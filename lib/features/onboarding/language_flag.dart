@@ -8,12 +8,34 @@ class LanguageFlag extends StatelessWidget {
   final double width;
   final double height;
 
+  /// `assets/images/flags` dosya adları ile dil kodu eşlemesi.
+  static String assetPathFor(String code) {
+    const fileByCode = <String, String>{
+      'en': 'en',
+      'de': 'german',
+      'it': 'italian',
+      'fr': 'french',
+      'tr': 'tr',
+      'jp': 'jp',
+      'ja': 'jp',
+      'es': 'spanish_icon',
+      'ru': 'russian',
+      'hi': 'hi',
+      'pt': 'po',
+      'po': 'po',
+      'zh': 'china',
+      'cn': 'china',
+    };
+    final file = fileByCode[code] ?? code;
+    return 'assets/images/flags/$file.svg';
+  }
+
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(4),
       child: SvgPicture.asset(
-        'assets/images/flags/$code.svg',
+        assetPathFor(code),
         width: width,
         height: height,
         fit: BoxFit.cover,

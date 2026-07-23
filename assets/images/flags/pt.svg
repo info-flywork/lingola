@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 30" preserveAspectRatio="xMidYMid meet">
-<path d="M0 0h16v30H0V0Z" fill="#006600"/>
-<path d="M16 0h24v30H16V0Z" fill="#FF0000"/>
-<circle cx="16" cy="15" r="5.5" fill="#FFCC00"/>
-<circle cx="16" cy="15" r="3.2" fill="#fff"/>
-<circle cx="16" cy="15" r="2" fill="#003399"/>
-</svg>

@@ -1334,16 +1334,18 @@ class _FeatureCard extends StatelessWidget {
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Container(
+        child: Ink(
           height: 216,
-          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
+            color: Colors.white,
             border: Border.all(color: AppColors.border10),
             borderRadius: BorderRadius.circular(16),
           ),
+          padding: const EdgeInsets.all(10),
           child: Column(
             children: [
               Container(
@@ -1393,21 +1395,28 @@ class _FeatureCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 height: 36,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: buttonColor,
+                child: Material(
+                  color: buttonColor,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: onTap,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.border10),
-                  ),
-                  child: Center(
-                    child: Text(
-                      buttonLabel,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        color: Colors.white,
-                        fontSize: 14,
-                        height: 18 / 14,
-                        fontWeight: FontWeight.w500,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          buttonLabel,
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            color: Colors.white,
+                            fontSize: 14,
+                            height: 18 / 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ),
                   ),

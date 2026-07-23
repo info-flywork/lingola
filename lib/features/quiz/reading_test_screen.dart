@@ -1,11 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
@@ -49,17 +54,29 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
   ];
 
   final _speech = SpeechToText();
+  final _recorder = AudioRecorder();
+  final _player = AudioPlayer();
 
   var _index = 0;
   var _saved = false;
   var _hintVisible = true;
   var _isRecording = false;
+  var _isPlaying = false;
+  var _showRecordingBar = false;
   var _speechReady = false;
   var _elapsed = Duration.zero;
+  var _playbackElapsed = Duration.zero;
   var _heardText = '';
-  var _levels = List<double>.filled(24, 0.25);
+  var _levels = List<double>.filled(48, 0.12);
+  var _recordedLevels = <double>[];
+  var _recordedDuration = Duration.zero;
+  String? _recordingPath;
 
   Timer? _ticker;
+  Timer? _playbackTicker;
+  StreamSubscription<Amplitude>? _amplitudeSub;
+  StreamSubscription<void>? _playerCompleteSub;
+  StreamSubscription<Duration>? _playerPositionSub;
 
   _ReadingWord get _current => _words[_index];
 
@@ -67,12 +84,45 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
   void initState() {
     super.initState();
     _initSpeech();
+    _playerCompleteSub = _player.onPlayerComplete.listen((_) {
+      if (!mounted) return;
+      setState(() {
+        _isPlaying = false;
+        _playbackElapsed = _recordedDuration;
+        if (_recordedLevels.isNotEmpty) {
+          _levels = _visibleLevelsFromRecording(_recordedLevels.length - 1);
+        }
+      });
+    });
+    _playerPositionSub = _player.onPositionChanged.listen((pos) {
+      if (!mounted || !_isPlaying) return;
+      final progress = _recordedDuration.inMilliseconds == 0
+          ? 0.0
+          : pos.inMilliseconds / _recordedDuration.inMilliseconds;
+      final idx = _recordedLevels.isEmpty
+          ? 0
+          : (progress * (_recordedLevels.length - 1))
+              .round()
+              .clamp(0, _recordedLevels.length - 1);
+      setState(() {
+        _playbackElapsed = pos;
+        if (_recordedLevels.isNotEmpty) {
+          _levels = _visibleLevelsFromRecording(idx);
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
     _ticker?.cancel();
+    _playbackTicker?.cancel();
+    _amplitudeSub?.cancel();
+    _playerCompleteSub?.cancel();
+    _playerPositionSub?.cancel();
     _speech.stop();
+    _recorder.dispose();
+    _player.dispose();
     super.dispose();
   }
 
@@ -96,34 +146,67 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
     setState(() => _speechReady = ready);
   }
 
-  void _goPrevious() {
+  void _resetRecorderForWord() {
+    _ticker?.cancel();
+    _playbackTicker?.cancel();
+    _amplitudeSub?.cancel();
+    _ticker = null;
+    _playbackTicker = null;
+    _amplitudeSub = null;
+    _player.stop();
+    _isRecording = false;
+    _isPlaying = false;
+    _showRecordingBar = false;
+    _elapsed = Duration.zero;
+    _playbackElapsed = Duration.zero;
+    _recordedDuration = Duration.zero;
+    _recordedLevels = [];
+    _levels = List<double>.filled(48, 0.12);
+    _heardText = '';
+    _recordingPath = null;
+  }
+
+  Future<void> _goPrevious() async {
     if (_index == 0) return;
-    _stopRecording(showResult: false);
+    await _stopRecording(showResult: false);
+    if (!mounted) return;
     setState(() {
       _index -= 1;
       _saved = false;
       _hintVisible = true;
-      _heardText = '';
+      _resetRecorderForWord();
     });
   }
 
-  void _goNext() {
+  Future<void> _goNext() async {
     if (_index >= _words.length - 1) return;
-    _stopRecording(showResult: false);
+    await _stopRecording(showResult: false);
+    if (!mounted) return;
     setState(() {
       _index += 1;
       _saved = false;
       _hintVisible = true;
-      _heardText = '';
+      _resetRecorderForWord();
     });
   }
 
   Future<void> _toggleRead() async {
+    if (_isPlaying) {
+      await _pausePlayback();
+    }
     if (_isRecording) {
       await _stopRecording(showResult: true);
       return;
     }
     await _startRecording();
+  }
+
+  void _pushLevel(double normalized) {
+    _levels = [..._levels.skip(1), normalized];
+    _recordedLevels = [..._recordedLevels, normalized];
+    if (_recordedLevels.length > 240) {
+      _recordedLevels = _recordedLevels.sublist(_recordedLevels.length - 240);
+    }
   }
 
   Future<void> _startRecording() async {
@@ -139,30 +222,64 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
       return;
     }
 
+    final hasMic = await _recorder.hasPermission();
+    if (!hasMic) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(text.micPermissionDenied)),
+      );
+      return;
+    }
+
+    await _player.stop();
+    _amplitudeSub?.cancel();
+
+    final dir = await getTemporaryDirectory();
+    final path =
+        '${dir.path}/lingola_read_${DateTime.now().millisecondsSinceEpoch}.m4a';
+
     setState(() {
       _isRecording = true;
+      _isPlaying = false;
+      _showRecordingBar = true;
       _elapsed = Duration.zero;
+      _playbackElapsed = Duration.zero;
       _heardText = '';
-      _levels = List<double>.filled(24, 0.25);
+      _recordedLevels = [];
+      _recordingPath = path;
+      _levels = List<double>.filled(48, 0.12);
     });
 
     _ticker?.cancel();
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+    _ticker = Timer.periodic(const Duration(milliseconds: 200), (_) {
       if (!mounted || !_isRecording) return;
-      setState(() => _elapsed += const Duration(seconds: 1));
+      setState(() => _elapsed += const Duration(milliseconds: 200));
     });
+
+    try {
+      await _recorder.start(
+        const RecordConfig(encoder: AudioEncoder.aacLc),
+        path: path,
+      );
+      _amplitudeSub = _recorder
+          .onAmplitudeChanged(const Duration(milliseconds: 80))
+          .listen((amp) {
+        if (!mounted || !_isRecording) return;
+        // amp.current ~ -160..0 dBFS
+        final normalized = ((amp.current + 45) / 45).clamp(0.08, 1.0);
+        setState(() => _pushLevel(normalized.toDouble()));
+      });
+    } catch (_) {
+      // Kayıt dosyası açılamazsa sadece konuşma tanıma ile devam.
+    }
 
     await _speech.listen(
       onSoundLevelChange: (level) {
         if (!mounted || !_isRecording) return;
-        // speech_to_text roughly reports ~ -2..10; normalize to 0..1
-        final normalized = ((level + 2) / 12).clamp(0.15, 1.0);
-        setState(() {
-          _levels = [
-            ..._levels.skip(1),
-            normalized.toDouble(),
-          ];
-        });
+        // record amplitude zaten varsa speech seviyesini yoksay
+        if (_amplitudeSub != null) return;
+        final normalized = ((level + 2) / 12).clamp(0.08, 1.0);
+        setState(() => _pushLevel(normalized.toDouble()));
       },
       listenOptions: SpeechListenOptions(
         listenMode: ListenMode.confirmation,
@@ -185,6 +302,15 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
   Future<void> _stopRecording({required bool showResult}) async {
     _ticker?.cancel();
     _ticker = null;
+    await _amplitudeSub?.cancel();
+    _amplitudeSub = null;
+
+    String? savedPath = _recordingPath;
+    try {
+      if (await _recorder.isRecording()) {
+        savedPath = await _recorder.stop() ?? savedPath;
+      }
+    } catch (_) {}
 
     if (_speech.isListening) {
       await _speech.stop();
@@ -196,31 +322,171 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
     final wasRecording = _isRecording;
     setState(() {
       _isRecording = false;
-      _levels = List<double>.filled(24, 0.25);
+      _isPlaying = false;
+      _recordingPath = savedPath;
+      if (wasRecording || _recordedLevels.isNotEmpty || savedPath != null) {
+        _showRecordingBar = true;
+        _recordedDuration = _elapsed;
+        _playbackElapsed = Duration.zero;
+        if (_recordedLevels.isNotEmpty) {
+          _levels = _visibleLevelsFromRecording(_recordedLevels.length - 1);
+        }
+      }
     });
 
     if (!showResult || !wasRecording) return;
 
     final matched = _matchesTarget(heard, _current.word, _current.exampleEn);
-    final text = AppText.current.quizPage;
     if (matched) {
       await _showSuccessSheet();
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          text.matchFail(heard: heard.isEmpty ? '—' : heard),
-        ),
-      ),
-    );
+    await _showFailedSheet();
+  }
+
+  List<double> _visibleLevelsFromRecording(int playIndex) {
+    if (_recordedLevels.isEmpty) {
+      return List<double>.filled(48, 0.12);
+    }
+    final end = (playIndex + 1).clamp(1, _recordedLevels.length);
+    final start = (end - 48).clamp(0, end);
+    final slice = _recordedLevels.sublist(start, end);
+    if (slice.length >= 48) return slice;
+    return [
+      ...List<double>.filled(48 - slice.length, 0.12),
+      ...slice,
+    ];
+  }
+
+  Future<void> _togglePlayback() async {
+    if (_isRecording) return;
+    if (_isPlaying) {
+      await _pausePlayback();
+    } else {
+      await _startPlayback();
+    }
+  }
+
+  Future<void> _startPlayback() async {
+    final path = _recordingPath;
+    _playbackTicker?.cancel();
+    _playbackTicker = null;
+
+    if (path == null || !File(path).existsSync()) {
+      _startWaveformPlaybackOnly();
+      return;
+    }
+
+    if (_playbackElapsed >= _recordedDuration &&
+        _recordedDuration > Duration.zero) {
+      _playbackElapsed = Duration.zero;
+    }
+
+    setState(() => _isPlaying = true);
+    try {
+      await _player.play(
+        DeviceFileSource(path),
+        position: _playbackElapsed,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isPlaying = false);
+      _startWaveformPlaybackOnly();
+    }
+  }
+
+  void _startWaveformPlaybackOnly() {
+    if (_recordedLevels.isEmpty && _recordedDuration == Duration.zero) return;
+    if (_playbackElapsed >= _recordedDuration &&
+        _recordedDuration > Duration.zero) {
+      _playbackElapsed = Duration.zero;
+    }
+
+    setState(() => _isPlaying = true);
+
+    _playbackTicker?.cancel();
+    _playbackTicker = Timer.periodic(const Duration(milliseconds: 80), (timer) {
+      if (!mounted || !_isPlaying) {
+        timer.cancel();
+        return;
+      }
+      final next = _playbackElapsed + const Duration(milliseconds: 80);
+      if (next >= _recordedDuration && _recordedDuration > Duration.zero) {
+        setState(() {
+          _isPlaying = false;
+          _playbackElapsed = _recordedDuration;
+          if (_recordedLevels.isNotEmpty) {
+            _levels = _visibleLevelsFromRecording(_recordedLevels.length - 1);
+          }
+        });
+        timer.cancel();
+        _playbackTicker = null;
+        return;
+      }
+      final progress = _recordedDuration.inMilliseconds == 0
+          ? 0.0
+          : next.inMilliseconds / _recordedDuration.inMilliseconds;
+      final idx = _recordedLevels.isEmpty
+          ? 0
+          : (progress * (_recordedLevels.length - 1))
+              .round()
+              .clamp(0, _recordedLevels.length - 1);
+      setState(() {
+        _playbackElapsed = next;
+        if (_recordedLevels.isNotEmpty) {
+          _levels = _visibleLevelsFromRecording(idx);
+        }
+      });
+    });
+  }
+
+  Future<void> _pausePlayback() async {
+    _playbackTicker?.cancel();
+    _playbackTicker = null;
+    await _player.pause();
+    if (!mounted) return;
+    setState(() => _isPlaying = false);
+  }
+
+  String get _timerLabel {
+    final value = _isRecording
+        ? _elapsed
+        : (_showRecordingBar ? _playbackElapsed : Duration.zero);
+    final minutes = value.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = value.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
   }
 
   Future<void> _showSuccessSheet() async {
     final text = AppText.current.quizPage;
-    final nextLabel = AppText.current.wordPracticePage.next;
+    await _showResultSheet(
+      iconAsset: AppAssets.success,
+      title: text.successfulTitle,
+      body: text.successfulBody,
+      buttonLabel: AppText.current.wordPracticePage.next,
+      onPressed: _goNext,
+    );
+  }
 
+  Future<void> _showFailedSheet() async {
+    final text = AppText.current.quizPage;
+    await _showResultSheet(
+      iconAsset: AppAssets.failed,
+      title: text.failedTitle,
+      body: text.failedBody,
+      buttonLabel: text.tryAgain,
+      onPressed: () {},
+    );
+  }
+
+  Future<void> _showResultSheet({
+    required String iconAsset,
+    required String title,
+    required String body,
+    required String buttonLabel,
+    required VoidCallback onPressed,
+  }) async {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -239,14 +505,14 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const HomeAsset(
-                  'assets/images/quizSection/succesfull.svg',
+                HomeAsset(
+                  iconAsset,
                   width: 55,
                   height: 56,
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  text.successfulTitle,
+                  title,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
@@ -258,7 +524,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  text.successfulBody,
+                  body,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
@@ -271,10 +537,10 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
                 ),
                 const SizedBox(height: 10),
                 PrimaryButton(
-                  label: nextLabel,
+                  label: buttonLabel,
                   onPressed: () {
                     Navigator.of(sheetContext).pop();
-                    _goNext();
+                    onPressed();
                   },
                 ),
               ],
@@ -299,15 +565,9 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
   static String _normalize(String value) {
     return value
         .toLowerCase()
-        .replaceAll(RegExp(r"[^a-z0-9\s]"), '')
+        .replaceAll(RegExp(r'[^a-z0-9\s]'), '')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
-  }
-
-  String get _timerLabel {
-    final minutes = _elapsed.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = _elapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
   }
 
   @override
@@ -332,10 +592,10 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 18,
-                        color: AppColors.ink,
+                      icon: const HomeAsset(
+                        AppAssets.backArrow,
+                        width: 24,
+                        height: 24,
                       ),
                       tooltip: AppText.current.common.back,
                     ),
@@ -376,12 +636,20 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
                         hintBg: _hintBg,
                         isRecording: _isRecording,
                       ),
-                      if (_isRecording) ...[
+                      if (_showRecordingBar) ...[
                         const SizedBox(height: 10),
                         _RecordingBar(
                           timerLabel: _timerLabel,
                           levels: _levels,
-                          onStop: () => _stopRecording(showResult: true),
+                          isRecording: _isRecording,
+                          isPlaying: _isPlaying,
+                          onPrimaryAction: () {
+                            if (_isRecording) {
+                              _stopRecording(showResult: true);
+                            } else {
+                              _togglePlayback();
+                            }
+                          },
                         ),
                       ],
                     ],
@@ -529,7 +797,7 @@ class _ReadingCard extends StatelessWidget {
                   background: saved ? const Color(0x33FF383C) : saveBg,
                   foreground: saveRed,
                   icon: const HomeAsset(
-                    'assets/images/heart.svg',
+                    AppAssets.heart,
                     width: 20,
                     height: 20,
                   ),
@@ -543,7 +811,7 @@ class _ReadingCard extends StatelessWidget {
                   background: AppColors.ink,
                   foreground: Colors.white,
                   icon: SvgPicture.asset(
-                    'assets/images/microphone.svg',
+                    AppAssets.microphone,
                     width: 18,
                     height: 18,
                     colorFilter: const ColorFilter.mode(
@@ -561,7 +829,7 @@ class _ReadingCard extends StatelessWidget {
                   background: hintBg,
                   foreground: AppColors.primary,
                   icon: const HomeAsset(
-                    'assets/images/noHint.svg',
+                    AppAssets.hint,
                     width: 20,
                     height: 20,
                   ),
@@ -593,12 +861,16 @@ class _RecordingBar extends StatelessWidget {
   const _RecordingBar({
     required this.timerLabel,
     required this.levels,
-    required this.onStop,
+    required this.isRecording,
+    required this.isPlaying,
+    required this.onPrimaryAction,
   });
 
   final String timerLabel;
   final List<double> levels;
-  final VoidCallback onStop;
+  final bool isRecording;
+  final bool isPlaying;
+  final VoidCallback onPrimaryAction;
 
   @override
   Widget build(BuildContext context) {
@@ -627,28 +899,20 @@ class _RecordingBar extends StatelessWidget {
           ),
           Expanded(
             child: SizedBox(
-              height: 36,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  for (final level in levels) ...[
-                    Container(
-                      width: 3,
-                      height: 8 + level * 28,
-                      margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                      decoration: BoxDecoration(
-                        color: AppColors.ink,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+              height: 31,
+              child: ClipRect(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    for (final level in levels) _WaveBar(level: level),
                   ],
-                ],
+                ),
               ),
             ),
           ),
           GestureDetector(
-            onTap: onStop,
+            onTap: onPrimaryAction,
             child: Container(
               width: 26,
               height: 26,
@@ -657,17 +921,49 @@ class _RecordingBar extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+              child: isRecording
+                  ? Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    )
+                  : Icon(
+                      isPlaying
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
+                      size: 18,
+                      color: Colors.white,
+                    ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _WaveBar extends StatelessWidget {
+  const _WaveBar({required this.level});
+
+  final double level;
+
+  @override
+  Widget build(BuildContext context) {
+    // Sessizken nokta, seslenince ince dikey çubuk (Figma)
+    final isDot = level < 0.22;
+    final height = isDot ? 4.0 : (8 + level * 22).clamp(8.0, 31.0);
+    final width = isDot ? 3.0 : 2.0;
+
+    return Container(
+      width: width,
+      height: height,
+      margin: const EdgeInsets.symmetric(horizontal: 1),
+      decoration: BoxDecoration(
+        color: AppColors.ink,
+        borderRadius: BorderRadius.circular(isDot ? 99 : 1.5),
       ),
     );
   }

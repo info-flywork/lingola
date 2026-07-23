@@ -56,6 +56,7 @@ class TranslationsTr with BaseTranslations<AppLocale, Translations> implements T
 	@override late final _Translations$lessonPage$tr lessonPage = _Translations$lessonPage$tr._(_root);
 	@override late final _Translations$rolePlayPage$tr rolePlayPage = _Translations$rolePlayPage$tr._(_root);
 	@override late final _Translations$notificationsPage$tr notificationsPage = _Translations$notificationsPage$tr._(_root);
+	@override late final _Translations$profilePage$tr profilePage = _Translations$profilePage$tr._(_root);
 }
 
 // Path: app
@@ -347,6 +348,20 @@ class _Translations$quizPage$tr implements Translations$quizPage$en {
 	@override String matchFail({required Object heard}) => 'Duyulan: "${heard}". Tekrar dene.';
 	@override String get successfulTitle => 'Successful!';
 	@override String get successfulBody => 'Ana dili gibi bir telaffuz!';
+	@override String get failedTitle => 'Failed';
+	@override String get failedBody => 'Neredeyse oluyordu, bir şans daha ver';
+	@override String get tryAgain => 'TEKRAR DENE';
+	@override String get writingTestTitle => 'Writing Test';
+	@override String get sourceLanguage => 'SOURCE LANGUAGE';
+	@override String get answer => 'ANSWER';
+	@override String get writeAnswerHint => 'Cevabını buraya yaz...';
+	@override String get submit => 'Submit';
+	@override String get speakingTestTitle => 'Speaking Test';
+	@override String get speakingProficiency => 'Speaking Proficiency';
+	@override String get speakClearlyHint => 'Speak clearly into your microphone:';
+	@override String get speakUp => 'Speak Up';
+	@override String get recording => 'Recording...';
+	@override String questionOf({required Object current, required Object total}) => 'QUESTION ${current} OF ${total}';
 }
 
 // Path: placeholder
@@ -436,6 +451,89 @@ class _Translations$notificationsPage$tr implements Translations$notificationsPa
 	@override late final _Translations$notificationsPage$translation$tr translation = _Translations$notificationsPage$translation$tr._(_root);
 	@override late final _Translations$notificationsPage$offer$tr offer = _Translations$notificationsPage$offer$tr._(_root);
 	@override late final _Translations$notificationsPage$stories$tr stories = _Translations$notificationsPage$stories$tr._(_root);
+}
+
+// Path: profilePage
+class _Translations$profilePage$tr implements Translations$profilePage$en {
+	_Translations$profilePage$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Profile';
+	@override String get userName => 'Jhon Doe';
+	@override String get freeVersion => 'Free Version';
+	@override String get dayStreak => 'Day Streak!';
+	@override String get accountSettings => 'Account Settings';
+	@override String get general => 'General';
+	@override String get profileSettings => 'Profile Settings';
+	@override String get fullName => 'Full Name';
+	@override String get email => 'E-mail';
+	@override String get deleteAccount => 'Delete Account';
+	@override String get save => 'SAVE';
+	@override String get deleteTitle => 'Gitmeni istemiyoruz ama seni anlıyoruz.';
+	@override String get deleteBody => 'Lingola deneyimini iyileştirmemiz için bize neden ayrılmak istediğini söyler misin?';
+	@override late final _Translations$profilePage$deleteReasons$tr deleteReasons = _Translations$profilePage$deleteReasons$tr._(_root);
+	@override String get messageOptional => 'Mesaj (opsiyonel)';
+	@override String get messageHint => 'Mesajınız varsa lütfen yazın.';
+	@override String get next => 'NEXT';
+	@override String get specialOfferTitle => 'Özel teklif';
+	@override String get specialOfferBody => 'Gitmeden önce senin için hazırlamış olduğumuz teklife göz at.';
+	@override String get monthlyPlanTitle => 'Switch to 1-Month Plan';
+	@override String get monthlyPlanPrice => '\$79/month, cancel anytime';
+	@override String get monthlyPlanDesc => 'No long-term commitment. Stay connected with our community on a month-to-month basis.';
+	@override String get whatYoullKeep => 'What you\'ll keep:';
+	@override String get keepCharacters => 'Access all characters';
+	@override String get keepVideo => 'Unlimited video calls';
+	@override String get keepCourses => 'Access to all courses';
+	@override String get switchMonthlyCta => 'Switch to Monthly Plan';
+	@override String get confirmTitle => 'Are you sure?';
+	@override String get confirmBody => 'We really don\'t want to see you go. Here\'s what you\'ll lose:';
+	@override String get loseCharacters => 'Unlimited character access';
+	@override String get loseVideo => 'Unlimited video call access';
+	@override String get loseCourses => 'Access to all courses';
+	@override String get discountTitle => 'Stay and get 60% off for 1 month';
+	@override String get discountSubtitle => 'Our best offer ever. Just \$27.60/month';
+	@override String get acceptDiscountCta => 'Accept 60% Off & Stay';
+	@override String get farewellTitle => 'We\'re sad to see you go';
+	@override String farewellBody({required Object date}) => 'Your membership has been cancelled. You\'ll have access until the end of your current billing period on ${date}.';
+	@override String get changeMindTitle => '✨ Change your mind?';
+	@override String changeMindBody({required Object date}) => 'You can reactivate your membership anytime before ${date} to keep your benefits.';
+	@override String get reactivateCta => 'Wait, I want to reactivate';
+	@override String get done => 'DONE';
+	@override String get notifications => 'Notifications';
+	@override String get appLanguage => 'App Language';
+	@override String get selectLanguageTitle => 'Select Language';
+	@override String get premium => 'Premium';
+	@override String get passive => 'Passive';
+	@override String get shareFriend => 'Share Friend';
+	@override String get shareWithFriendTitle => 'Share with Friend';
+	@override String get shareInviteBody => 'Invite your friends and enjoy translate together';
+	@override String get rateUs => 'Rate Us';
+	@override String get faq => 'F.A.Q.';
+	@override late final _Translations$profilePage$faqItems$tr faqItems = _Translations$profilePage$faqItems$tr._(_root);
+	@override String get support => 'Support';
+	@override String get feedback => 'Feedback';
+	@override String get progression => 'Progression';
+	@override String get progressTitle => 'Progress';
+	@override String get goodMorning => 'Good Morning,';
+	@override String get progressUserName => 'Jhon';
+	@override String get progressLanguage => 'English';
+	@override String get past7Days => 'Past 7 Days';
+	@override String get past7DaysBody => 'Study every day to build your streak and create a powerful learning habit.';
+	@override String get currentLevel => 'Current Level';
+	@override String xpLeft({required Object xp, required Object level}) => 'Just ${xp} XP left to reach ${level}!';
+	@override String get toNextLevel => 'TO NEXT LEVEL';
+	@override String get dayStreakLabel => 'Day Streak';
+	@override String get totalPoints => 'Total Points';
+	@override String get savedWords => 'Saved Words';
+	@override String itemsToReview({required Object count}) => '${count} items to review';
+	@override String get logout => 'Log Out';
+	@override String get logoutTitle => 'You are about to log out';
+	@override String get logoutBody => 'See you again soon! We\'ll miss your breathing exercises.';
+	@override String get logoutConfirm => 'LOGOUT';
+	@override String get logoutCancel => 'CANCEL';
+	@override late final _Translations$profilePage$days$tr days = _Translations$profilePage$days$tr._(_root);
 }
 
 // Path: onboarding.slide1
@@ -635,6 +733,49 @@ class _Translations$notificationsPage$stories$tr implements Translations$notific
 	// Translations
 	@override String get title => 'Yeni Hikayeleri Keşfet';
 	@override String get body => 'Hikayelerle yeni kelimeler öğren';
+}
+
+// Path: profilePage.deleteReasons
+class _Translations$profilePage$deleteReasons$tr implements Translations$profilePage$deleteReasons$en {
+	_Translations$profilePage$deleteReasons$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get aiCharacters => 'Yapay zeka karakterlerini gerçekçi bulmadım.';
+	@override String get videoIssues => 'Görüntülü sohbetlerde teknik sorunlar yaşıyorum.';
+	@override String get pricing => 'Abonelik fiyatları beklentimin üzerinde.';
+	@override String get noMatch => 'Aradığım tarzda karakterler bulamadım.';
+	@override String get shortTrial => 'Sadece kısa bir süreliğine denemek istemiştim.';
+	@override String get other => 'Diğer';
+}
+
+// Path: profilePage.faqItems
+class _Translations$profilePage$faqItems$tr implements Translations$profilePage$faqItems$en {
+	_Translations$profilePage$faqItems$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$profilePage$faqItems$howItWorks$tr howItWorks = _Translations$profilePage$faqItems$howItWorks$tr._(_root);
+	@override late final _Translations$profilePage$faqItems$replacePsychologist$tr replacePsychologist = _Translations$profilePage$faqItems$replacePsychologist$tr._(_root);
+	@override late final _Translations$profilePage$faqItems$dataPrivate$tr dataPrivate = _Translations$profilePage$faqItems$dataPrivate$tr._(_root);
+}
+
+// Path: profilePage.days
+class _Translations$profilePage$days$tr implements Translations$profilePage$days$en {
+	_Translations$profilePage$days$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get mon => 'MON';
+	@override String get tue => 'TUE';
+	@override String get wed => 'WED';
+	@override String get thu => 'THU';
+	@override String get fri => 'FRI';
+	@override String get sat => 'SAT';
+	@override String get sun => 'SUN';
 }
 
 // Path: lessonPage.levels.a1
@@ -923,6 +1064,39 @@ class _Translations$lessonPage$levels$c2$tr implements Translations$lessonPage$l
 	];
 }
 
+// Path: profilePage.faqItems.howItWorks
+class _Translations$profilePage$faqItems$howItWorks$tr implements Translations$profilePage$faqItems$howItWorks$en {
+	_Translations$profilePage$faqItems$howItWorks$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => 'How does this app work?';
+	@override String get answer => 'Our app uses artificial intelligence to analyze your emotional state through your written or spoken inputs. It provides personalized insights, mood tracking, and mental-wellness exercises designed to help you better understand and manage your emotions.';
+}
+
+// Path: profilePage.faqItems.replacePsychologist
+class _Translations$profilePage$faqItems$replacePsychologist$tr implements Translations$profilePage$faqItems$replacePsychologist$en {
+	_Translations$profilePage$faqItems$replacePsychologist$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => 'Can this app replace a real psychologist?';
+	@override String get answer => 'No. This app is designed to support your wellbeing and learning journey, but it does not replace professional mental health care. If you need clinical support, please consult a licensed specialist.';
+}
+
+// Path: profilePage.faqItems.dataPrivate
+class _Translations$profilePage$faqItems$dataPrivate$tr implements Translations$profilePage$faqItems$dataPrivate$en {
+	_Translations$profilePage$faqItems$dataPrivate$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => 'Are my conversations and data private?';
+	@override String get answer => 'Yes. Your conversations and personal data are kept private and handled according to our privacy policy. We do not sell your data to third parties.';
+}
+
 /// The flat map containing all translations for locale <tr>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -1127,6 +1301,20 @@ extension on TranslationsTr {
 			'quizPage.matchFail' => ({required Object heard}) => 'Duyulan: "${heard}". Tekrar dene.',
 			'quizPage.successfulTitle' => 'Successful!',
 			'quizPage.successfulBody' => 'Ana dili gibi bir telaffuz!',
+			'quizPage.failedTitle' => 'Failed',
+			'quizPage.failedBody' => 'Neredeyse oluyordu, bir şans daha ver',
+			'quizPage.tryAgain' => 'TEKRAR DENE',
+			'quizPage.writingTestTitle' => 'Writing Test',
+			'quizPage.sourceLanguage' => 'SOURCE LANGUAGE',
+			'quizPage.answer' => 'ANSWER',
+			'quizPage.writeAnswerHint' => 'Cevabını buraya yaz...',
+			'quizPage.submit' => 'Submit',
+			'quizPage.speakingTestTitle' => 'Speaking Test',
+			'quizPage.speakingProficiency' => 'Speaking Proficiency',
+			'quizPage.speakClearlyHint' => 'Speak clearly into your microphone:',
+			'quizPage.speakUp' => 'Speak Up',
+			'quizPage.recording' => 'Recording...',
+			'quizPage.questionOf' => ({required Object current, required Object total}) => 'QUESTION ${current} OF ${total}',
 			'placeholder.title' => ({required Object tab}) => '${tab} yakında burada',
 			'placeholder.body' => ({required Object tab}) => 'Senin için odaklı bir ${tab} deneyimi hazırlıyoruz.',
 			'tutorPage.title' => 'Eğitmen',
@@ -1413,6 +1601,98 @@ extension on TranslationsTr {
 			'notificationsPage.offer.body' => 'Sınırsız fotoğraf çevirisi için Premium’a yükselt — %50 indirim.',
 			'notificationsPage.stories.title' => 'Yeni Hikayeleri Keşfet',
 			'notificationsPage.stories.body' => 'Hikayelerle yeni kelimeler öğren',
+			'profilePage.title' => 'Profile',
+			'profilePage.userName' => 'Jhon Doe',
+			'profilePage.freeVersion' => 'Free Version',
+			'profilePage.dayStreak' => 'Day Streak!',
+			'profilePage.accountSettings' => 'Account Settings',
+			'profilePage.general' => 'General',
+			'profilePage.profileSettings' => 'Profile Settings',
+			'profilePage.fullName' => 'Full Name',
+			'profilePage.email' => 'E-mail',
+			'profilePage.deleteAccount' => 'Delete Account',
+			'profilePage.save' => 'SAVE',
+			'profilePage.deleteTitle' => 'Gitmeni istemiyoruz ama seni anlıyoruz.',
+			'profilePage.deleteBody' => 'Lingola deneyimini iyileştirmemiz için bize neden ayrılmak istediğini söyler misin?',
+			'profilePage.deleteReasons.aiCharacters' => 'Yapay zeka karakterlerini gerçekçi bulmadım.',
+			'profilePage.deleteReasons.videoIssues' => 'Görüntülü sohbetlerde teknik sorunlar yaşıyorum.',
+			'profilePage.deleteReasons.pricing' => 'Abonelik fiyatları beklentimin üzerinde.',
+			_ => null,
+		} ?? switch (path) {
+			'profilePage.deleteReasons.noMatch' => 'Aradığım tarzda karakterler bulamadım.',
+			'profilePage.deleteReasons.shortTrial' => 'Sadece kısa bir süreliğine denemek istemiştim.',
+			'profilePage.deleteReasons.other' => 'Diğer',
+			'profilePage.messageOptional' => 'Mesaj (opsiyonel)',
+			'profilePage.messageHint' => 'Mesajınız varsa lütfen yazın.',
+			'profilePage.next' => 'NEXT',
+			'profilePage.specialOfferTitle' => 'Özel teklif',
+			'profilePage.specialOfferBody' => 'Gitmeden önce senin için hazırlamış olduğumuz teklife göz at.',
+			'profilePage.monthlyPlanTitle' => 'Switch to 1-Month Plan',
+			'profilePage.monthlyPlanPrice' => '\$79/month, cancel anytime',
+			'profilePage.monthlyPlanDesc' => 'No long-term commitment. Stay connected with our community on a month-to-month basis.',
+			'profilePage.whatYoullKeep' => 'What you\'ll keep:',
+			'profilePage.keepCharacters' => 'Access all characters',
+			'profilePage.keepVideo' => 'Unlimited video calls',
+			'profilePage.keepCourses' => 'Access to all courses',
+			'profilePage.switchMonthlyCta' => 'Switch to Monthly Plan',
+			'profilePage.confirmTitle' => 'Are you sure?',
+			'profilePage.confirmBody' => 'We really don\'t want to see you go. Here\'s what you\'ll lose:',
+			'profilePage.loseCharacters' => 'Unlimited character access',
+			'profilePage.loseVideo' => 'Unlimited video call access',
+			'profilePage.loseCourses' => 'Access to all courses',
+			'profilePage.discountTitle' => 'Stay and get 60% off for 1 month',
+			'profilePage.discountSubtitle' => 'Our best offer ever. Just \$27.60/month',
+			'profilePage.acceptDiscountCta' => 'Accept 60% Off & Stay',
+			'profilePage.farewellTitle' => 'We\'re sad to see you go',
+			'profilePage.farewellBody' => ({required Object date}) => 'Your membership has been cancelled. You\'ll have access until the end of your current billing period on ${date}.',
+			'profilePage.changeMindTitle' => '✨ Change your mind?',
+			'profilePage.changeMindBody' => ({required Object date}) => 'You can reactivate your membership anytime before ${date} to keep your benefits.',
+			'profilePage.reactivateCta' => 'Wait, I want to reactivate',
+			'profilePage.done' => 'DONE',
+			'profilePage.notifications' => 'Notifications',
+			'profilePage.appLanguage' => 'App Language',
+			'profilePage.selectLanguageTitle' => 'Select Language',
+			'profilePage.premium' => 'Premium',
+			'profilePage.passive' => 'Passive',
+			'profilePage.shareFriend' => 'Share Friend',
+			'profilePage.shareWithFriendTitle' => 'Share with Friend',
+			'profilePage.shareInviteBody' => 'Invite your friends and enjoy translate together',
+			'profilePage.rateUs' => 'Rate Us',
+			'profilePage.faq' => 'F.A.Q.',
+			'profilePage.faqItems.howItWorks.question' => 'How does this app work?',
+			'profilePage.faqItems.howItWorks.answer' => 'Our app uses artificial intelligence to analyze your emotional state through your written or spoken inputs. It provides personalized insights, mood tracking, and mental-wellness exercises designed to help you better understand and manage your emotions.',
+			'profilePage.faqItems.replacePsychologist.question' => 'Can this app replace a real psychologist?',
+			'profilePage.faqItems.replacePsychologist.answer' => 'No. This app is designed to support your wellbeing and learning journey, but it does not replace professional mental health care. If you need clinical support, please consult a licensed specialist.',
+			'profilePage.faqItems.dataPrivate.question' => 'Are my conversations and data private?',
+			'profilePage.faqItems.dataPrivate.answer' => 'Yes. Your conversations and personal data are kept private and handled according to our privacy policy. We do not sell your data to third parties.',
+			'profilePage.support' => 'Support',
+			'profilePage.feedback' => 'Feedback',
+			'profilePage.progression' => 'Progression',
+			'profilePage.progressTitle' => 'Progress',
+			'profilePage.goodMorning' => 'Good Morning,',
+			'profilePage.progressUserName' => 'Jhon',
+			'profilePage.progressLanguage' => 'English',
+			'profilePage.past7Days' => 'Past 7 Days',
+			'profilePage.past7DaysBody' => 'Study every day to build your streak and create a powerful learning habit.',
+			'profilePage.currentLevel' => 'Current Level',
+			'profilePage.xpLeft' => ({required Object xp, required Object level}) => 'Just ${xp} XP left to reach ${level}!',
+			'profilePage.toNextLevel' => 'TO NEXT LEVEL',
+			'profilePage.dayStreakLabel' => 'Day Streak',
+			'profilePage.totalPoints' => 'Total Points',
+			'profilePage.savedWords' => 'Saved Words',
+			'profilePage.itemsToReview' => ({required Object count}) => '${count} items to review',
+			'profilePage.logout' => 'Log Out',
+			'profilePage.logoutTitle' => 'You are about to log out',
+			'profilePage.logoutBody' => 'See you again soon! We\'ll miss your breathing exercises.',
+			'profilePage.logoutConfirm' => 'LOGOUT',
+			'profilePage.logoutCancel' => 'CANCEL',
+			'profilePage.days.mon' => 'MON',
+			'profilePage.days.tue' => 'TUE',
+			'profilePage.days.wed' => 'WED',
+			'profilePage.days.thu' => 'THU',
+			'profilePage.days.fri' => 'FRI',
+			'profilePage.days.sat' => 'SAT',
+			'profilePage.days.sun' => 'SUN',
 			_ => null,
 		};
 	}

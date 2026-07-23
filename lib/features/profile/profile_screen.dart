@@ -1,0 +1,689 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../core/constants/app_assets.dart';
+import '../../core/constants/app_text.dart';
+import '../../core/theme/app_theme.dart';
+import '../../widgets/app_widgets.dart';
+import '../../widgets/home_asset.dart';
+import 'faq_screen.dart';
+import 'profile_settings_screen.dart';
+import 'progress_screen.dart';
+import 'select_language_screen.dart';
+import 'share_friend_screen.dart';
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  static const _notifPurple = Color(0xFF9333EA);
+  static const _notifPurpleBg = Color(0xFFF3E8FF);
+  static const _langGreenBg = Color(0xFFE6F7F4);
+  static const _premiumOrange = Color(0xFFFF8D28);
+  static const _premiumOrangeBg = Color(0xFFFFF1E4);
+  static const _sharePurpleBg = Color(0xFFEEEDFE);
+  static const _rateOrangeBg = Color(0xFFFFF1E8);
+  static const _faqBg = Color(0xFFF3F4F6);
+  static const _supportBg = Color(0xFFE8F1FF);
+  static const _feedbackBg = Color(0xFFFFF6E8);
+  static const _progressionBg = Color(0xFFFFEBEE);
+  static const _logoutBg = Color(0xFFFFEBEB);
+  static const _settingsBlueBg = Color(0xFFE8ECFF);
+  static const _streakDone = Color(0xFF2D46FF);
+  static const _streakIdle = Color(0xFFD7D7D7);
+  static const _badgeStart = Color(0xFF000088);
+
+  // Demo: Mon–Wed done, Thu today, Fri–Sun idle
+  static const _streakStates = <_StreakDayState>[
+    _StreakDayState.done,
+    _StreakDayState.done,
+    _StreakDayState.done,
+    _StreakDayState.today,
+    _StreakDayState.idle,
+    _StreakDayState.idle,
+    _StreakDayState.idle,
+  ];
+
+  var _notificationsOn = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = AppText.current.profilePage;
+    final dayLabels = [
+      text.days.mon,
+      text.days.tue,
+      text.days.wed,
+      text.days.thu,
+      text.days.fri,
+      text.days.sat,
+      text.days.sun,
+    ];
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.white,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.surface,
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            children: [
+              Text(
+                text.title,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
+                  height: 24 / 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.ink,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Center(
+                child: HomeAsset(
+                  AppAssets.profileAvatar,
+                  width: 86,
+                  height: 86,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: Text(
+                  text.userName,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 20,
+                    height: 28 / 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    gradient: const LinearGradient(
+                      colors: [_badgeStart, AppColors.primary],
+                    ),
+                  ),
+                  child: Text(
+                    text.freeVersion,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      height: 24 / 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _DayStreakCard(
+                title: text.dayStreak,
+                labels: dayLabels,
+                states: _streakStates,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                text.accountSettings,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
+                  height: 20 / 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.ink,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _SettingsGroup(
+                children: [
+                  _SettingsTile(
+                    icon: AppAssets.profileSettings,
+                    iconBg: _settingsBlueBg,
+                    label: text.profileSettings,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const ProfileSettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _SettingsTile(
+                    icon: AppAssets.profileNotification,
+                    iconBg: _notifPurpleBg,
+                    iconColor: _notifPurple,
+                    label: text.notifications,
+                    trailing: Transform.scale(
+                      scale: 0.75,
+                      alignment: Alignment.centerRight,
+                      child: SizedBox(
+                        width: 39,
+                        height: 24,
+                        child: FittedBox(
+                          fit: BoxFit.contain,
+                          child: Switch.adaptive(
+                            value: _notificationsOn,
+                            activeThumbColor: Colors.white,
+                            activeTrackColor: AppColors.primary,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            onChanged: (value) =>
+                                setState(() => _notificationsOn = value),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  _SettingsTile(
+                    icon: AppAssets.profileLangFlag,
+                    iconBg: _langGreenBg,
+                    label: text.appLanguage,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const SelectLanguageScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Text(
+                text.general,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
+                  height: 20 / 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.ink,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _SettingsGroup(
+                children: [
+                  _SettingsTile(
+                    icon: AppAssets.profileCrown,
+                    iconBg: _premiumOrangeBg,
+                    label: text.premium,
+                    labelColor: _premiumOrange,
+                    valueLabel: text.passive,
+                    valueColor: _premiumOrange,
+                    onTap: () {},
+                  ),
+                  _SettingsTile(
+                    icon: AppAssets.profileShareFriends,
+                    iconBg: _sharePurpleBg,
+                    label: text.shareFriend,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const ShareFriendScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _SettingsTile(
+                    icon: AppAssets.profileRateUs,
+                    iconBg: _rateOrangeBg,
+                    label: text.rateUs,
+                    onTap: () {},
+                  ),
+                  _SettingsTile(
+                    icon: AppAssets.profileFaq,
+                    iconBg: _faqBg,
+                    label: text.faq,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const FaqScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _SettingsTile(
+                    icon: AppAssets.profileSupport,
+                    iconBg: _supportBg,
+                    label: text.support,
+                    onTap: () => _openSupportEmail(),
+                  ),
+                  _SettingsTile(
+                    icon: AppAssets.profileFeedback,
+                    iconBg: _feedbackBg,
+                    label: text.feedback,
+                    onTap: () {},
+                  ),
+                  _SettingsTile(
+                    icon: AppAssets.profileProgression,
+                    iconBg: _progressionBg,
+                    label: text.progression,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const ProgressScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _LogoutCard(
+                label: text.logout,
+                onTap: () => _showLogoutSheet(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openSupportEmail() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'support@fly-work.com',
+    );
+    await launchUrl(uri);
+  }
+
+  Future<void> _showLogoutSheet(BuildContext context) async {
+    final text = AppText.current.profilePage;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: .35),
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(10, 10, 16, 30),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                top: BorderSide(color: Color(0xFFECECEC), width: 2),
+                left: BorderSide(color: Color(0xFFECECEC), width: 2),
+                right: BorderSide(color: Color(0xFFECECEC), width: 2),
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFECECEC),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: _logoutBg,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: const HomeAsset(
+                    AppAssets.profileLogout,
+                    width: 24,
+                    height: 24,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      Text(
+                        text.logoutTitle,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          height: 20 / 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.3,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        text.logoutBody,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14,
+                          height: 18 / 14,
+                          fontWeight: FontWeight.w300,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SecondaryButton(
+                  label: text.logoutConfirm,
+                  onPressed: () => Navigator.of(sheetContext).pop(),
+                ),
+                const SizedBox(height: 10),
+                PrimaryButton(
+                  label: text.logoutCancel,
+                  onPressed: () => Navigator.of(sheetContext).pop(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+enum _StreakDayState { done, today, idle }
+
+class _DayStreakCard extends StatelessWidget {
+  const _DayStreakCard({
+    required this.title,
+    required this.labels,
+    required this.states,
+  });
+
+  final String title;
+  final List<String> labels;
+  final List<_StreakDayState> states;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.border10),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 16,
+              height: 22 / 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.ink,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              for (var i = 0; i < labels.length; i++) ...[
+                if (i > 0) const SizedBox(width: 6),
+                Expanded(
+                  child: _StreakDay(
+                    label: labels[i],
+                    state: states[i],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StreakDay extends StatelessWidget {
+  const _StreakDay({
+    required this.label,
+    required this.state,
+  });
+
+  final String label;
+  final _StreakDayState state;
+
+  @override
+  Widget build(BuildContext context) {
+    late final Color bg;
+    late final Widget? child;
+
+    switch (state) {
+      case _StreakDayState.done:
+        bg = _ProfileScreenState._streakDone;
+        child = const Icon(Icons.check_rounded, size: 16, color: Colors.white);
+      case _StreakDayState.today:
+        bg = Colors.transparent;
+        child = const HomeAsset(
+          AppAssets.profileFireOrange,
+          width: 29,
+          height: 32,
+        );
+      case _StreakDayState.idle:
+        bg = _ProfileScreenState._streakIdle;
+        child = null;
+    }
+
+    return Column(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: bg,
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: child,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 10,
+            height: 14 / 10,
+            fontWeight: FontWeight.w500,
+            color: AppColors.secondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LogoutCard extends StatelessWidget {
+  const _LogoutCard({
+    required this.label,
+    required this.onTap,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.border10),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: _ProfileScreenState._logoutBg,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: const HomeAsset(
+                  AppAssets.profileLogout,
+                  width: 22,
+                  height: 22,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  height: 20 / 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFFC10000),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsGroup extends StatelessWidget {
+  const _SettingsGroup({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.border10),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const SizedBox(height: 16),
+            children[i],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile({
+    required this.icon,
+    required this.iconBg,
+    required this.label,
+    this.iconColor,
+    this.labelColor,
+    this.valueLabel,
+    this.valueColor,
+    this.trailing,
+    this.onTap,
+  });
+
+  final String icon;
+  final Color iconBg;
+  final String label;
+  final Color? iconColor;
+  final Color? labelColor;
+  final String? valueLabel;
+  final Color? valueColor;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: trailing == null ? onTap : null,
+      borderRadius: BorderRadius.circular(10),
+      child: SizedBox(
+        height: 40,
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              alignment: Alignment.center,
+              child: HomeAsset(
+                icon,
+                width: 18,
+                height: 18,
+                color: iconColor,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  height: 20 / 14,
+                  fontWeight: FontWeight.w500,
+                  color: labelColor ?? AppColors.ink,
+                ),
+              ),
+            ),
+            if (valueLabel != null) ...[
+              Text(
+                valueLabel!,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 13,
+                  height: 18 / 13,
+                  fontWeight: FontWeight.w500,
+                  color: valueColor ?? AppColors.secondary,
+                ),
+              ),
+              const SizedBox(width: 6),
+            ],
+            if (trailing != null)
+              trailing!
+            else
+              const HomeAsset(
+                AppAssets.quizArrow,
+                width: 6,
+                height: 12,
+                color: Color(0xFF828282),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}

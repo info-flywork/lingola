@@ -6,6 +6,7 @@ import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../home/home_screen.dart';
 import '../lesson/lesson_screen.dart';
+import '../profile/profile_screen.dart';
 import '../roleplay/role_play_screen.dart';
 import '../tutor/tutor_screen.dart';
 
@@ -69,7 +70,7 @@ class _MainShellState extends State<MainShell> {
           1 => const TutorScreen(),
           2 => const LessonScreen(),
           3 => const RolePlayScreen(),
-          _ => _PlaceholderScreen(tab: labels[4]),
+          _ => const ProfileScreen(),
         },
         bottomNavigationBar: DecoratedBox(
           decoration: BoxDecoration(
@@ -149,57 +150,6 @@ class _NavItem extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.tab});
-
-  final String tab;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = AppText.current;
-    return SafeArea(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(36),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: .1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  size: 40,
-                  color: AppColors.primary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                text.placeholder.title(tab: tab),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                text.placeholder.body(tab: tab),
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.secondary, height: 1.5),
-              ),
-            ],
-          ),
         ),
       ),
     );

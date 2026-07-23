@@ -9,6 +9,7 @@ class HomeAsset extends StatelessWidget {
     this.width,
     this.height,
     this.fit = BoxFit.contain,
+    this.color,
     super.key,
   });
 
@@ -16,6 +17,7 @@ class HomeAsset extends StatelessWidget {
   final double? width;
   final double? height;
   final BoxFit fit;
+  final Color? color;
 
   bool get _isSvg => path.toLowerCase().endsWith('.svg');
 
@@ -29,6 +31,9 @@ class HomeAsset extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        colorFilter: color == null
+            ? null
+            : ColorFilter.mode(color!, BlendMode.srcIn),
         placeholderBuilder: (_) => _placeholder(),
         // Bozuk SVG olursa boş kutu göster, çökme.
         errorBuilder: (_, _, _) => _placeholder(),

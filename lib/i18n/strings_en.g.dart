@@ -59,6 +59,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$lessonPage$en lessonPage = Translations$lessonPage$en._(_root);
 	late final Translations$rolePlayPage$en rolePlayPage = Translations$rolePlayPage$en._(_root);
 	late final Translations$notificationsPage$en notificationsPage = Translations$notificationsPage$en._(_root);
+	late final Translations$profilePage$en profilePage = Translations$profilePage$en._(_root);
 }
 
 // Path: app
@@ -674,6 +675,48 @@ class Translations$quizPage$en {
 
 	/// en: 'Pronunciation like a native speaker!'
 	String get successfulBody => 'Pronunciation like a native speaker!';
+
+	/// en: 'Failed'
+	String get failedTitle => 'Failed';
+
+	/// en: 'It was almost happening, give it one more chance'
+	String get failedBody => 'It was almost happening, give it one more chance';
+
+	/// en: 'TRY AGAIN'
+	String get tryAgain => 'TRY AGAIN';
+
+	/// en: 'Writing Test'
+	String get writingTestTitle => 'Writing Test';
+
+	/// en: 'SOURCE LANGUAGE'
+	String get sourceLanguage => 'SOURCE LANGUAGE';
+
+	/// en: 'ANSWER'
+	String get answer => 'ANSWER';
+
+	/// en: 'Write your answer here...'
+	String get writeAnswerHint => 'Write your answer here...';
+
+	/// en: 'Submit'
+	String get submit => 'Submit';
+
+	/// en: 'Speaking Test'
+	String get speakingTestTitle => 'Speaking Test';
+
+	/// en: 'Speaking Proficiency'
+	String get speakingProficiency => 'Speaking Proficiency';
+
+	/// en: 'Speak clearly into your microphone:'
+	String get speakClearlyHint => 'Speak clearly into your microphone:';
+
+	/// en: 'Speak Up'
+	String get speakUp => 'Speak Up';
+
+	/// en: 'Recording...'
+	String get recording => 'Recording...';
+
+	/// en: 'QUESTION $current OF $total'
+	String questionOf({required Object current, required Object total}) => 'QUESTION ${current} OF ${total}';
 }
 
 // Path: placeholder
@@ -836,6 +879,234 @@ class Translations$notificationsPage$en {
 	late final Translations$notificationsPage$translation$en translation = Translations$notificationsPage$translation$en._(_root);
 	late final Translations$notificationsPage$offer$en offer = Translations$notificationsPage$offer$en._(_root);
 	late final Translations$notificationsPage$stories$en stories = Translations$notificationsPage$stories$en._(_root);
+}
+
+// Path: profilePage
+class Translations$profilePage$en {
+	Translations$profilePage$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Profile'
+	String get title => 'Profile';
+
+	/// en: 'Jhon Doe'
+	String get userName => 'Jhon Doe';
+
+	/// en: 'Free Version'
+	String get freeVersion => 'Free Version';
+
+	/// en: 'Day Streak!'
+	String get dayStreak => 'Day Streak!';
+
+	/// en: 'Account Settings'
+	String get accountSettings => 'Account Settings';
+
+	/// en: 'General'
+	String get general => 'General';
+
+	/// en: 'Profile Settings'
+	String get profileSettings => 'Profile Settings';
+
+	/// en: 'Full Name'
+	String get fullName => 'Full Name';
+
+	/// en: 'E-mail'
+	String get email => 'E-mail';
+
+	/// en: 'Delete Account'
+	String get deleteAccount => 'Delete Account';
+
+	/// en: 'SAVE'
+	String get save => 'SAVE';
+
+	/// en: 'Gitmeni istemiyoruz ama seni anlıyoruz.'
+	String get deleteTitle => 'Gitmeni istemiyoruz ama seni anlıyoruz.';
+
+	/// en: 'Lingola deneyimini iyileştirmemiz için bize neden ayrılmak istediğini söyler misin?'
+	String get deleteBody => 'Lingola deneyimini iyileştirmemiz için bize neden ayrılmak istediğini söyler misin?';
+
+	late final Translations$profilePage$deleteReasons$en deleteReasons = Translations$profilePage$deleteReasons$en._(_root);
+
+	/// en: 'Mesaj (opsiyonel)'
+	String get messageOptional => 'Mesaj (opsiyonel)';
+
+	/// en: 'Mesajınız varsa lütfen yazın.'
+	String get messageHint => 'Mesajınız varsa lütfen yazın.';
+
+	/// en: 'NEXT'
+	String get next => 'NEXT';
+
+	/// en: 'Özel teklif'
+	String get specialOfferTitle => 'Özel teklif';
+
+	/// en: 'Gitmeden önce senin için hazırlamış olduğumuz teklife göz at.'
+	String get specialOfferBody => 'Gitmeden önce senin için hazırlamış olduğumuz teklife göz at.';
+
+	/// en: 'Switch to 1-Month Plan'
+	String get monthlyPlanTitle => 'Switch to 1-Month Plan';
+
+	/// en: '\$79/month, cancel anytime'
+	String get monthlyPlanPrice => '\$79/month, cancel anytime';
+
+	/// en: 'No long-term commitment. Stay connected with our community on a month-to-month basis.'
+	String get monthlyPlanDesc => 'No long-term commitment. Stay connected with our community on a month-to-month basis.';
+
+	/// en: 'What you'll keep:'
+	String get whatYoullKeep => 'What you\'ll keep:';
+
+	/// en: 'Access all characters'
+	String get keepCharacters => 'Access all characters';
+
+	/// en: 'Unlimited video calls'
+	String get keepVideo => 'Unlimited video calls';
+
+	/// en: 'Access to all courses'
+	String get keepCourses => 'Access to all courses';
+
+	/// en: 'Switch to Monthly Plan'
+	String get switchMonthlyCta => 'Switch to Monthly Plan';
+
+	/// en: 'Are you sure?'
+	String get confirmTitle => 'Are you sure?';
+
+	/// en: 'We really don't want to see you go. Here's what you'll lose:'
+	String get confirmBody => 'We really don\'t want to see you go. Here\'s what you\'ll lose:';
+
+	/// en: 'Unlimited character access'
+	String get loseCharacters => 'Unlimited character access';
+
+	/// en: 'Unlimited video call access'
+	String get loseVideo => 'Unlimited video call access';
+
+	/// en: 'Access to all courses'
+	String get loseCourses => 'Access to all courses';
+
+	/// en: 'Stay and get 60% off for 1 month'
+	String get discountTitle => 'Stay and get 60% off for 1 month';
+
+	/// en: 'Our best offer ever. Just \$27.60/month'
+	String get discountSubtitle => 'Our best offer ever. Just \$27.60/month';
+
+	/// en: 'Accept 60% Off & Stay'
+	String get acceptDiscountCta => 'Accept 60% Off & Stay';
+
+	/// en: 'We're sad to see you go'
+	String get farewellTitle => 'We\'re sad to see you go';
+
+	/// en: 'Your membership has been cancelled. You'll have access until the end of your current billing period on $date.'
+	String farewellBody({required Object date}) => 'Your membership has been cancelled. You\'ll have access until the end of your current billing period on ${date}.';
+
+	/// en: '✨ Change your mind?'
+	String get changeMindTitle => '✨ Change your mind?';
+
+	/// en: 'You can reactivate your membership anytime before $date to keep your benefits.'
+	String changeMindBody({required Object date}) => 'You can reactivate your membership anytime before ${date} to keep your benefits.';
+
+	/// en: 'Wait, I want to reactivate'
+	String get reactivateCta => 'Wait, I want to reactivate';
+
+	/// en: 'DONE'
+	String get done => 'DONE';
+
+	/// en: 'Notifications'
+	String get notifications => 'Notifications';
+
+	/// en: 'App Language'
+	String get appLanguage => 'App Language';
+
+	/// en: 'Select Language'
+	String get selectLanguageTitle => 'Select Language';
+
+	/// en: 'Premium'
+	String get premium => 'Premium';
+
+	/// en: 'Passive'
+	String get passive => 'Passive';
+
+	/// en: 'Share Friend'
+	String get shareFriend => 'Share Friend';
+
+	/// en: 'Share with Friend'
+	String get shareWithFriendTitle => 'Share with Friend';
+
+	/// en: 'Invite your friends and enjoy translate together'
+	String get shareInviteBody => 'Invite your friends and enjoy translate together';
+
+	/// en: 'Rate Us'
+	String get rateUs => 'Rate Us';
+
+	/// en: 'F.A.Q.'
+	String get faq => 'F.A.Q.';
+
+	late final Translations$profilePage$faqItems$en faqItems = Translations$profilePage$faqItems$en._(_root);
+
+	/// en: 'Support'
+	String get support => 'Support';
+
+	/// en: 'Feedback'
+	String get feedback => 'Feedback';
+
+	/// en: 'Progression'
+	String get progression => 'Progression';
+
+	/// en: 'Progress'
+	String get progressTitle => 'Progress';
+
+	/// en: 'Good Morning,'
+	String get goodMorning => 'Good Morning,';
+
+	/// en: 'Jhon'
+	String get progressUserName => 'Jhon';
+
+	/// en: 'English'
+	String get progressLanguage => 'English';
+
+	/// en: 'Past 7 Days'
+	String get past7Days => 'Past 7 Days';
+
+	/// en: 'Study every day to build your streak and create a powerful learning habit.'
+	String get past7DaysBody => 'Study every day to build your streak and create a powerful learning habit.';
+
+	/// en: 'Current Level'
+	String get currentLevel => 'Current Level';
+
+	/// en: 'Just $xp XP left to reach $level!'
+	String xpLeft({required Object xp, required Object level}) => 'Just ${xp} XP left to reach ${level}!';
+
+	/// en: 'TO NEXT LEVEL'
+	String get toNextLevel => 'TO NEXT LEVEL';
+
+	/// en: 'Day Streak'
+	String get dayStreakLabel => 'Day Streak';
+
+	/// en: 'Total Points'
+	String get totalPoints => 'Total Points';
+
+	/// en: 'Saved Words'
+	String get savedWords => 'Saved Words';
+
+	/// en: '$count items to review'
+	String itemsToReview({required Object count}) => '${count} items to review';
+
+	/// en: 'Log Out'
+	String get logout => 'Log Out';
+
+	/// en: 'You are about to log out'
+	String get logoutTitle => 'You are about to log out';
+
+	/// en: 'See you again soon! We'll miss your breathing exercises.'
+	String get logoutBody => 'See you again soon! We\'ll miss your breathing exercises.';
+
+	/// en: 'LOGOUT'
+	String get logoutConfirm => 'LOGOUT';
+
+	/// en: 'CANCEL'
+	String get logoutCancel => 'CANCEL';
+
+	late final Translations$profilePage$days$en days = Translations$profilePage$days$en._(_root);
 }
 
 // Path: onboarding.slide1
@@ -1171,6 +1442,75 @@ class Translations$notificationsPage$stories$en {
 	String get body => 'Learn new words through stories';
 }
 
+// Path: profilePage.deleteReasons
+class Translations$profilePage$deleteReasons$en {
+	Translations$profilePage$deleteReasons$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Yapay zeka karakterlerini gerçekçi bulmadım.'
+	String get aiCharacters => 'Yapay zeka karakterlerini gerçekçi bulmadım.';
+
+	/// en: 'Görüntülü sohbetlerde teknik sorunlar yaşıyorum.'
+	String get videoIssues => 'Görüntülü sohbetlerde teknik sorunlar yaşıyorum.';
+
+	/// en: 'Abonelik fiyatları beklentimin üzerinde.'
+	String get pricing => 'Abonelik fiyatları beklentimin üzerinde.';
+
+	/// en: 'Aradığım tarzda karakterler bulamadım.'
+	String get noMatch => 'Aradığım tarzda karakterler bulamadım.';
+
+	/// en: 'Sadece kısa bir süreliğine denemek istemiştim.'
+	String get shortTrial => 'Sadece kısa bir süreliğine denemek istemiştim.';
+
+	/// en: 'Diğer'
+	String get other => 'Diğer';
+}
+
+// Path: profilePage.faqItems
+class Translations$profilePage$faqItems$en {
+	Translations$profilePage$faqItems$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+	late final Translations$profilePage$faqItems$howItWorks$en howItWorks = Translations$profilePage$faqItems$howItWorks$en._(_root);
+	late final Translations$profilePage$faqItems$replacePsychologist$en replacePsychologist = Translations$profilePage$faqItems$replacePsychologist$en._(_root);
+	late final Translations$profilePage$faqItems$dataPrivate$en dataPrivate = Translations$profilePage$faqItems$dataPrivate$en._(_root);
+}
+
+// Path: profilePage.days
+class Translations$profilePage$days$en {
+	Translations$profilePage$days$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'MON'
+	String get mon => 'MON';
+
+	/// en: 'TUE'
+	String get tue => 'TUE';
+
+	/// en: 'WED'
+	String get wed => 'WED';
+
+	/// en: 'THU'
+	String get thu => 'THU';
+
+	/// en: 'FRI'
+	String get fri => 'FRI';
+
+	/// en: 'SAT'
+	String get sat => 'SAT';
+
+	/// en: 'SUN'
+	String get sun => 'SUN';
+}
+
 // Path: lessonPage.levels.a1
 class Translations$lessonPage$levels$a1$en {
 	Translations$lessonPage$levels$a1$en._(this._root);
@@ -1475,6 +1815,51 @@ class Translations$lessonPage$levels$c2$en {
 	];
 }
 
+// Path: profilePage.faqItems.howItWorks
+class Translations$profilePage$faqItems$howItWorks$en {
+	Translations$profilePage$faqItems$howItWorks$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How does this app work?'
+	String get question => 'How does this app work?';
+
+	/// en: 'Our app uses artificial intelligence to analyze your emotional state through your written or spoken inputs. It provides personalized insights, mood tracking, and mental-wellness exercises designed to help you better understand and manage your emotions.'
+	String get answer => 'Our app uses artificial intelligence to analyze your emotional state through your written or spoken inputs. It provides personalized insights, mood tracking, and mental-wellness exercises designed to help you better understand and manage your emotions.';
+}
+
+// Path: profilePage.faqItems.replacePsychologist
+class Translations$profilePage$faqItems$replacePsychologist$en {
+	Translations$profilePage$faqItems$replacePsychologist$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Can this app replace a real psychologist?'
+	String get question => 'Can this app replace a real psychologist?';
+
+	/// en: 'No. This app is designed to support your wellbeing and learning journey, but it does not replace professional mental health care. If you need clinical support, please consult a licensed specialist.'
+	String get answer => 'No. This app is designed to support your wellbeing and learning journey, but it does not replace professional mental health care. If you need clinical support, please consult a licensed specialist.';
+}
+
+// Path: profilePage.faqItems.dataPrivate
+class Translations$profilePage$faqItems$dataPrivate$en {
+	Translations$profilePage$faqItems$dataPrivate$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Are my conversations and data private?'
+	String get question => 'Are my conversations and data private?';
+
+	/// en: 'Yes. Your conversations and personal data are kept private and handled according to our privacy policy. We do not sell your data to third parties.'
+	String get answer => 'Yes. Your conversations and personal data are kept private and handled according to our privacy policy. We do not sell your data to third parties.';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -1679,6 +2064,20 @@ extension on Translations {
 			'quizPage.matchFail' => ({required Object heard}) => 'Heard "${heard}". Try again.',
 			'quizPage.successfulTitle' => 'Successful!',
 			'quizPage.successfulBody' => 'Pronunciation like a native speaker!',
+			'quizPage.failedTitle' => 'Failed',
+			'quizPage.failedBody' => 'It was almost happening, give it one more chance',
+			'quizPage.tryAgain' => 'TRY AGAIN',
+			'quizPage.writingTestTitle' => 'Writing Test',
+			'quizPage.sourceLanguage' => 'SOURCE LANGUAGE',
+			'quizPage.answer' => 'ANSWER',
+			'quizPage.writeAnswerHint' => 'Write your answer here...',
+			'quizPage.submit' => 'Submit',
+			'quizPage.speakingTestTitle' => 'Speaking Test',
+			'quizPage.speakingProficiency' => 'Speaking Proficiency',
+			'quizPage.speakClearlyHint' => 'Speak clearly into your microphone:',
+			'quizPage.speakUp' => 'Speak Up',
+			'quizPage.recording' => 'Recording...',
+			'quizPage.questionOf' => ({required Object current, required Object total}) => 'QUESTION ${current} OF ${total}',
 			'placeholder.title' => ({required Object tab}) => '${tab} is on the way',
 			'placeholder.body' => ({required Object tab}) => 'We’re preparing a focused ${tab} experience for you.',
 			'tutorPage.title' => 'Tutor',
@@ -1965,6 +2364,98 @@ extension on Translations {
 			'notificationsPage.offer.body' => 'Upgrade to Premium for unlimited photo translations at 50% off.',
 			'notificationsPage.stories.title' => 'Discover New Stories',
 			'notificationsPage.stories.body' => 'Learn new words through stories',
+			'profilePage.title' => 'Profile',
+			'profilePage.userName' => 'Jhon Doe',
+			'profilePage.freeVersion' => 'Free Version',
+			'profilePage.dayStreak' => 'Day Streak!',
+			'profilePage.accountSettings' => 'Account Settings',
+			'profilePage.general' => 'General',
+			'profilePage.profileSettings' => 'Profile Settings',
+			'profilePage.fullName' => 'Full Name',
+			'profilePage.email' => 'E-mail',
+			'profilePage.deleteAccount' => 'Delete Account',
+			'profilePage.save' => 'SAVE',
+			'profilePage.deleteTitle' => 'Gitmeni istemiyoruz ama seni anlıyoruz.',
+			'profilePage.deleteBody' => 'Lingola deneyimini iyileştirmemiz için bize neden ayrılmak istediğini söyler misin?',
+			'profilePage.deleteReasons.aiCharacters' => 'Yapay zeka karakterlerini gerçekçi bulmadım.',
+			'profilePage.deleteReasons.videoIssues' => 'Görüntülü sohbetlerde teknik sorunlar yaşıyorum.',
+			'profilePage.deleteReasons.pricing' => 'Abonelik fiyatları beklentimin üzerinde.',
+			_ => null,
+		} ?? switch (path) {
+			'profilePage.deleteReasons.noMatch' => 'Aradığım tarzda karakterler bulamadım.',
+			'profilePage.deleteReasons.shortTrial' => 'Sadece kısa bir süreliğine denemek istemiştim.',
+			'profilePage.deleteReasons.other' => 'Diğer',
+			'profilePage.messageOptional' => 'Mesaj (opsiyonel)',
+			'profilePage.messageHint' => 'Mesajınız varsa lütfen yazın.',
+			'profilePage.next' => 'NEXT',
+			'profilePage.specialOfferTitle' => 'Özel teklif',
+			'profilePage.specialOfferBody' => 'Gitmeden önce senin için hazırlamış olduğumuz teklife göz at.',
+			'profilePage.monthlyPlanTitle' => 'Switch to 1-Month Plan',
+			'profilePage.monthlyPlanPrice' => '\$79/month, cancel anytime',
+			'profilePage.monthlyPlanDesc' => 'No long-term commitment. Stay connected with our community on a month-to-month basis.',
+			'profilePage.whatYoullKeep' => 'What you\'ll keep:',
+			'profilePage.keepCharacters' => 'Access all characters',
+			'profilePage.keepVideo' => 'Unlimited video calls',
+			'profilePage.keepCourses' => 'Access to all courses',
+			'profilePage.switchMonthlyCta' => 'Switch to Monthly Plan',
+			'profilePage.confirmTitle' => 'Are you sure?',
+			'profilePage.confirmBody' => 'We really don\'t want to see you go. Here\'s what you\'ll lose:',
+			'profilePage.loseCharacters' => 'Unlimited character access',
+			'profilePage.loseVideo' => 'Unlimited video call access',
+			'profilePage.loseCourses' => 'Access to all courses',
+			'profilePage.discountTitle' => 'Stay and get 60% off for 1 month',
+			'profilePage.discountSubtitle' => 'Our best offer ever. Just \$27.60/month',
+			'profilePage.acceptDiscountCta' => 'Accept 60% Off & Stay',
+			'profilePage.farewellTitle' => 'We\'re sad to see you go',
+			'profilePage.farewellBody' => ({required Object date}) => 'Your membership has been cancelled. You\'ll have access until the end of your current billing period on ${date}.',
+			'profilePage.changeMindTitle' => '✨ Change your mind?',
+			'profilePage.changeMindBody' => ({required Object date}) => 'You can reactivate your membership anytime before ${date} to keep your benefits.',
+			'profilePage.reactivateCta' => 'Wait, I want to reactivate',
+			'profilePage.done' => 'DONE',
+			'profilePage.notifications' => 'Notifications',
+			'profilePage.appLanguage' => 'App Language',
+			'profilePage.selectLanguageTitle' => 'Select Language',
+			'profilePage.premium' => 'Premium',
+			'profilePage.passive' => 'Passive',
+			'profilePage.shareFriend' => 'Share Friend',
+			'profilePage.shareWithFriendTitle' => 'Share with Friend',
+			'profilePage.shareInviteBody' => 'Invite your friends and enjoy translate together',
+			'profilePage.rateUs' => 'Rate Us',
+			'profilePage.faq' => 'F.A.Q.',
+			'profilePage.faqItems.howItWorks.question' => 'How does this app work?',
+			'profilePage.faqItems.howItWorks.answer' => 'Our app uses artificial intelligence to analyze your emotional state through your written or spoken inputs. It provides personalized insights, mood tracking, and mental-wellness exercises designed to help you better understand and manage your emotions.',
+			'profilePage.faqItems.replacePsychologist.question' => 'Can this app replace a real psychologist?',
+			'profilePage.faqItems.replacePsychologist.answer' => 'No. This app is designed to support your wellbeing and learning journey, but it does not replace professional mental health care. If you need clinical support, please consult a licensed specialist.',
+			'profilePage.faqItems.dataPrivate.question' => 'Are my conversations and data private?',
+			'profilePage.faqItems.dataPrivate.answer' => 'Yes. Your conversations and personal data are kept private and handled according to our privacy policy. We do not sell your data to third parties.',
+			'profilePage.support' => 'Support',
+			'profilePage.feedback' => 'Feedback',
+			'profilePage.progression' => 'Progression',
+			'profilePage.progressTitle' => 'Progress',
+			'profilePage.goodMorning' => 'Good Morning,',
+			'profilePage.progressUserName' => 'Jhon',
+			'profilePage.progressLanguage' => 'English',
+			'profilePage.past7Days' => 'Past 7 Days',
+			'profilePage.past7DaysBody' => 'Study every day to build your streak and create a powerful learning habit.',
+			'profilePage.currentLevel' => 'Current Level',
+			'profilePage.xpLeft' => ({required Object xp, required Object level}) => 'Just ${xp} XP left to reach ${level}!',
+			'profilePage.toNextLevel' => 'TO NEXT LEVEL',
+			'profilePage.dayStreakLabel' => 'Day Streak',
+			'profilePage.totalPoints' => 'Total Points',
+			'profilePage.savedWords' => 'Saved Words',
+			'profilePage.itemsToReview' => ({required Object count}) => '${count} items to review',
+			'profilePage.logout' => 'Log Out',
+			'profilePage.logoutTitle' => 'You are about to log out',
+			'profilePage.logoutBody' => 'See you again soon! We\'ll miss your breathing exercises.',
+			'profilePage.logoutConfirm' => 'LOGOUT',
+			'profilePage.logoutCancel' => 'CANCEL',
+			'profilePage.days.mon' => 'MON',
+			'profilePage.days.tue' => 'TUE',
+			'profilePage.days.wed' => 'WED',
+			'profilePage.days.thu' => 'THU',
+			'profilePage.days.fri' => 'FRI',
+			'profilePage.days.sat' => 'SAT',
+			'profilePage.days.sun' => 'SUN',
 			_ => null,
 		};
 	}

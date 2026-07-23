@@ -1,0 +1,81 @@
+/// Merkezi asset yolları — yeni ikon indirmeden önce buraya bak.
+abstract final class AppAssets {
+  // —— Genel ——
+  static const backArrow = 'assets/images/generalArrowIcon.svg';
+  static const heart = 'assets/images/heart.svg';
+  static const microphone = 'assets/images/microphone.svg';
+  static const speaker = 'assets/images/speaker.svg';
+  static const whiteSpeaker = 'assets/images/whiteSpeaker.svg';
+  static const translate = 'assets/images/translate.svg';
+  static const hint = 'assets/images/noHint.svg';
+  static const lightbulb = 'assets/images/ampul.svg';
+  static const send = 'assets/images/oksign.svg';
+  static const success = 'assets/images/quizSection/succesfull.svg';
+  static const failed = 'assets/images/onboarding/unseccesfull.svg';
+
+  // —— Quiz ——
+  static const quizBook = 'assets/images/quizIcons/book.svg';
+  static const quizWriting = 'assets/images/quizIcons/writing.svg';
+  static const quizSpeaking = 'assets/images/quizIcons/microphoneSpeaking.svg';
+  static const quizArrow = 'assets/images/quizIcons/arrow.svg';
+
+  // —— Writing Test ——
+  static const writingCopy = 'assets/images/writingTestIcons/copyIcon.svg';
+  static const writingTranslate =
+      'assets/images/writingTestIcons/translateIconWritingTest.svg';
+  static const writingSubmit = 'assets/images/writingTestIcons/submit.svg';
+
+  // —— Speaking Test ——
+  static const speakingHead =
+      'assets/images/speakingTestIcons/userSpeakingIcon.png';
+
+  // —— Profile ——
+  static const profileAvatar = 'assets/images/home/profile_avatar.svg';
+  static const profileSettings =
+      'assets/images/profilIcons/profilesettings.svg';
+  static const profileLangFlag =
+      'assets/images/profilIcons/profileLangFlag.svg';
+  static const profileCrown = 'assets/images/profilIcons/crownProfile.svg';
+  static const profileShareFriends =
+      'assets/images/profilIcons/shareFriends.svg';
+  static const shareFriendsBanner =
+      'assets/images/profilIcons/shareWitFriendsBanner.png';
+  static const profileRateUs = 'assets/images/profilIcons/rateUs.svg';
+  static const profileFaq = 'assets/images/profilIcons/faq.svg';
+  static const profileTopArrow = 'assets/images/profilIcons/topArrow.svg';
+  static const profileBottomArrow =
+      'assets/images/profilIcons/bottomArrow.svg';
+  static const profileSupport = 'assets/images/profilIcons/support.svg';
+  static const profileFeedback = 'assets/images/profilIcons/feedback.svg';
+  static const profileProgression =
+      'assets/images/profilIcons/progression.svg';
+  static const profileSaveButton =
+      'assets/images/profilIcons/saveButton.svg';
+  static const profileLogout = 'assets/images/profilIcons/logout.svg';
+  static const profileCamera = 'assets/images/profilIcons/camera.svg';
+  static const profileDeleteAccount =
+      'assets/images/profilIcons/deleteAccount.svg';
+  static const profileDeleteAccountTik =
+      'assets/images/profilIcons/deleteaccounttik.svg';
+  static const profileStarsGroup =
+      'assets/images/profilIcons/starsgroup.svg';
+  static const profilePremiumIconDeleteAccount =
+      'assets/images/profilIcons/premiumIconDeleteAccounts.svg';
+  static const profileCornesTik = 'assets/images/profilIcons/cornesTik.svg';
+  static const profileUnlimitedCharacter =
+      'assets/images/profilIcons/unlimitedCharacter.svg';
+  static const profileUnlimitedVideo =
+      'assets/images/profilIcons/unlimitedVideo.svg';
+  static const profileAccessAll = 'assets/images/profilIcons/accessAll.svg';
+  static const profileDiscount = 'assets/images/profilIcons/discount.svg';
+  static const profileChain = 'assets/images/profilIcons/chain.svg';
+  static const profileLock = 'assets/images/profilIcons/lock.svg';
+  static const profileNotification =
+      'assets/images/home/notification_icon.svg';
+  static const profileStreakFlame = 'assets/images/home/streak_icon.svg';
+  static const profileFireOrange =
+      'assets/images/profilIcons/fireOrange.svg';
+  static const premiumCheck = 'assets/images/home/premium_check.svg';
+  static const homePremiumCrown = 'assets/images/home/premium_crown.svg';
+  static const homeStar = 'assets/images/home/star_small.svg';
+}
