@@ -177,6 +177,11 @@ class TutorScreen extends StatelessWidget {
     final tags = text.tags;
     return [
       _TutorData(
+        name: text.tutors.lingola,
+        image: AppAssets.tutorRobot,
+        tags: [tags.analytic, tags.curious],
+      ),
+      _TutorData(
         name: text.tutors.elena,
         image: AppAssets.tutorElena,
         riveAsset: AppAssets.tutorElenaRiv,

@@ -671,6 +671,7 @@ class _Translations$tutorPage$tags$tr implements Translations$tutorPage$tags$en 
 	@override String get decisive => 'Kararlı';
 	@override String get disciplined => 'Disiplinli';
 	@override String get smart => 'Zeki';
+	@override String get analytic => 'Analitik';
 }
 
 // Path: tutorPage.chat
@@ -1462,6 +1463,7 @@ extension on TranslationsTr {
 			'tutorPage.tags.decisive' => 'Kararlı',
 			'tutorPage.tags.disciplined' => 'Disiplinli',
 			'tutorPage.tags.smart' => 'Zeki',
+			'tutorPage.tags.analytic' => 'Analitik',
 			'tutorPage.historyPreview1' => 'Hey! Can sıkıntısından patlamak üzereydim...',
 			'tutorPage.historyPreview2' => 'Bugün yemek siparişi pratiği yapalım mı?',
 			'tutorPage.time1' => '11:00',
@@ -1710,9 +1712,9 @@ extension on TranslationsTr {
 			'rolePlayPage.beginner' => 'Başlangıç',
 			'rolePlayPage.screenplay' => 'SENARYO',
 			'rolePlayPage.dailyInteractions' => 'Günlük Etkileşimler',
-			'rolePlayPage.business' => 'İş',
 			_ => null,
 		} ?? switch (path) {
+			'rolePlayPage.business' => 'İş',
 			'rolePlayPage.coffee.title' => 'Kafede Sipariş Verme',
 			'rolePlayPage.coffee.screenplay' => 'Favori içeceğini sipariş et, boyut ve ekstraları sor, toplamı onayla ve tezgâhtan kahveni al.',
 			'rolePlayPage.coffee.chat.incoming1' => 'Hoş geldiniz! Bugün ne alırsınız?',

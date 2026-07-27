@@ -115,7 +115,7 @@ abstract final class AppAssets {
   static const tutorDiego = 'assets/images/profilIcons/tutor/diego.png';
   static const tutorAmara = 'assets/images/profilIcons/tutor/amara.png';
   static const tutorErik = 'assets/images/profilIcons/tutor/erik.png';
-  static const tutorKatie = 'assets/images/profilIcons/tutor/katie.png';
+  static const tutorKatie = 'assets/riv/Female/kaite.png';
   static const tutorMorgan = 'assets/images/profilIcons/tutor/morgan.png';
 
   // —— Calling ——
@@ -132,8 +132,8 @@ abstract final class AppAssets {
   static const tutorMarcoRiv = 'assets/riv/Male/avatar2.riv';
   static const tutorJulianRiv = 'assets/riv/Male/avatar1.riv';
   static const tutorInesRiv = 'assets/riv/Female/avatar2.riv';
-  static const tutorFelixRiv = 'assets/riv/Male/avatar6.riv';
-  static const tutorDiegoRiv = 'assets/riv/Male/avatar7.riv';
+  static const tutorFelixRiv = 'assets/riv/Male/avatar7.riv';
+  static const tutorDiegoRiv = 'assets/riv/Male/avatar6.riv';
   static const tutorAmaraRiv = 'assets/riv/Female/avatar1.riv';
   static const tutorErikRiv = 'assets/riv/Male/avatar3.riv';
   static const tutorKatieRiv = 'assets/riv/Female/kaite.riv';

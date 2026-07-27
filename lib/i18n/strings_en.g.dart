@@ -1388,6 +1388,9 @@ class Translations$tutorPage$tags$en {
 
 	/// en: 'Smart'
 	String get smart => 'Smart';
+
+	/// en: 'Analytic'
+	String get analytic => 'Analytic';
 }
 
 // Path: tutorPage.chat
@@ -2316,6 +2319,7 @@ extension on Translations {
 			'tutorPage.tags.decisive' => 'Decisive',
 			'tutorPage.tags.disciplined' => 'Disciplined',
 			'tutorPage.tags.smart' => 'Smart',
+			'tutorPage.tags.analytic' => 'Analytic',
 			'tutorPage.historyPreview1' => 'Hey! I was about to explode with boredom...',
 			'tutorPage.historyPreview2' => 'Shall we practice ordering food today?',
 			'tutorPage.time1' => '11:00 AM',
@@ -2564,9 +2568,9 @@ extension on Translations {
 			'rolePlayPage.beginner' => 'Beginner',
 			'rolePlayPage.screenplay' => 'SCREENPLAY',
 			'rolePlayPage.dailyInteractions' => 'Daily Interactions',
-			'rolePlayPage.business' => 'Business',
 			_ => null,
 		} ?? switch (path) {
+			'rolePlayPage.business' => 'Business',
 			'rolePlayPage.coffee.title' => 'Ordering at the Coffee Shop',
 			'rolePlayPage.coffee.screenplay' => 'Order your favorite drink, ask about sizes and extras, confirm your total, and pick up your coffee at the counter.',
 			'rolePlayPage.coffee.chat.incoming1' => 'Welcome! What can I get started for you today?',
