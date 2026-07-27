@@ -10,7 +10,7 @@ Future<void> _settle(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('Role play list opens detail sheet', (tester) async {
+  testWidgets('Role play list opens detail sheet then chat', (tester) async {
     await LocaleSettings.setLocale(AppLocale.en);
     await tester.pumpWidget(const MaterialApp(home: RolePlayScreen()));
     await tester.pump();
@@ -25,5 +25,16 @@ void main() {
     expect(find.text(text.rolePlayPage.screenplay), findsOneWidget);
     expect(find.text(text.rolePlayPage.directions.screenplay), findsOneWidget);
     expect(find.text(text.common.getStarted), findsOneWidget);
+
+    await tester.ensureVisible(find.text(text.common.getStarted));
+    await tester.tap(find.text(text.common.getStarted));
+    await _settle(tester);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(text.rolePlayPage.directions.chat.incoming1),
+      findsOneWidget,
+    );
+    expect(find.text(text.previewChat.brand), findsOneWidget);
   });
 }

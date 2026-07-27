@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
+import 'calling_screen.dart';
 import 'chat_screen.dart';
 import 'tutor_screen.dart';
 
@@ -14,36 +16,32 @@ class ChatHistoryScreen extends StatelessWidget {
     final text = AppText.current.tutorPage;
     final featured = [
       (
-        text.tutors.elenaSchmidt,
-        'assets/images/tutors/elena.png',
+        text.tutors.elena,
+        AppAssets.tutorElena,
         [
           text.tags.adaptive,
           text.tags.calm,
-          text.tags.patient,
-          text.tags.more,
         ],
       ),
       (
-        text.tutors.kenjiSato,
-        'assets/images/tutors/kenji.png',
+        text.tutors.kenji,
+        AppAssets.tutorKenji,
         [
-          text.tags.adaptive,
-          text.tags.calm,
           text.tags.patient,
-          text.tags.more,
+          text.tags.organized,
         ],
       ),
     ];
     final history = [
       (
-        text.tutors.elenaSchmidt,
-        'assets/images/tutors/elena.png',
+        text.tutors.elena,
+        AppAssets.tutorElena,
         text.historyPreview1,
         text.time1,
       ),
       (
-        text.tutors.kenjiSato,
-        'assets/images/tutors/kenji.png',
+        text.tutors.kenji,
+        AppAssets.tutorKenji,
         text.historyPreview2,
         text.time2,
       ),
@@ -88,7 +86,7 @@ class ChatHistoryScreen extends StatelessWidget {
                       onStartTalk: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                            builder: (_) => ChatScreen(
+                            builder: (_) => CallingScreen(
                               tutorName: featured[i].$1,
                               imagePath: featured[i].$2,
                             ),

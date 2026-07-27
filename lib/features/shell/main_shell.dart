@@ -65,13 +65,16 @@ class _MainShellState extends State<MainShell> {
       ),
       child: Scaffold(
         backgroundColor: AppColors.surface,
-        body: switch (_index) {
-          0 => const HomeScreen(),
-          1 => const TutorScreen(),
-          2 => const LessonScreen(),
-          3 => const RolePlayScreen(),
-          _ => const ProfileScreen(),
-        },
+        body: SafeArea(
+          bottom: false,
+          child: switch (_index) {
+            0 => const HomeScreen(),
+            1 => const TutorScreen(),
+            2 => const LessonScreen(),
+            3 => const RolePlayScreen(),
+            _ => const ProfileScreen(),
+          },
+        ),
         bottomNavigationBar: DecoratedBox(
           decoration: BoxDecoration(
             color: Colors.white,

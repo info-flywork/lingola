@@ -64,21 +64,21 @@ class _SplashScreenState extends State<SplashScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: AppColors.primary,
+        systemNavigationBarColor: const Color(0xFF2D46FF),
       ),
       child: Scaffold(
-        backgroundColor: AppColors.primary,
-        body: _DesignSurface(
-          // Figma 430×852 ölçeği — koala 401×387 @ y:499 birebir.
-          fit: BoxFit.fitWidth,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 480),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            child: _step == 0
-                ? const _IconSplashVisual(key: ValueKey('icon'))
-                : const _KoalaSplashVisual(key: ValueKey('koala')),
-          ),
+        backgroundColor: Colors.white,
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 480),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          child: _step == 0
+              ? const _DesignSurface(
+                  key: ValueKey('icon-surface'),
+                  fit: BoxFit.fitWidth,
+                  child: _IconSplashVisual(),
+                )
+              : const _KoalaSplashVisual(key: ValueKey('koala')),
         ),
       ),
     );
@@ -86,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class _IconSplashVisual extends StatelessWidget {
-  const _IconSplashVisual({super.key});
+  const _IconSplashVisual();
 
   @override
   Widget build(BuildContext context) {
@@ -129,46 +129,133 @@ class _IconSplashVisual extends StatelessWidget {
   }
 }
 
+/// Figma’daki gibi belden kesik koala — kesik kenar ekranın dibine yapışır.
 class _KoalaSplashVisual extends StatelessWidget {
   const _KoalaSplashVisual({super.key});
+
+  /// Layer 1 / koala.png kaynak oranı (belden kesik export).
+  static const _assetW = 802.0;
+  static const _assetH = 706.0;
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
-    // Figma Layer 1: x:14 y:499 w:401 h:387
+    final size = MediaQuery.sizeOf(context);
+    // Figma frame 430×852 — Lingola @ (102, 346), Quicksand Bold 64, 227×80.
+    final scale = size.width / 430.0;
+    final titleTop = 346 * scale;
+    final titleSize = 64 * scale;
+
+    // Figma: ~401/430 genişlik, alt kenar frame dibinde (ayak yok — kasıtlı).
+    final koalaW = size.width * (401 / 430);
+    final koalaH = koalaW * (_assetH / _assetW);
+
     return Stack(
+      fit: StackFit.expand,
       clipBehavior: Clip.hardEdge,
       children: [
-        const Positioned.fill(child: _OnboardingBackground()),
+        const Positioned.fill(child: _OnboardingBackgroundLive()),
         Positioned(
-          top: 346,
+          top: titleTop,
           left: 0,
           right: 0,
+          height: 80 * scale,
           child: Text(
             text.app.name,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.primary,
               fontFamily: 'Quicksand',
-              fontSize: 64,
+              fontSize: titleSize,
               height: 1,
               fontWeight: FontWeight.w700,
             ),
           ),
         ),
-        const Positioned(
-          left: 14,
-          top: 499,
-          width: 401,
-          height: 387,
-          child: LocalPicture(
-            'koala.png',
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
-            width: 401,
-            height: 387,
+        // Belden kesik Layer 1 — kesik alt kenar ekranın dibine yapışık (Figma).
+        Positioned(
+          left: (size.width - koalaW) / 2,
+          bottom: 0,
+          width: koalaW,
+          height: koalaH,
+          child: Image.asset(
+            'assets/images/koala.png',
+            width: koalaW,
+            height: koalaH,
+            fit: BoxFit.fill,
+            filterQuality: FilterQuality.high,
+            isAntiAlias: true,
+            gaplessPlayback: true,
           ),
         ),
+      ],
+    );
+  }
+}
+
+/// Canlı ekran boyutuna göre Figma elipsleri (430×852 oranında ölçeklenir).
+class _OnboardingBackgroundLive extends StatelessWidget {
+  const _OnboardingBackgroundLive();
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final sx = size.width / 430.0;
+    final sy = size.height / 852.0;
+
+    Widget circle({
+      required double left,
+      required double top,
+      required double diameter,
+      required Color color,
+    }) {
+      const pad = 160.0;
+      final d = diameter * ((sx + sy) / 2);
+      final blur = 80.0 * ((sx + sy) / 2);
+      return Positioned(
+        left: left * sx - pad,
+        top: top * sy - pad,
+        width: d + pad * 2,
+        height: d + pad * 2,
+        child: ImageFiltered(
+          imageFilter: ImageFilter.blur(
+            sigmaX: blur,
+            sigmaY: blur,
+            tileMode: TileMode.decal,
+          ),
+          child: Center(
+            child: Container(
+              width: d,
+              height: d,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      clipBehavior: Clip.none,
+      children: [
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white,
+                Colors.white,
+                Color(0xFFE8F4FF),
+                Color(0xFF9FD0F0),
+              ],
+              stops: [0, 0.32, 0.58, 1],
+            ),
+          ),
+        ),
+        circle(left: -22, top: 448, diameter: 490, color: const Color(0xFF2D85FF)),
+        circle(left: -81, top: 516, diameter: 594, color: const Color(0xFF37B2E3)),
+        circle(left: -65, top: 659, diameter: 559, color: const Color(0xFF2D46FF)),
       ],
     );
   }
@@ -924,30 +1011,30 @@ class _PageDots extends StatelessWidget {
 class _OnboardingBackground extends StatelessWidget {
   const _OnboardingBackground();
 
-  /// Figma / onboarding_background.svg: feGaussianBlur stdDeviation=50
-  /// → filter pad ≈ 100 (circle + blur taşması).
-  static const _blurPad = 100.0;
-  static const _blurSigma = 50.0;
+  /// Figma background group: Ellipse 8/9/10 + Layer blur.
+  /// Blur taşması için pad; clip yok ki glow kesilmesin.
+  static const _blurPad = 140.0;
+  static const _blurSigma = 70.0;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: Clip.none,
       children: [
-        // SVG linearGradient: alt #63B1D9 → üst white (dalga blur’lardan gelir)
+        // Rectangle 130 — üst beyaz, alta doğru açık gökyüzü
         const Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
                 colors: [
-                  AppColors.onboardingSky,
-                  AppColors.onboardingSky,
                   Colors.white,
                   Colors.white,
+                  Color(0xFFE8F4FF),
+                  Color(0xFFB8DCF5),
                 ],
-                stops: [0, 0.221154, 0.591346, 1],
+                stops: [0, 0.35, 0.62, 1],
               ),
             ),
           ),
@@ -957,7 +1044,7 @@ class _OnboardingBackground extends StatelessWidget {
           left: -22,
           top: 448,
           size: 490,
-          color: AppColors.onboardingBlue,
+          color: const Color(0xFF2D85FF),
         ),
         // Ellipse 10: x:-81 y:516 594×594 #37B2E3
         _blurCircle(
@@ -971,7 +1058,7 @@ class _OnboardingBackground extends StatelessWidget {
           left: -65,
           top: 659,
           size: 559,
-          color: AppColors.primary,
+          color: const Color(0xFF2D46FF),
         ),
       ],
     );
@@ -1013,6 +1100,7 @@ class _DesignSurface extends StatelessWidget {
   const _DesignSurface({
     required this.child,
     this.fit = BoxFit.fitWidth,
+    super.key,
   });
 
   final Widget child;
@@ -1020,11 +1108,9 @@ class _DesignSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // fitWidth + topCenter uzun ekranlarda altta boşluk bırakır; Figma'da
-    // bu alan mavi gradient devamıdır, beyaz scaffold değil.
-    // Splash’ta contain: kısa ekranlarda koala alttan kesilmesin.
+    // Alt boşluk Figma’daki mavi glow ile devam etsin.
     return ColoredBox(
-      color: AppColors.primary,
+      color: const Color(0xFF2D46FF),
       child: SizedBox.expand(
         child: FittedBox(
           fit: fit,

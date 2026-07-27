@@ -44,6 +44,9 @@ dependencies:
   audioplayers: ^6.8.1
   path_provider: ^2.1.6
   url_launcher: ^6.3.2
+  http: ^1.6.0
+  flutter_dotenv: ^6.0.1
+  rive: ^0.14.10
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -68,6 +71,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - .env
     - assets/images/
     - assets/images/home/
     - assets/images/nav/
@@ -80,6 +84,14 @@ flutter:
     - assets/images/auth/
     - assets/images/lessons/
     - assets/images/lessons/icons/
+    - assets/learningPath/
+    - assets/learningPath/a1/
+    - assets/learningPath/a2/
+    - assets/learningPath/a2/_ordered/
+    - assets/learningPath/b1/
+    - assets/learningPath/b2/
+    - assets/learningPath/c1/
+    - assets/learningPath/c2/
     - assets/images/roleplay/
     - assets/images/notifications/
     - assets/images/onboarding/
@@ -88,6 +100,11 @@ flutter:
     - assets/images/writingTestIcons/
     - assets/images/speakingTestIcons/
     - assets/images/profilIcons/
+    - assets/images/profilIcons/tutor/
+    - assets/images/callinScreen/
+    - assets/riv/
+    - assets/riv/Female/
+    - assets/riv/Male/
   fonts:
     - family: Poppins
       fonts:

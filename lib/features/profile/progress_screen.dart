@@ -13,11 +13,11 @@ class ProgressScreen extends StatelessWidget {
   const ProgressScreen({super.key});
 
   static const _streakDone = Color(0xFF2D46FF);
-  static const _streakToday = Color(0xFFFF8D28);
-  static const _streakIdle = Color(0xFFD7D7D7);
-  static const _flameBg = Color(0xFFFFF1E4);
+  static const _streakIdle = Color(0xFFD9D9D9);
+  static const _pastBody = Color(0xFF4D4D4D);
+  static const _flameBg = Color(0xFFFFE2CE);
+  static const _flame = Color(0xFFF97316);
   static const _starBg = Color(0xFFE8F1FF);
-  static const _savedIconBg = Color(0xFF5B6EFF);
 
   static const _streakStates = <_ProgressStreakState>[
     _ProgressStreakState.done,
@@ -98,9 +98,9 @@ class ProgressScreen extends StatelessWidget {
                                 text.goodMorning,
                                 style: const TextStyle(
                                   fontFamily: 'Poppins',
-                                  fontSize: 12,
-                                  height: 16 / 12,
-                                  fontWeight: FontWeight.w400,
+                                  fontSize: 14,
+                                  height: 18 / 14,
+                                  fontWeight: FontWeight.w500,
                                   color: AppColors.secondary,
                                 ),
                               ),
@@ -108,35 +108,54 @@ class ProgressScreen extends StatelessWidget {
                                 text.progressUserName,
                                 style: const TextStyle(
                                   fontFamily: 'Poppins',
-                                  fontSize: 16,
-                                  height: 22 / 16,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 20,
+                                  height: 24 / 20,
+                                  fontWeight: FontWeight.w500,
                                   color: AppColors.ink,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        Text(
-                          text.progressLanguage,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            height: 16 / 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.ink,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        ClipOval(
-                          child: LanguageFlag('en', width: 28, height: 28),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: .05),
+                            borderRadius: BorderRadius.circular(9999),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                text.progressLanguage,
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 12,
+                                  height: 15 / 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.ink,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              ClipOval(
+                                child: LanguageFlag(
+                                  'en',
+                                  width: 21,
+                                  height: 21,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: AppColors.border10),
@@ -149,36 +168,37 @@ class ProgressScreen extends StatelessWidget {
                             text.past7Days,
                             style: const TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 16,
-                              height: 22 / 16,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              height: 18 / 14,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.ink,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 10),
                           Text(
                             text.past7DaysBody,
                             style: const TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 12,
-                              height: 16 / 12,
-                              fontWeight: FontWeight.w400,
-                              color: AppColors.secondary,
+                              fontSize: 14,
+                              height: 20 / 14,
+                              fontWeight: FontWeight.w300,
+                              color: _pastBody,
                             ),
                           ),
-                          const SizedBox(height: 14),
-                          Row(
-                            children: [
-                              for (var i = 0; i < dayLabels.length; i++) ...[
-                                if (i > 0) const SizedBox(width: 6),
-                                Expanded(
-                                  child: _ProgressStreakDay(
-                                    label: dayLabels[i],
-                                    state: _streakStates[i],
+                          const SizedBox(height: 10),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Row(
+                              children: [
+                                for (var i = 0; i < dayLabels.length; i++)
+                                  Expanded(
+                                    child: _ProgressStreakDay(
+                                      label: dayLabels[i],
+                                      state: _streakStates[i],
+                                    ),
                                   ),
-                                ),
                               ],
-                            ],
+                            ),
                           ),
                         ],
                       ),
@@ -270,10 +290,10 @@ class ProgressScreen extends StatelessWidget {
                           child: _StatCard(
                             iconBg: _flameBg,
                             icon: const HomeAsset(
-                              AppAssets.profileStreakFlame,
-                              width: 18,
-                              height: 20,
-                              color: _streakToday,
+                              AppAssets.profileStreak,
+                              width: 22,
+                              height: 25,
+                              color: _flame,
                             ),
                             value: '12',
                             label: text.dayStreakLabel,
@@ -313,14 +333,14 @@ class ProgressScreen extends StatelessWidget {
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: _savedIconBg,
+                                  color: Colors.white.withValues(alpha: .2),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 alignment: Alignment.center,
                                 child: const HomeAsset(
                                   AppAssets.profileSaveButton,
-                                  width: 22,
-                                  height: 22,
+                                  width: 24,
+                                  height: 24,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -353,18 +373,13 @@ class ProgressScreen extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              Container(
-                                width: 28,
-                                height: 28,
-                                decoration: const BoxDecoration(
+                              Transform.flip(
+                                flipX: true,
+                                child: const HomeAsset(
+                                  AppAssets.homeArrowCircle,
+                                  width: 24,
+                                  height: 24,
                                   color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                alignment: Alignment.center,
-                                child: const Icon(
-                                  Icons.chevron_right_rounded,
-                                  size: 20,
-                                  color: AppColors.primary,
                                 ),
                               ),
                             ],
@@ -406,9 +421,9 @@ class _ProgressStreakDay extends StatelessWidget {
       case _ProgressStreakState.today:
         bg = Colors.transparent;
         child = const HomeAsset(
-          AppAssets.profileFireOrange,
-          width: 29,
-          height: 32,
+          AppAssets.profileStreak,
+          width: 22,
+          height: 25,
         );
       case _ProgressStreakState.idle:
         bg = ProgressScreen._streakIdle;
@@ -432,9 +447,10 @@ class _ProgressStreakDay extends StatelessWidget {
           label,
           style: const TextStyle(
             fontFamily: 'Poppins',
-            fontSize: 10,
-            height: 12 / 10,
-            fontWeight: FontWeight.w500,
+            fontSize: 12,
+            height: 16 / 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.24,
             color: AppColors.secondary,
           ),
         ),
@@ -562,8 +578,7 @@ class _StatCard extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: iconBg,
               borderRadius: BorderRadius.circular(10),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
+import '../../widgets/home_asset.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -14,19 +15,22 @@ class NotificationsScreen extends StatelessWidget {
     final text = AppText.current.notificationsPage;
     final items = [
       _NotificationItem(
-        icon: 'assets/images/notifications/icon_translation.png',
+        icon: 'assets/images/notifications/icon_translation.svg',
+        iconBg: const Color(0x1A2D46FF),
         title: text.translation.title,
         body: text.translation.body,
         titleColor: AppColors.ink,
       ),
       _NotificationItem(
-        icon: 'assets/images/notifications/icon_offer.png',
+        icon: 'assets/images/notifications/icon_offer.svg',
+        iconBg: const Color(0x1AFF8A00),
         title: text.offer.title,
         body: text.offer.body,
         titleColor: _offerTitle,
       ),
       _NotificationItem(
-        icon: 'assets/images/notifications/icon_stories.png',
+        icon: 'assets/images/notifications/icon_stories.svg',
+        iconBg: const Color(0x1A34C759),
         title: text.stories.title,
         body: text.stories.body,
         titleColor: AppColors.ink,
@@ -91,12 +95,14 @@ class NotificationsScreen extends StatelessWidget {
 class _NotificationItem {
   const _NotificationItem({
     required this.icon,
+    required this.iconBg,
     required this.title,
     required this.body,
     required this.titleColor,
   });
 
   final String icon;
+  final Color iconBg;
   final String title;
   final String body;
   final Color titleColor;
@@ -119,14 +125,18 @@ class _NotificationCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: item.iconBg,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            alignment: Alignment.center,
+            child: HomeAsset(
               item.icon,
-              width: 46,
-              height: 46,
-              fit: BoxFit.cover,
-              filterQuality: FilterQuality.high,
+              width: 24,
+              height: 24,
             ),
           ),
           const SizedBox(width: 4),

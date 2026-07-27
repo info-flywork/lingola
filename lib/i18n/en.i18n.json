@@ -203,6 +203,11 @@
       "cta": "Start"
     }
   },
+  "libraryPage": {
+    "title": "Library",
+    "searchWord": "Search Word",
+    "savedWordCount": "$count Saved Word"
+  },
   "wordPracticePage": {
     "title": "Word Practice",
     "turkish": "TURKISH",
@@ -266,13 +271,23 @@
     "messagesCount": "12",
     "tutors": {
       "lingola": "Lingola",
+      "zephyrion": "Zephyrion",
+      "vaelen": "Vaelen",
+      "elrion": "Elrion",
+      "ukrath": "Ukrath",
       "elena": "Elena",
-      "kaj": "Kaj",
-      "mei": "Mei Lin",
-      "kate": "Kate",
-      "sofia": "Sofia",
-      "elenaSchmidt": "Elena Schmidt",
-      "kenjiSato": "Kenji Sato"
+      "kenji": "Kenji",
+      "freya": "Freya",
+      "camila": "Camila",
+      "marco": "Marco",
+      "julian": "Julian",
+      "ines": "Ines",
+      "felix": "Felix",
+      "diego": "Diego",
+      "amara": "Amara",
+      "erik": "Erik",
+      "katie": "Katie",
+      "morgan": "Morgan"
     },
     "tags": {
       "adaptive": "Adaptive",
@@ -282,7 +297,15 @@
       "relaxed": "Relaxed",
       "methodical": "Methodical",
       "attentive": "Attentive",
-      "more": "+5"
+      "more": "+5",
+      "curious": "Curious",
+      "observer": "Observer",
+      "ancientKnowledge": "Ancient Knowledge",
+      "wise": "Wise",
+      "clear": "Clear",
+      "decisive": "Decisive",
+      "disciplined": "Disciplined",
+      "smart": "Smart"
     },
     "historyPreview1": "Hey! I was about to explode with boredom...",
     "historyPreview2": "Shall we practice ordering food today?",
@@ -293,6 +316,16 @@
       "outgoing1": "Yes, let's start with greetings.",
       "incoming2": "Perfect. How would you say hello to a colleague?",
       "typing": "Typing"
+    },
+    "calling": {
+      "lessonBadge": "Lesson 1 : Greetings",
+      "nativeLine": "Sıkıldın mı?",
+      "englishLine": "Bored? I deleted that word from my vocabulary. Get up, the plan's already set: we're hitting that new arcade bar in Kadıköy.",
+      "highlight": "Bored?",
+      "close": "End call",
+      "toggleCaptions": "Toggle captions",
+      "toggleHints": "Toggle hints",
+      "toggleMic": "Toggle microphone"
     }
   },
   "lessonPage": {
@@ -305,8 +338,8 @@
       "a1": {
         "title": "A1 - Starter",
         "lessons": [
-          "Introductions I",
           "Greetings",
+          "Introductions I",
           "Jobs",
           "A Favorite Room",
           "Daily Routine",
@@ -400,8 +433,8 @@
       "b1": {
         "title": "B1 - Intermediate",
         "lessons": [
-          "Celebrities",
           "Cultural traditions",
+          "Celebrities",
           "Art and creativity",
           "Future plans",
           "Planning events",
@@ -462,8 +495,8 @@
       "b2": {
         "title": "B2 - Upper Intermediate",
         "lessons": [
-          "Great leads",
           "Personalities",
+          "Great leads",
           "Healthy lifestyle",
           "What is the truth?",
           "Personal growth",
@@ -559,15 +592,36 @@
     "business": "Business",
     "coffee": {
       "title": "Ordering at the Coffee Shop",
-      "screenplay": "Order your favorite drink, ask about sizes and extras, confirm your total, and pick up your coffee at the counter."
+      "screenplay": "Order your favorite drink, ask about sizes and extras, confirm your total, and pick up your coffee at the counter.",
+      "chat": {
+        "incoming1": "Welcome! What can I get started for you today?",
+        "outgoing1": "Hi! I'd like a medium latte, please.",
+        "incoming2Highlight": "Sure",
+        "incoming2Rest": "! Would you like that hot or iced, and any extras?",
+        "botReply": "Great choice. Anything else with your order?"
+      }
     },
     "directions": {
       "title": "Asking for Directions on the Street",
-      "screenplay": "Ask for directions to a place, find out how to get to the subway or bus, get information about tickets, and listen to restaurant recommendations."
+      "screenplay": "Ask for directions to a place, find out how to get to the subway or bus, get information about tickets, and listen to restaurant recommendations.",
+      "chat": {
+        "incoming1": "Hi there! You look a bit lost — need help finding something?",
+        "outgoing1": "Yes, I'm looking for the nearest subway station.",
+        "incoming2Highlight": "Of course",
+        "incoming2Rest": "! Walk two blocks that way, then turn left. You'll see the entrance.",
+        "botReply": "You're welcome! Want a restaurant tip near the station too?"
+      }
     },
     "interview": {
       "title": "Job Interview",
-      "screenplay": "Introduce yourself, answer common interview questions, talk about your experience, and ask about the role and next steps."
+      "screenplay": "Introduce yourself, answer common interview questions, talk about your experience, and ask about the role and next steps.",
+      "chat": {
+        "incoming1": "Thanks for coming in today. Could you briefly introduce yourself?",
+        "outgoing1": "Of course. I'm excited to be here and share my experience.",
+        "incoming2Highlight": "Wonderful",
+        "incoming2Rest": ". Tell me about a recent project you're proud of.",
+        "botReply": "That's impressive. What questions do you have about the role?"
+      }
     }
   },
   "notificationsPage": {

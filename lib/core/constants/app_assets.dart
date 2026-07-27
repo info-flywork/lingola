@@ -75,7 +75,67 @@ abstract final class AppAssets {
   static const profileStreakFlame = 'assets/images/home/streak_icon.svg';
   static const profileFireOrange =
       'assets/images/profilIcons/fireOrange.svg';
+  static const profileStreak = 'assets/images/profilIcons/streak.svg';
   static const premiumCheck = 'assets/images/home/premium_check.svg';
   static const homePremiumCrown = 'assets/images/home/premium_crown.svg';
   static const homeStar = 'assets/images/home/star_small.svg';
+  static const homeArrowCircle = 'assets/images/home/arrow_circle.svg';
+
+  // —— Role Play ——
+  static const rolePlayCoffee = 'assets/images/roleplay/orderingcoffe.png';
+  static const rolePlayDirections =
+      'assets/images/roleplay/askingdirection.png';
+  static const rolePlayInterview = 'assets/images/roleplay/jobinterview.png';
+  static const rolePlayScreenplay = 'assets/images/roleplay/screenPlay.svg';
+  static const rolePlayResize =
+      'assets/images/roleplay/kucultmebuyutme.svg';
+  static const rolePlayRecording = 'assets/images/roleplay/seskaydi.svg';
+
+  // —— Tutor ——
+  static const tutorFilter = 'assets/images/profilIcons/tutor/filter.svg';
+  static const tutorSpeaker = 'assets/images/profilIcons/tutor/speakerChat.svg';
+  static const tutorChatWithLingola =
+      'assets/images/profilIcons/tutor/chatwithlingola.svg';
+  static const tutorHeroBg =
+      'assets/images/profilIcons/tutor/noelbababacground.png';
+  static const tutorRobot = 'assets/images/tutors/hero.png';
+  static const tutorLingola = 'assets/images/profilIcons/tutor/alien.png';
+  static const tutorZephyrion = 'assets/images/profilIcons/tutor/alien.png';
+  static const tutorVaelen = 'assets/images/profilIcons/tutor/vaelen.png';
+  static const tutorElrion = 'assets/images/profilIcons/tutor/Elrion.png';
+  static const tutorUkrath = 'assets/images/profilIcons/tutor/ukrath.png';
+  static const tutorElena = 'assets/images/profilIcons/tutor/elena.png';
+  static const tutorKenji = 'assets/images/profilIcons/tutor/kenji.png';
+  static const tutorFreya = 'assets/images/profilIcons/tutor/freya.png';
+  static const tutorCamila = 'assets/images/profilIcons/tutor/camila.png';
+  static const tutorMarco = 'assets/images/profilIcons/tutor/marco.png';
+  static const tutorJulian = 'assets/images/profilIcons/tutor/julian.png';
+  static const tutorInes = 'assets/images/profilIcons/tutor/ines.png';
+  static const tutorFelix = 'assets/images/profilIcons/tutor/felix.png';
+  static const tutorDiego = 'assets/images/profilIcons/tutor/diego.png';
+  static const tutorAmara = 'assets/images/profilIcons/tutor/amara.png';
+  static const tutorErik = 'assets/images/profilIcons/tutor/erik.png';
+  static const tutorKatie = 'assets/images/profilIcons/tutor/katie.png';
+  static const tutorMorgan = 'assets/images/profilIcons/tutor/morgan.png';
+
+  // —— Calling ——
+  static const callingEye = 'assets/images/callinScreen/eye.svg';
+  static const callingClosedEye = 'assets/images/callinScreen/closedEye.svg';
+  static const callingResize = 'assets/images/roleplay/kucultmebuyutme.svg';
+  static const tutorElrionRiv = 'assets/riv/elrion.riv';
+
+  // —— Tutor Rive (Female/Male foto eşleştirmesi) ——
+  static const tutorElenaRiv = 'assets/riv/Female/avatar3.riv';
+  static const tutorKenjiRiv = 'assets/riv/Male/avatar4.riv';
+  static const tutorFreyaRiv = 'assets/riv/Female/avatar5.riv';
+  static const tutorCamilaRiv = 'assets/riv/Female/avatar6.riv';
+  static const tutorMarcoRiv = 'assets/riv/Male/avatar2.riv';
+  static const tutorJulianRiv = 'assets/riv/Male/avatar1.riv';
+  static const tutorInesRiv = 'assets/riv/Female/avatar2.riv';
+  static const tutorFelixRiv = 'assets/riv/Male/avatar6.riv';
+  static const tutorDiegoRiv = 'assets/riv/Male/avatar7.riv';
+  static const tutorAmaraRiv = 'assets/riv/Female/avatar1.riv';
+  static const tutorErikRiv = 'assets/riv/Male/avatar3.riv';
+  static const tutorKatieRiv = 'assets/riv/Female/kaite.riv';
+  static const tutorMorganRiv = 'assets/riv/Male/morgan.riv';
 }

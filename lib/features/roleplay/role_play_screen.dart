@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
+import '../../widgets/home_asset.dart';
+import 'role_play_chat_screen.dart';
 
 class RolePlayScreen extends StatelessWidget {
   const RolePlayScreen({super.key});
@@ -16,7 +18,7 @@ class RolePlayScreen extends StatelessWidget {
       _RolePlayScenario(
         id: 'coffee',
         title: text.rolePlayPage.coffee.title,
-        image: 'assets/images/roleplay/coffee.png',
+        image: AppAssets.rolePlayCoffee,
         progress: 0.6,
         minutes: 8,
         level: text.rolePlayPage.beginner,
@@ -25,8 +27,7 @@ class RolePlayScreen extends StatelessWidget {
       _RolePlayScenario(
         id: 'directions',
         title: text.rolePlayPage.directions.title,
-        image: 'assets/images/roleplay/directions.png',
-        largeImage: 'assets/images/roleplay/directions_large.png',
+        image: AppAssets.rolePlayDirections,
         minutes: 8,
         level: text.rolePlayPage.beginner,
         screenplay: text.rolePlayPage.directions.screenplay,
@@ -35,7 +36,7 @@ class RolePlayScreen extends StatelessWidget {
       _RolePlayScenario(
         id: 'interview',
         title: text.rolePlayPage.interview.title,
-        image: 'assets/images/roleplay/interview.png',
+        image: AppAssets.rolePlayInterview,
         minutes: 8,
         level: text.rolePlayPage.beginner,
         screenplay: text.rolePlayPage.interview.screenplay,
@@ -72,7 +73,7 @@ class RolePlayScreen extends StatelessWidget {
                   fontFamily: 'Poppins',
                   fontSize: 16,
                   height: 24 / 16,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 20),
@@ -86,7 +87,7 @@ class RolePlayScreen extends StatelessWidget {
                       fontFamily: 'Poppins',
                       fontSize: 16,
                       height: 20 / 16,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -112,7 +113,23 @@ class RolePlayScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _RolePlayDetailSheet(scenario: scenario),
+      builder: (sheetContext) => _RolePlayDetailSheet(
+        scenario: scenario,
+        onGetStarted: () {
+          Navigator.of(sheetContext).pop();
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => RolePlayChatScreen(
+                scenarioId: switch (scenario.id) {
+                  'coffee' => RolePlayScenarioId.coffee,
+                  'interview' => RolePlayScenarioId.interview,
+                  _ => RolePlayScenarioId.directions,
+                },
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -125,7 +142,6 @@ class _RolePlayScenario {
     required this.minutes,
     required this.level,
     required this.screenplay,
-    this.largeImage,
     this.progress,
     this.section,
   });
@@ -133,7 +149,6 @@ class _RolePlayScenario {
   final String id;
   final String title;
   final String image;
-  final String? largeImage;
   final double? progress;
   final int minutes;
   final String level;
@@ -167,12 +182,11 @@ class _RolePlayCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.asset(
+                child: HomeAsset(
                   scenario.image,
                   width: 90,
                   height: 90,
                   fit: BoxFit.cover,
-                  filterQuality: FilterQuality.high,
                 ),
               ),
               const SizedBox(width: 10),
@@ -211,11 +225,11 @@ class _RolePlayCard extends StatelessWidget {
                             value: ((scenario.progress ?? 0) * 100).round(),
                           ),
                           style: const TextStyle(
-                            color: Color(0xFF9A9A9A),
+                            color: AppColors.secondary,
                             fontFamily: 'Poppins',
-                            fontSize: 12,
-                            height: 16 / 12,
-                            fontWeight: FontWeight.w400,
+                            fontSize: 10,
+                            height: 14 / 10,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ] else
@@ -248,10 +262,11 @@ class _RolePlayCard extends StatelessWidget {
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Colors.white,
-                  size: 18,
+                alignment: Alignment.center,
+                child: const HomeAsset(
+                  AppAssets.quizArrow,
+                  width: 6,
+                  height: 12,
                 ),
               ),
             ],
@@ -268,12 +283,14 @@ class _MetaChip extends StatelessWidget {
     required this.background,
     required this.foreground,
     this.outlined = false,
+    this.fontWeight = FontWeight.w500,
   });
 
   final String label;
   final Color background;
   final Color foreground;
   final bool outlined;
+  final FontWeight fontWeight;
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +298,7 @@ class _MetaChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(99),
+        borderRadius: BorderRadius.circular(999),
         border: outlined ? Border.all(color: foreground) : null,
       ),
       child: Text(
@@ -291,7 +308,7 @@ class _MetaChip extends StatelessWidget {
           fontFamily: 'Poppins',
           fontSize: 12,
           height: 15 / 12,
-          fontWeight: FontWeight.w500,
+          fontWeight: fontWeight,
         ),
       ),
     );
@@ -299,9 +316,13 @@ class _MetaChip extends StatelessWidget {
 }
 
 class _RolePlayDetailSheet extends StatelessWidget {
-  const _RolePlayDetailSheet({required this.scenario});
+  const _RolePlayDetailSheet({
+    required this.scenario,
+    required this.onGetStarted,
+  });
 
   final _RolePlayScenario scenario;
+  final VoidCallback onGetStarted;
 
   @override
   Widget build(BuildContext context) {
@@ -334,12 +355,11 @@ class _RolePlayDetailSheet extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      scenario.largeImage ?? scenario.image,
+                    child: HomeAsset(
+                      scenario.image,
                       width: 189,
                       height: 189,
                       fit: BoxFit.cover,
-                      filterQuality: FilterQuality.high,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -359,9 +379,12 @@ class _RolePlayDetailSheet extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       _MetaChip(
-                        label: text.rolePlayPage.minutes(value: scenario.minutes),
-                        background: const Color(0xFFF0F0F0),
+                        label: text.rolePlayPage.minutes(
+                          value: scenario.minutes,
+                        ),
+                        background: Colors.white,
                         foreground: const Color(0xFF6F6F6F),
+                        outlined: true,
                       ),
                       const SizedBox(width: 8),
                       _MetaChip(
@@ -369,50 +392,59 @@ class _RolePlayDetailSheet extends StatelessWidget {
                         background: Colors.white,
                         foreground: AppColors.primary,
                         outlined: true,
+                        fontWeight: FontWeight.w600,
                       ),
                     ],
                   ),
                   const SizedBox(height: 18),
-                  const Divider(height: 1, color: Color(0xFFEAEAEA)),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      SvgPicture.asset(
-                        'assets/images/roleplay/screenplay.svg',
-                        width: 18,
-                        height: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        text.rolePlayPage.screenplay,
-                        style: const TextStyle(
-                          color: Color(0xFF606060),
-                          fontFamily: 'Poppins',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.4,
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4FF),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const HomeAsset(
+                              AppAssets.rolePlayScreenplay,
+                              width: 18,
+                              height: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              text.rolePlayPage.screenplay,
+                              style: const TextStyle(
+                                color: AppColors.ink,
+                                fontFamily: 'Poppins',
+                                fontSize: 14,
+                                height: 18 / 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      scenario.screenplay,
-                      style: const TextStyle(
-                        color: Color(0xFF8A8A8A),
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        height: 20 / 14,
-                        fontWeight: FontWeight.w400,
-                      ),
+                        const SizedBox(height: 8),
+                        Text(
+                          scenario.screenplay,
+                          style: const TextStyle(
+                            color: AppColors.secondary,
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            height: 16 / 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 22),
                   PrimaryButton(
                     label: text.common.getStarted,
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: onGetStarted,
                   ),
                 ],
               ),

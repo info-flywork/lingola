@@ -49,6 +49,7 @@ class TranslationsTr with BaseTranslations<AppLocale, Translations> implements T
 	@override late final _Translations$auth$tr auth = _Translations$auth$tr._(_root);
 	@override late final _Translations$nav$tr nav = _Translations$nav$tr._(_root);
 	@override late final _Translations$home$tr home = _Translations$home$tr._(_root);
+	@override late final _Translations$libraryPage$tr libraryPage = _Translations$libraryPage$tr._(_root);
 	@override late final _Translations$wordPracticePage$tr wordPracticePage = _Translations$wordPracticePage$tr._(_root);
 	@override late final _Translations$quizPage$tr quizPage = _Translations$quizPage$tr._(_root);
 	@override late final _Translations$placeholder$tr placeholder = _Translations$placeholder$tr._(_root);
@@ -308,6 +309,18 @@ class _Translations$home$tr implements Translations$home$en {
 	@override late final _Translations$home$premium$tr premium = _Translations$home$premium$tr._(_root);
 }
 
+// Path: libraryPage
+class _Translations$libraryPage$tr implements Translations$libraryPage$en {
+	_Translations$libraryPage$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Kütüphane';
+	@override String get searchWord => 'Kelime Ara';
+	@override String savedWordCount({required Object count}) => '${count} Kayıtlı Kelime';
+}
+
 // Path: wordPracticePage
 class _Translations$wordPracticePage$tr implements Translations$wordPracticePage$en {
 	_Translations$wordPracticePage$tr._(this._root);
@@ -403,6 +416,7 @@ class _Translations$tutorPage$tr implements Translations$tutorPage$en {
 	@override String get time1 => '11:00';
 	@override String get time2 => 'Dün';
 	@override late final _Translations$tutorPage$chat$tr chat = _Translations$tutorPage$chat$tr._(_root);
+	@override late final _Translations$tutorPage$calling$tr calling = _Translations$tutorPage$calling$tr._(_root);
 }
 
 // Path: lessonPage
@@ -615,13 +629,23 @@ class _Translations$tutorPage$tutors$tr implements Translations$tutorPage$tutors
 
 	// Translations
 	@override String get lingola => 'Lingola';
+	@override String get zephyrion => 'Zephyrion';
+	@override String get vaelen => 'Vaelen';
+	@override String get elrion => 'Elrion';
+	@override String get ukrath => 'Ukrath';
 	@override String get elena => 'Elena';
-	@override String get kaj => 'Kaj';
-	@override String get mei => 'Mei Lin';
-	@override String get kate => 'Kate';
-	@override String get sofia => 'Sofia';
-	@override String get elenaSchmidt => 'Elena Schmidt';
-	@override String get kenjiSato => 'Kenji Sato';
+	@override String get kenji => 'Kenji';
+	@override String get freya => 'Freya';
+	@override String get camila => 'Camila';
+	@override String get marco => 'Marco';
+	@override String get julian => 'Julian';
+	@override String get ines => 'Ines';
+	@override String get felix => 'Felix';
+	@override String get diego => 'Diego';
+	@override String get amara => 'Amara';
+	@override String get erik => 'Erik';
+	@override String get katie => 'Katie';
+	@override String get morgan => 'Morgan';
 }
 
 // Path: tutorPage.tags
@@ -639,6 +663,14 @@ class _Translations$tutorPage$tags$tr implements Translations$tutorPage$tags$en 
 	@override String get methodical => 'Metodikli';
 	@override String get attentive => 'Dikkatli';
 	@override String get more => '+5';
+	@override String get curious => 'Meraklı';
+	@override String get observer => 'Gözlemci';
+	@override String get ancientKnowledge => 'Kadim Bilgi';
+	@override String get wise => 'Bilge';
+	@override String get clear => 'Net';
+	@override String get decisive => 'Kararlı';
+	@override String get disciplined => 'Disiplinli';
+	@override String get smart => 'Zeki';
 }
 
 // Path: tutorPage.chat
@@ -652,6 +684,23 @@ class _Translations$tutorPage$chat$tr implements Translations$tutorPage$chat$en 
 	@override String get outgoing1 => 'Evet, selamlaşmayla başlayalım.';
 	@override String get incoming2 => 'Harika. Bir iş arkadaşına merhaba nasıl dersin?';
 	@override String get typing => 'Yazıyor';
+}
+
+// Path: tutorPage.calling
+class _Translations$tutorPage$calling$tr implements Translations$tutorPage$calling$en {
+	_Translations$tutorPage$calling$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get lessonBadge => 'Ders 1 : Selamlaşma';
+	@override String get nativeLine => 'Sıkıldın mı?';
+	@override String get englishLine => 'Bored? I deleted that word from my vocabulary. Get up, the plan\'s already set: we\'re hitting that new arcade bar in Kadıköy.';
+	@override String get highlight => 'Bored?';
+	@override String get close => 'Görüşmeyi bitir';
+	@override String get toggleCaptions => 'Altyazıyı aç/kapat';
+	@override String get toggleHints => 'İpuçlarını aç/kapat';
+	@override String get toggleMic => 'Mikrofonu aç/kapat';
 }
 
 // Path: lessonPage.levels
@@ -678,6 +727,7 @@ class _Translations$rolePlayPage$coffee$tr implements Translations$rolePlayPage$
 	// Translations
 	@override String get title => 'Kafede Sipariş Verme';
 	@override String get screenplay => 'Favori içeceğini sipariş et, boyut ve ekstraları sor, toplamı onayla ve tezgâhtan kahveni al.';
+	@override late final _Translations$rolePlayPage$coffee$chat$tr chat = _Translations$rolePlayPage$coffee$chat$tr._(_root);
 }
 
 // Path: rolePlayPage.directions
@@ -689,6 +739,7 @@ class _Translations$rolePlayPage$directions$tr implements Translations$rolePlayP
 	// Translations
 	@override String get title => 'Sokakta Yol Sorma';
 	@override String get screenplay => 'Bir yere yol sor, metro veya otobüse nasıl gideceğini öğren, bilet bilgisi al ve restoran önerilerini dinle.';
+	@override late final _Translations$rolePlayPage$directions$chat$tr chat = _Translations$rolePlayPage$directions$chat$tr._(_root);
 }
 
 // Path: rolePlayPage.interview
@@ -700,6 +751,7 @@ class _Translations$rolePlayPage$interview$tr implements Translations$rolePlayPa
 	// Translations
 	@override String get title => 'İş Görüşmesi';
 	@override String get screenplay => 'Kendini tanıt, sık sorulan soruları yanıtla, deneyiminden bahset ve rol ile sonraki adımları sor.';
+	@override late final _Translations$rolePlayPage$interview$chat$tr chat = _Translations$rolePlayPage$interview$chat$tr._(_root);
 }
 
 // Path: notificationsPage.translation
@@ -787,8 +839,8 @@ class _Translations$lessonPage$levels$a1$tr implements Translations$lessonPage$l
 	// Translations
 	@override String get title => 'A1 - Başlangıç';
 	@override List<String> get lessons => [
-		'Tanışma I',
 		'Selamlaşma',
+		'Tanışma I',
 		'Meslekler',
 		'Favori Oda',
 		'Günlük Rutin',
@@ -896,8 +948,8 @@ class _Translations$lessonPage$levels$b1$tr implements Translations$lessonPage$l
 	// Translations
 	@override String get title => 'B1 - Orta';
 	@override List<String> get lessons => [
-		'Celebrities',
 		'Cultural traditions',
+		'Celebrities',
 		'Art and creativity',
 		'Future plans',
 		'Planning events',
@@ -965,8 +1017,8 @@ class _Translations$lessonPage$levels$b2$tr implements Translations$lessonPage$l
 	// Translations
 	@override String get title => 'B2 - Orta Üstü';
 	@override List<String> get lessons => [
-		'Great leads',
 		'Personalities',
+		'Great leads',
 		'Healthy lifestyle',
 		'What is the truth?',
 		'Personal growth',
@@ -1062,6 +1114,48 @@ class _Translations$lessonPage$levels$c2$tr implements Translations$lessonPage$l
 		'The mind\'s eye',
 		'Media consumption',
 	];
+}
+
+// Path: rolePlayPage.coffee.chat
+class _Translations$rolePlayPage$coffee$chat$tr implements Translations$rolePlayPage$coffee$chat$en {
+	_Translations$rolePlayPage$coffee$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get incoming1 => 'Hoş geldiniz! Bugün ne alırsınız?';
+	@override String get outgoing1 => 'Merhaba! Orta boy bir latte istiyorum lütfen.';
+	@override String get incoming2Highlight => 'Tabii';
+	@override String get incoming2Rest => '! Sıcak mı buzlu mu olsun, ekstra ister misiniz?';
+	@override String get botReply => 'Harika tercih. Siparişinize başka bir şey ekleyelim mi?';
+}
+
+// Path: rolePlayPage.directions.chat
+class _Translations$rolePlayPage$directions$chat$tr implements Translations$rolePlayPage$directions$chat$en {
+	_Translations$rolePlayPage$directions$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get incoming1 => 'Merhaba! Biraz kaybolmuş görünüyorsunuz — bir yere mi bakıyorsunuz?';
+	@override String get outgoing1 => 'Evet, en yakın metro istasyonunu arıyorum.';
+	@override String get incoming2Highlight => 'Tabii ki';
+	@override String get incoming2Rest => '! İki blok o tarafa yürüyün, sonra sola dönün. Girişi göreceksiniz.';
+	@override String get botReply => 'Rica ederim! İstasyonun yanında bir restoran önerisi de ister misiniz?';
+}
+
+// Path: rolePlayPage.interview.chat
+class _Translations$rolePlayPage$interview$chat$tr implements Translations$rolePlayPage$interview$chat$en {
+	_Translations$rolePlayPage$interview$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get incoming1 => 'Bugün geldiğiniz için teşekkürler. Kendinizi kısaca tanıtır mısınız?';
+	@override String get outgoing1 => 'Tabii. Burada olmaktan mutluyum ve deneyimimi paylaşmak istiyorum.';
+	@override String get incoming2Highlight => 'Harika';
+	@override String get incoming2Rest => '. Gurur duyduğunuz yakın bir projeden bahseder misiniz?';
+	@override String get botReply => 'Çok etkileyici. Rol hakkında ne sormak istersiniz?';
 }
 
 // Path: profilePage.faqItems.howItWorks
@@ -1277,6 +1371,9 @@ extension on TranslationsTr {
 			'home.premium.pricePeriod' => '/mo',
 			'home.premium.discount' => 'Yıllık alımda %40 indirim',
 			'home.premium.cta' => 'Başlayın',
+			'libraryPage.title' => 'Kütüphane',
+			'libraryPage.searchWord' => 'Kelime Ara',
+			'libraryPage.savedWordCount' => ({required Object count}) => '${count} Kayıtlı Kelime',
 			'wordPracticePage.title' => 'Kelime Pratiği',
 			'wordPracticePage.turkish' => 'TÜRKÇE',
 			'wordPracticePage.save' => 'Kaydet',
@@ -1332,13 +1429,23 @@ extension on TranslationsTr {
 			'tutorPage.speaker' => 'Hoparlör',
 			'tutorPage.messagesCount' => '12',
 			'tutorPage.tutors.lingola' => 'Lingola',
+			'tutorPage.tutors.zephyrion' => 'Zephyrion',
+			'tutorPage.tutors.vaelen' => 'Vaelen',
+			'tutorPage.tutors.elrion' => 'Elrion',
+			'tutorPage.tutors.ukrath' => 'Ukrath',
 			'tutorPage.tutors.elena' => 'Elena',
-			'tutorPage.tutors.kaj' => 'Kaj',
-			'tutorPage.tutors.mei' => 'Mei Lin',
-			'tutorPage.tutors.kate' => 'Kate',
-			'tutorPage.tutors.sofia' => 'Sofia',
-			'tutorPage.tutors.elenaSchmidt' => 'Elena Schmidt',
-			'tutorPage.tutors.kenjiSato' => 'Kenji Sato',
+			'tutorPage.tutors.kenji' => 'Kenji',
+			'tutorPage.tutors.freya' => 'Freya',
+			'tutorPage.tutors.camila' => 'Camila',
+			'tutorPage.tutors.marco' => 'Marco',
+			'tutorPage.tutors.julian' => 'Julian',
+			'tutorPage.tutors.ines' => 'Ines',
+			'tutorPage.tutors.felix' => 'Felix',
+			'tutorPage.tutors.diego' => 'Diego',
+			'tutorPage.tutors.amara' => 'Amara',
+			'tutorPage.tutors.erik' => 'Erik',
+			'tutorPage.tutors.katie' => 'Katie',
+			'tutorPage.tutors.morgan' => 'Morgan',
 			'tutorPage.tags.adaptive' => 'Uyarlanabilir',
 			'tutorPage.tags.calm' => 'Sakin',
 			'tutorPage.tags.patient' => 'Sabırlı',
@@ -1347,6 +1454,14 @@ extension on TranslationsTr {
 			'tutorPage.tags.methodical' => 'Metodikli',
 			'tutorPage.tags.attentive' => 'Dikkatli',
 			'tutorPage.tags.more' => '+5',
+			'tutorPage.tags.curious' => 'Meraklı',
+			'tutorPage.tags.observer' => 'Gözlemci',
+			'tutorPage.tags.ancientKnowledge' => 'Kadim Bilgi',
+			'tutorPage.tags.wise' => 'Bilge',
+			'tutorPage.tags.clear' => 'Net',
+			'tutorPage.tags.decisive' => 'Kararlı',
+			'tutorPage.tags.disciplined' => 'Disiplinli',
+			'tutorPage.tags.smart' => 'Zeki',
 			'tutorPage.historyPreview1' => 'Hey! Can sıkıntısından patlamak üzereydim...',
 			'tutorPage.historyPreview2' => 'Bugün yemek siparişi pratiği yapalım mı?',
 			'tutorPage.time1' => '11:00',
@@ -1355,14 +1470,22 @@ extension on TranslationsTr {
 			'tutorPage.chat.outgoing1' => 'Evet, selamlaşmayla başlayalım.',
 			'tutorPage.chat.incoming2' => 'Harika. Bir iş arkadaşına merhaba nasıl dersin?',
 			'tutorPage.chat.typing' => 'Yazıyor',
+			'tutorPage.calling.lessonBadge' => 'Ders 1 : Selamlaşma',
+			'tutorPage.calling.nativeLine' => 'Sıkıldın mı?',
+			'tutorPage.calling.englishLine' => 'Bored? I deleted that word from my vocabulary. Get up, the plan\'s already set: we\'re hitting that new arcade bar in Kadıköy.',
+			'tutorPage.calling.highlight' => 'Bored?',
+			'tutorPage.calling.close' => 'Görüşmeyi bitir',
+			'tutorPage.calling.toggleCaptions' => 'Altyazıyı aç/kapat',
+			'tutorPage.calling.toggleHints' => 'İpuçlarını aç/kapat',
+			'tutorPage.calling.toggleMic' => 'Mikrofonu aç/kapat',
 			'lessonPage.title' => 'Öğrenmeye Devam Et',
 			'lessonPage.profile' => 'Profil',
 			'lessonPage.language' => 'Hedef dil',
 			'lessonPage.completed' => 'Tamamlandı',
 			'lessonPage.locked' => 'Kilitli',
 			'lessonPage.levels.a1.title' => 'A1 - Başlangıç',
-			'lessonPage.levels.a1.lessons.0' => 'Tanışma I',
-			'lessonPage.levels.a1.lessons.1' => 'Selamlaşma',
+			'lessonPage.levels.a1.lessons.0' => 'Selamlaşma',
+			'lessonPage.levels.a1.lessons.1' => 'Tanışma I',
 			'lessonPage.levels.a1.lessons.2' => 'Meslekler',
 			'lessonPage.levels.a1.lessons.3' => 'Favori Oda',
 			'lessonPage.levels.a1.lessons.4' => 'Günlük Rutin',
@@ -1448,8 +1571,8 @@ extension on TranslationsTr {
 			'lessonPage.levels.a2.lessons.51' => 'Save or spend?',
 			'lessonPage.levels.a2.lessons.52' => 'Say sorry',
 			'lessonPage.levels.b1.title' => 'B1 - Orta',
-			'lessonPage.levels.b1.lessons.0' => 'Celebrities',
-			'lessonPage.levels.b1.lessons.1' => 'Cultural traditions',
+			'lessonPage.levels.b1.lessons.0' => 'Cultural traditions',
+			'lessonPage.levels.b1.lessons.1' => 'Celebrities',
 			'lessonPage.levels.b1.lessons.2' => 'Art and creativity',
 			'lessonPage.levels.b1.lessons.3' => 'Future plans',
 			'lessonPage.levels.b1.lessons.4' => 'Planning events',
@@ -1506,8 +1629,8 @@ extension on TranslationsTr {
 			'lessonPage.levels.b1.lessons.55' => 'Sorry to interrupt…',
 			'lessonPage.levels.b1.lessons.56' => 'Complaint responses',
 			'lessonPage.levels.b2.title' => 'B2 - Orta Üstü',
-			'lessonPage.levels.b2.lessons.0' => 'Great leads',
-			'lessonPage.levels.b2.lessons.1' => 'Personalities',
+			'lessonPage.levels.b2.lessons.0' => 'Personalities',
+			'lessonPage.levels.b2.lessons.1' => 'Great leads',
 			'lessonPage.levels.b2.lessons.2' => 'Healthy lifestyle',
 			'lessonPage.levels.b2.lessons.3' => 'What is the truth?',
 			'lessonPage.levels.b2.lessons.4' => 'Personal growth',
@@ -1588,12 +1711,29 @@ extension on TranslationsTr {
 			'rolePlayPage.screenplay' => 'SENARYO',
 			'rolePlayPage.dailyInteractions' => 'Günlük Etkileşimler',
 			'rolePlayPage.business' => 'İş',
+			_ => null,
+		} ?? switch (path) {
 			'rolePlayPage.coffee.title' => 'Kafede Sipariş Verme',
 			'rolePlayPage.coffee.screenplay' => 'Favori içeceğini sipariş et, boyut ve ekstraları sor, toplamı onayla ve tezgâhtan kahveni al.',
+			'rolePlayPage.coffee.chat.incoming1' => 'Hoş geldiniz! Bugün ne alırsınız?',
+			'rolePlayPage.coffee.chat.outgoing1' => 'Merhaba! Orta boy bir latte istiyorum lütfen.',
+			'rolePlayPage.coffee.chat.incoming2Highlight' => 'Tabii',
+			'rolePlayPage.coffee.chat.incoming2Rest' => '! Sıcak mı buzlu mu olsun, ekstra ister misiniz?',
+			'rolePlayPage.coffee.chat.botReply' => 'Harika tercih. Siparişinize başka bir şey ekleyelim mi?',
 			'rolePlayPage.directions.title' => 'Sokakta Yol Sorma',
 			'rolePlayPage.directions.screenplay' => 'Bir yere yol sor, metro veya otobüse nasıl gideceğini öğren, bilet bilgisi al ve restoran önerilerini dinle.',
+			'rolePlayPage.directions.chat.incoming1' => 'Merhaba! Biraz kaybolmuş görünüyorsunuz — bir yere mi bakıyorsunuz?',
+			'rolePlayPage.directions.chat.outgoing1' => 'Evet, en yakın metro istasyonunu arıyorum.',
+			'rolePlayPage.directions.chat.incoming2Highlight' => 'Tabii ki',
+			'rolePlayPage.directions.chat.incoming2Rest' => '! İki blok o tarafa yürüyün, sonra sola dönün. Girişi göreceksiniz.',
+			'rolePlayPage.directions.chat.botReply' => 'Rica ederim! İstasyonun yanında bir restoran önerisi de ister misiniz?',
 			'rolePlayPage.interview.title' => 'İş Görüşmesi',
 			'rolePlayPage.interview.screenplay' => 'Kendini tanıt, sık sorulan soruları yanıtla, deneyiminden bahset ve rol ile sonraki adımları sor.',
+			'rolePlayPage.interview.chat.incoming1' => 'Bugün geldiğiniz için teşekkürler. Kendinizi kısaca tanıtır mısınız?',
+			'rolePlayPage.interview.chat.outgoing1' => 'Tabii. Burada olmaktan mutluyum ve deneyimimi paylaşmak istiyorum.',
+			'rolePlayPage.interview.chat.incoming2Highlight' => 'Harika',
+			'rolePlayPage.interview.chat.incoming2Rest' => '. Gurur duyduğunuz yakın bir projeden bahseder misiniz?',
+			'rolePlayPage.interview.chat.botReply' => 'Çok etkileyici. Rol hakkında ne sormak istersiniz?',
 			'notificationsPage.title' => 'Bildirimler',
 			'notificationsPage.translation.title' => 'Yeni Çeviri Hazır',
 			'notificationsPage.translation.body' => 'Ses çeviri dosyan başarıyla metne dönüştürüldü ve çevrildi.',
@@ -1617,8 +1757,6 @@ extension on TranslationsTr {
 			'profilePage.deleteReasons.aiCharacters' => 'Yapay zeka karakterlerini gerçekçi bulmadım.',
 			'profilePage.deleteReasons.videoIssues' => 'Görüntülü sohbetlerde teknik sorunlar yaşıyorum.',
 			'profilePage.deleteReasons.pricing' => 'Abonelik fiyatları beklentimin üzerinde.',
-			_ => null,
-		} ?? switch (path) {
 			'profilePage.deleteReasons.noMatch' => 'Aradığım tarzda karakterler bulamadım.',
 			'profilePage.deleteReasons.shortTrial' => 'Sadece kısa bir süreliğine denemek istemiştim.',
 			'profilePage.deleteReasons.other' => 'Diğer',

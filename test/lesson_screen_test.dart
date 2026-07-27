@@ -37,7 +37,7 @@ void main() {
       'c2',
     ]);
     for (final level in LessonCurriculum.levels) {
-      expect(level.iconKeys.length, expected[level.id]);
+      expect(level.iconAssets.length, expected[level.id]);
     }
     final total = expected.values.fold<int>(0, (a, b) => a + b);
     expect(total, greaterThan(200));

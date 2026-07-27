@@ -52,6 +52,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$auth$en auth = Translations$auth$en._(_root);
 	late final Translations$nav$en nav = Translations$nav$en._(_root);
 	late final Translations$home$en home = Translations$home$en._(_root);
+	late final Translations$libraryPage$en libraryPage = Translations$libraryPage$en._(_root);
 	late final Translations$wordPracticePage$en wordPracticePage = Translations$wordPracticePage$en._(_root);
 	late final Translations$quizPage$en quizPage = Translations$quizPage$en._(_root);
 	late final Translations$placeholder$en placeholder = Translations$placeholder$en._(_root);
@@ -587,6 +588,24 @@ class Translations$home$en {
 	late final Translations$home$premium$en premium = Translations$home$premium$en._(_root);
 }
 
+// Path: libraryPage
+class Translations$libraryPage$en {
+	Translations$libraryPage$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Library'
+	String get title => 'Library';
+
+	/// en: 'Search Word'
+	String get searchWord => 'Search Word';
+
+	/// en: '$count Saved Word'
+	String savedWordCount({required Object count}) => '${count} Saved Word';
+}
+
 // Path: wordPracticePage
 class Translations$wordPracticePage$en {
 	Translations$wordPracticePage$en._(this._root);
@@ -800,6 +819,7 @@ class Translations$tutorPage$en {
 	String get time2 => 'Yesterday';
 
 	late final Translations$tutorPage$chat$en chat = Translations$tutorPage$chat$en._(_root);
+	late final Translations$tutorPage$calling$en calling = Translations$tutorPage$calling$en._(_root);
 }
 
 // Path: lessonPage
@@ -1261,26 +1281,56 @@ class Translations$tutorPage$tutors$en {
 	/// en: 'Lingola'
 	String get lingola => 'Lingola';
 
+	/// en: 'Zephyrion'
+	String get zephyrion => 'Zephyrion';
+
+	/// en: 'Vaelen'
+	String get vaelen => 'Vaelen';
+
+	/// en: 'Elrion'
+	String get elrion => 'Elrion';
+
+	/// en: 'Ukrath'
+	String get ukrath => 'Ukrath';
+
 	/// en: 'Elena'
 	String get elena => 'Elena';
 
-	/// en: 'Kaj'
-	String get kaj => 'Kaj';
+	/// en: 'Kenji'
+	String get kenji => 'Kenji';
 
-	/// en: 'Mei Lin'
-	String get mei => 'Mei Lin';
+	/// en: 'Freya'
+	String get freya => 'Freya';
 
-	/// en: 'Kate'
-	String get kate => 'Kate';
+	/// en: 'Camila'
+	String get camila => 'Camila';
 
-	/// en: 'Sofia'
-	String get sofia => 'Sofia';
+	/// en: 'Marco'
+	String get marco => 'Marco';
 
-	/// en: 'Elena Schmidt'
-	String get elenaSchmidt => 'Elena Schmidt';
+	/// en: 'Julian'
+	String get julian => 'Julian';
 
-	/// en: 'Kenji Sato'
-	String get kenjiSato => 'Kenji Sato';
+	/// en: 'Ines'
+	String get ines => 'Ines';
+
+	/// en: 'Felix'
+	String get felix => 'Felix';
+
+	/// en: 'Diego'
+	String get diego => 'Diego';
+
+	/// en: 'Amara'
+	String get amara => 'Amara';
+
+	/// en: 'Erik'
+	String get erik => 'Erik';
+
+	/// en: 'Katie'
+	String get katie => 'Katie';
+
+	/// en: 'Morgan'
+	String get morgan => 'Morgan';
 }
 
 // Path: tutorPage.tags
@@ -1314,6 +1364,30 @@ class Translations$tutorPage$tags$en {
 
 	/// en: '+5'
 	String get more => '+5';
+
+	/// en: 'Curious'
+	String get curious => 'Curious';
+
+	/// en: 'Observer'
+	String get observer => 'Observer';
+
+	/// en: 'Ancient Knowledge'
+	String get ancientKnowledge => 'Ancient Knowledge';
+
+	/// en: 'Wise'
+	String get wise => 'Wise';
+
+	/// en: 'Clear'
+	String get clear => 'Clear';
+
+	/// en: 'Decisive'
+	String get decisive => 'Decisive';
+
+	/// en: 'Disciplined'
+	String get disciplined => 'Disciplined';
+
+	/// en: 'Smart'
+	String get smart => 'Smart';
 }
 
 // Path: tutorPage.chat
@@ -1335,6 +1409,39 @@ class Translations$tutorPage$chat$en {
 
 	/// en: 'Typing'
 	String get typing => 'Typing';
+}
+
+// Path: tutorPage.calling
+class Translations$tutorPage$calling$en {
+	Translations$tutorPage$calling$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Lesson 1 : Greetings'
+	String get lessonBadge => 'Lesson 1 : Greetings';
+
+	/// en: 'Sıkıldın mı?'
+	String get nativeLine => 'Sıkıldın mı?';
+
+	/// en: 'Bored? I deleted that word from my vocabulary. Get up, the plan's already set: we're hitting that new arcade bar in Kadıköy.'
+	String get englishLine => 'Bored? I deleted that word from my vocabulary. Get up, the plan\'s already set: we\'re hitting that new arcade bar in Kadıköy.';
+
+	/// en: 'Bored?'
+	String get highlight => 'Bored?';
+
+	/// en: 'End call'
+	String get close => 'End call';
+
+	/// en: 'Toggle captions'
+	String get toggleCaptions => 'Toggle captions';
+
+	/// en: 'Toggle hints'
+	String get toggleHints => 'Toggle hints';
+
+	/// en: 'Toggle microphone'
+	String get toggleMic => 'Toggle microphone';
 }
 
 // Path: lessonPage.levels
@@ -1365,6 +1472,8 @@ class Translations$rolePlayPage$coffee$en {
 
 	/// en: 'Order your favorite drink, ask about sizes and extras, confirm your total, and pick up your coffee at the counter.'
 	String get screenplay => 'Order your favorite drink, ask about sizes and extras, confirm your total, and pick up your coffee at the counter.';
+
+	late final Translations$rolePlayPage$coffee$chat$en chat = Translations$rolePlayPage$coffee$chat$en._(_root);
 }
 
 // Path: rolePlayPage.directions
@@ -1380,6 +1489,8 @@ class Translations$rolePlayPage$directions$en {
 
 	/// en: 'Ask for directions to a place, find out how to get to the subway or bus, get information about tickets, and listen to restaurant recommendations.'
 	String get screenplay => 'Ask for directions to a place, find out how to get to the subway or bus, get information about tickets, and listen to restaurant recommendations.';
+
+	late final Translations$rolePlayPage$directions$chat$en chat = Translations$rolePlayPage$directions$chat$en._(_root);
 }
 
 // Path: rolePlayPage.interview
@@ -1395,6 +1506,8 @@ class Translations$rolePlayPage$interview$en {
 
 	/// en: 'Introduce yourself, answer common interview questions, talk about your experience, and ask about the role and next steps.'
 	String get screenplay => 'Introduce yourself, answer common interview questions, talk about your experience, and ask about the role and next steps.';
+
+	late final Translations$rolePlayPage$interview$chat$en chat = Translations$rolePlayPage$interview$chat$en._(_root);
 }
 
 // Path: notificationsPage.translation
@@ -1523,8 +1636,8 @@ class Translations$lessonPage$levels$a1$en {
 	String get title => 'A1 - Starter';
 
 	List<String> get lessons => [
-		'Introductions I',
 		'Greetings',
+		'Introductions I',
 		'Jobs',
 		'A Favorite Room',
 		'Daily Routine',
@@ -1638,8 +1751,8 @@ class Translations$lessonPage$levels$b1$en {
 	String get title => 'B1 - Intermediate';
 
 	List<String> get lessons => [
-		'Celebrities',
 		'Cultural traditions',
+		'Celebrities',
 		'Art and creativity',
 		'Future plans',
 		'Planning events',
@@ -1710,8 +1823,8 @@ class Translations$lessonPage$levels$b2$en {
 	String get title => 'B2 - Upper Intermediate';
 
 	List<String> get lessons => [
-		'Great leads',
 		'Personalities',
+		'Great leads',
 		'Healthy lifestyle',
 		'What is the truth?',
 		'Personal growth',
@@ -1813,6 +1926,78 @@ class Translations$lessonPage$levels$c2$en {
 		'The mind\'s eye',
 		'Media consumption',
 	];
+}
+
+// Path: rolePlayPage.coffee.chat
+class Translations$rolePlayPage$coffee$chat$en {
+	Translations$rolePlayPage$coffee$chat$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Welcome! What can I get started for you today?'
+	String get incoming1 => 'Welcome! What can I get started for you today?';
+
+	/// en: 'Hi! I'd like a medium latte, please.'
+	String get outgoing1 => 'Hi! I\'d like a medium latte, please.';
+
+	/// en: 'Sure'
+	String get incoming2Highlight => 'Sure';
+
+	/// en: '! Would you like that hot or iced, and any extras?'
+	String get incoming2Rest => '! Would you like that hot or iced, and any extras?';
+
+	/// en: 'Great choice. Anything else with your order?'
+	String get botReply => 'Great choice. Anything else with your order?';
+}
+
+// Path: rolePlayPage.directions.chat
+class Translations$rolePlayPage$directions$chat$en {
+	Translations$rolePlayPage$directions$chat$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Hi there! You look a bit lost — need help finding something?'
+	String get incoming1 => 'Hi there! You look a bit lost — need help finding something?';
+
+	/// en: 'Yes, I'm looking for the nearest subway station.'
+	String get outgoing1 => 'Yes, I\'m looking for the nearest subway station.';
+
+	/// en: 'Of course'
+	String get incoming2Highlight => 'Of course';
+
+	/// en: '! Walk two blocks that way, then turn left. You'll see the entrance.'
+	String get incoming2Rest => '! Walk two blocks that way, then turn left. You\'ll see the entrance.';
+
+	/// en: 'You're welcome! Want a restaurant tip near the station too?'
+	String get botReply => 'You\'re welcome! Want a restaurant tip near the station too?';
+}
+
+// Path: rolePlayPage.interview.chat
+class Translations$rolePlayPage$interview$chat$en {
+	Translations$rolePlayPage$interview$chat$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Thanks for coming in today. Could you briefly introduce yourself?'
+	String get incoming1 => 'Thanks for coming in today. Could you briefly introduce yourself?';
+
+	/// en: 'Of course. I'm excited to be here and share my experience.'
+	String get outgoing1 => 'Of course. I\'m excited to be here and share my experience.';
+
+	/// en: 'Wonderful'
+	String get incoming2Highlight => 'Wonderful';
+
+	/// en: '. Tell me about a recent project you're proud of.'
+	String get incoming2Rest => '. Tell me about a recent project you\'re proud of.';
+
+	/// en: 'That's impressive. What questions do you have about the role?'
+	String get botReply => 'That\'s impressive. What questions do you have about the role?';
 }
 
 // Path: profilePage.faqItems.howItWorks
@@ -2040,6 +2225,9 @@ extension on Translations {
 			'home.premium.pricePeriod' => '/mo',
 			'home.premium.discount' => '40% off with annual purchase',
 			'home.premium.cta' => 'Start',
+			'libraryPage.title' => 'Library',
+			'libraryPage.searchWord' => 'Search Word',
+			'libraryPage.savedWordCount' => ({required Object count}) => '${count} Saved Word',
 			'wordPracticePage.title' => 'Word Practice',
 			'wordPracticePage.turkish' => 'TURKISH',
 			'wordPracticePage.save' => 'Save',
@@ -2095,13 +2283,23 @@ extension on Translations {
 			'tutorPage.speaker' => 'Speaker',
 			'tutorPage.messagesCount' => '12',
 			'tutorPage.tutors.lingola' => 'Lingola',
+			'tutorPage.tutors.zephyrion' => 'Zephyrion',
+			'tutorPage.tutors.vaelen' => 'Vaelen',
+			'tutorPage.tutors.elrion' => 'Elrion',
+			'tutorPage.tutors.ukrath' => 'Ukrath',
 			'tutorPage.tutors.elena' => 'Elena',
-			'tutorPage.tutors.kaj' => 'Kaj',
-			'tutorPage.tutors.mei' => 'Mei Lin',
-			'tutorPage.tutors.kate' => 'Kate',
-			'tutorPage.tutors.sofia' => 'Sofia',
-			'tutorPage.tutors.elenaSchmidt' => 'Elena Schmidt',
-			'tutorPage.tutors.kenjiSato' => 'Kenji Sato',
+			'tutorPage.tutors.kenji' => 'Kenji',
+			'tutorPage.tutors.freya' => 'Freya',
+			'tutorPage.tutors.camila' => 'Camila',
+			'tutorPage.tutors.marco' => 'Marco',
+			'tutorPage.tutors.julian' => 'Julian',
+			'tutorPage.tutors.ines' => 'Ines',
+			'tutorPage.tutors.felix' => 'Felix',
+			'tutorPage.tutors.diego' => 'Diego',
+			'tutorPage.tutors.amara' => 'Amara',
+			'tutorPage.tutors.erik' => 'Erik',
+			'tutorPage.tutors.katie' => 'Katie',
+			'tutorPage.tutors.morgan' => 'Morgan',
 			'tutorPage.tags.adaptive' => 'Adaptive',
 			'tutorPage.tags.calm' => 'Calm',
 			'tutorPage.tags.patient' => 'Patient',
@@ -2110,6 +2308,14 @@ extension on Translations {
 			'tutorPage.tags.methodical' => 'Methodical',
 			'tutorPage.tags.attentive' => 'Attentive',
 			'tutorPage.tags.more' => '+5',
+			'tutorPage.tags.curious' => 'Curious',
+			'tutorPage.tags.observer' => 'Observer',
+			'tutorPage.tags.ancientKnowledge' => 'Ancient Knowledge',
+			'tutorPage.tags.wise' => 'Wise',
+			'tutorPage.tags.clear' => 'Clear',
+			'tutorPage.tags.decisive' => 'Decisive',
+			'tutorPage.tags.disciplined' => 'Disciplined',
+			'tutorPage.tags.smart' => 'Smart',
 			'tutorPage.historyPreview1' => 'Hey! I was about to explode with boredom...',
 			'tutorPage.historyPreview2' => 'Shall we practice ordering food today?',
 			'tutorPage.time1' => '11:00 AM',
@@ -2118,14 +2324,22 @@ extension on Translations {
 			'tutorPage.chat.outgoing1' => 'Yes, let\'s start with greetings.',
 			'tutorPage.chat.incoming2' => 'Perfect. How would you say hello to a colleague?',
 			'tutorPage.chat.typing' => 'Typing',
+			'tutorPage.calling.lessonBadge' => 'Lesson 1 : Greetings',
+			'tutorPage.calling.nativeLine' => 'Sıkıldın mı?',
+			'tutorPage.calling.englishLine' => 'Bored? I deleted that word from my vocabulary. Get up, the plan\'s already set: we\'re hitting that new arcade bar in Kadıköy.',
+			'tutorPage.calling.highlight' => 'Bored?',
+			'tutorPage.calling.close' => 'End call',
+			'tutorPage.calling.toggleCaptions' => 'Toggle captions',
+			'tutorPage.calling.toggleHints' => 'Toggle hints',
+			'tutorPage.calling.toggleMic' => 'Toggle microphone',
 			'lessonPage.title' => 'Continue to Learn',
 			'lessonPage.profile' => 'Profile',
 			'lessonPage.language' => 'Target language',
 			'lessonPage.completed' => 'Completed',
 			'lessonPage.locked' => 'Locked',
 			'lessonPage.levels.a1.title' => 'A1 - Starter',
-			'lessonPage.levels.a1.lessons.0' => 'Introductions I',
-			'lessonPage.levels.a1.lessons.1' => 'Greetings',
+			'lessonPage.levels.a1.lessons.0' => 'Greetings',
+			'lessonPage.levels.a1.lessons.1' => 'Introductions I',
 			'lessonPage.levels.a1.lessons.2' => 'Jobs',
 			'lessonPage.levels.a1.lessons.3' => 'A Favorite Room',
 			'lessonPage.levels.a1.lessons.4' => 'Daily Routine',
@@ -2211,8 +2425,8 @@ extension on Translations {
 			'lessonPage.levels.a2.lessons.51' => 'Save or spend?',
 			'lessonPage.levels.a2.lessons.52' => 'Say sorry',
 			'lessonPage.levels.b1.title' => 'B1 - Intermediate',
-			'lessonPage.levels.b1.lessons.0' => 'Celebrities',
-			'lessonPage.levels.b1.lessons.1' => 'Cultural traditions',
+			'lessonPage.levels.b1.lessons.0' => 'Cultural traditions',
+			'lessonPage.levels.b1.lessons.1' => 'Celebrities',
 			'lessonPage.levels.b1.lessons.2' => 'Art and creativity',
 			'lessonPage.levels.b1.lessons.3' => 'Future plans',
 			'lessonPage.levels.b1.lessons.4' => 'Planning events',
@@ -2269,8 +2483,8 @@ extension on Translations {
 			'lessonPage.levels.b1.lessons.55' => 'Sorry to interrupt…',
 			'lessonPage.levels.b1.lessons.56' => 'Complaint responses',
 			'lessonPage.levels.b2.title' => 'B2 - Upper Intermediate',
-			'lessonPage.levels.b2.lessons.0' => 'Great leads',
-			'lessonPage.levels.b2.lessons.1' => 'Personalities',
+			'lessonPage.levels.b2.lessons.0' => 'Personalities',
+			'lessonPage.levels.b2.lessons.1' => 'Great leads',
 			'lessonPage.levels.b2.lessons.2' => 'Healthy lifestyle',
 			'lessonPage.levels.b2.lessons.3' => 'What is the truth?',
 			'lessonPage.levels.b2.lessons.4' => 'Personal growth',
@@ -2351,12 +2565,29 @@ extension on Translations {
 			'rolePlayPage.screenplay' => 'SCREENPLAY',
 			'rolePlayPage.dailyInteractions' => 'Daily Interactions',
 			'rolePlayPage.business' => 'Business',
+			_ => null,
+		} ?? switch (path) {
 			'rolePlayPage.coffee.title' => 'Ordering at the Coffee Shop',
 			'rolePlayPage.coffee.screenplay' => 'Order your favorite drink, ask about sizes and extras, confirm your total, and pick up your coffee at the counter.',
+			'rolePlayPage.coffee.chat.incoming1' => 'Welcome! What can I get started for you today?',
+			'rolePlayPage.coffee.chat.outgoing1' => 'Hi! I\'d like a medium latte, please.',
+			'rolePlayPage.coffee.chat.incoming2Highlight' => 'Sure',
+			'rolePlayPage.coffee.chat.incoming2Rest' => '! Would you like that hot or iced, and any extras?',
+			'rolePlayPage.coffee.chat.botReply' => 'Great choice. Anything else with your order?',
 			'rolePlayPage.directions.title' => 'Asking for Directions on the Street',
 			'rolePlayPage.directions.screenplay' => 'Ask for directions to a place, find out how to get to the subway or bus, get information about tickets, and listen to restaurant recommendations.',
+			'rolePlayPage.directions.chat.incoming1' => 'Hi there! You look a bit lost — need help finding something?',
+			'rolePlayPage.directions.chat.outgoing1' => 'Yes, I\'m looking for the nearest subway station.',
+			'rolePlayPage.directions.chat.incoming2Highlight' => 'Of course',
+			'rolePlayPage.directions.chat.incoming2Rest' => '! Walk two blocks that way, then turn left. You\'ll see the entrance.',
+			'rolePlayPage.directions.chat.botReply' => 'You\'re welcome! Want a restaurant tip near the station too?',
 			'rolePlayPage.interview.title' => 'Job Interview',
 			'rolePlayPage.interview.screenplay' => 'Introduce yourself, answer common interview questions, talk about your experience, and ask about the role and next steps.',
+			'rolePlayPage.interview.chat.incoming1' => 'Thanks for coming in today. Could you briefly introduce yourself?',
+			'rolePlayPage.interview.chat.outgoing1' => 'Of course. I\'m excited to be here and share my experience.',
+			'rolePlayPage.interview.chat.incoming2Highlight' => 'Wonderful',
+			'rolePlayPage.interview.chat.incoming2Rest' => '. Tell me about a recent project you\'re proud of.',
+			'rolePlayPage.interview.chat.botReply' => 'That\'s impressive. What questions do you have about the role?',
 			'notificationsPage.title' => 'Notifications',
 			'notificationsPage.translation.title' => 'New Translation Ready',
 			'notificationsPage.translation.body' => 'Your audio translation file has been successfully converted to text and translated.',
@@ -2380,8 +2611,6 @@ extension on Translations {
 			'profilePage.deleteReasons.aiCharacters' => 'Yapay zeka karakterlerini gerçekçi bulmadım.',
 			'profilePage.deleteReasons.videoIssues' => 'Görüntülü sohbetlerde teknik sorunlar yaşıyorum.',
 			'profilePage.deleteReasons.pricing' => 'Abonelik fiyatları beklentimin üzerinde.',
-			_ => null,
-		} ?? switch (path) {
 			'profilePage.deleteReasons.noMatch' => 'Aradığım tarzda karakterler bulamadım.',
 			'profilePage.deleteReasons.shortTrial' => 'Sadece kısa bir süreliğine denemek istemiştim.',
 			'profilePage.deleteReasons.other' => 'Diğer',

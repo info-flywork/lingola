@@ -203,6 +203,11 @@
       "cta": "Başlayın"
     }
   },
+  "libraryPage": {
+    "title": "Kütüphane",
+    "searchWord": "Kelime Ara",
+    "savedWordCount": "$count Kayıtlı Kelime"
+  },
   "wordPracticePage": {
     "title": "Kelime Pratiği",
     "turkish": "TÜRKÇE",
@@ -266,13 +271,23 @@
     "messagesCount": "12",
     "tutors": {
       "lingola": "Lingola",
+      "zephyrion": "Zephyrion",
+      "vaelen": "Vaelen",
+      "elrion": "Elrion",
+      "ukrath": "Ukrath",
       "elena": "Elena",
-      "kaj": "Kaj",
-      "mei": "Mei Lin",
-      "kate": "Kate",
-      "sofia": "Sofia",
-      "elenaSchmidt": "Elena Schmidt",
-      "kenjiSato": "Kenji Sato"
+      "kenji": "Kenji",
+      "freya": "Freya",
+      "camila": "Camila",
+      "marco": "Marco",
+      "julian": "Julian",
+      "ines": "Ines",
+      "felix": "Felix",
+      "diego": "Diego",
+      "amara": "Amara",
+      "erik": "Erik",
+      "katie": "Katie",
+      "morgan": "Morgan"
     },
     "tags": {
       "adaptive": "Uyarlanabilir",
@@ -282,7 +297,15 @@
       "relaxed": "Rahat",
       "methodical": "Metodikli",
       "attentive": "Dikkatli",
-      "more": "+5"
+      "more": "+5",
+      "curious": "Meraklı",
+      "observer": "Gözlemci",
+      "ancientKnowledge": "Kadim Bilgi",
+      "wise": "Bilge",
+      "clear": "Net",
+      "decisive": "Kararlı",
+      "disciplined": "Disiplinli",
+      "smart": "Zeki"
     },
     "historyPreview1": "Hey! Can sıkıntısından patlamak üzereydim...",
     "historyPreview2": "Bugün yemek siparişi pratiği yapalım mı?",
@@ -293,6 +316,16 @@
       "outgoing1": "Evet, selamlaşmayla başlayalım.",
       "incoming2": "Harika. Bir iş arkadaşına merhaba nasıl dersin?",
       "typing": "Yazıyor"
+    },
+    "calling": {
+      "lessonBadge": "Ders 1 : Selamlaşma",
+      "nativeLine": "Sıkıldın mı?",
+      "englishLine": "Bored? I deleted that word from my vocabulary. Get up, the plan's already set: we're hitting that new arcade bar in Kadıköy.",
+      "highlight": "Bored?",
+      "close": "Görüşmeyi bitir",
+      "toggleCaptions": "Altyazıyı aç/kapat",
+      "toggleHints": "İpuçlarını aç/kapat",
+      "toggleMic": "Mikrofonu aç/kapat"
     }
   },
   "lessonPage": {
@@ -305,8 +338,8 @@
       "a1": {
         "title": "A1 - Başlangıç",
         "lessons": [
-          "Tanışma I",
           "Selamlaşma",
+          "Tanışma I",
           "Meslekler",
           "Favori Oda",
           "Günlük Rutin",
@@ -400,8 +433,8 @@
       "b1": {
         "title": "B1 - Orta",
         "lessons": [
-          "Celebrities",
           "Cultural traditions",
+          "Celebrities",
           "Art and creativity",
           "Future plans",
           "Planning events",
@@ -462,8 +495,8 @@
       "b2": {
         "title": "B2 - Orta Üstü",
         "lessons": [
-          "Great leads",
           "Personalities",
+          "Great leads",
           "Healthy lifestyle",
           "What is the truth?",
           "Personal growth",
@@ -559,15 +592,36 @@
     "business": "İş",
     "coffee": {
       "title": "Kafede Sipariş Verme",
-      "screenplay": "Favori içeceğini sipariş et, boyut ve ekstraları sor, toplamı onayla ve tezgâhtan kahveni al."
+      "screenplay": "Favori içeceğini sipariş et, boyut ve ekstraları sor, toplamı onayla ve tezgâhtan kahveni al.",
+      "chat": {
+        "incoming1": "Hoş geldiniz! Bugün ne alırsınız?",
+        "outgoing1": "Merhaba! Orta boy bir latte istiyorum lütfen.",
+        "incoming2Highlight": "Tabii",
+        "incoming2Rest": "! Sıcak mı buzlu mu olsun, ekstra ister misiniz?",
+        "botReply": "Harika tercih. Siparişinize başka bir şey ekleyelim mi?"
+      }
     },
     "directions": {
       "title": "Sokakta Yol Sorma",
-      "screenplay": "Bir yere yol sor, metro veya otobüse nasıl gideceğini öğren, bilet bilgisi al ve restoran önerilerini dinle."
+      "screenplay": "Bir yere yol sor, metro veya otobüse nasıl gideceğini öğren, bilet bilgisi al ve restoran önerilerini dinle.",
+      "chat": {
+        "incoming1": "Merhaba! Biraz kaybolmuş görünüyorsunuz — bir yere mi bakıyorsunuz?",
+        "outgoing1": "Evet, en yakın metro istasyonunu arıyorum.",
+        "incoming2Highlight": "Tabii ki",
+        "incoming2Rest": "! İki blok o tarafa yürüyün, sonra sola dönün. Girişi göreceksiniz.",
+        "botReply": "Rica ederim! İstasyonun yanında bir restoran önerisi de ister misiniz?"
+      }
     },
     "interview": {
       "title": "İş Görüşmesi",
-      "screenplay": "Kendini tanıt, sık sorulan soruları yanıtla, deneyiminden bahset ve rol ile sonraki adımları sor."
+      "screenplay": "Kendini tanıt, sık sorulan soruları yanıtla, deneyiminden bahset ve rol ile sonraki adımları sor.",
+      "chat": {
+        "incoming1": "Bugün geldiğiniz için teşekkürler. Kendinizi kısaca tanıtır mısınız?",
+        "outgoing1": "Tabii. Burada olmaktan mutluyum ve deneyimimi paylaşmak istiyorum.",
+        "incoming2Highlight": "Harika",
+        "incoming2Rest": ". Gurur duyduğunuz yakın bir projeden bahseder misiniz?",
+        "botReply": "Çok etkileyici. Rol hakkında ne sormak istersiniz?"
+      }
     }
   },
   "notificationsPage": {

@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +11,7 @@ import 'lesson_curriculum.dart';
 class LessonScreen extends StatelessWidget {
   const LessonScreen({super.key});
 
+  /// İlk 2 ders tamamlanmış: Greetings ✓, Introductions aktif.
   static const _completedCount = 2;
 
   @override
@@ -36,35 +35,27 @@ class LessonScreen extends StatelessWidget {
       'c2': levels.c2.lessons,
     };
 
-    final levelWidgets = <Widget>[];
-    var globalIndex = 0;
+    // Her seviye ayrı blok: başlık + bağımsız path (birleşik değil).
+    final sections = <_LevelSectionData>[];
+    var globalStart = 0;
     for (final level in LessonCurriculum.levels) {
-      final start = globalIndex;
       final lessons = lessonLists[level.id]!;
-      levelWidgets.add(
-        Padding(
-          padding: const EdgeInsets.fromLTRB(21, 20, 21, 8),
-          child: Text(
-            titles[level.id]!,
-            style: const TextStyle(
-              color: Color(0xFF3D3D3D),
-              fontFamily: 'Poppins',
-              fontSize: 14,
-              height: 21 / 14,
-              fontWeight: FontWeight.w600,
-            ),
+      final icons = level.iconAssets;
+      final levelNodes = <_LessonPathNodeData>[
+        for (var i = 0; i < lessons.length; i++)
+          _LessonPathNodeData(
+            label: lessons[i],
+            iconAsset: icons[i < icons.length ? i : icons.length - 1],
           ),
+      ];
+      sections.add(
+        _LevelSectionData(
+          title: titles[level.id]!,
+          nodes: levelNodes,
+          globalStartIndex: globalStart,
         ),
       );
-      levelWidgets.add(
-        _LessonPathSection(
-          lessons: lessons,
-          iconKeys: level.iconKeys,
-          startGlobalIndex: start,
-          completedCount: _completedCount,
-        ),
-      );
-      globalIndex += lessons.length;
+      globalStart += levelNodes.length;
     }
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -80,15 +71,40 @@ class LessonScreen extends StatelessWidget {
             scrollCacheExtent: const ScrollCacheExtent.pixels(1200),
             slivers: [
               SliverToBoxAdapter(child: _LessonHeader(text: text)),
-              for (final widget in levelWidgets)
-                SliverToBoxAdapter(child: widget),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              for (final section in sections)
+                SliverToBoxAdapter(
+                  child: _LevelPathSection(
+                    title: section.title,
+                    nodes: section.nodes,
+                    globalStartIndex: section.globalStartIndex,
+                    completedCount: _completedCount,
+                  ),
+                ),
+              const SliverToBoxAdapter(child: SizedBox(height: 32)),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class _LessonPathNodeData {
+  const _LessonPathNodeData({required this.label, required this.iconAsset});
+  final String label;
+  final String iconAsset;
+}
+
+class _LevelSectionData {
+  const _LevelSectionData({
+    required this.title,
+    required this.nodes,
+    required this.globalStartIndex,
+  });
+
+  final String title;
+  final List<_LessonPathNodeData> nodes;
+  final int globalStartIndex;
 }
 
 class _LessonHeader extends StatelessWidget {
@@ -171,38 +187,112 @@ class _LessonHeader extends StatelessWidget {
   }
 }
 
-class _LessonPathSection extends StatelessWidget {
-  const _LessonPathSection({
-    required this.lessons,
-    required this.iconKeys,
-    required this.startGlobalIndex,
+/// Tek seviye: başlık + kendi path’i (A1 / A2 / … birbirine bağlı değil).
+class _LevelPathSection extends StatelessWidget {
+  const _LevelPathSection({
+    required this.title,
+    required this.nodes,
+    required this.globalStartIndex,
     required this.completedCount,
   });
 
-  final List<String> lessons;
-  final List<String> iconKeys;
-  final int startGlobalIndex;
+  final String title;
+  final List<_LessonPathNodeData> nodes;
+  final int globalStartIndex;
   final int completedCount;
-
-  // Figma Lesson frame 393×… — Vector at x:70 w:227.72, nodes at x:53 / x:258
-  static const _designWidth = 393.0;
-  static const _leftX = 53.0;
-  static const _rightX = 258.0;
-  static const _rowGap = 89.0;
-  static const _topPad = 18.0;
-  static const _nodeSize = 63.0;
-
-  /// Figma: first node is on the right (Greetings), then left, right, …
-  bool _isLeft(int index) => index.isOdd;
 
   @override
   Widget build(BuildContext context) {
-    final height = _topPad + lessons.length * _rowGap + 48;
+    if (nodes.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(21, 20, 21, 4),
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF3D3D3D),
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              height: 21 / 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        _LevelLessonPath(
+          nodes: nodes,
+          globalStartIndex: globalStartIndex,
+          completedCount: completedCount,
+        ),
+      ],
+    );
+  }
+}
+
+/// Bir seviyenin bağımsız S-yolu — yumuşak U, ikon apex ortasında.
+class _LevelLessonPath extends StatelessWidget {
+  const _LevelLessonPath({
+    required this.nodes,
+    required this.globalStartIndex,
+    required this.completedCount,
+  });
+
+  final List<_LessonPathNodeData> nodes;
+  final int globalStartIndex;
+  final int completedCount;
+
+  static const _designWidth = 398.0;
+  static const _leftX = 65.0;
+  static const _rightX = 278.0;
+  static const _nodeSize = 63.0;
+  static const _pitch = 112.0;
+  static const _y0 = 40.0;
+  static const _trackStroke = 22.0;
+
+  bool _isLeft(int index) => index.isOdd;
+
+  ({List<double> hs, List<double> nodeCenters}) _layout(int n) {
+    final hs = <double>[_y0];
+    final nodeCenters = <double>[_y0];
+    for (var i = 1; i < n; i++) {
+      hs.add(hs.last + _pitch);
+      final yTop = hs[hs.length - 2];
+      final yBot = hs[hs.length - 1];
+      nodeCenters.add((yTop + yBot) / 2);
+    }
+    return (hs: hs, nodeCenters: nodeCenters);
+  }
+
+  _NodeState _stateForLocal(int localIndex) {
+    final global = globalStartIndex + localIndex;
+    if (global < completedCount - 1) return _NodeState.completed;
+    if (global == completedCount - 1) return _NodeState.active;
+    return _NodeState.locked;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final n = nodes.length;
+    if (n == 0) return const SizedBox.shrink();
+
+    final layout = _layout(n);
+    final nodeCenters = layout.nodeCenters;
+    final horizontalYs = layout.hs;
+
+    double nodeTop(int i) => nodeCenters[i] - _nodeSize / 2;
+
+    final lastTop = nodeTop(n - 1);
+    final height = lastTop + _nodeSize + 48;
+    final leftApex = _leftX + _nodeSize / 2;
+    final rightApex = _rightX + _nodeSize / 2;
+    const radius = _pitch / 2;
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final scale = constraints.maxWidth / _designWidth;
         return SizedBox(
-          height: height * scale,
+          height: height * (constraints.maxWidth / _designWidth),
           width: constraints.maxWidth,
           child: FittedBox(
             fit: BoxFit.fitWidth,
@@ -213,46 +303,31 @@ class _LessonPathSection extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    width: _designWidth,
-                    height: height,
+                  Positioned.fill(
                     child: CustomPaint(
-                      painter: _SnakePathPainter(
-                        nodeCount: lessons.length,
-                        rowGap: _rowGap,
-                        topPad: _topPad,
-                        leftX: _leftX + _nodeSize / 2,
-                        rightX: _rightX + _nodeSize / 2,
-                        completedThrough: math.max(
-                          0,
-                          completedCount - startGlobalIndex,
-                        ),
-                        isLeft: _isLeft,
+                      painter: _LessonPathTrackPainter(
+                        horizontalYs: horizontalYs,
+                        leftApexX: leftApex,
+                        rightApexX: rightApex,
+                        radius: radius,
+                        strokeWidth: _trackStroke,
                       ),
                     ),
                   ),
-                  for (var i = 0; i < lessons.length; i++)
+                  for (var i = 0; i < n; i++)
                     Positioned(
                       left: _isLeft(i) ? _leftX : _rightX,
-                      top: _topPad + i * _rowGap,
+                      top: nodeTop(i),
                       child: _LessonNode(
-                        label: lessons[i],
-                        iconKey: iconKeys[i],
-                        state: () {
-                          final g = startGlobalIndex + i;
-                          if (g < completedCount - 1) {
-                            return _NodeState.active;
-                          }
-                          if (g == completedCount - 1) {
-                            return _NodeState.completed;
-                          }
-                          return _NodeState.locked;
-                        }(),
-                        labelSide: _isLeft(i)
-                            ? _LabelSide.right
-                            : (i == 0 ? _LabelSide.below : _LabelSide.left),
+                        label: nodes[i].label,
+                        iconAsset: nodes[i].iconAsset,
+                        state: _stateForLocal(i),
+                        // İlk node (Greetings): Figma’da etiket ikonun altında.
+                        labelSide: i == 0
+                            ? _LabelSide.below
+                            : (_isLeft(i)
+                                ? _LabelSide.right
+                                : _LabelSide.left),
                       ),
                     ),
                 ],
@@ -272,13 +347,13 @@ enum _LabelSide { left, right, below }
 class _LessonNode extends StatelessWidget {
   const _LessonNode({
     required this.label,
-    required this.iconKey,
+    required this.iconAsset,
     required this.state,
     required this.labelSide,
   });
 
   final String label;
-  final String iconKey;
+  final String iconAsset;
   final _NodeState state;
   final _LabelSide labelSide;
 
@@ -288,8 +363,7 @@ class _LessonNode extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = AppText.current;
     final isLocked = state == _NodeState.locked;
-    // Figma: locked nodes are white circles with dark icons; active/done are primary.
-    final circle = isLocked ? Colors.white : AppColors.primary;
+    final circle = isLocked ? const Color(0xFFDBDBDB) : AppColors.primary;
     final iconColor = isLocked ? const Color(0xFF656565) : Colors.white;
     final labelColor = switch (state) {
       _NodeState.active => AppColors.primary,
@@ -309,10 +383,7 @@ class _LessonNode extends StatelessWidget {
             decoration: BoxDecoration(
               color: circle,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: isLocked ? const Color(0xFFF0F0F0) : Colors.white,
-                width: 3,
-              ),
+              border: Border.all(color: Colors.white, width: 3),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: .18),
@@ -323,92 +394,85 @@ class _LessonNode extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: SvgPicture.asset(
-              'assets/images/lessons/icons/$iconKey.svg',
+              iconAsset,
               width: 28,
               height: 28,
+              fit: BoxFit.contain,
               colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+              placeholderBuilder: (_) => const SizedBox(width: 28, height: 28),
             ),
           ),
           if (state == _NodeState.completed)
             Positioned(
-              right: -2,
-              bottom: -2,
+              right: -4,
+              bottom: -4,
               child: Semantics(
                 label: text.lessonPage.completed,
                 child: Container(
-                  width: 22,
-                  height: 22,
+                  width: 23,
+                  height: 23,
                   decoration: BoxDecoration(
                     color: const Color(0xFF34C759),
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                   ),
-                  child: const Icon(Icons.check_rounded, size: 12, color: Colors.white),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    size: 13,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
           if (isLocked)
             Positioned(
-              right: -2,
+              // SVG viewBox 30x30; görünür daire ~22–23 (Figma).
+              right: -6,
               bottom: -2,
               child: Semantics(
                 label: text.lessonPage.locked,
-                child: Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDBDBDB),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: .18),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: SvgPicture.asset(
-                    'assets/images/lessons/icons/lock.svg',
-                    width: 11,
-                    height: 11,
-                    colorFilter: const ColorFilter.mode(
-                      Color(0xFF656565),
-                      BlendMode.srcIn,
-                    ),
-                  ),
+                child: SvgPicture.asset(
+                  'assets/learningPath/a1/badge_lock.svg',
+                  width: 30,
+                  height: 30,
                 ),
-              ),
-            ),
-          if (labelSide == _LabelSide.below)
-            Positioned(
-              top: _size + 4,
-              left: -28,
-              width: _size + 56,
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                style: _labelStyle(labelColor),
               ),
             ),
           if (labelSide == _LabelSide.right)
             Positioned(
-              left: _size + 8,
-              top: (_size - 16) / 2,
-              width: 120,
-              child: Text(label, maxLines: 2, style: _labelStyle(labelColor)),
+              left: _size + 10,
+              top: (_size - 30) / 2,
+              width: 118,
+              child: Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: _labelStyle(labelColor),
+              ),
             ),
           if (labelSide == _LabelSide.left)
             Positioned(
               left: -128,
-              top: (_size - 16) / 2,
-              width: 120,
+              top: (_size - 30) / 2,
+              width: 118,
               child: Text(
                 label,
                 maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.right,
+                style: _labelStyle(labelColor),
+              ),
+            ),
+          if (labelSide == _LabelSide.below)
+            Positioned(
+              left: (_size - 118) / 2,
+              top: _size + 6,
+              width: 118,
+              child: Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: _labelStyle(labelColor),
               ),
             ),
@@ -428,86 +492,76 @@ class _LessonNode extends StatelessWidget {
   }
 }
 
-class _SnakePathPainter extends CustomPainter {
-  _SnakePathPainter({
-    required this.nodeCount,
-    required this.rowGap,
-    required this.topPad,
-    required this.leftX,
-    required this.rightX,
-    required this.completedThrough,
-    required this.isLeft,
+/// Yumuşak yarım daire U’lar; sabit yarıçap.
+class _LessonPathTrackPainter extends CustomPainter {
+  _LessonPathTrackPainter({
+    required this.horizontalYs,
+    required this.leftApexX,
+    required this.rightApexX,
+    required this.radius,
+    required this.strokeWidth,
   });
 
-  final int nodeCount;
-  final double rowGap;
-  final double topPad;
-  final double leftX;
-  final double rightX;
-  final int completedThrough;
-  final bool Function(int index) isLeft;
+  final List<double> horizontalYs;
+  final double leftApexX;
+  final double rightApexX;
+  final double radius;
+  final double strokeWidth;
 
-  static const _stroke = 20.0;
+  Path _buildCenterline() {
+    final hs = horizontalYs;
+    final path = Path();
+    if (hs.isEmpty) return path;
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (nodeCount <= 0) return;
-    final track = Paint()
-      ..color = const Color(0xFFEBEBEB)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final leftInner = leftApexX + radius;
+    final rightInner = rightApexX - radius;
 
-    final progress = Paint()
-      ..color = AppColors.primary
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    path.moveTo(rightApexX, hs[0]);
+    if (hs.length == 1) return path;
 
-    Offset point(int i) {
-      final x = isLeft(i) ? leftX : rightX;
-      final y = topPad + i * rowGap + 31.5;
-      return Offset(x, y);
-    }
-
-    // Figma Vector: tight rounded U-turns (not flat S-curves between nodes).
-    final path = Path()..moveTo(point(0).dx, point(0).dy);
-    for (var i = 1; i < nodeCount; i++) {
-      final prev = point(i - 1);
-      final curr = point(i);
-      final dx = (curr.dx - prev.dx).abs();
-      final dy = (curr.dy - prev.dy).abs();
-      path.arcToPoint(
-        curr,
-        radius: Radius.elliptical(dx / 2, math.max(dy / 2, 1)),
-        // Bottom U-turn so the snake keeps descending (Figma Vector).
-        clockwise: curr.dx > prev.dx,
-        largeArc: false,
-      );
-    }
-
-    canvas.drawPath(path, track);
-
-    if (completedThrough > 0) {
-      final metrics = path.computeMetrics().toList();
-      if (metrics.isNotEmpty) {
-        final metric = metrics.first;
-        final ratio = (completedThrough / math.max(nodeCount - 1, 1)).clamp(
-          0.0,
-          1.0,
+    for (var i = 0; i < hs.length - 1; i++) {
+      final yA = hs[i];
+      final yB = hs[i + 1];
+      if (i.isEven) {
+        path.lineTo(leftInner, yA);
+        path.arcToPoint(
+          Offset(leftInner, yB),
+          radius: Radius.circular(radius),
+          clockwise: false,
         );
-        final extract = metric.extractPath(0, metric.length * ratio);
-        canvas.drawPath(extract, progress);
+      } else {
+        path.lineTo(rightInner, yA);
+        path.arcToPoint(
+          Offset(rightInner, yB),
+          radius: Radius.circular(radius),
+          clockwise: true,
+        );
       }
     }
+    return path;
   }
 
   @override
-  bool shouldRepaint(covariant _SnakePathPainter oldDelegate) {
-    return oldDelegate.nodeCount != nodeCount ||
-        oldDelegate.completedThrough != completedThrough ||
-        oldDelegate.rowGap != rowGap;
+  void paint(Canvas canvas, Size size) {
+    if (horizontalYs.isEmpty) return;
+
+    final track = Paint()
+      ..color = const Color(0xFFEBEBEB)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..isAntiAlias = true;
+
+    canvas.drawPath(_buildCenterline(), track);
+  }
+
+  @override
+  bool shouldRepaint(covariant _LessonPathTrackPainter oldDelegate) {
+    return oldDelegate.horizontalYs != horizontalYs ||
+        oldDelegate.leftApexX != leftApexX ||
+        oldDelegate.rightApexX != rightApexX ||
+        oldDelegate.radius != radius ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

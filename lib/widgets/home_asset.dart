@@ -9,6 +9,7 @@ class HomeAsset extends StatelessWidget {
     this.width,
     this.height,
     this.fit = BoxFit.contain,
+    this.alignment = Alignment.center,
     this.color,
     super.key,
   });
@@ -17,9 +18,13 @@ class HomeAsset extends StatelessWidget {
   final double? width;
   final double? height;
   final BoxFit fit;
+  final Alignment alignment;
   final Color? color;
 
   bool get _isSvg => path.toLowerCase().endsWith('.svg');
+
+  static bool _isFinitePositive(double? v) =>
+      v != null && v.isFinite && v > 0;
 
   @override
   Widget build(BuildContext context) {
@@ -28,27 +33,34 @@ class HomeAsset extends StatelessWidget {
     if (_isSvg) {
       return SvgPicture.asset(
         path,
-        width: width,
-        height: height,
+        width: _isFinitePositive(width) ? width : null,
+        height: _isFinitePositive(height) ? height : null,
         fit: fit,
+        alignment: alignment,
         colorFilter: color == null
             ? null
             : ColorFilter.mode(color!, BlendMode.srcIn),
         placeholderBuilder: (_) => _placeholder(),
-        // Bozuk SVG olursa boş kutu göster, çökme.
         errorBuilder: (_, _, _) => _placeholder(),
       );
     }
 
-    final cacheWidth = width != null
-        ? (width! * dpr).round().clamp(1, 1600)
-        : (420 * dpr).round().clamp(1, 1600);
+    // Layout için infinity OK; cacheWidth sadece sonlu genişlikte hesaplanır.
+    final int? cacheWidth;
+    if (_isFinitePositive(width)) {
+      cacheWidth = (width! * dpr).round().clamp(1, 1600);
+    } else if (width == null) {
+      cacheWidth = (420 * dpr).round().clamp(1, 1600);
+    } else {
+      cacheWidth = null;
+    }
 
     return Image.asset(
       path,
       width: width,
       height: height,
       fit: fit,
+      alignment: alignment,
       cacheWidth: cacheWidth,
       filterQuality: FilterQuality.high,
       isAntiAlias: true,
@@ -57,9 +69,11 @@ class HomeAsset extends StatelessWidget {
   }
 
   Widget _placeholder() {
+    final w = _isFinitePositive(width) ? width : null;
+    final h = _isFinitePositive(height) ? height : null;
     return SizedBox(
-      width: width,
-      height: height,
+      width: w,
+      height: h,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: const Color(0x142D46FF),
