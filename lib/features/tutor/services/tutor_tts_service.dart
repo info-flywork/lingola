@@ -7,16 +7,16 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../core/config/app_env.dart';
 
-/// ElevenLabs TTS — voice [AppEnv.elevenLabsVoiceId].
+/// ElevenLabs TTS — voice [voiceId] veya [AppEnv.elevenLabsVoiceId].
 /// Key yoksa OpenAI TTS fallback (demo için).
 class TutorTtsService {
   TutorTtsService({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
 
-  Future<File> synthesizeToFile(String text) async {
+  Future<File> synthesizeToFile(String text, {String? voiceId}) async {
     final bytes = AppEnv.hasElevenLabs
-        ? await _elevenLabs(text)
+        ? await _elevenLabs(text, voiceId: voiceId)
         : await _openAiTts(text);
 
     final dir = await getTemporaryDirectory();
@@ -27,10 +27,12 @@ class TutorTtsService {
     return file;
   }
 
-  Future<Uint8List> _elevenLabs(String text) async {
-    final voiceId = AppEnv.elevenLabsVoiceId;
+  Future<Uint8List> _elevenLabs(String text, {String? voiceId}) async {
+    final id = (voiceId != null && voiceId.trim().isNotEmpty)
+        ? voiceId.trim()
+        : AppEnv.elevenLabsVoiceId;
     final uri = Uri.parse(
-      'https://api.elevenlabs.io/v1/text-to-speech/$voiceId'
+      'https://api.elevenlabs.io/v1/text-to-speech/$id'
       '?output_format=mp3_44100_128',
     );
     final res = await _client.post(

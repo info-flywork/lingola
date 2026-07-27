@@ -3,12 +3,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
-import 'chat_history_screen.dart';
 import 'calling_screen.dart';
+import 'chat_history_screen.dart';
 import 'chat_screen.dart';
 import 'tutor_filter_sheet.dart';
 
@@ -157,6 +158,7 @@ class TutorScreen extends StatelessWidget {
                               tutorName: tutor.name,
                               imagePath: tutor.image,
                               riveAsset: tutor.riveAsset,
+                              voiceId: tutor.voiceId,
                             ),
                           ),
                         );
@@ -191,6 +193,7 @@ class TutorScreen extends StatelessWidget {
         name: text.tutors.kenji,
         image: AppAssets.tutorKenji,
         riveAsset: AppAssets.tutorKenjiRiv,
+        voiceId: TutorVoiceIds.male,
         flagAsset: 'assets/images/home/flag_cn.svg',
         tags: [tags.patient, tags.organized],
       ),
@@ -210,12 +213,14 @@ class TutorScreen extends StatelessWidget {
         name: text.tutors.marco,
         image: AppAssets.tutorMarco,
         riveAsset: AppAssets.tutorMarcoRiv,
+        voiceId: TutorVoiceIds.male,
         tags: [tags.methodical, tags.patient],
       ),
       _TutorData(
         name: text.tutors.julian,
         image: AppAssets.tutorJulian,
         riveAsset: AppAssets.tutorJulianRiv,
+        voiceId: TutorVoiceIds.male,
         tags: [tags.adaptive, tags.calm],
       ),
       _TutorData(
@@ -228,12 +233,14 @@ class TutorScreen extends StatelessWidget {
         name: text.tutors.felix,
         image: AppAssets.tutorFelix,
         riveAsset: AppAssets.tutorFelixRiv,
+        voiceId: TutorVoiceIds.male,
         tags: [tags.organized, tags.relaxed],
       ),
       _TutorData(
         name: text.tutors.diego,
         image: AppAssets.tutorDiego,
         riveAsset: AppAssets.tutorDiegoRiv,
+        voiceId: TutorVoiceIds.male,
         tags: [tags.methodical, tags.calm],
       ),
       _TutorData(
@@ -246,6 +253,7 @@ class TutorScreen extends StatelessWidget {
         name: text.tutors.erik,
         image: AppAssets.tutorErik,
         riveAsset: AppAssets.tutorErikRiv,
+        voiceId: TutorVoiceIds.male,
         tags: [tags.relaxed, tags.attentive],
       ),
       _TutorData(
@@ -258,12 +266,28 @@ class TutorScreen extends StatelessWidget {
         name: text.tutors.morgan,
         image: AppAssets.tutorMorgan,
         riveAsset: AppAssets.tutorMorganRiv,
+        voiceId: TutorVoiceIds.male,
         tags: [tags.smart, tags.patient],
+      ),
+      _TutorData(
+        name: text.tutors.santa,
+        image: AppAssets.tutorHeroBg,
+        riveAsset: AppAssets.tutorSantaRiv,
+        voiceId: TutorVoiceIds.santa,
+        tags: [tags.cheerful, tags.generous],
+        theme: const TutorCardTheme(
+          gradientStart: Color(0xFFE85D04),
+          gradientEnd: Color(0xFF9B2226),
+          buttonColor: Color(0xFFD00000),
+          buttonForeground: Colors.white,
+        ),
       ),
       // Fantasy dörtlü — listenin en altında (riv’leri ayrı kalır)
       _TutorData(
         name: text.tutors.zephyrion,
         image: AppAssets.tutorZephyrion,
+        riveAsset: AppAssets.tutorZephyrionRiv,
+        voiceId: TutorVoiceIds.zephyrion,
         tags: [tags.curious, tags.observer],
         theme: const TutorCardTheme(
           gradientStart: Color(0xFF586168),
@@ -275,6 +299,7 @@ class TutorScreen extends StatelessWidget {
       _TutorData(
         name: text.tutors.vaelen,
         image: AppAssets.tutorVaelen,
+        riveAsset: AppAssets.tutorVaelenRiv,
         tags: [tags.calm, tags.ancientKnowledge],
         theme: const TutorCardTheme(
           gradientStart: Color(0xFF160A20),
@@ -286,6 +311,8 @@ class TutorScreen extends StatelessWidget {
       _TutorData(
         name: text.tutors.ukrath,
         image: AppAssets.tutorUkrath,
+        riveAsset: AppAssets.tutorUkrathRiv,
+        voiceId: TutorVoiceIds.ukrath,
         tags: [tags.clear, tags.decisive],
         theme: const TutorCardTheme(
           gradientStart: Color(0xFF2A1812),
@@ -299,6 +326,7 @@ class TutorScreen extends StatelessWidget {
         image: AppAssets.tutorElrion,
         tags: [tags.wise, tags.patient],
         riveAsset: AppAssets.tutorElrionRiv,
+        voiceId: TutorVoiceIds.male,
         theme: const TutorCardTheme(
           gradientStart: Color(0xFF18452A),
           gradientEnd: Color(0xFFD7B35A),
@@ -332,6 +360,7 @@ class _TutorData {
     this.theme,
     this.flagAsset,
     this.riveAsset,
+    this.voiceId,
   });
 
   final String name;
@@ -340,6 +369,7 @@ class _TutorData {
   final TutorCardTheme? theme;
   final String? flagAsset;
   final String? riveAsset;
+  final String? voiceId;
 }
 
 class _TutorHero extends StatelessWidget {

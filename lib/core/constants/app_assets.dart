@@ -123,6 +123,10 @@ abstract final class AppAssets {
   static const callingClosedEye = 'assets/images/callinScreen/closedEye.svg';
   static const callingResize = 'assets/images/roleplay/kucultmebuyutme.svg';
   static const tutorElrionRiv = 'assets/riv/elrion.riv';
+  static const tutorVaelenRiv = 'assets/riv/vaelen.riv';
+  static const tutorUkrathRiv = 'assets/riv/ukrath.riv';
+  static const tutorSantaRiv = 'assets/riv/santa_claus.riv';
+  static const tutorZephyrionRiv = 'assets/riv/zephyrion.riv';
 
   // —— Tutor Rive (Female/Male foto eşleştirmesi) ——
   static const tutorElenaRiv = 'assets/riv/Female/avatar3.riv';

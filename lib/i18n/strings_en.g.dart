@@ -1331,6 +1331,9 @@ class Translations$tutorPage$tutors$en {
 
 	/// en: 'Morgan'
 	String get morgan => 'Morgan';
+
+	/// en: 'Santa Claus'
+	String get santa => 'Santa Claus';
 }
 
 // Path: tutorPage.tags
@@ -1391,6 +1394,12 @@ class Translations$tutorPage$tags$en {
 
 	/// en: 'Analytic'
 	String get analytic => 'Analytic';
+
+	/// en: 'Cheerful'
+	String get cheerful => 'Cheerful';
+
+	/// en: 'Generous'
+	String get generous => 'Generous';
 }
 
 // Path: tutorPage.chat
@@ -2303,6 +2312,7 @@ extension on Translations {
 			'tutorPage.tutors.erik' => 'Erik',
 			'tutorPage.tutors.katie' => 'Katie',
 			'tutorPage.tutors.morgan' => 'Morgan',
+			'tutorPage.tutors.santa' => 'Santa Claus',
 			'tutorPage.tags.adaptive' => 'Adaptive',
 			'tutorPage.tags.calm' => 'Calm',
 			'tutorPage.tags.patient' => 'Patient',
@@ -2320,6 +2330,8 @@ extension on Translations {
 			'tutorPage.tags.disciplined' => 'Disciplined',
 			'tutorPage.tags.smart' => 'Smart',
 			'tutorPage.tags.analytic' => 'Analytic',
+			'tutorPage.tags.cheerful' => 'Cheerful',
+			'tutorPage.tags.generous' => 'Generous',
 			'tutorPage.historyPreview1' => 'Hey! I was about to explode with boredom...',
 			'tutorPage.historyPreview2' => 'Shall we practice ordering food today?',
 			'tutorPage.time1' => '11:00 AM',
@@ -2565,11 +2577,11 @@ extension on Translations {
 			'rolePlayPage.subtitle' => 'Choose your role — experience a real-life scenario 🎭',
 			'rolePlayPage.progressCompleted' => ({required Object value}) => '%${value} completed',
 			'rolePlayPage.minutes' => ({required Object value}) => '${value} Min',
+			_ => null,
+		} ?? switch (path) {
 			'rolePlayPage.beginner' => 'Beginner',
 			'rolePlayPage.screenplay' => 'SCREENPLAY',
 			'rolePlayPage.dailyInteractions' => 'Daily Interactions',
-			_ => null,
-		} ?? switch (path) {
 			'rolePlayPage.business' => 'Business',
 			'rolePlayPage.coffee.title' => 'Ordering at the Coffee Shop',
 			'rolePlayPage.coffee.screenplay' => 'Order your favorite drink, ask about sizes and extras, confirm your total, and pick up your coffee at the counter.',

@@ -69,19 +69,21 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
   RiveWidgetController _createController(File file) {
     Object? lastError;
+    final isElrion = widget.assetPath.toLowerCase().contains('elrion');
     final attempts = <RiveWidgetController Function()>[
       () => RiveWidgetController(file),
-      () => RiveWidgetController(
-            file,
-            artboardSelector: ArtboardSelector.byName('Elrion'),
-            stateMachineSelector:
-                StateMachineSelector.byName('State Machine 1'),
-          ),
       () => RiveWidgetController(
             file,
             artboardSelector: const ArtboardAtIndex(0),
             stateMachineSelector: const StateMachineAtIndex(0),
           ),
+      if (isElrion)
+        () => RiveWidgetController(
+              file,
+              artboardSelector: ArtboardSelector.byName('Elrion'),
+              stateMachineSelector:
+                  StateMachineSelector.byName('State Machine 1'),
+            ),
     ];
     for (final create in attempts) {
       try {

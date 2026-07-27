@@ -646,6 +646,7 @@ class _Translations$tutorPage$tutors$tr implements Translations$tutorPage$tutors
 	@override String get erik => 'Erik';
 	@override String get katie => 'Katie';
 	@override String get morgan => 'Morgan';
+	@override String get santa => 'Santa Claus';
 }
 
 // Path: tutorPage.tags
@@ -672,6 +673,8 @@ class _Translations$tutorPage$tags$tr implements Translations$tutorPage$tags$en 
 	@override String get disciplined => 'Disiplinli';
 	@override String get smart => 'Zeki';
 	@override String get analytic => 'Analitik';
+	@override String get cheerful => 'Neşeli';
+	@override String get generous => 'Cömert';
 }
 
 // Path: tutorPage.chat
@@ -1447,6 +1450,7 @@ extension on TranslationsTr {
 			'tutorPage.tutors.erik' => 'Erik',
 			'tutorPage.tutors.katie' => 'Katie',
 			'tutorPage.tutors.morgan' => 'Morgan',
+			'tutorPage.tutors.santa' => 'Santa Claus',
 			'tutorPage.tags.adaptive' => 'Uyarlanabilir',
 			'tutorPage.tags.calm' => 'Sakin',
 			'tutorPage.tags.patient' => 'Sabırlı',
@@ -1464,6 +1468,8 @@ extension on TranslationsTr {
 			'tutorPage.tags.disciplined' => 'Disiplinli',
 			'tutorPage.tags.smart' => 'Zeki',
 			'tutorPage.tags.analytic' => 'Analitik',
+			'tutorPage.tags.cheerful' => 'Neşeli',
+			'tutorPage.tags.generous' => 'Cömert',
 			'tutorPage.historyPreview1' => 'Hey! Can sıkıntısından patlamak üzereydim...',
 			'tutorPage.historyPreview2' => 'Bugün yemek siparişi pratiği yapalım mı?',
 			'tutorPage.time1' => '11:00',
@@ -1709,11 +1715,11 @@ extension on TranslationsTr {
 			'rolePlayPage.subtitle' => 'Rolünü seç — gerçek bir senaryoyu deneyimle 🎭',
 			'rolePlayPage.progressCompleted' => ({required Object value}) => '%${value} tamamlandı',
 			'rolePlayPage.minutes' => ({required Object value}) => '${value} Dk',
+			_ => null,
+		} ?? switch (path) {
 			'rolePlayPage.beginner' => 'Başlangıç',
 			'rolePlayPage.screenplay' => 'SENARYO',
 			'rolePlayPage.dailyInteractions' => 'Günlük Etkileşimler',
-			_ => null,
-		} ?? switch (path) {
 			'rolePlayPage.business' => 'İş',
 			'rolePlayPage.coffee.title' => 'Kafede Sipariş Verme',
 			'rolePlayPage.coffee.screenplay' => 'Favori içeceğini sipariş et, boyut ve ekstraları sor, toplamı onayla ve tezgâhtan kahveni al.',

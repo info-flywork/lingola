@@ -18,6 +18,7 @@ class CallingScreen extends StatefulWidget {
     required this.tutorName,
     required this.imagePath,
     this.riveAsset,
+    this.voiceId,
     super.key,
   });
 
@@ -25,6 +26,8 @@ class CallingScreen extends StatefulWidget {
   final String imagePath;
   /// Varsa Rive avatar (dudak senkronu); yoksa [imagePath].
   final String? riveAsset;
+  /// ElevenLabs voice ID (hoca özel sesi).
+  final String? voiceId;
 
   @override
   State<CallingScreen> createState() => _CallingScreenState();
@@ -50,7 +53,8 @@ class _CallingScreenState extends State<CallingScreen> {
       if (!mounted) return;
       setState(() => _elapsed = _watch.elapsed);
     });
-    _conversation = CallingConversationController()..addListener(_onConvo);
+    _conversation = CallingConversationController(voiceId: widget.voiceId)
+      ..addListener(_onConvo);
     unawaited(_conversation.start());
   }
 
@@ -105,15 +109,23 @@ class _CallingScreenState extends State<CallingScreen> {
                 ),
               ),
             ),
-            // Hoca kartındaki riveAsset; yoksa Elrion fallback.
+            // Hoca kartındaki riveAsset; yoksa statik görsel.
             Positioned.fill(
-              child: TutorRiveAvatar(
-                assetPath: widget.riveAsset ?? AppAssets.tutorElrionRiv,
-                talking: _conversation.speaking,
-                fallbackImage: widget.imagePath,
-                fit: Fit.cover,
-                alignment: const Alignment(0, -0.35),
-              ),
+              child: widget.riveAsset != null
+                  ? TutorRiveAvatar(
+                      assetPath: widget.riveAsset!,
+                      talking: _conversation.speaking,
+                      fallbackImage: widget.imagePath,
+                      fit: Fit.cover,
+                      alignment: const Alignment(0, -0.35),
+                    )
+                  : Image.asset(
+                      widget.imagePath,
+                      fit: BoxFit.cover,
+                      alignment: const Alignment(0, -0.35),
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
             ),
             const Positioned(
               left: 0,
@@ -476,30 +488,32 @@ class _ChatBubbleState extends State<_ChatBubble> {
     _recognizers.clear();
 
     final spans = <InlineSpan>[];
-    final parts = widget.message.text.split(RegExp(r'(\s+)'));
+    // Boşlukları ayrı TextSpan yapma — gesture’lı span’lerde Flutter
+    // whitespace-only span’leri yutabiliyor (birleşik yazı).
+    final words = widget.message.text
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
 
-    for (final part in parts) {
-      if (part.isEmpty) continue;
-      if (part.trim().isEmpty) {
-        spans.add(TextSpan(text: part));
-        continue;
-      }
-
-      final clean = part.replaceAll(RegExp(r"[^\w'\-]+"), '');
-      final selected =
-          isTutor && clean.isNotEmpty && _selectedWord == clean;
+    for (var i = 0; i < words.length; i++) {
+      final word = words[i];
+      final display = i < words.length - 1 ? '$word ' : word;
+      final clean = word.replaceAll(RegExp(r"[^\w'\-]+"), '');
 
       if (!isTutor || clean.isEmpty) {
-        spans.add(TextSpan(text: part, style: TextStyle(color: baseColor)));
+        spans.add(TextSpan(text: display, style: TextStyle(color: baseColor)));
         continue;
       }
 
-      final recognizer = TapGestureRecognizer()..onTap = () => _onWordTap(part);
+      final selected = _selectedWord == clean;
+      final recognizer = TapGestureRecognizer()
+        ..onTap = () => _onWordTap(word);
       _recognizers.add(recognizer);
 
       spans.add(
         TextSpan(
-          text: part,
+          text: display,
           recognizer: recognizer,
           style: TextStyle(
             color: selected ? Colors.white : baseColor,

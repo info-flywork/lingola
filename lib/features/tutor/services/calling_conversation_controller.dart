@@ -31,6 +31,7 @@ class CallingConversationController extends ChangeNotifier {
     TutorTtsService? tts,
     AudioRecorder? recorder,
     AudioPlayer? player,
+    this.voiceId,
   })  : _chat = chat ?? OpenAiChatService(),
         _tts = tts ?? TutorTtsService(),
         _recorder = recorder ?? AudioRecorder(),
@@ -45,6 +46,7 @@ class CallingConversationController extends ChangeNotifier {
   final TutorTtsService _tts;
   final AudioRecorder _recorder;
   final AudioPlayer _player;
+  final String? voiceId;
   StreamSubscription<void>? _playerCompleteSub;
 
   final List<CallMessage> messages = [];
@@ -241,7 +243,7 @@ class CallingConversationController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final file = await _tts.synthesizeToFile(text);
+      final file = await _tts.synthesizeToFile(text, voiceId: voiceId);
       await _player.stop();
       _speaking = true;
       notifyListeners();
