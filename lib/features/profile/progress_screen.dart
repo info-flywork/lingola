@@ -3,13 +3,17 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/auth/auth_service.dart';
+import '../../core/auth/session_store.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/practice/practice_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
+import '../library/library_screen.dart';
 import '../onboarding/language_flag.dart';
 
-class ProgressScreen extends StatelessWidget {
+class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
 
   static const _streakDone = Color(0xFF2D46FF);
@@ -30,8 +34,30 @@ class ProgressScreen extends StatelessWidget {
   ];
 
   @override
+  State<ProgressScreen> createState() => _ProgressScreenState();
+}
+
+class _ProgressScreenState extends State<ProgressScreen> {
+  var _savedCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCount();
+  }
+
+  Future<void> _loadSavedCount() async {
+    try {
+      final count = await PracticeService.fetchSavedCount();
+      if (!mounted) return;
+      setState(() => _savedCount = count);
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
     final text = AppText.current.profilePage;
+    final userName = AuthService.displayNameOf(SessionStore.currentUser);
     final dayLabels = [
       text.days.mon,
       text.days.tue,
@@ -105,7 +131,7 @@ class ProgressScreen extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                text.progressUserName,
+                                userName,
                                 style: const TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 20,
@@ -182,7 +208,7 @@ class ProgressScreen extends StatelessWidget {
                               fontSize: 14,
                               height: 20 / 14,
                               fontWeight: FontWeight.w300,
-                              color: _pastBody,
+                              color: ProgressScreen._pastBody,
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -194,7 +220,7 @@ class ProgressScreen extends StatelessWidget {
                                   Expanded(
                                     child: _ProgressStreakDay(
                                       label: dayLabels[i],
-                                      state: _streakStates[i],
+                                      state: ProgressScreen._streakStates[i],
                                     ),
                                   ),
                               ],
@@ -288,12 +314,12 @@ class ProgressScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: _StatCard(
-                            iconBg: _flameBg,
+                            iconBg: ProgressScreen._flameBg,
                             icon: const HomeAsset(
                               AppAssets.profileStreak,
                               width: 22,
                               height: 25,
-                              color: _flame,
+                              color: ProgressScreen._flame,
                             ),
                             value: '12',
                             label: text.dayStreakLabel,
@@ -302,7 +328,7 @@ class ProgressScreen extends StatelessWidget {
                         const SizedBox(width: 10),
                         Expanded(
                           child: _StatCard(
-                            iconBg: _starBg,
+                            iconBg: ProgressScreen._starBg,
                             icon: const HomeAsset(
                               AppAssets.homeStar,
                               width: 18,
@@ -320,7 +346,14 @@ class ProgressScreen extends StatelessWidget {
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(10),
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const LibraryScreen(),
+                            ),
+                          );
+                          if (mounted) _loadSavedCount();
+                        },
                         borderRadius: BorderRadius.circular(10),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -360,7 +393,9 @@ class ProgressScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      text.itemsToReview(count: '128'),
+                                      text.itemsToReview(
+                                        count: '$_savedCount',
+                                      ),
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 12,

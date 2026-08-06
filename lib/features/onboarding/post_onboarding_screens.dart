@@ -1,19 +1,26 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/auth/api_client.dart';
+import '../../core/auth/auth_service.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../shell/main_shell.dart';
 import 'language_flag.dart';
+import 'onboarding_draft.dart';
 import 'preview_chat_screen.dart';
 
 class AccountCreatingScreen extends StatefulWidget {
-  const AccountCreatingScreen({super.key});
+  const AccountCreatingScreen({super.key, required this.draft});
+
+  final OnboardingDraft draft;
 
   @override
   State<AccountCreatingScreen> createState() => _AccountCreatingScreenState();
@@ -49,7 +56,9 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen> {
 
   void _openPreviewChat() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const PreviewChatScreen()),
+      MaterialPageRoute<void>(
+        builder: (_) => PreviewChatScreen(draft: widget.draft),
+      ),
     );
   }
 
@@ -430,7 +439,9 @@ class _AccountStepRow extends StatelessWidget {
 }
 
 class PaywallScreen extends StatefulWidget {
-  const PaywallScreen({super.key});
+  const PaywallScreen({super.key, required this.draft});
+
+  final OnboardingDraft draft;
 
   @override
   State<PaywallScreen> createState() => _PaywallScreenState();
@@ -441,7 +452,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   void _openAuth() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const AuthScreen()),
+      MaterialPageRoute<void>(
+        builder: (_) => AuthScreen(draft: widget.draft),
+      ),
     );
   }
 
@@ -706,13 +719,91 @@ class _PaywallMetaRow extends StatelessWidget {
   }
 }
 
-class AuthScreen extends StatelessWidget {
-  const AuthScreen({super.key});
+class AuthScreen extends StatefulWidget {
+  const AuthScreen({super.key, required this.draft});
 
-  void _enterApp(BuildContext context) {
+  final OnboardingDraft draft;
+
+  @override
+  State<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends State<AuthScreen> {
+  var _busy = false;
+
+  /// Apple sadece iOS'ta; Android'de Google + Guest.
+  bool get _showAppleSignIn => !kIsWeb && Platform.isIOS;
+
+  void _enterApp() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(builder: (_) => const MainShell()),
     );
+  }
+
+  Future<void> _continueAsGuest() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await AuthService.signInAsGuest(widget.draft);
+      if (!mounted) return;
+      _enterApp();
+    } on ApiException catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err.message)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not sign in as guest')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _continueWithGoogle() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await AuthService.signInWithGoogle(widget.draft);
+      if (!mounted) return;
+      _enterApp();
+    } on ApiException catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err.message)),
+      );
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google sign-in failed: $err')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _continueWithApple() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await AuthService.signInWithApple(widget.draft);
+      if (!mounted) return;
+      _enterApp();
+    } on ApiException catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err.message)),
+      );
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Apple sign-in failed: $err')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
@@ -857,26 +948,31 @@ class AuthScreen extends StatelessWidget {
                               foreground: AppColors.ink,
                               iconAsset: 'assets/images/auth/google.svg',
                               iconSize: 22,
-                              onPressed: () => _enterApp(context),
+                              onPressed: _busy ? null : _continueWithGoogle,
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: _SocialAuthButton(
-                              label: text.auth.continueApple,
-                              background: Colors.white.withValues(alpha: .20),
-                              foreground: Colors.white,
-                              iconAsset: 'assets/images/auth/apple.svg',
-                              iconSize: 28,
-                              glassGradient: true,
-                              onPressed: () => _enterApp(context),
+                          if (_showAppleSignIn) ...[
+                            const SizedBox(height: 12),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: _SocialAuthButton(
+                                label: text.auth.continueApple,
+                                background:
+                                    Colors.white.withValues(alpha: .20),
+                                foreground: Colors.white,
+                                iconAsset: 'assets/images/auth/apple.svg',
+                                iconSize: 28,
+                                glassGradient: true,
+                                onPressed:
+                                    _busy ? null : _continueWithApple,
+                              ),
                             ),
-                          ),
+                          ],
                           const SizedBox(height: 16),
                           Center(
                             child: TextButton(
-                              onPressed: () => _enterApp(context),
+                              onPressed: _busy ? null : _continueAsGuest,
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
@@ -884,16 +980,25 @@ class AuthScreen extends StatelessWidget {
                                   vertical: 8,
                                 ),
                               ),
-                              child: Text(
-                                text.auth.continueGuest,
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  height: 18 / 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              child: _busy
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Text(
+                                      text.auth.continueGuest,
+                                      style: const TextStyle(
+                                        fontFamily: 'Poppins',
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        height: 18 / 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                             ),
                           ),
                           const Spacer(),
@@ -1000,7 +1105,7 @@ class _SocialAuthButton extends StatelessWidget {
   final Color background;
   final Color foreground;
   final String iconAsset;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final double iconSize;
   final bool glassGradient;
 

@@ -9,7 +9,9 @@ import '../../widgets/home_asset.dart';
 import '../onboarding/language_flag.dart';
 
 class SelectLanguageScreen extends StatefulWidget {
-  const SelectLanguageScreen({super.key});
+  const SelectLanguageScreen({super.key, this.initialCode = 'tr'});
+
+  final String initialCode;
 
   @override
   State<SelectLanguageScreen> createState() => _SelectLanguageScreenState();
@@ -18,7 +20,13 @@ class SelectLanguageScreen extends StatefulWidget {
 class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
   static const _labelMuted = Color(0xFF606060);
 
-  String _selectedCode = 'tr';
+  late String _selectedCode;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCode = widget.initialCode;
+  }
 
   List<({String code, String label})> _languages() {
     final t = AppText.current;
@@ -140,7 +148,7 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: PrimaryButton(
                   label: text.save,
-                  onPressed: () => Navigator.of(context).maybePop(),
+                  onPressed: () => Navigator.of(context).pop(_selectedCode),
                 ),
               ),
             ],

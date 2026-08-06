@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../../core/auth/app_user.dart';
+import '../../core/auth/auth_service.dart';
+import '../../core/auth/session_store.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
@@ -21,13 +25,47 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;
+  var _saving = false;
+  var _loading = true;
+  var _uploadingAvatar = false;
+  String? _avatarUrl;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: 'Alex Jhonson');
-    _emailController =
-        TextEditingController(text: 'alex.johnson@icloud.com');
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+    _hydrateFrom(SessionStore.currentUser);
+    _loadUser();
+  }
+
+  void _hydrateFrom(AppUser? user) {
+    final name = user?.displayName?.trim() ?? '';
+    final email = user?.email?.trim() ?? '';
+    _nameController.value = TextEditingValue(
+      text: name,
+      selection: TextSelection.collapsed(offset: name.length),
+    );
+    _emailController.value = TextEditingValue(
+      text: email,
+      selection: TextSelection.collapsed(offset: email.length),
+    );
+    _avatarUrl = user?.avatarUrl;
+  }
+
+  Future<void> _loadUser() async {
+    setState(() => _loading = true);
+    final cached = await SessionStore.loadCachedUser();
+    if (mounted && cached != null) {
+      setState(() => _hydrateFrom(cached));
+    }
+
+    final user = await AuthService.restoreSession();
+    if (!mounted) return;
+    setState(() {
+      _hydrateFrom(user ?? cached ?? SessionStore.currentUser);
+      _loading = false;
+    });
   }
 
   @override
@@ -37,9 +75,141 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     super.dispose();
   }
 
-  void _onSave() {
+  Future<void> _onSave() async {
     FocusScope.of(context).unfocus();
-    Navigator.of(context).maybePop();
+    if (_saving || _loading) return;
+
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Name cannot be empty')),
+      );
+      return;
+    }
+
+    setState(() => _saving = true);
+    try {
+      final updated = await AuthService.updateProfile(displayName: name);
+      if (!mounted) return;
+      _hydrateFrom(updated);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile saved')),
+      );
+      Navigator.of(context).maybePop(true);
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not save profile: $err')),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    if (_uploadingAvatar || _loading) return;
+    final picker = ImagePicker();
+    final file = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
+    if (file == null) return;
+
+    setState(() => _uploadingAvatar = true);
+    try {
+      final bytes = await file.readAsBytes();
+      final path = file.path.toLowerCase();
+      final mime = path.endsWith('.png')
+          ? 'image/png'
+          : path.endsWith('.webp')
+              ? 'image/webp'
+              : 'image/jpeg';
+      final user = await AuthService.uploadAvatar(
+        bytes: bytes,
+        contentType: mime,
+      );
+      if (!mounted) return;
+      setState(() => _hydrateFrom(user));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile photo updated')),
+      );
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Photo upload failed: $err')),
+      );
+    } finally {
+      if (mounted) setState(() => _uploadingAvatar = false);
+    }
+  }
+
+  Widget _buildAvatar() {
+    final url = _avatarUrl?.trim();
+    final image = (url != null && url.isNotEmpty)
+        ? ClipOval(
+            child: Image.network(
+              url,
+              width: 86,
+              height: 86,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => const HomeAsset(
+                AppAssets.profileAvatar,
+                width: 86,
+                height: 86,
+              ),
+            ),
+          )
+        : const HomeAsset(
+            AppAssets.profileAvatar,
+            width: 86,
+            height: 86,
+          );
+
+    return SizedBox(
+      width: 92,
+      height: 92,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Center(
+            child: _uploadingAvatar
+                ? const SizedBox(
+                    width: 86,
+                    height: 86,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : image,
+          ),
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Material(
+              color: Colors.white,
+              shape: const CircleBorder(),
+              elevation: 1,
+              shadowColor: Colors.black26,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: _uploadingAvatar ? null : _pickAndUploadAvatar,
+                child: const SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: Center(
+                    child: HomeAsset(
+                      AppAssets.profileCamera,
+                      width: 16,
+                      height: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _showDeleteAccountSheet(BuildContext context) async {
@@ -104,55 +274,14 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   children: [
                     const SizedBox(height: 8),
-                    Center(
-                      child: SizedBox(
-                        width: 92,
-                        height: 92,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            const Center(
-                              child: HomeAsset(
-                                AppAssets.profileAvatar,
-                                width: 86,
-                                height: 86,
-                              ),
-                            ),
-                            Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: Material(
-                                color: Colors.white,
-                                shape: const CircleBorder(),
-                                elevation: 1,
-                                shadowColor: Colors.black26,
-                                child: InkWell(
-                                  customBorder: const CircleBorder(),
-                                  onTap: () {},
-                                  child: const SizedBox(
-                                    width: 32,
-                                    height: 32,
-                                    child: Center(
-                                      child: HomeAsset(
-                                        AppAssets.profileCamera,
-                                        width: 16,
-                                        height: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    Center(child: _buildAvatar()),
                     const SizedBox(height: 28),
                     _LabeledField(
                       label: text.fullName,
                       child: _InputBox(
                         child: TextField(
                           controller: _nameController,
+                          enabled: !_loading && !_saving,
                           style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 14,
@@ -161,6 +290,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                             color: AppColors.ink,
                           ),
                           cursorColor: AppColors.primary,
+                          textInputAction: TextInputAction.done,
                           decoration: const InputDecoration(
                             isDense: true,
                             border: InputBorder.none,
@@ -186,10 +316,16 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                                   fontWeight: FontWeight.w500,
                                   color: AppColors.secondary,
                                 ),
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   isDense: true,
                                   border: InputBorder.none,
                                   contentPadding: EdgeInsets.zero,
+                                  hintText: _loading ? '…' : '—',
+                                  hintStyle: const TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 14,
+                                    color: AppColors.secondary,
+                                  ),
                                 ),
                               ),
                             ),
@@ -247,7 +383,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     ),
                     const SizedBox(height: 10),
                     PrimaryButton(
-                      label: text.save,
+                      label: _saving ? '…' : text.save,
                       onPressed: _onSave,
                     ),
                   ],
@@ -326,11 +462,21 @@ enum _DeleteStep { survey, offer, confirm, farewell }
 class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
   static const _border = Color(0x0D000000);
   static const _iconOrangeBg = Color(0xFFFFF0E6);
-  static const _accessUntilDate = 'Jan 15, 2025';
+
+  static const _reasonCodes = <String>[
+    'ai_characters',
+    'video_issues',
+    'pricing',
+    'no_match',
+    'short_trial',
+    'other',
+  ];
 
   final _messageController = TextEditingController();
   int? _selectedIndex;
   _DeleteStep _step = _DeleteStep.survey;
+  var _busy = false;
+  String _accessUntilLabel = '—';
 
   @override
   void dispose() {
@@ -340,14 +486,93 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
 
   void _close() => Navigator.of(context).pop();
 
-  void _onNext() {
+  Future<void> _acceptOffer(String offerType) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await AuthService.acceptRetentionOffer(offerType);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Offer saved — glad you\'re staying!')),
+      );
+      _close();
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not save offer: $err')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _confirmDeletion() async {
+    if (_busy) return;
+    final index = _selectedIndex;
+    if (index == null || index < 0 || index >= _reasonCodes.length) return;
+
+    final text = AppText.current.profilePage;
+    final reasons = [
+      text.deleteReasons.aiCharacters,
+      text.deleteReasons.videoIssues,
+      text.deleteReasons.pricing,
+      text.deleteReasons.noMatch,
+      text.deleteReasons.shortTrial,
+      text.deleteReasons.other,
+    ];
+
+    setState(() => _busy = true);
+    try {
+      final result = await AuthService.requestAccountDeletion(
+        reasonCode: _reasonCodes[index],
+        reasonLabel: reasons[index],
+        message: _messageController.text,
+      );
+      if (!mounted) return;
+      setState(() {
+        _accessUntilLabel = AuthService.formatAccessDate(result.accessUntil);
+        _step = _DeleteStep.farewell;
+      });
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not delete account: $err')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _reactivate() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await AuthService.reactivateAccount();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Welcome back — account reactivated')),
+      );
+      _close();
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not reactivate: $err')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _onNext() async {
+    if (_busy) return;
     switch (_step) {
       case _DeleteStep.survey:
+        if (_selectedIndex == null) return;
         setState(() => _step = _DeleteStep.offer);
       case _DeleteStep.offer:
         setState(() => _step = _DeleteStep.confirm);
       case _DeleteStep.confirm:
-        setState(() => _step = _DeleteStep.farewell);
+        await _confirmDeletion();
       case _DeleteStep.farewell:
         _close();
     }
@@ -357,7 +582,7 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
   Widget build(BuildContext context) {
     final text = AppText.current.profilePage;
     final canNext =
-        _step != _DeleteStep.survey || _selectedIndex != null;
+        !_busy && (_step != _DeleteStep.survey || _selectedIndex != null);
     final isFarewell = _step == _DeleteStep.farewell;
 
     return SafeArea(
@@ -399,17 +624,22 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  if (_busy)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 12),
+                      child: LinearProgressIndicator(minHeight: 2),
+                    ),
                   if (_step == _DeleteStep.offer) ...[
                     PrimaryButton(
                       label: text.switchMonthlyCta,
-                      onPressed: _close,
+                      onPressed: () => _acceptOffer('monthly_plan'),
                     ),
                     const SizedBox(height: 10),
                   ],
                   if (_step == _DeleteStep.confirm) ...[
                     PrimaryButton(
                       label: text.acceptDiscountCta,
-                      onPressed: _close,
+                      onPressed: () => _acceptOffer('discount_60'),
                     ),
                     const SizedBox(height: 10),
                   ],
@@ -455,7 +685,6 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
       ),
     );
   }
-
   Widget _buildSurvey(Translations$profilePage$en text) {
     final reasons = [
       text.deleteReasons.aiCharacters,
@@ -778,7 +1007,7 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
       children: [
         _SheetHeader(
           title: text.farewellTitle,
-          body: text.farewellBody(date: _accessUntilDate),
+          body: text.farewellBody(date: _accessUntilLabel),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
@@ -805,7 +1034,7 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  text.changeMindBody(date: _accessUntilDate),
+                  text.changeMindBody(date: _accessUntilLabel),
                   style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 12,
@@ -818,7 +1047,7 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: _close,
+                    onTap: _reactivate,
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
                       width: double.infinity,

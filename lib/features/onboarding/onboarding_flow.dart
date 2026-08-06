@@ -5,11 +5,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/auth/auth_service.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../shell/main_shell.dart';
 import 'language_setup_screens.dart';
+import 'onboarding_draft.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,27 +24,39 @@ class _SplashScreenState extends State<SplashScreen> {
   Timer? _timer;
   /// 0 = app icon, 1 = büyük koala
   int _step = 0;
+  Future<bool>? _sessionCheck;
 
   @override
   void initState() {
     super.initState();
+    _sessionCheck = _hasValidSession();
     _armTimer();
+  }
+
+  Future<bool> _hasValidSession() async {
+    final user = await AuthService.restoreSession();
+    return user != null;
   }
 
   void _armTimer() {
     _timer?.cancel();
     _timer = Timer(
       Duration(milliseconds: _step == 0 ? 1500 : 1600),
-      () {
+      () async {
         if (!mounted) return;
         if (_step == 0) {
           setState(() => _step = 1);
           _armTimer();
           return;
         }
+
+        final signedIn = await (_sessionCheck ?? _hasValidSession());
+        if (!mounted) return;
+
         Navigator.of(context).pushReplacement(
           PageRouteBuilder<void>(
-            pageBuilder: (_, _, _) => const OnboardingScreen(),
+            pageBuilder: (_, _, _) =>
+                signedIn ? const MainShell() : const OnboardingScreen(),
             transitionsBuilder: (_, animation, _, child) {
               return FadeTransition(opacity: animation, child: child);
             },
@@ -282,7 +296,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => const LanguageSetupScreen(),
+        builder: (_) => LanguageSetupScreen(draft: OnboardingDraft()),
       ),
     );
   }

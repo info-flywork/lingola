@@ -24,14 +24,35 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>GIDClientID</key>
+	<string>963261267239-7b2f514cmbgfoak6ne2s77s3kc18mdru.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.963261267239-7b2f514cmbgfoak6ne2s77s3kc18mdru</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_dartVmService._tcp</string>
+		<string>_http._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Flutter araçlarının bu uygulamaya bağlanıp hata ayıklamasına izin verin.</string>
+	<string>Lingola, aynı Wi‑Fi üzerindeki geliştirme API sunucusuna (Mac) bağlanmak için yerel ağı kullanır.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -53,6 +74,10 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Profil fotoğrafını güncellemek için galeri erişimi gerekir.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Profil fotoğrafı çekmek için kamera erişimi gerekir.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Kelimeleri sesli okumanı dinlemek için mikrofona ihtiyacımız var.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

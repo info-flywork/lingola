@@ -5,10 +5,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
+import 'onboarding_draft.dart';
 import 'post_onboarding_screens.dart';
 
 class GoalSetupScreen extends StatefulWidget {
-  const GoalSetupScreen({super.key});
+  const GoalSetupScreen({super.key, required this.draft});
+
+  final OnboardingDraft draft;
 
   @override
   State<GoalSetupScreen> createState() => _GoalSetupScreenState();
@@ -36,15 +39,22 @@ class _GoalSetupScreenState extends State<GoalSetupScreen> {
       mutedUnselectedLabels: true,
       onSelect: (index) => setState(() => _selected = index),
       onBack: () => Navigator.of(context).maybePop(),
-      onContinue: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const LevelSetupScreen()),
-      ),
+      onContinue: () {
+        widget.draft.setGoalIndex(_selected);
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => LevelSetupScreen(draft: widget.draft),
+          ),
+        );
+      },
     );
   }
 }
 
 class LevelSetupScreen extends StatefulWidget {
-  const LevelSetupScreen({super.key});
+  const LevelSetupScreen({super.key, required this.draft});
+
+  final OnboardingDraft draft;
 
   @override
   State<LevelSetupScreen> createState() => _LevelSetupScreenState();
@@ -73,15 +83,22 @@ class _LevelSetupScreenState extends State<LevelSetupScreen> {
       mutedUnselectedLabels: true,
       onSelect: (index) => setState(() => _selected = index),
       onBack: () => Navigator.of(context).maybePop(),
-      onContinue: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const PaceSetupScreen()),
-      ),
+      onContinue: () {
+        widget.draft.setLevelIndex(_selected);
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => PaceSetupScreen(draft: widget.draft),
+          ),
+        );
+      },
     );
   }
 }
 
 class PaceSetupScreen extends StatefulWidget {
-  const PaceSetupScreen({super.key});
+  const PaceSetupScreen({super.key, required this.draft});
+
+  final OnboardingDraft draft;
 
   @override
   State<PaceSetupScreen> createState() => _PaceSetupScreenState();
@@ -113,11 +130,14 @@ class _PaceSetupScreenState extends State<PaceSetupScreen> {
       mutedUnselectedLabels: true,
       onSelect: (index) => setState(() => _selected = index),
       onBack: () => Navigator.of(context).maybePop(),
-      onContinue: () => Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => const AccountCreatingScreen(),
-        ),
-      ),
+      onContinue: () {
+        widget.draft.setPaceIndex(_selected);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (_) => AccountCreatingScreen(draft: widget.draft),
+          ),
+        );
+      },
     );
   }
 }

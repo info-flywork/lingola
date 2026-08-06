@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 import '../../../core/config/app_env.dart';
 
@@ -17,9 +16,17 @@ class ChatTurn {
 
 /// Basit İngilizce pratik — OpenAI Chat Completions + Whisper.
 class OpenAiChatService {
-  OpenAiChatService({http.Client? client}) : _client = client ?? http.Client();
+  OpenAiChatService({Dio? dio})
+      : _dio = dio ??
+            Dio(
+              BaseOptions(
+                connectTimeout: const Duration(seconds: 30),
+                receiveTimeout: const Duration(seconds: 60),
+                sendTimeout: const Duration(seconds: 60),
+              ),
+            );
 
-  final http.Client _client;
+  final Dio _dio;
 
   static const _chatUrl = 'https://api.openai.com/v1/chat/completions';
   static const _transcribeUrl = 'https://api.openai.com/v1/audio/transcriptions';
@@ -42,25 +49,29 @@ Rules:
       throw StateError('OPENAI_API_KEY eksik (.env)');
     }
 
-    final request = http.MultipartRequest('POST', Uri.parse(_transcribeUrl))
-      ..headers['Authorization'] = 'Bearer ${AppEnv.openAiApiKey}'
-      ..fields['model'] = 'whisper-1'
-      ..fields['language'] = 'en'
-      ..files.add(
-        await http.MultipartFile.fromPath(
-          'file',
-          audioFile.path,
-          filename: 'speech.m4a',
+    final form = FormData.fromMap({
+      'model': 'whisper-1',
+      'language': 'en',
+      'file': await MultipartFile.fromFile(
+        audioFile.path,
+        filename: 'speech.m4a',
+      ),
+    });
+
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        _transcribeUrl,
+        data: form,
+        options: Options(
+          headers: {'Authorization': 'Bearer ${AppEnv.openAiApiKey}'},
         ),
       );
-
-    final streamed = await _client.send(request);
-    final body = await streamed.stream.bytesToString();
-    if (streamed.statusCode < 200 || streamed.statusCode >= 300) {
-      throw StateError('Whisper ${streamed.statusCode}: $body');
+      return (res.data?['text'] as String?)?.trim() ?? '';
+    } on DioException catch (err) {
+      throw StateError(
+        'Whisper ${err.response?.statusCode}: ${err.response?.data ?? err.message}',
+      );
     }
-    final data = jsonDecode(body) as Map<String, dynamic>;
-    return (data['text'] as String?)?.trim() ?? '';
   }
 
   Future<String> complete({
@@ -77,36 +88,39 @@ Rules:
       {'role': 'user', 'content': userMessage},
     ];
 
-    final res = await _client.post(
-      Uri.parse(_chatUrl),
-      headers: {
-        'Authorization': 'Bearer ${AppEnv.openAiApiKey}',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'model': _model,
-        'temperature': 0.7,
-        'max_tokens': 120,
-        'messages': messages,
-      }),
-    );
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        _chatUrl,
+        data: {
+          'model': _model,
+          'temperature': 0.7,
+          'max_tokens': 120,
+          'messages': messages,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${AppEnv.openAiApiKey}',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
 
-    if (res.statusCode < 200 || res.statusCode >= 300) {
-      throw StateError('OpenAI ${res.statusCode}: ${res.body}');
+      final choices = res.data?['choices'] as List<dynamic>?;
+      if (choices == null || choices.isEmpty) {
+        throw StateError('OpenAI boş yanıt');
+      }
+      final content = choices.first as Map<String, dynamic>;
+      final message = content['message'] as Map<String, dynamic>?;
+      final text = (message?['content'] as String?)?.trim();
+      if (text == null || text.isEmpty) {
+        throw StateError('OpenAI boş yanıt');
+      }
+      return text;
+    } on DioException catch (err) {
+      throw StateError(
+        'OpenAI ${err.response?.statusCode}: ${err.response?.data ?? err.message}',
+      );
     }
-
-    final data = jsonDecode(res.body) as Map<String, dynamic>;
-    final choices = data['choices'] as List<dynamic>?;
-    if (choices == null || choices.isEmpty) {
-      throw StateError('OpenAI boş yanıt');
-    }
-    final content = choices.first as Map<String, dynamic>;
-    final message = content['message'] as Map<String, dynamic>?;
-    final text = (message?['content'] as String?)?.trim();
-    if (text == null || text.isEmpty) {
-      throw StateError('OpenAI boş yanıt');
-    }
-    return text;
   }
 
   /// İngilizce → Türkçe (kelime veya cümle). Yanıtta sadece çeviri.
@@ -117,42 +131,45 @@ Rules:
     final trimmed = text.trim();
     if (trimmed.isEmpty) return '';
 
-    final res = await _client.post(
-      Uri.parse(_chatUrl),
-      headers: {
-        'Authorization': 'Bearer ${AppEnv.openAiApiKey}',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'model': _model,
-        'temperature': 0.2,
-        'max_tokens': 200,
-        'messages': [
-          {
-            'role': 'system',
-            'content':
-                'You translate English to Turkish for language learners. '
-                'Reply with only the Turkish translation, nothing else. '
-                'Keep it natural and concise.',
+    try {
+      final res = await _dio.post<Map<String, dynamic>>(
+        _chatUrl,
+        data: {
+          'model': _model,
+          'temperature': 0.2,
+          'max_tokens': 200,
+          'messages': [
+            {
+              'role': 'system',
+              'content':
+                  'You translate English to Turkish for language learners. '
+                  'Reply with only the Turkish translation, nothing else. '
+                  'Keep it natural and concise.',
+            },
+            {'role': 'user', 'content': trimmed},
+          ],
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${AppEnv.openAiApiKey}',
+            'Content-Type': 'application/json',
           },
-          {'role': 'user', 'content': trimmed},
-        ],
-      }),
-    );
+        ),
+      );
 
-    if (res.statusCode < 200 || res.statusCode >= 300) {
-      throw StateError('OpenAI translate ${res.statusCode}: ${res.body}');
+      final choices = res.data?['choices'] as List<dynamic>?;
+      if (choices == null || choices.isEmpty) {
+        throw StateError('OpenAI boş çeviri');
+      }
+      final content = choices.first as Map<String, dynamic>;
+      final message = content['message'] as Map<String, dynamic>?;
+      return (message?['content'] as String?)?.trim() ?? '';
+    } on DioException catch (err) {
+      throw StateError(
+        'OpenAI translate ${err.response?.statusCode}: ${err.response?.data ?? err.message}',
+      );
     }
-
-    final data = jsonDecode(res.body) as Map<String, dynamic>;
-    final choices = data['choices'] as List<dynamic>?;
-    if (choices == null || choices.isEmpty) {
-      throw StateError('OpenAI boş çeviri');
-    }
-    final content = choices.first as Map<String, dynamic>;
-    final message = content['message'] as Map<String, dynamic>?;
-    return (message?['content'] as String?)?.trim() ?? '';
   }
 
-  void dispose() => _client.close();
+  void dispose() => _dio.close(force: true);
 }

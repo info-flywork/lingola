@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "963261267239",
+    "project_id": "lingola-66a0a",
+    "storage_bucket": "lingola-66a0a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:963261267239:android:f1e8cf1d32ecf140a0fd02",
+        "android_client_info": {
+          "package_name": "com.flywork.lingolaapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "963261267239-vbhpvpavho0ittnlbe7v1ehj0d5ki98s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.flywork.lingolaapp",
+            "certificate_hash": "8192bc9094a45bc99555b22ef95c7ad8b2158268"
+          }
+        },
+        {
+          "client_id": "963261267239-j7do1ps29c4i0oj4n1q7d8rnss7m19nr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrbIwe99yZ6ynuo4AzOHkXRu1octXOeYk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "963261267239-j7do1ps29c4i0oj4n1q7d8rnss7m19nr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "963261267239-7b2f514cmbgfoak6ne2s77s3kc18mdru.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.flywork.lingolaapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

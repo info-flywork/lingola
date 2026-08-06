@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/auth/auth_service.dart';
+import '../../core/auth/session_store.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
+import '../onboarding/onboarding_flow.dart';
 import 'faq_screen.dart';
 import 'profile_settings_screen.dart';
 import 'progress_screen.dart';
@@ -50,6 +53,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ];
 
   var _notificationsOn = true;
+  var _notificationsBusy = false;
+  var _displayName = '';
+  var _avatarUrl = '';
+  var _appLocale = 'en';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final cached = await SessionStore.loadCachedUser();
+    if (cached != null && mounted) {
+      setState(() {
+        _notificationsOn = cached.notificationsEnabled;
+        _displayName = AuthService.displayNameOf(cached);
+        _avatarUrl = cached.avatarUrl?.trim() ?? '';
+        _appLocale = cached.appLocale;
+      });
+    }
+
+    final user = await AuthService.restoreSession();
+    if (!mounted) return;
+    if (user != null) {
+      setState(() {
+        _notificationsOn = user.notificationsEnabled;
+        _displayName = AuthService.displayNameOf(user);
+        _avatarUrl = user.avatarUrl?.trim() ?? '';
+        _appLocale = user.appLocale;
+      });
+    } else if (cached == null) {
+      setState(() {
+        _displayName = 'Lingola';
+        _avatarUrl = '';
+      });
+    }
+  }
+
+  Future<void> _setNotifications(bool value) async {
+    if (_notificationsBusy || _notificationsOn == value) return;
+    final previous = _notificationsOn;
+    setState(() {
+      _notificationsOn = value;
+      _notificationsBusy = true;
+    });
+    try {
+      final user = await AuthService.setNotificationsEnabled(value);
+      if (!mounted) return;
+      setState(() {
+        _notificationsOn = user.notificationsEnabled;
+        _notificationsBusy = false;
+      });
+    } catch (err) {
+      if (!mounted) return;
+      setState(() {
+        _notificationsOn = previous;
+        _notificationsBusy = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Notifications update failed: $err')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,17 +153,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Center(
-                child: HomeAsset(
-                  AppAssets.profileAvatar,
-                  width: 86,
-                  height: 86,
+              Center(
+                child: ClipOval(
+                  child: _avatarUrl.isNotEmpty
+                      ? Image.network(
+                          _avatarUrl,
+                          width: 86,
+                          height: 86,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => const HomeAsset(
+                            AppAssets.profileAvatar,
+                            width: 86,
+                            height: 86,
+                          ),
+                        )
+                      : const HomeAsset(
+                          AppAssets.profileAvatar,
+                          width: 86,
+                          height: 86,
+                        ),
                 ),
               ),
               const SizedBox(height: 12),
               Center(
                 child: Text(
-                  text.userName,
+                  _displayName.isEmpty ? 'Lingola' : _displayName,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 20,
@@ -153,12 +234,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: AppAssets.profileSettings,
                     iconBg: _settingsBlueBg,
                     label: text.profileSettings,
-                    onTap: () {
-                      Navigator.of(context).push(
+                    onTap: () async {
+                      await Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (_) => const ProfileSettingsScreen(),
                         ),
                       );
+                      if (mounted) await _loadProfile();
                     },
                   ),
                   _SettingsTile(
@@ -166,6 +248,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     iconBg: _notifPurpleBg,
                     iconColor: _notifPurple,
                     label: text.notifications,
+                    onTap: _notificationsBusy
+                        ? null
+                        : () => _setNotifications(!_notificationsOn),
                     trailing: Transform.scale(
                       scale: 0.75,
                       alignment: Alignment.centerRight,
@@ -180,8 +265,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             activeTrackColor: AppColors.primary,
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
-                            onChanged: (value) =>
-                                setState(() => _notificationsOn = value),
+                            onChanged: _notificationsBusy
+                                ? null
+                                : _setNotifications,
                           ),
                         ),
                       ),
@@ -191,12 +277,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: AppAssets.profileLangFlag,
                     iconBg: _langGreenBg,
                     label: text.appLanguage,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const SelectLanguageScreen(),
+                    onTap: () async {
+                      final selected = await Navigator.of(context)
+                          .push<String>(
+                        MaterialPageRoute<String>(
+                          builder: (_) => SelectLanguageScreen(
+                            initialCode: _appLocale,
+                          ),
                         ),
                       );
+                      if (selected == null || !mounted) return;
+                      setState(() => _appLocale = selected);
+                      try {
+                        await AuthService.updateProfile(appLocale: selected);
+                      } catch (_) {}
                     },
                   ),
                 ],
@@ -384,7 +478,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 10),
                 SecondaryButton(
                   label: text.logoutConfirm,
-                  onPressed: () => Navigator.of(sheetContext).pop(),
+                  onPressed: () async {
+                    Navigator.of(sheetContext).pop();
+                    await AuthService.logout();
+                    if (!context.mounted) return;
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const SplashScreen(),
+                      ),
+                      (_) => false,
+                    );
+                  },
                 ),
                 const SizedBox(height: 10),
                 PrimaryButton(
@@ -625,7 +729,7 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: trailing == null ? onTap : null,
+      onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: SizedBox(
         height: 40,

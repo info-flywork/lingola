@@ -12,6 +12,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/quiz/quiz_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
@@ -29,34 +30,13 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
   static const _chipText = Color(0xFF000088);
   static const _hintBg = Color(0x0D2D46FF);
 
-  static const _words = <_ReadingWord>[
-    _ReadingWord(
-      word: 'Friend',
-      phonetic: '/frend/',
-      translations: ['Arkadaş', 'Dost', 'Yoldaş'],
-      exampleEn: 'A good friend is hard to find',
-      exampleTr: 'İyi bir arkadaş bulmak zordur.',
-    ),
-    _ReadingWord(
-      word: 'Journey',
-      phonetic: '/ˈdʒɜːrni/',
-      translations: ['Yolculuk', 'Seyahat', 'Macera'],
-      exampleEn: 'The journey was long but exciting',
-      exampleTr: 'Yolculuk uzun ama heyecan vericiydi.',
-    ),
-    _ReadingWord(
-      word: 'Courage',
-      phonetic: '/ˈkʌrɪdʒ/',
-      translations: ['Cesaret', 'Yiğitlik', 'Yüreklilik'],
-      exampleEn: 'It takes courage to speak up',
-      exampleTr: 'Konuşmak cesaret ister.',
-    ),
-  ];
-
   final _speech = SpeechToText();
   final _recorder = AudioRecorder();
   final _player = AudioPlayer();
 
+  var _words = <_ReadingWord>[];
+  var _loading = true;
+  String? _error;
   var _index = 0;
   var _saved = false;
   var _hintVisible = true;
@@ -78,11 +58,15 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
   StreamSubscription<void>? _playerCompleteSub;
   StreamSubscription<Duration>? _playerPositionSub;
 
-  _ReadingWord get _current => _words[_index];
+  _ReadingWord? get _current {
+    if (_words.isEmpty || _index < 0 || _index >= _words.length) return null;
+    return _words[_index];
+  }
 
   @override
   void initState() {
     super.initState();
+    _loadWords();
     _initSpeech();
     _playerCompleteSub = _player.onPlayerComplete.listen((_) {
       if (!mounted) return;
@@ -111,6 +95,64 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
         }
       });
     });
+  }
+
+  Future<void> _loadWords({bool append = false}) async {
+    if (!append) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
+    try {
+      final exclude = _words.map((w) => w.id).where((id) => id.isNotEmpty).toList();
+      final cards = await QuizService.fetchReadingWords(
+        count: 10,
+        excludeIds: exclude,
+      );
+      if (!mounted) return;
+      final mapped = cards
+          .map(
+            (c) => _ReadingWord(
+              id: c.id,
+              word: c.word,
+              phonetic: c.phonetic.isEmpty
+                  ? ''
+                  : (c.phonetic.startsWith('/')
+                      ? c.phonetic
+                      : '/${c.phonetic}/'),
+              translations: c.translations,
+              exampleEn: c.sentence,
+              exampleTr: c.sentenceTranslation,
+            ),
+          )
+          .toList();
+      setState(() {
+        if (append && mapped.isNotEmpty) {
+          _words = [..._words, ...mapped];
+          _index = (_words.length - mapped.length).clamp(0, _words.length - 1);
+        } else {
+          _words = mapped;
+          _index = 0;
+        }
+        _saved = false;
+        _hintVisible = true;
+        _loading = false;
+        _error = mapped.isEmpty ? 'No words found' : null;
+        _resetRecorderForWord();
+      });
+    } catch (err) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        if (!append) _error = err.toString();
+      });
+      if (append) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not load more: $err')),
+        );
+      }
+    }
   }
 
   @override
@@ -179,7 +221,12 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
   }
 
   Future<void> _goNext() async {
-    if (_index >= _words.length - 1) return;
+    if (_index >= _words.length - 1) {
+      await _stopRecording(showResult: false);
+      if (!mounted) return;
+      await _loadWords(append: true);
+      return;
+    }
     await _stopRecording(showResult: false);
     if (!mounted) return;
     setState(() {
@@ -336,7 +383,9 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
 
     if (!showResult || !wasRecording) return;
 
-    final matched = _matchesTarget(heard, _current.word, _current.exampleEn);
+    final card = _current;
+    if (card == null) return;
+    final matched = _matchesTarget(heard, card.word, card.exampleEn);
     if (matched) {
       await _showSuccessSheet();
       return;
@@ -614,12 +663,39 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: SingleChildScrollView(
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _error != null || _current == null
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _error ?? 'No words found',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 13,
+                                      color: AppColors.secondary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextButton(
+                                    onPressed: _loadWords,
+                                    child: const Text('Retry'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(19, 0, 19, 10),
                   child: Column(
                     children: [
                       _ReadingCard(
-                        word: _current,
+                        word: _current!,
                         languageLabel: practice.turkish,
                         hintVisible: _hintVisible,
                         saved: _saved,
@@ -663,7 +739,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
                     Opacity(
                       opacity: _index == 0 ? 0.45 : 1,
                       child: IgnorePointer(
-                        ignoring: _index == 0,
+                        ignoring: _index == 0 || _loading,
                         child: SecondaryButton(
                           label: practice.previous,
                           onPressed: _goPrevious,
@@ -672,9 +748,9 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
                     ),
                     const SizedBox(height: 10),
                     Opacity(
-                      opacity: _index >= _words.length - 1 ? 0.45 : 1,
+                      opacity: _loading || _current == null ? 0.45 : 1,
                       child: IgnorePointer(
-                        ignoring: _index >= _words.length - 1,
+                        ignoring: _loading || _current == null,
                         child: PrimaryButton(
                           label: practice.next,
                           onPressed: _goNext,
@@ -694,6 +770,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
 
 class _ReadingWord {
   const _ReadingWord({
+    required this.id,
     required this.word,
     required this.phonetic,
     required this.translations,
@@ -701,6 +778,7 @@ class _ReadingWord {
     required this.exampleTr,
   });
 
+  final String id;
   final String word;
   final String phonetic;
   final List<String> translations;

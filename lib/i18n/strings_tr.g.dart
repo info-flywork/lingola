@@ -87,6 +87,9 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String minutes({required Object value}) => '${value} dk';
 	@override String get close => 'Kapat';
 	@override String get getStarted => 'BAŞLA';
+	@override String get connectionError => 'Bağlantı yok. İnternetini kontrol edip tekrar dene.';
+	@override String get genericError => 'Bir şeyler ters gitti. Lütfen tekrar dene.';
+	@override String get tryAgain => 'Tekrar dene';
 }
 
 // Path: onboarding
@@ -319,6 +322,9 @@ class _Translations$libraryPage$tr implements Translations$libraryPage$en {
 	@override String get title => 'Kütüphane';
 	@override String get searchWord => 'Kelime Ara';
 	@override String savedWordCount({required Object count}) => '${count} Kayıtlı Kelime';
+	@override String get savedWordTab => 'Saved Word';
+	@override String get dictionaryTab => 'Dictionary';
+	@override String get dictionaryLabel => 'Dictionary';
 }
 
 // Path: wordPracticePage
@@ -397,6 +403,7 @@ class _Translations$tutorPage$tr implements Translations$tutorPage$en {
 	// Translations
 	@override String get title => 'Eğitmen';
 	@override String get chatWithLingola => 'Lingola ile Sohbet';
+	@override String chatWithTutor({required Object name}) => '${name} ile Sohbet';
 	@override String get chatHistory => 'Sohbet Geçmişi';
 	@override String get history => 'Geçmiş';
 	@override String get filter => 'Filtre';
@@ -1214,6 +1221,9 @@ extension on TranslationsTr {
 			'common.minutes' => ({required Object value}) => '${value} dk',
 			'common.close' => 'Kapat',
 			'common.getStarted' => 'BAŞLA',
+			'common.connectionError' => 'Bağlantı yok. İnternetini kontrol edip tekrar dene.',
+			'common.genericError' => 'Bir şeyler ters gitti. Lütfen tekrar dene.',
+			'common.tryAgain' => 'Tekrar dene',
 			'onboarding.pageA11y' => ({required Object current, required Object total}) => 'Tanıtım sayfası ${current} / ${total}',
 			'onboarding.slide1.title' => 'Aylar Değil, Haftalar İçinde Özgüvenle Konuş',
 			'onboarding.slide1.body' => 'Yapay zekâ ile gerçek konuşmalar yap. Aksanını, özgüvenini ve akıcılığını her gün geliştir.',
@@ -1378,6 +1388,9 @@ extension on TranslationsTr {
 			'libraryPage.title' => 'Kütüphane',
 			'libraryPage.searchWord' => 'Kelime Ara',
 			'libraryPage.savedWordCount' => ({required Object count}) => '${count} Kayıtlı Kelime',
+			'libraryPage.savedWordTab' => 'Saved Word',
+			'libraryPage.dictionaryTab' => 'Dictionary',
+			'libraryPage.dictionaryLabel' => 'Dictionary',
 			'wordPracticePage.title' => 'Kelime Pratiği',
 			'wordPracticePage.turkish' => 'TÜRKÇE',
 			'wordPracticePage.save' => 'Kaydet',
@@ -1420,6 +1433,7 @@ extension on TranslationsTr {
 			'placeholder.body' => ({required Object tab}) => 'Senin için odaklı bir ${tab} deneyimi hazırlıyoruz.',
 			'tutorPage.title' => 'Eğitmen',
 			'tutorPage.chatWithLingola' => 'Lingola ile Sohbet',
+			'tutorPage.chatWithTutor' => ({required Object name}) => '${name} ile Sohbet',
 			'tutorPage.chatHistory' => 'Sohbet Geçmişi',
 			'tutorPage.history' => 'Geçmiş',
 			'tutorPage.filter' => 'Filtre',
@@ -1708,6 +1722,8 @@ extension on TranslationsTr {
 			'lessonPage.levels.c2.lessons.18' => 'Problems, problems',
 			'lessonPage.levels.c2.lessons.19' => 'Fact or fiction?',
 			'lessonPage.levels.c2.lessons.20' => 'Sightseeing',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c2.lessons.21' => 'Volunteering',
 			'lessonPage.levels.c2.lessons.22' => 'The mind\'s eye',
 			'lessonPage.levels.c2.lessons.23' => 'Media consumption',
@@ -1715,8 +1731,6 @@ extension on TranslationsTr {
 			'rolePlayPage.subtitle' => 'Rolünü seç — gerçek bir senaryoyu deneyimle 🎭',
 			'rolePlayPage.progressCompleted' => ({required Object value}) => '%${value} tamamlandı',
 			'rolePlayPage.minutes' => ({required Object value}) => '${value} Dk',
-			_ => null,
-		} ?? switch (path) {
 			'rolePlayPage.beginner' => 'Başlangıç',
 			'rolePlayPage.screenplay' => 'SENARYO',
 			'rolePlayPage.dailyInteractions' => 'Günlük Etkileşimler',

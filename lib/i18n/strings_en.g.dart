@@ -112,6 +112,15 @@ class Translations$common$en {
 
 	/// en: 'GET STARTED'
 	String get getStarted => 'GET STARTED';
+
+	/// en: 'No connection. Check your internet and try again.'
+	String get connectionError => 'No connection. Check your internet and try again.';
+
+	/// en: 'Something went wrong. Please try again.'
+	String get genericError => 'Something went wrong. Please try again.';
+
+	/// en: 'Try again'
+	String get tryAgain => 'Try again';
 }
 
 // Path: onboarding
@@ -604,6 +613,15 @@ class Translations$libraryPage$en {
 
 	/// en: '$count Saved Word'
 	String savedWordCount({required Object count}) => '${count} Saved Word';
+
+	/// en: 'Saved Word'
+	String get savedWordTab => 'Saved Word';
+
+	/// en: 'Dictionary'
+	String get dictionaryTab => 'Dictionary';
+
+	/// en: 'Dictionary'
+	String get dictionaryLabel => 'Dictionary';
 }
 
 // Path: wordPracticePage
@@ -766,6 +784,9 @@ class Translations$tutorPage$en {
 
 	/// en: 'Chat with Lingola'
 	String get chatWithLingola => 'Chat with Lingola';
+
+	/// en: 'Chat with $name'
+	String chatWithTutor({required Object name}) => 'Chat with ${name}';
 
 	/// en: 'Chat History'
 	String get chatHistory => 'Chat History';
@@ -2076,6 +2097,9 @@ extension on Translations {
 			'common.minutes' => ({required Object value}) => '${value} min',
 			'common.close' => 'Close',
 			'common.getStarted' => 'GET STARTED',
+			'common.connectionError' => 'No connection. Check your internet and try again.',
+			'common.genericError' => 'Something went wrong. Please try again.',
+			'common.tryAgain' => 'Try again',
 			'onboarding.pageA11y' => ({required Object current, required Object total}) => 'Onboarding page ${current} of ${total}',
 			'onboarding.slide1.title' => 'Speak Confidently in Weeks — Not Months',
 			'onboarding.slide1.body' => 'Practice real conversations with AI. Improve your accent, confidence, and fluency, daily.',
@@ -2240,6 +2264,9 @@ extension on Translations {
 			'libraryPage.title' => 'Library',
 			'libraryPage.searchWord' => 'Search Word',
 			'libraryPage.savedWordCount' => ({required Object count}) => '${count} Saved Word',
+			'libraryPage.savedWordTab' => 'Saved Word',
+			'libraryPage.dictionaryTab' => 'Dictionary',
+			'libraryPage.dictionaryLabel' => 'Dictionary',
 			'wordPracticePage.title' => 'Word Practice',
 			'wordPracticePage.turkish' => 'TURKISH',
 			'wordPracticePage.save' => 'Save',
@@ -2282,6 +2309,7 @@ extension on Translations {
 			'placeholder.body' => ({required Object tab}) => 'We’re preparing a focused ${tab} experience for you.',
 			'tutorPage.title' => 'Tutor',
 			'tutorPage.chatWithLingola' => 'Chat with Lingola',
+			'tutorPage.chatWithTutor' => ({required Object name}) => 'Chat with ${name}',
 			'tutorPage.chatHistory' => 'Chat History',
 			'tutorPage.history' => 'History',
 			'tutorPage.filter' => 'Filter',
@@ -2570,6 +2598,8 @@ extension on Translations {
 			'lessonPage.levels.c2.lessons.18' => 'Problems, problems',
 			'lessonPage.levels.c2.lessons.19' => 'Fact or fiction?',
 			'lessonPage.levels.c2.lessons.20' => 'Sightseeing',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c2.lessons.21' => 'Volunteering',
 			'lessonPage.levels.c2.lessons.22' => 'The mind\'s eye',
 			'lessonPage.levels.c2.lessons.23' => 'Media consumption',
@@ -2577,8 +2607,6 @@ extension on Translations {
 			'rolePlayPage.subtitle' => 'Choose your role — experience a real-life scenario 🎭',
 			'rolePlayPage.progressCompleted' => ({required Object value}) => '%${value} completed',
 			'rolePlayPage.minutes' => ({required Object value}) => '${value} Min',
-			_ => null,
-		} ?? switch (path) {
 			'rolePlayPage.beginner' => 'Beginner',
 			'rolePlayPage.screenplay' => 'SCREENPLAY',
 			'rolePlayPage.dailyInteractions' => 'Daily Interactions',

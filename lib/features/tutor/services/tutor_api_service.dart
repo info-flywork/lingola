@@ -1,0 +1,99 @@
+import '../../../core/auth/api_client.dart';
+
+class TutorDto {
+  const TutorDto({
+    required this.id,
+    required this.slug,
+    required this.nameKey,
+    required this.tagKeys,
+    this.voiceId,
+    this.imageCdnUrl,
+    this.riveCdnUrl,
+    this.localImagePath,
+    this.localRivePath,
+    this.flagAssetPath,
+    this.theme,
+    this.sortOrder = 0,
+  });
+
+  final String id;
+  final String slug;
+  final String nameKey;
+  final List<String> tagKeys;
+  final String? voiceId;
+  final String? imageCdnUrl;
+  final String? riveCdnUrl;
+  final String? localImagePath;
+  final String? localRivePath;
+  final String? flagAssetPath;
+  final TutorThemeDto? theme;
+  final int sortOrder;
+
+  factory TutorDto.fromJson(Map<String, dynamic> json) {
+    final tags = json['tagKeys'];
+    return TutorDto(
+      id: json['id'] as String? ?? '',
+      slug: json['slug'] as String? ?? '',
+      nameKey: json['nameKey'] as String? ?? json['slug'] as String? ?? '',
+      tagKeys: tags is List
+          ? tags.map((e) => e.toString()).toList()
+          : const <String>[],
+      voiceId: json['voiceId'] as String?,
+      imageCdnUrl: json['imageCdnUrl'] as String?,
+      riveCdnUrl: json['riveCdnUrl'] as String?,
+      localImagePath: json['localImagePath'] as String?,
+      localRivePath: json['localRivePath'] as String?,
+      flagAssetPath: json['flagAssetPath'] as String?,
+      theme: json['theme'] is Map<String, dynamic>
+          ? TutorThemeDto.fromJson(json['theme'] as Map<String, dynamic>)
+          : null,
+      sortOrder: (json['sortOrder'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  /// Prefer CDN; fall back to bundled asset path.
+  String? get imagePath {
+    if (imageCdnUrl != null && imageCdnUrl!.isNotEmpty) return imageCdnUrl;
+    return localImagePath;
+  }
+
+  String? get rivePath {
+    if (riveCdnUrl != null && riveCdnUrl!.isNotEmpty) return riveCdnUrl;
+    return localRivePath;
+  }
+}
+
+class TutorThemeDto {
+  const TutorThemeDto({
+    required this.gradientStart,
+    required this.gradientEnd,
+    required this.buttonColor,
+    required this.buttonForeground,
+  });
+
+  final String gradientStart;
+  final String gradientEnd;
+  final String buttonColor;
+  final String buttonForeground;
+
+  factory TutorThemeDto.fromJson(Map<String, dynamic> json) {
+    return TutorThemeDto(
+      gradientStart: json['gradientStart'] as String? ?? '#2D46FF',
+      gradientEnd: json['gradientEnd'] as String? ?? '#000088',
+      buttonColor: json['buttonColor'] as String? ?? '#2D46FF',
+      buttonForeground: json['buttonForeground'] as String? ?? '#FFFFFF',
+    );
+  }
+}
+
+abstract final class TutorApiService {
+  static Future<List<TutorDto>> fetchTutors() async {
+    final json = await ApiClient.get('/tutors');
+    final list = json['tutors'];
+    if (list is! List) return const [];
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map(TutorDto.fromJson)
+        .toList();
+  }
+}

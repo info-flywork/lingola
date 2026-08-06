@@ -22,6 +22,8 @@ class HomeAsset extends StatelessWidget {
   final Color? color;
 
   bool get _isSvg => path.toLowerCase().endsWith('.svg');
+  bool get _isNetwork =>
+      path.startsWith('http://') || path.startsWith('https://');
 
   static bool _isFinitePositive(double? v) =>
       v != null && v.isFinite && v > 0;
@@ -53,6 +55,20 @@ class HomeAsset extends StatelessWidget {
       cacheWidth = (420 * dpr).round().clamp(1, 1600);
     } else {
       cacheWidth = null;
+    }
+
+    if (_isNetwork) {
+      return Image.network(
+        path,
+        width: width,
+        height: height,
+        fit: fit,
+        alignment: alignment,
+        cacheWidth: cacheWidth,
+        filterQuality: FilterQuality.high,
+        isAntiAlias: true,
+        errorBuilder: (_, _, _) => _placeholder(),
+      );
     }
 
     return Image.asset(

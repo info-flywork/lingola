@@ -44,9 +44,16 @@ dependencies:
   audioplayers: ^6.8.1
   path_provider: ^2.1.6
   url_launcher: ^6.3.2
-  http: ^1.6.0
   flutter_dotenv: ^6.0.1
   rive: ^0.14.10
+  shared_preferences: ^2.5.5
+  dio: ^5.11.0
+  firebase_core: ^4.12.1
+  firebase_auth: ^6.5.6
+  google_sign_in: ^7.2.0
+  sign_in_with_apple: ^8.1.0
+  crypto: ^3.0.7
+  image_picker: ^1.2.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -59,6 +66,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   slang_build_runner: ^4.18.0
   build_runner: ^2.15.1
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -152,3 +160,15 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  macos:
+    generate: true
+  web:
+    generate: true
+  image_path: assets/images/lingolaAppIcon.png
+  adaptive_icon_background: "#2983FF"
+  adaptive_icon_foreground: assets/images/lingolaAppIcon.png
+  remove_alpha_ios: true

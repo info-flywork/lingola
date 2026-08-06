@@ -12,7 +12,10 @@
     "locked": "Kilitli",
     "minutes": "$value dk",
     "close": "Kapat",
-    "getStarted": "BAŞLA"
+    "getStarted": "BAŞLA",
+    "connectionError": "Bağlantı yok. İnternetini kontrol edip tekrar dene.",
+    "genericError": "Bir şeyler ters gitti. Lütfen tekrar dene.",
+    "tryAgain": "Tekrar dene"
   },
   "onboarding": {
     "pageA11y": "Tanıtım sayfası $current / $total",
@@ -206,7 +209,10 @@
   "libraryPage": {
     "title": "Kütüphane",
     "searchWord": "Kelime Ara",
-    "savedWordCount": "$count Kayıtlı Kelime"
+    "savedWordCount": "$count Kayıtlı Kelime",
+    "savedWordTab": "Saved Word",
+    "dictionaryTab": "Dictionary",
+    "dictionaryLabel": "Dictionary"
   },
   "wordPracticePage": {
     "title": "Kelime Pratiği",
@@ -257,6 +263,7 @@
   "tutorPage": {
     "title": "Eğitmen",
     "chatWithLingola": "Lingola ile Sohbet",
+    "chatWithTutor": "$name ile Sohbet",
     "chatHistory": "Sohbet Geçmişi",
     "history": "Geçmiş",
     "filter": "Filtre",

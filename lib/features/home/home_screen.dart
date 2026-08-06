@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/auth/auth_service.dart';
+import '../../core/auth/app_user.dart';
+import '../../core/auth/session_store.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
@@ -7,6 +10,7 @@ import '../library/library_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../practice/word_practice_screen.dart';
 import '../quiz/quiz_screen.dart';
+import '../shell/main_shell.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -236,26 +240,60 @@ class _MoreFeaturesSection extends StatelessWidget {
   }
 }
 
-class _HomeHeader extends StatelessWidget {
+class _HomeHeader extends StatefulWidget {
   const _HomeHeader();
+
+  @override
+  State<_HomeHeader> createState() => _HomeHeaderState();
+}
+
+class _HomeHeaderState extends State<_HomeHeader> {
+  String _greeting = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _applyUser(SessionStore.currentUser);
+    _refreshUser();
+  }
+
+  Future<void> _refreshUser() async {
+    final user = await AuthService.restoreSession();
+    if (!mounted) return;
+    _applyUser(user ?? SessionStore.currentUser);
+  }
+
+  void _applyUser(AppUser? user) {
+    final text = AppText.current;
+    final name = AuthService.displayNameOf(user);
+    setState(() {
+      _greeting = '${text.profilePage.goodMorning} $name';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
+    final greeting =
+        _greeting.isEmpty ? text.profilePage.goodMorning.trim() : _greeting;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Figma icon satırı: yatay 16, dikey 10
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
           child: Row(
             children: [
-              Semantics(
-                label: text.app.profile,
-                child: const HomeAsset(
-                  'assets/images/home/profile_avatar.svg',
-                  width: 43,
-                  height: 43,
+              GestureDetector(
+                onTap: () => MainShell.goToProfile(context),
+                child: Semantics(
+                  button: true,
+                  label: text.app.profile,
+                  child: const HomeAsset(
+                    'assets/images/home/profile_avatar.svg',
+                    width: 43,
+                    height: 43,
+                  ),
                 ),
               ),
               const Spacer(),
@@ -317,15 +355,13 @@ class _HomeHeader extends StatelessWidget {
             ],
           ),
         ),
-        // Figma: icon satırı ↔ greeting bloğu = 16
         const SizedBox(height: 16),
-        // Greeting: üst/alt 16 — Continue beyazın DIŞINDA
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(text.home.greeting, style: AppTextStyles.homeGreeting),
+              Text(greeting, style: AppTextStyles.homeGreeting),
               const SizedBox(height: 2),
               Text(text.home.todayPractice, style: AppTextStyles.homeTitle),
             ],

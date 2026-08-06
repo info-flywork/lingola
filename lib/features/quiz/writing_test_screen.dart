@@ -1,11 +1,21 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
 
+import '../../core/auth/api_client.dart';
+import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/quiz/quiz_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
+import '../tutor/services/tutor_tts_service.dart';
 
 class WritingTestScreen extends StatefulWidget {
   const WritingTestScreen({super.key});
@@ -15,23 +25,27 @@ class WritingTestScreen extends StatefulWidget {
 }
 
 class _WritingTestScreenState extends State<WritingTestScreen> {
-  static const _promptEn = 'What do you do on Sundays?';
-  static const _promptTr = 'Pazar günleri ne yaparsın?';
-  static const _expectedAnswers = <String>[
-    'i read books',
-    'i watch films',
-    'i watch movies',
-    'i rest',
-    'i sleep',
-  ];
-
   final _answerController = TextEditingController();
   final _focusNode = FocusNode();
+  final _tts = TutorTtsService();
+  final _player = AudioPlayer();
+  final _recorder = AudioRecorder();
 
+  final _seenIds = <String>[];
+
+  QuizWritingPrompt? _prompt;
+  var _loading = true;
+  var _busy = false;
+  var _speaking = false;
+  var _recording = false;
   var _showTranslation = false;
+  var _showHint = false;
   var _answerText = '';
+  String? _error;
+  String? _recordingPath;
 
-  bool get _canSubmit => _answerText.trim().isNotEmpty;
+  bool get _canSubmit =>
+      !_busy && !_loading && _prompt != null && _answerText.trim().isNotEmpty;
 
   @override
   void initState() {
@@ -39,13 +53,61 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
     _answerController.addListener(() {
       setState(() => _answerText = _answerController.text);
     });
+    _loadPrompt();
   }
 
   @override
   void dispose() {
     _answerController.dispose();
     _focusNode.dispose();
+    _tts.dispose();
+    _player.dispose();
+    _recorder.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadPrompt() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+      _showTranslation = false;
+      _showHint = false;
+      _answerController.clear();
+      _answerText = '';
+    });
+    try {
+      final prompt = await QuizService.fetchWritingPrompt(
+        excludeIds: _seenIds,
+      );
+      if (!mounted) return;
+      if (prompt == null) {
+        setState(() {
+          _prompt = null;
+          _loading = false;
+          _error = 'No writing prompts found';
+        });
+        return;
+      }
+      _seenIds.add(prompt.id);
+      if (_seenIds.length > 80) {
+        _seenIds.removeRange(0, _seenIds.length - 80);
+      }
+      setState(() {
+        _prompt = prompt;
+        _loading = false;
+      });
+    } catch (err) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = _friendlyError(err);
+      });
+    }
+  }
+
+  String _friendlyError(Object err) {
+    if (err is ApiException) return err.message;
+    return AppText.current.common.genericError;
   }
 
   Future<void> _copyAnswer() async {
@@ -54,34 +116,144 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
     await Clipboard.setData(ClipboardData(text: value));
   }
 
-  Future<void> _submit() async {
-    if (!_canSubmit) return;
-    FocusScope.of(context).unfocus();
+  Future<void> _speakSource() async {
+    final prompt = _prompt;
+    if (prompt == null || _speaking) return;
+    // Always speak the English target sentence so the learner can hear the answer.
+    final text = prompt.sentenceEn.trim();
+    if (text.isEmpty) return;
 
-    final normalized = _normalize(_answerText);
-    final matched = _expectedAnswers.any(
-      (expected) =>
-          normalized == expected ||
-          normalized.contains(expected) ||
-          expected.contains(normalized),
+    setState(() => _speaking = true);
+    try {
+      final file = await _tts.synthesizeToFile(
+        text,
+        voiceId: TutorVoiceIds.female,
+        modelId: TutorTtsService.flashModel,
+      );
+      await _player.stop();
+      await _player.play(DeviceFileSource(file.path));
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Speak failed: $err')),
+      );
+    } finally {
+      if (mounted) setState(() => _speaking = false);
+    }
+  }
+
+  Future<void> _toggleMic() async {
+    if (_busy) return;
+    if (_recording) {
+      await _stopAndEvaluateRecording();
+      return;
+    }
+    await _startRecording();
+  }
+
+  Future<void> _startRecording() async {
+    final quiz = AppText.current.quizPage;
+    final hasMic = await _recorder.hasPermission();
+    if (!hasMic) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(quiz.micPermissionDenied)),
+      );
+      return;
+    }
+
+    final dir = await getTemporaryDirectory();
+    final path =
+        '${dir.path}/lingola_writing_${DateTime.now().millisecondsSinceEpoch}.m4a';
+
+    await _player.stop();
+    await _recorder.start(
+      const RecordConfig(encoder: AudioEncoder.aacLc),
+      path: path,
     );
 
+    if (!mounted) return;
+    setState(() {
+      _recording = true;
+      _recordingPath = path;
+    });
+  }
+
+  Future<void> _stopAndEvaluateRecording() async {
+    final prompt = _prompt;
+    final path = await _recorder.stop() ?? _recordingPath;
+    if (!mounted) return;
+    setState(() => _recording = false);
+
+    if (prompt == null || path == null || !File(path).existsSync()) {
+      return;
+    }
+
+    setState(() => _busy = true);
+    try {
+      final bytes = await File(path).readAsBytes();
+      final result = await QuizService.evaluateWritingAudio(
+        wordId: prompt.id,
+        bytes: bytes,
+        contentType: 'audio/m4a',
+      );
+      if (!mounted) return;
+      if (result.transcript.isNotEmpty) {
+        _answerController.text = result.transcript;
+        _answerText = result.transcript;
+      }
+      await _showEvalResult(matched: result.matched);
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_friendlyError(err))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _submit() async {
+    final prompt = _prompt;
+    if (!_canSubmit || prompt == null) return;
+    FocusScope.of(context).unfocus();
+
+    setState(() => _busy = true);
+    try {
+      final result = await QuizService.evaluateWritingText(
+        wordId: prompt.id,
+        answer: _answerText,
+      );
+      if (!mounted) return;
+      await _showEvalResult(matched: result.matched);
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_friendlyError(err))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _showEvalResult({required bool matched}) async {
+    final quiz = AppText.current.quizPage;
     if (matched) {
       await _showResultSheet(
         iconAsset: AppAssets.success,
-        title: AppText.current.quizPage.successfulTitle,
-        body: AppText.current.quizPage.successfulBody,
+        title: quiz.successfulTitle,
+        body: quiz.successfulBody,
         buttonLabel: AppText.current.wordPracticePage.next,
-        onPressed: () => Navigator.of(context).maybePop(),
+        onPressed: _loadPrompt,
       );
       return;
     }
 
     await _showResultSheet(
       iconAsset: AppAssets.failed,
-      title: AppText.current.quizPage.failedTitle,
-      body: AppText.current.quizPage.failedBody,
-      buttonLabel: AppText.current.quizPage.tryAgain,
+      title: quiz.failedTitle,
+      body: quiz.failedBody,
+      buttonLabel: quiz.tryAgain,
       onPressed: () {},
     );
   }
@@ -153,12 +325,15 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
     );
   }
 
-  static String _normalize(String value) {
-    return value
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9\s]'), '')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
+  String get _sourceText {
+    final prompt = _prompt;
+    if (prompt == null) return '';
+    // Default: native sentence (translate into English).
+    // Translate toggle / hint reveals the English model sentence.
+    if (_showHint || _showTranslation) return prompt.sentenceEn;
+    return prompt.sentenceNative.isNotEmpty
+        ? prompt.sentenceNative
+        : prompt.sentenceEn;
   }
 
   @override
@@ -204,32 +379,71 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(19, 0, 19, 24),
-                  children: [
-                    _SourceCard(
-                      label: text.sourceLanguage,
-                      prompt: _showTranslation ? _promptTr : _promptEn,
-                      onTranslate: () => setState(
-                        () => _showTranslation = !_showTranslation,
-                      ),
-                      onSpeak: () {},
-                    ),
-                    const SizedBox(height: 10),
-                    _AnswerCard(
-                      label: text.answer,
-                      hint: text.writeAnswerHint,
-                      controller: _answerController,
-                      focusNode: _focusNode,
-                      canSubmit: _canSubmit,
-                      submitLabel: text.submit,
-                      onCopy: _copyAnswer,
-                      onMic: () {},
-                      onHint: () {},
-                      onSubmit: _submit,
-                    ),
-                  ],
-                ),
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _error != null || _prompt == null
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _error ??
+                                        AppText.current.common.genericError,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 13,
+                                      color: AppColors.secondary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextButton(
+                                    onPressed: _loadPrompt,
+                                    child: Text(
+                                      AppText.current.common.tryAgain,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : ListView(
+                            padding: const EdgeInsets.fromLTRB(19, 0, 19, 24),
+                            children: [
+                              _SourceCard(
+                                label: text.sourceLanguage,
+                                prompt: _sourceText,
+                                speaking: _speaking,
+                                onTranslate: () => setState(() {
+                                  _showTranslation = !_showTranslation;
+                                  _showHint = false;
+                                }),
+                                onSpeak: _speakSource,
+                              ),
+                              const SizedBox(height: 10),
+                              _AnswerCard(
+                                label: text.answer,
+                                hint: text.writeAnswerHint,
+                                controller: _answerController,
+                                focusNode: _focusNode,
+                                canSubmit: _canSubmit,
+                                submitLabel: _busy
+                                    ? '...'
+                                    : (_recording ? 'Stop' : text.submit),
+                                recording: _recording,
+                                busy: _busy,
+                                onCopy: _copyAnswer,
+                                onMic: _toggleMic,
+                                onHint: () => setState(() {
+                                  _showHint = !_showHint;
+                                  if (_showHint) _showTranslation = false;
+                                }),
+                                onSubmit: _recording ? _toggleMic : _submit,
+                              ),
+                            ],
+                          ),
               ),
             ],
           ),
@@ -245,12 +459,14 @@ class _SourceCard extends StatelessWidget {
     required this.prompt,
     required this.onTranslate,
     required this.onSpeak,
+    this.speaking = false,
   });
 
   final String label;
   final String prompt;
   final VoidCallback onTranslate;
   final VoidCallback onSpeak;
+  final bool speaking;
 
   @override
   Widget build(BuildContext context) {
@@ -301,12 +517,15 @@ class _SourceCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               _IconTap(
-                onTap: onSpeak,
-                child: const HomeAsset(
-                  AppAssets.speaker,
-                  width: 24,
-                  height: 24,
-                  color: AppColors.secondary,
+                onTap: speaking ? null : onSpeak,
+                child: Opacity(
+                  opacity: speaking ? 0.45 : 1,
+                  child: const HomeAsset(
+                    AppAssets.speaker,
+                    width: 24,
+                    height: 24,
+                    color: AppColors.secondary,
+                  ),
                 ),
               ),
             ],
@@ -329,6 +548,8 @@ class _AnswerCard extends StatelessWidget {
     required this.onMic,
     required this.onHint,
     required this.onSubmit,
+    this.recording = false,
+    this.busy = false,
   });
 
   final String label;
@@ -341,6 +562,8 @@ class _AnswerCard extends StatelessWidget {
   final VoidCallback onMic;
   final VoidCallback onHint;
   final VoidCallback onSubmit;
+  final bool recording;
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
@@ -371,6 +594,7 @@ class _AnswerCard extends StatelessWidget {
             focusNode: focusNode,
             minLines: 3,
             maxLines: 6,
+            enabled: !busy && !recording,
             style: const TextStyle(
               fontFamily: 'Poppins',
               fontSize: 14,
@@ -397,7 +621,7 @@ class _AnswerCard extends StatelessWidget {
           Row(
             children: [
               _IconTap(
-                onTap: onCopy,
+                onTap: busy ? null : onCopy,
                 child: const HomeAsset(
                   AppAssets.writingCopy,
                   width: 24,
@@ -406,17 +630,17 @@ class _AnswerCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               _IconTap(
-                onTap: onMic,
-                child: const HomeAsset(
+                onTap: busy ? null : onMic,
+                child: HomeAsset(
                   AppAssets.microphone,
                   width: 22,
                   height: 22,
-                  color: AppColors.secondary,
+                  color: recording ? AppColors.primary : AppColors.secondary,
                 ),
               ),
               const SizedBox(width: 12),
               _IconTap(
-                onTap: onHint,
+                onTap: busy ? null : onHint,
                 child: const HomeAsset(
                   AppAssets.hint,
                   width: 22,
@@ -426,7 +650,7 @@ class _AnswerCard extends StatelessWidget {
               const Spacer(),
               _SubmitButton(
                 label: submitLabel,
-                enabled: canSubmit,
+                enabled: recording || canSubmit,
                 onTap: onSubmit,
               ),
             ],
@@ -450,7 +674,6 @@ class _SubmitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Figma: pasif = #000 %10, aktif = primary blue
     final bg = enabled
         ? AppColors.primary
         : Colors.black.withValues(alpha: .10);
@@ -496,7 +719,7 @@ class _IconTap extends StatelessWidget {
     required this.child,
   });
 
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final Widget child;
 
   @override

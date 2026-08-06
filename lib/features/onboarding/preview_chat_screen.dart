@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/app_text.dart';
 import '../../widgets/lingola_chat_session.dart';
+import 'onboarding_draft.dart';
 import 'post_onboarding_screens.dart';
 
 class PreviewChatScreen extends StatelessWidget {
-  const PreviewChatScreen({super.key});
+  const PreviewChatScreen({super.key, required this.draft});
+
+  final OnboardingDraft draft;
 
   void _goPaywall(BuildContext context) {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const PaywallScreen()),
+      MaterialPageRoute<void>(
+        builder: (_) => PaywallScreen(draft: draft),
+      ),
     );
   }
 

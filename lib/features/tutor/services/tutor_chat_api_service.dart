@@ -1,0 +1,165 @@
+import '../../../core/auth/api_client.dart';
+
+class TutorChatSessionDto {
+  const TutorChatSessionDto({
+    required this.id,
+    required this.tutorId,
+    this.title,
+    this.lastMessageAt,
+    this.createdAt,
+    this.preview = '',
+    this.tutor,
+  });
+
+  final String id;
+  final String tutorId;
+  final String? title;
+  final String? lastMessageAt;
+  final String? createdAt;
+  final String preview;
+  final TutorChatTutorDto? tutor;
+
+  factory TutorChatSessionDto.fromJson(Map<String, dynamic> json) {
+    return TutorChatSessionDto(
+      id: json['id'] as String? ?? '',
+      tutorId: json['tutorId'] as String? ?? '',
+      title: json['title'] as String?,
+      lastMessageAt: json['lastMessageAt']?.toString(),
+      createdAt: json['createdAt']?.toString(),
+      preview: json['preview'] as String? ?? '',
+      tutor: json['tutor'] is Map<String, dynamic>
+          ? TutorChatTutorDto.fromJson(json['tutor'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+}
+
+class TutorChatTutorDto {
+  const TutorChatTutorDto({
+    required this.id,
+    required this.slug,
+    required this.nameKey,
+    this.imageCdnUrl,
+    this.localImagePath,
+  });
+
+  final String id;
+  final String slug;
+  final String nameKey;
+  final String? imageCdnUrl;
+  final String? localImagePath;
+
+  factory TutorChatTutorDto.fromJson(Map<String, dynamic> json) {
+    return TutorChatTutorDto(
+      id: json['id'] as String? ?? '',
+      slug: json['slug'] as String? ?? '',
+      nameKey: json['nameKey'] as String? ?? '',
+      imageCdnUrl: json['imageCdnUrl'] as String?,
+      localImagePath: json['localImagePath'] as String?,
+    );
+  }
+
+  String? get imagePath {
+    if (imageCdnUrl != null && imageCdnUrl!.isNotEmpty) return imageCdnUrl;
+    return localImagePath;
+  }
+}
+
+class TutorChatMessageDto {
+  const TutorChatMessageDto({
+    required this.id,
+    required this.sessionId,
+    required this.role,
+    required this.content,
+    this.createdAt,
+  });
+
+  final String id;
+  final String sessionId;
+  final String role;
+  final String content;
+  final String? createdAt;
+
+  bool get isUser => role == 'user';
+  bool get isAssistant => role == 'assistant';
+
+  factory TutorChatMessageDto.fromJson(Map<String, dynamic> json) {
+    return TutorChatMessageDto(
+      id: json['id'] as String? ?? '',
+      sessionId: json['sessionId'] as String? ?? '',
+      role: json['role'] as String? ?? 'assistant',
+      content: json['content'] as String? ?? '',
+      createdAt: json['createdAt']?.toString(),
+    );
+  }
+}
+
+abstract final class TutorChatApiService {
+  static Future<TutorChatSessionDto> openSession({
+    String? tutorId,
+    String? tutorSlug,
+  }) async {
+    final json = await ApiClient.post(
+      '/chat/sessions',
+      auth: true,
+      body: {
+        if (tutorId != null && tutorId.isNotEmpty) 'tutorId': tutorId,
+        if (tutorSlug != null && tutorSlug.isNotEmpty) 'tutorSlug': tutorSlug,
+      },
+    );
+    final session = json['session'];
+    if (session is! Map<String, dynamic>) {
+      throw ApiException('Invalid chat session response');
+    }
+    return TutorChatSessionDto.fromJson(session);
+  }
+
+  static Future<List<TutorChatSessionDto>> listSessions({int limit = 30}) async {
+    final json = await ApiClient.get(
+      '/chat/sessions?limit=$limit',
+      auth: true,
+    );
+    final list = json['sessions'];
+    if (list is! List) return const [];
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map(TutorChatSessionDto.fromJson)
+        .toList();
+  }
+
+  static Future<List<TutorChatMessageDto>> listMessages(String sessionId) async {
+    final json = await ApiClient.get(
+      '/chat/sessions/$sessionId/messages',
+      auth: true,
+    );
+    final list = json['messages'];
+    if (list is! List) return const [];
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map(TutorChatMessageDto.fromJson)
+        .toList();
+  }
+
+  static Future<({
+    TutorChatMessageDto userMessage,
+    TutorChatMessageDto assistantMessage,
+  })> sendMessage({
+    required String sessionId,
+    required String content,
+  }) async {
+    final json = await ApiClient.post(
+      '/chat/sessions/$sessionId/messages',
+      auth: true,
+      body: {'content': content},
+    );
+    final user = json['userMessage'];
+    final assistant = json['assistantMessage'];
+    if (user is! Map<String, dynamic> || assistant is! Map<String, dynamic>) {
+      throw ApiException('Invalid chat message response');
+    }
+    return (
+      userMessage: TutorChatMessageDto.fromJson(user),
+      assistantMessage: TutorChatMessageDto.fromJson(assistant),
+    );
+  }
+}

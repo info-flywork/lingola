@@ -43,10 +43,17 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   @override
   void initState() {
     super.initState();
-    _fileLoader = FileLoader.fromAsset(
-      widget.assetPath,
-      riveFactory: Factory.rive,
-    );
+    final isNetwork = widget.assetPath.startsWith('http://') ||
+        widget.assetPath.startsWith('https://');
+    _fileLoader = isNetwork
+        ? FileLoader.fromUrl(
+            widget.assetPath,
+            riveFactory: Factory.rive,
+          )
+        : FileLoader.fromAsset(
+            widget.assetPath,
+            riveFactory: Factory.rive,
+          );
   }
 
   @override

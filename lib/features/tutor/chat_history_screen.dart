@@ -1,51 +1,119 @@
 import 'package:flutter/material.dart';
 
+import '../../core/auth/api_client.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
-import 'calling_screen.dart';
 import 'chat_screen.dart';
-import 'tutor_screen.dart';
+import 'services/tutor_chat_api_service.dart';
 
-class ChatHistoryScreen extends StatelessWidget {
+class ChatHistoryScreen extends StatefulWidget {
   const ChatHistoryScreen({super.key});
+
+  @override
+  State<ChatHistoryScreen> createState() => _ChatHistoryScreenState();
+}
+
+class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
+  var _loading = true;
+  String? _error;
+  List<TutorChatSessionDto> _sessions = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final sessions = await TutorChatApiService.listSessions();
+      if (!mounted) return;
+      setState(() {
+        _sessions = sessions;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = e is ApiException ? e.message : e.toString();
+      });
+    }
+  }
+
+  String _displayName(TutorChatSessionDto session) {
+    final key = session.tutor?.nameKey ?? session.title ?? '';
+    final tutors = AppText.current.tutorPage.tutors;
+    switch (key) {
+      case 'lingola':
+        return tutors.lingola;
+      case 'elena':
+        return tutors.elena;
+      case 'kenji':
+        return tutors.kenji;
+      case 'freya':
+        return tutors.freya;
+      case 'camila':
+        return tutors.camila;
+      case 'marco':
+        return tutors.marco;
+      case 'julian':
+        return tutors.julian;
+      case 'ines':
+        return tutors.ines;
+      case 'felix':
+        return tutors.felix;
+      case 'diego':
+        return tutors.diego;
+      case 'amara':
+        return tutors.amara;
+      case 'erik':
+        return tutors.erik;
+      case 'katie':
+        return tutors.katie;
+      case 'morgan':
+        return tutors.morgan;
+      case 'santa':
+        return tutors.santa;
+      case 'zephyrion':
+        return tutors.zephyrion;
+      case 'vaelen':
+        return tutors.vaelen;
+      case 'ukrath':
+        return tutors.ukrath;
+      case 'elrion':
+        return tutors.elrion;
+      default:
+        if (key.isEmpty) return 'Tutor';
+        return key[0].toUpperCase() + key.substring(1);
+    }
+  }
+
+  String _imagePath(TutorChatSessionDto session) {
+    return session.tutor?.imagePath ?? AppAssets.tutorRobot;
+  }
+
+  String _formatTime(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    final dt = DateTime.tryParse(raw)?.toLocal();
+    if (dt == null) return '';
+    final now = DateTime.now();
+    final diff = now.difference(dt);
+    if (diff.inMinutes < 60) return '${diff.inMinutes.clamp(1, 59)}m';
+    if (diff.inHours < 24) return '${diff.inHours}h';
+    if (diff.inDays < 7) return '${diff.inDays}d';
+    return '${dt.day}.${dt.month}';
+  }
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.tutorPage;
-    final featured = [
-      (
-        text.tutors.elena,
-        AppAssets.tutorElena,
-        [
-          text.tags.adaptive,
-          text.tags.calm,
-        ],
-      ),
-      (
-        text.tutors.kenji,
-        AppAssets.tutorKenji,
-        [
-          text.tags.patient,
-          text.tags.organized,
-        ],
-      ),
-    ];
-    final history = [
-      (
-        text.tutors.elena,
-        AppAssets.tutorElena,
-        text.historyPreview1,
-        text.time1,
-      ),
-      (
-        text.tutors.kenji,
-        AppAssets.tutorKenji,
-        text.historyPreview2,
-        text.time2,
-      ),
-    ];
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -69,67 +137,79 @@ class ChatHistoryScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        children: [
-          SizedBox(
-            height: 303,
-            child: Row(
-              children: [
-                for (var i = 0; i < featured.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 12),
-                  Expanded(
-                    child: TutorCard(
-                      name: featured[i].$1,
-                      imagePath: featured[i].$2,
-                      tags: featured[i].$3,
-                      onStartTalk: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => CallingScreen(
-                              tutorName: featured[i].$1,
-                              imagePath: featured[i].$2,
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _load,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                children: [
+                  if (_error != null) ...[
+                    Text(
+                      _error!,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 13,
+                        color: Color(0xFFB71C1C),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(onPressed: _load, child: const Text('Tekrar dene')),
+                    const SizedBox(height: 12),
+                  ],
+                  Text(
+                    text.history,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  if (_sessions.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 40),
+                      child: Text(
+                        'Henüz sohbet yok. Bir tutor seçip konuşmaya başla.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 13,
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                    )
+                  else
+                    for (final session in _sessions) ...[
+                      _HistoryTile(
+                        name: _displayName(session),
+                        imagePath: _imagePath(session),
+                        preview: session.preview.isEmpty
+                            ? 'Konuşmaya başla'
+                            : session.preview,
+                        time: _formatTime(
+                          session.lastMessageAt ?? session.createdAt,
+                        ),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => ChatScreen(
+                                tutorName: _displayName(session),
+                                imagePath: _imagePath(session),
+                                tutorId: session.tutorId,
+                                tutorSlug: session.tutor?.slug,
+                                sessionId: session.id,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                 ],
-              ],
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            text.history,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          for (final item in history) ...[
-            _HistoryTile(
-              name: item.$1,
-              imagePath: item.$2,
-              preview: item.$3,
-              time: item.$4,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => ChatScreen(
-                      tutorName: item.$1,
-                      imagePath: item.$2,
-                    ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 10),
-          ],
-        ],
-      ),
     );
   }
 }

@@ -11,14 +11,33 @@ import '../roleplay/role_play_screen.dart';
 import '../tutor/tutor_screen.dart';
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  const MainShell({super.key, this.initialIndex = 0});
+
+  final int initialIndex;
+
+  static void goToTab(BuildContext context, int index) {
+    context.findAncestorStateOfType<_MainShellState>()?.selectTab(index);
+  }
+
+  static void goToProfile(BuildContext context) => goToTab(context, 4);
 
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
 class _MainShellState extends State<MainShell> {
-  int _index = 0;
+  late int _index;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.initialIndex.clamp(0, 4);
+  }
+
+  void selectTab(int index) {
+    if (!mounted) return;
+    setState(() => _index = index.clamp(0, 4));
+  }
 
   static const _iconSets = [
     (

@@ -7,16 +7,20 @@ import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import 'language_flag.dart';
+import 'onboarding_draft.dart';
 import 'setup_question_screens.dart';
 
 class LanguageSetupScreen extends StatefulWidget {
-  const LanguageSetupScreen({super.key});
+  const LanguageSetupScreen({super.key, this.draft});
+
+  final OnboardingDraft? draft;
 
   @override
   State<LanguageSetupScreen> createState() => _LanguageSetupScreenState();
 }
 
 class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
+  late final OnboardingDraft _draft;
   late String _nativeCode;
   late String _nativeName;
   late String _targetCode;
@@ -26,9 +30,10 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
   void initState() {
     super.initState();
     final text = AppText.current;
-    _nativeCode = 'tr';
+    _draft = widget.draft ?? OnboardingDraft();
+    _nativeCode = _draft.nativeLanguageCode;
     _nativeName = text.language.nativeName;
-    _targetCode = 'en';
+    _targetCode = _draft.targetLanguageCode;
     _targetName = text.language.targetName;
   }
 
@@ -87,9 +92,11 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
       if (forNative) {
         _nativeCode = result.code;
         _nativeName = result.label;
+        _draft.nativeLanguageCode = result.code;
       } else {
         _targetCode = result.code;
         _targetName = result.label;
+        _draft.targetLanguageCode = result.code;
       }
     });
   }
@@ -226,11 +233,15 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                   child: PrimaryButton(
                     label: text.common.continueLabel,
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const GoalSetupScreen(),
-                      ),
-                    ),
+                    onPressed: () {
+                      _draft.nativeLanguageCode = _nativeCode;
+                      _draft.targetLanguageCode = _targetCode;
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => GoalSetupScreen(draft: _draft),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),

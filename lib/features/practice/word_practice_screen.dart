@@ -1,12 +1,16 @@
 import 'dart:ui';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/config/app_env.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/practice/practice_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
+import '../tutor/services/tutor_tts_service.dart';
 
 class WordPracticeScreen extends StatefulWidget {
   const WordPracticeScreen({super.key});
@@ -21,57 +25,217 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   static const _chipText = Color(0xFF000088);
   static const _hintBg = Color(0x0D2D46FF);
 
-  static const _words = <_PracticeWord>[
-    _PracticeWord(
-      word: 'Friend',
-      phonetic: '/frend/',
-      translations: ['Arkadaş', 'Dost', 'Yoldaş'],
-      exampleEn: 'A good friend is hard to find',
-      exampleTr: 'İyi bir arkadaş bulmak zordur.',
-    ),
-    _PracticeWord(
-      word: 'Journey',
-      phonetic: '/ˈdʒɜːrni/',
-      translations: ['Yolculuk', 'Seyahat', 'Macera'],
-      exampleEn: 'The journey was long but exciting',
-      exampleTr: 'Yolculuk uzun ama heyecan vericiydi.',
-    ),
-    _PracticeWord(
-      word: 'Courage',
-      phonetic: '/ˈkʌrɪdʒ/',
-      translations: ['Cesaret', 'Yiğitlik', 'Yüreklilik'],
-      exampleEn: 'It takes courage to speak up',
-      exampleTr: 'Konuşmak cesaret ister.',
-    ),
-  ];
+  final _tts = TutorTtsService();
+  final _player = AudioPlayer();
 
+  var _loading = true;
+  String? _error;
+  PracticeSession? _session;
   var _index = 0;
   var _saved = false;
   var _hintVisible = true;
+  var _listening = false;
 
-  _PracticeWord get _current => _words[_index];
+  PracticeCard? get _current {
+    final cards = _session?.cards;
+    if (cards == null || cards.isEmpty) return null;
+    if (_index < 0 || _index >= cards.length) return null;
+    return cards[_index];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    _tts.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load({bool append = false}) async {
+    if (!append) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
+    try {
+      final session = await PracticeService.fetchCards(count: 5);
+      if (!mounted) return;
+      setState(() {
+        if (append && _session != null) {
+          final existingIds = _session!.cards.map((c) => c.id).toSet();
+          final fresh = session.cards
+              .where((c) => c.id.isNotEmpty && !existingIds.contains(c.id))
+              .toList();
+          _session = PracticeSession(
+            nativeLang: session.nativeLang,
+            targetLang: session.targetLang,
+            level: session.level,
+            cards: [..._session!.cards, ...fresh],
+          );
+          if (fresh.isNotEmpty) {
+            _index = _session!.cards.length - fresh.length;
+            _saved = _session!.cards[_index].saved;
+            _hintVisible = true;
+          }
+        } else {
+          _session = session;
+          _index = 0;
+          _saved = _current?.saved ?? false;
+          _hintVisible = true;
+        }
+        _loading = false;
+        _error = null;
+      });
+      _warmAudio();
+    } catch (err) {
+      if (!mounted) return;
+      if (append) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not load more: $err')),
+        );
+        return;
+      }
+      setState(() {
+        _error = err.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  /// Synthesise the current and next word ahead of time so "Listen" plays
+  /// from the local cache instead of waiting on the TTS API.
+  void _warmAudio() {
+    final cards = _session?.cards ?? const <PracticeCard>[];
+    for (final offset in const [0, 1]) {
+      final i = _index + offset;
+      if (i < 0 || i >= cards.length) continue;
+      _tts.prefetch(
+        cards[i].word,
+        voiceId: TutorVoiceIds.female,
+        modelId: TutorTtsService.flashModel,
+      );
+    }
+  }
 
   void _goPrevious() {
     if (_index == 0) return;
     setState(() {
       _index -= 1;
-      _saved = false;
+      _saved = _current?.saved ?? false;
       _hintVisible = true;
     });
+    _warmAudio();
   }
 
-  void _goNext() {
-    if (_index >= _words.length - 1) return;
-    setState(() {
-      _index += 1;
-      _saved = false;
-      _hintVisible = true;
-    });
+  Future<void> _goNext() async {
+    final cards = _session?.cards ?? const <PracticeCard>[];
+    if (_index < cards.length - 1) {
+      final nextIndex = _index + 1;
+      setState(() {
+        _index = nextIndex;
+        _saved = cards[nextIndex].saved;
+        _hintVisible = true;
+      });
+      _warmAudio();
+      return;
+    }
+    // Append the next batch so Previous can walk the full history.
+    await _load(append: true);
+  }
+
+  Future<void> _onToggleSave() async {
+    final card = _current;
+    if (card == null || card.id.isEmpty) return;
+    final next = !_saved;
+    setState(() => _saved = next);
+    try {
+      if (next) {
+        await PracticeService.saveWord(card.id);
+      } else {
+        await PracticeService.unsaveWord(card.id);
+      }
+      final session = _session;
+      if (session == null) return;
+      final cards = List<PracticeCard>.from(session.cards);
+      final i = _index;
+      if (i >= 0 && i < cards.length) {
+        cards[i] = cards[i].copyWith(saved: next);
+        _session = PracticeSession(
+          nativeLang: session.nativeLang,
+          targetLang: session.targetLang,
+          level: session.level,
+          cards: cards,
+        );
+      }
+    } catch (err) {
+      if (!mounted) return;
+      setState(() => _saved = !next);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Save failed: $err')),
+      );
+    }
+  }
+
+  Future<void> _onListen() async {
+    final card = _current;
+    if (card == null || _listening) return;
+    setState(() => _listening = true);
+    try {
+      final file = await _tts.synthesizeToFile(
+        card.word,
+        voiceId: TutorVoiceIds.female,
+        modelId: TutorTtsService.flashModel,
+      );
+      await _player.stop();
+      await _player.play(DeviceFileSource(file.path));
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Listen failed: $err')),
+      );
+    } finally {
+      if (mounted) setState(() => _listening = false);
+    }
+  }
+
+  String _nativeLanguageLabel(String code) {
+    final t = AppText.current.targetLanguage;
+    switch (code.toLowerCase()) {
+      case 'tr':
+        return t.turkish.toUpperCase();
+      case 'de':
+        return t.german.toUpperCase();
+      case 'it':
+        return t.italian.toUpperCase();
+      case 'pt':
+        return t.portuguese.toUpperCase();
+      case 'ko':
+        return t.korean.toUpperCase();
+      case 'zh':
+        return t.simplifiedChinese.toUpperCase();
+      case 'ar':
+        return t.arabic.toUpperCase();
+      case 'hi':
+        return t.hindi.toUpperCase();
+      case 'en':
+        return 'ENGLISH';
+      default:
+        return code.toUpperCase();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.wordPracticePage;
+    final card = _current;
+    final cardsLen = _session?.cards.length ?? 0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -112,54 +276,99 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(19, 0, 19, 10),
-                  child: _WordCard(
-                    word: _current,
-                    languageLabel: text.turkish,
-                    hintVisible: _hintVisible,
-                    saved: _saved,
-                    saveLabel: text.save,
-                    listenLabel: text.listen,
-                    hintLabel: text.hint,
-                    onSave: () => setState(() => _saved = !_saved),
-                    onListen: () {},
-                    onHint: () => setState(() => _hintVisible = !_hintVisible),
-                    saveRed: _saveRed,
-                    saveBg: _saveBg,
-                    chipText: _chipText,
-                    hintBg: _hintBg,
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _error != null
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _error!,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontFamily: 'Poppins',
+                                      color: AppColors.secondary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  PrimaryButton(
+                                    label: 'Retry',
+                                    onPressed: _load,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : card == null
+                            ? const Center(child: Text('No words'))
+                            : SingleChildScrollView(
+                                padding:
+                                    const EdgeInsets.fromLTRB(19, 0, 19, 10),
+                                child: _WordCard(
+                                  word: card.word,
+                                  phonetic: card.phonetic,
+                                  translations: card.translations,
+                                  exampleTarget: card.sentence,
+                                  exampleNative: card.sentenceTranslation,
+                                  languageLabel: _nativeLanguageLabel(
+                                    _session?.nativeLang ?? 'tr',
+                                  ),
+                                  hintVisible: _hintVisible,
+                                  saved: _saved,
+                                  listening: _listening,
+                                  saveLabel: text.save,
+                                  listenLabel: text.listen,
+                                  hintLabel: text.hint,
+                                  onSave: _onToggleSave,
+                                  onListen: _onListen,
+                                  onHint: () => setState(
+                                    () => _hintVisible = !_hintVisible,
+                                  ),
+                                  saveRed: _saveRed,
+                                  saveBg: _saveBg,
+                                  chipText: _chipText,
+                                  hintBg: _hintBg,
+                                ),
+                              ),
+              ),
+              if (!_loading && _error == null && card != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(19, 0, 19, 16),
+                  child: Column(
+                    children: [
+                      Opacity(
+                        opacity: _index == 0 ? 0.45 : 1,
+                        child: IgnorePointer(
+                          ignoring: _index == 0,
+                          child: SecondaryButton(
+                            label: text.previous,
+                            onPressed: _goPrevious,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      PrimaryButton(
+                        label: text.next,
+                        onPressed: _goNext,
+                      ),
+                      if (cardsLen > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            '${_index + 1} / $cardsLen',
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(19, 0, 19, 16),
-                child: Column(
-                  children: [
-                    Opacity(
-                      opacity: _index == 0 ? 0.45 : 1,
-                      child: IgnorePointer(
-                        ignoring: _index == 0,
-                        child: SecondaryButton(
-                          label: text.previous,
-                          onPressed: _goPrevious,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Opacity(
-                      opacity: _index >= _words.length - 1 ? 0.45 : 1,
-                      child: IgnorePointer(
-                        ignoring: _index >= _words.length - 1,
-                        child: PrimaryButton(
-                          label: text.next,
-                          onPressed: _goNext,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -168,28 +377,17 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 }
 
-class _PracticeWord {
-  const _PracticeWord({
-    required this.word,
-    required this.phonetic,
-    required this.translations,
-    required this.exampleEn,
-    required this.exampleTr,
-  });
-
-  final String word;
-  final String phonetic;
-  final List<String> translations;
-  final String exampleEn;
-  final String exampleTr;
-}
-
 class _WordCard extends StatelessWidget {
   const _WordCard({
     required this.word,
+    required this.phonetic,
+    required this.translations,
+    required this.exampleTarget,
+    required this.exampleNative,
     required this.languageLabel,
     required this.hintVisible,
     required this.saved,
+    required this.listening,
     required this.saveLabel,
     required this.listenLabel,
     required this.hintLabel,
@@ -202,10 +400,15 @@ class _WordCard extends StatelessWidget {
     required this.hintBg,
   });
 
-  final _PracticeWord word;
+  final String word;
+  final String phonetic;
+  final List<String> translations;
+  final String exampleTarget;
+  final String exampleNative;
   final String languageLabel;
   final bool hintVisible;
   final bool saved;
+  final bool listening;
   final String saveLabel;
   final String listenLabel;
   final String hintLabel;
@@ -231,7 +434,7 @@ class _WordCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            word.word,
+            word,
             style: const TextStyle(
               fontFamily: 'Poppins',
               fontSize: 36,
@@ -240,27 +443,28 @@ class _WordCard extends StatelessWidget {
               color: AppColors.ink,
             ),
           ),
-          Text(
-            word.phonetic,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 16,
-              height: 20 / 16,
-              fontWeight: FontWeight.w500,
-              color: AppColors.ink,
+          if (phonetic.isNotEmpty)
+            Text(
+              phonetic,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 16,
+                height: 20 / 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.ink,
+              ),
             ),
-          ),
           const SizedBox(height: 10),
           _TranslationBox(
             languageLabel: languageLabel,
-            translations: word.translations,
+            translations: translations,
             hintVisible: hintVisible,
             chipText: chipText,
           ),
           const SizedBox(height: 10),
           _ExampleBlock(
-            exampleEn: word.exampleEn,
-            exampleTr: word.exampleTr,
+            exampleTarget: exampleTarget,
+            exampleNative: exampleNative,
           ),
           const SizedBox(height: 10),
           Row(
@@ -281,7 +485,7 @@ class _WordCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _ActionChipButton(
-                  label: listenLabel,
+                  label: listening ? '…' : listenLabel,
                   background: AppColors.ink,
                   foreground: Colors.white,
                   icon: const HomeAsset(
@@ -289,7 +493,7 @@ class _WordCard extends StatelessWidget {
                     width: 20,
                     height: 20,
                   ),
-                  onTap: onListen,
+                  onTap: listening ? () {} : onListen,
                 ),
               ),
               const SizedBox(width: 10),
@@ -356,7 +560,7 @@ class _TranslationBox extends StatelessWidget {
             child: Wrap(
               spacing: 10,
               runSpacing: 10,
-              children: translations
+              children: (translations.isEmpty ? const ['—'] : translations)
                   .map(
                     (item) => Container(
                       padding: const EdgeInsets.all(10),
@@ -388,12 +592,12 @@ class _TranslationBox extends StatelessWidget {
 
 class _ExampleBlock extends StatelessWidget {
   const _ExampleBlock({
-    required this.exampleEn,
-    required this.exampleTr,
+    required this.exampleTarget,
+    required this.exampleNative,
   });
 
-  final String exampleEn;
-  final String exampleTr;
+  final String exampleTarget;
+  final String exampleNative;
 
   @override
   Widget build(BuildContext context) {
@@ -414,7 +618,7 @@ class _ExampleBlock extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  exampleEn,
+                  exampleTarget.isEmpty ? '—' : exampleTarget,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 14,
@@ -425,7 +629,7 @@ class _ExampleBlock extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  exampleTr,
+                  exampleNative.isEmpty ? '—' : exampleNative,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 14,

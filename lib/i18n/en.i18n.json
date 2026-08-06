@@ -12,7 +12,10 @@
     "locked": "Locked",
     "minutes": "$value min",
     "close": "Close",
-    "getStarted": "GET STARTED"
+    "getStarted": "GET STARTED",
+    "connectionError": "No connection. Check your internet and try again.",
+    "genericError": "Something went wrong. Please try again.",
+    "tryAgain": "Try again"
   },
   "onboarding": {
     "pageA11y": "Onboarding page $current of $total",
@@ -206,7 +209,10 @@
   "libraryPage": {
     "title": "Library",
     "searchWord": "Search Word",
-    "savedWordCount": "$count Saved Word"
+    "savedWordCount": "$count Saved Word",
+    "savedWordTab": "Saved Word",
+    "dictionaryTab": "Dictionary",
+    "dictionaryLabel": "Dictionary"
   },
   "wordPracticePage": {
     "title": "Word Practice",
@@ -257,6 +263,7 @@
   "tutorPage": {
     "title": "Tutor",
     "chatWithLingola": "Chat with Lingola",
+    "chatWithTutor": "Chat with $name",
     "chatHistory": "Chat History",
     "history": "History",
     "filter": "Filter",

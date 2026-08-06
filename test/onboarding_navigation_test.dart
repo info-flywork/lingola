@@ -74,9 +74,6 @@ void main() {
 
     await _tapVisible(tester, find.text(text.common.getStarted).last);
     expect(find.text(text.auth.continueGuest), findsOneWidget);
-
-    await _tapVisible(tester, find.text(text.auth.continueGuest));
-    expect(find.text(text.home.greeting), findsOneWidget);
   });
 
   testWidgets('Target language sheet matches Figma layout', (tester) async {
