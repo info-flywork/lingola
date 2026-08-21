@@ -254,7 +254,7 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
       title: AppText.current.quizPage.failedTitle,
       body: AppText.current.quizPage.failedBody,
       buttonLabel: AppText.current.quizPage.tryAgain,
-      onPressed: () {},
+      onPressed: _resetForQuestion,
     );
   }
 

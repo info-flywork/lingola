@@ -1,9 +1,14 @@
+import 'dart:async';
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/auth/auth_service.dart';
 import '../../core/auth/session_store.dart';
+import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
@@ -341,7 +346,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     labelColor: _premiumOrange,
                     valueLabel: text.passive,
                     valueColor: _premiumOrange,
-                    onTap: () {},
+                    onTap: () => unawaited(_presentProfilePaywall(context)),
                   ),
                   _SettingsTile(
                     icon: AppAssets.profileShareFriends,
@@ -359,7 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: AppAssets.profileRateUs,
                     iconBg: _rateOrangeBg,
                     label: text.rateUs,
-                    onTap: () {},
+                    onTap: () => unawaited(_openRateUs()),
                   ),
                   _SettingsTile(
                     icon: AppAssets.profileFaq,
@@ -383,7 +388,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     icon: AppAssets.profileFeedback,
                     iconBg: _feedbackBg,
                     label: text.feedback,
-                    onTap: () {},
+                    onTap: () => unawaited(_openFeedbackEmail()),
                   ),
                   _SettingsTile(
                     icon: AppAssets.profileProgression,
@@ -411,10 +416,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _presentProfilePaywall(BuildContext context) async {
+    final hasKey = AppEnv.revenueCatIosPublicKey.isNotEmpty ||
+        AppEnv.revenueCatAndroidPublicKey.isNotEmpty;
+    if (!hasKey) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Paywall is not configured yet.')),
+      );
+      return;
+    }
+    try {
+      await RevenueCatUI.presentPaywall(displayCloseButton: true);
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppText.current.common.genericError)),
+      );
+    }
+  }
+
+  Future<void> _openRateUs() async {
+    final uri = Platform.isIOS
+        ? Uri.parse('https://apps.apple.com/app/id0000000000')
+        : Uri.parse(
+            'https://play.google.com/store/apps/details?id=com.flywork.lingolaapp',
+          );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   Future<void> _openSupportEmail() async {
     final uri = Uri(
       scheme: 'mailto',
       path: 'support@fly-work.com',
+    );
+    await launchUrl(uri);
+  }
+
+  Future<void> _openFeedbackEmail() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'feedback@fly-work.com',
+      queryParameters: {'subject': 'Lingola feedback'},
     );
     await launchUrl(uri);
   }

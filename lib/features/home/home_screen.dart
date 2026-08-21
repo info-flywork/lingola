@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 
 import '../../core/auth/auth_service.dart';
 import '../../core/auth/app_user.dart';
 import '../../core/auth/session_store.dart';
+import '../../core/config/app_env.dart';
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
@@ -10,9 +15,32 @@ import '../../widgets/user_avatar.dart';
 import '../library/library_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../practice/word_practice_screen.dart';
+import '../profile/progress_screen.dart';
+import '../profile/select_language_screen.dart';
 import '../streak/streak_api_service.dart';
 import '../quiz/quiz_screen.dart';
 import '../shell/main_shell.dart';
+import '../tutor/calling_screen.dart';
+
+Future<void> _presentHomePaywall(BuildContext context) async {
+  final hasKey = AppEnv.revenueCatIosPublicKey.isNotEmpty ||
+      AppEnv.revenueCatAndroidPublicKey.isNotEmpty;
+  if (!hasKey) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Paywall is not configured yet.')),
+    );
+    return;
+  }
+  try {
+    await RevenueCatUI.presentPaywall(displayCloseButton: true);
+  } catch (_) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppText.current.common.genericError)),
+    );
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -312,38 +340,63 @@ class _HomeHeaderState extends State<_HomeHeader> {
                     ),
                   ),
                   const Spacer(),
-                  _TopIconBadge(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        const HomeAsset(
-                          'assets/images/home/streak_icon.svg',
-                          width: 20,
-                          height: 23,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const ProgressScreen(),
                         ),
-                        Positioned(
-                          left: 7,
-                          top: 6,
-                          child: Text(
-                            '$_streakCount',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              height: 1,
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: -0.2,
+                      );
+                    },
+                    child: _TopIconBadge(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          const HomeAsset(
+                            'assets/images/home/streak_icon.svg',
+                            width: 20,
+                            height: 23,
+                          ),
+                          Positioned(
+                            left: 7,
+                            top: 6,
+                            child: Text(
+                              '$_streakCount',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                height: 1,
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: -0.2,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const _TopIconBadge(
-                    child: HomeAsset(
-                      'assets/images/home/flag_icon.svg',
-                      width: 21,
-                      height: 21,
+                  GestureDetector(
+                    onTap: () async {
+                      final user = SessionStore.currentUser;
+                      final code = await Navigator.of(context).push<String>(
+                        MaterialPageRoute(
+                          builder: (_) => SelectLanguageScreen(
+                            initialCode: user?.appLocale ?? 'en',
+                          ),
+                        ),
+                      );
+                      if (code == null || code.isEmpty) return;
+                      try {
+                        await AuthService.updateProfile(appLocale: code);
+                      } catch (_) {}
+                    },
+                    child: const _TopIconBadge(
+                      child: HomeAsset(
+                        'assets/images/home/flag_icon.svg',
+                        width: 21,
+                        height: 21,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -416,118 +469,124 @@ class _ContinueConversationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = AppText.current;
     // Figma: 398×138, pad dikey 10, gap 10; üst satır space-between
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(10, 16, 10, 16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryTint05,
+    return Material(
+      color: AppColors.primaryTint05,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
         borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+        onTap: () => MainShell.goToLessons(context),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(10, 16, 10, 16),
+          child: Column(
             children: [
-              Expanded(
-                child: Text(
-                  text.home.continueConversation,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.sectionSubtitle.copyWith(fontSize: 14),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                text.home.lessonProgress,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
-                  height: 16 / 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              const HomeAsset(
-                'assets/images/home/clock_icon.svg',
-                width: 24,
-                height: 24,
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: text.home.timeCurrent,
-                        style: const TextStyle(
-                          color: AppColors.ink,
-                          fontSize: 24,
-                          height: 28 / 24,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      TextSpan(
-                        text: ' ${text.home.timeTotal}',
-                        style: AppTextStyles.sectionSubtitle.copyWith(
-                          fontSize: 14,
-                          height: 18 / 14,
-                        ),
-                      ),
-                    ],
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      text.home.continueConversation,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          AppTextStyles.sectionSubtitle.copyWith(fontSize: 14),
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                height: 32,
-                constraints: const BoxConstraints(minWidth: 96, maxWidth: 120),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    text.home.kContinue,
+                  const SizedBox(width: 8),
+                  Text(
+                    text.home.lessonProgress,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      height: 18 / 14,
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      height: 16 / 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const HomeAsset(
+                    'assets/images/home/clock_icon.svg',
+                    width: 24,
+                    height: 24,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: text.home.timeCurrent,
+                            style: const TextStyle(
+                              color: AppColors.ink,
+                              fontSize: 24,
+                              height: 28 / 24,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          TextSpan(
+                            text: ' ${text.home.timeTotal}',
+                            style: AppTextStyles.sectionSubtitle.copyWith(
+                              fontSize: 14,
+                              height: 18 / 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    height: 32,
+                    constraints:
+                        const BoxConstraints(minWidth: 96, maxWidth: 120),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        text.home.kContinue,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          height: 18 / 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: SizedBox(
+                  height: 6,
+                  child: Stack(
+                    children: [
+                      Container(color: AppColors.progressTrack),
+                      FractionallySizedBox(
+                        widthFactor: 101 / 378,
+                        child: Container(color: AppColors.primary),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: SizedBox(
-              height: 6,
-              child: Stack(
-                children: [
-                  Container(color: AppColors.progressTrack),
-                  FractionallySizedBox(
-                    widthFactor: 101 / 378,
-                    child: Container(color: AppColors.primary),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -1016,6 +1075,20 @@ class _LiveTutorCarousel extends StatelessWidget {
             flagAsset: tutor.$3,
             tags: tutor.$4,
             startTalkLabel: text.home.startTalkNow,
+            onStartTalk: () {
+              final isLingola = index == 0;
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => CallingScreen(
+                    tutorName: tutor.$1,
+                    imagePath: tutor.$2,
+                    riveAsset: isLingola ? AppAssets.tutorLingolaRiv : null,
+                    voiceId: TutorVoiceIds.male,
+                    tutorSlug: isLingola ? 'lingola' : null,
+                  ),
+                ),
+              );
+            },
           );
         },
       ),
@@ -1029,6 +1102,7 @@ class _TutorCard extends StatelessWidget {
     required this.image,
     required this.tags,
     required this.startTalkLabel,
+    required this.onStartTalk,
     this.flagAsset,
   });
 
@@ -1037,6 +1111,7 @@ class _TutorCard extends StatelessWidget {
   final String? flagAsset;
   final List<String> tags;
   final String startTalkLabel;
+  final VoidCallback onStartTalk;
 
   @override
   Widget build(BuildContext context) {
@@ -1127,34 +1202,39 @@ class _TutorCard extends StatelessWidget {
                 .toList(),
           ),
           const SizedBox(height: 10),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
+          Material(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
               borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const HomeAsset(
-                  'assets/images/home/video_icon.svg',
-                  width: 15,
-                  height: 15,
+              onTap: onStartTalk,
+              child: Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const HomeAsset(
+                      'assets/images/home/video_icon.svg',
+                      width: 15,
+                      height: 15,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      startTalkLabel,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.white,
+                        fontSize: 12,
+                        height: 14 / 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  startTalkLabel,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    color: Colors.white,
-                    fontSize: 12,
-                    height: 14 / 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],
@@ -1320,38 +1400,45 @@ class _PremiumCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Container(
-                  width: 179,
-                  height: 44,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white, width: 1),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        premium.cta,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          height: 20 / 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    onTap: () => unawaited(_presentHomePaywall(context)),
+                    child: Container(
+                      width: 179,
+                      height: 44,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
                       ),
-                      const SizedBox(width: 8),
-                      const HomeAsset(
-                        'assets/images/home/premium_arrow.svg',
-                        width: 18,
-                        height: 18,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.white, width: 1),
                       ),
-                    ],
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            premium.cta,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              height: 20 / 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const HomeAsset(
+                            'assets/images/home/premium_arrow.svg',
+                            width: 18,
+                            height: 18,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],

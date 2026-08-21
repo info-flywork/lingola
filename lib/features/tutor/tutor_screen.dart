@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -12,6 +13,7 @@ import 'chat_history_screen.dart';
 import 'chat_screen.dart';
 import 'calling_screen.dart';
 import 'services/tutor_api_service.dart';
+import 'services/tutor_tts_service.dart';
 import 'tutor_filter_sheet.dart';
 
 class TutorScreen extends StatefulWidget {
@@ -654,7 +656,7 @@ class _TutorData {
   String get identity => id ?? slug ?? name;
 }
 
-class _TutorHero extends StatelessWidget {
+class _TutorHero extends StatefulWidget {
   const _TutorHero({
     required this.text,
     required this.tutor,
@@ -666,7 +668,69 @@ class _TutorHero extends StatelessWidget {
   final VoidCallback onChat;
 
   @override
+  State<_TutorHero> createState() => _TutorHeroState();
+}
+
+class _TutorHeroState extends State<_TutorHero> {
+  final _player = AudioPlayer();
+  final _tts = TutorTtsService();
+  var _playbackRate = 1.0;
+  var _speaking = false;
+
+  static const _rates = [0.5, 1.0, 1.5, 2.0];
+
+  String get _rateLabel {
+    final r = _playbackRate;
+    if (r == 0.5) return '0.5x';
+    if (r == 1.5) return '1.5x';
+    if (r == 2.0) return '2x';
+    return '1x';
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
+  Future<void> _speakPreview() async {
+    if (_speaking) {
+      await _player.stop();
+      if (mounted) setState(() => _speaking = false);
+      return;
+    }
+    setState(() => _speaking = true);
+    try {
+      final file = await _tts.synthesizeToFile(
+        "Hi, I'm ${widget.tutor.name}. Let's practice English together.",
+        voiceId: widget.tutor.voiceId ?? TutorVoiceIds.male,
+      );
+      await _player.setPlaybackRate(_playbackRate);
+      await _player.play(DeviceFileSource(file.path));
+      await _player.onPlayerComplete.first;
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppText.current.common.genericError)),
+      );
+    } finally {
+      if (mounted) setState(() => _speaking = false);
+    }
+  }
+
+  Future<void> _cycleRate() async {
+    final i = _rates.indexOf(_playbackRate);
+    final next = _rates[(i < 0 ? 0 : i + 1) % _rates.length];
+    setState(() => _playbackRate = next);
+    try {
+      await _player.setPlaybackRate(next);
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final text = widget.text;
+    final tutor = widget.tutor;
     final topInset = MediaQuery.paddingOf(context).top;
     final chatLabel = text.chatWithTutor(name: tutor.name) as String;
     return SizedBox(
@@ -705,7 +769,7 @@ class _TutorHero extends StatelessWidget {
                     children: [
                       _GlassIconButton(
                         tooltip: text.speaker as String,
-                        onTap: () {},
+                        onTap: _speakPreview,
                         child: const HomeAsset(
                           AppAssets.tutorSpeaker,
                           width: 22,
@@ -713,21 +777,26 @@ class _TutorHero extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        width: 36,
-                        height: 36,
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                          color: Color(0x80000000),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          AppText.current.previewChat.speed,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                            color: Colors.white,
+                      Material(
+                        color: const Color(0x80000000),
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: _cycleRate,
+                          child: SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Center(
+                              child: Text(
+                                _rateLabel,
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -741,7 +810,7 @@ class _TutorHero extends StatelessWidget {
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(999),
                     child: InkWell(
-                      onTap: onChat,
+                      onTap: widget.onChat,
                       borderRadius: BorderRadius.circular(999),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(

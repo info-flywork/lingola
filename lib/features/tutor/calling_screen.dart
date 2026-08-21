@@ -365,7 +365,21 @@ class _CallingScreenState extends State<CallingScreen> {
         _ControlCircle(
           size: 56,
           light: !darkChrome,
-          onTap: () => setState(() => _hintsOn = !_hintsOn),
+          onTap: () {
+            final next = !_hintsOn;
+            setState(() => _hintsOn = next);
+            if (!next) return;
+            final calling = AppText.current.tutorPage.calling;
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${calling.nativeLine}\n${calling.englishLine}',
+                ),
+                duration: const Duration(seconds: 5),
+              ),
+            );
+          },
           child: HomeAsset(
             _hintsOn ? AppAssets.lightbulb : AppAssets.hint,
             width: 22,

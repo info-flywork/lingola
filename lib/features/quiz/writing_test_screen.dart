@@ -254,7 +254,10 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
       title: quiz.failedTitle,
       body: quiz.failedBody,
       buttonLabel: quiz.tryAgain,
-      onPressed: () {},
+      onPressed: () {
+        _answerController.clear();
+        setState(() => _answerText = '');
+      },
     );
   }
 

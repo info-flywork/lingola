@@ -914,88 +914,146 @@ class _VoiceComposer extends StatelessWidget {
   }
 }
 
-class _BotBubble extends StatelessWidget {
+class _BotBubble extends StatefulWidget {
   const _BotBubble({required this.message, this.onSpeak});
 
   final LingolaChatMessage message;
   final VoidCallback? onSpeak;
 
   @override
+  State<_BotBubble> createState() => _BotBubbleState();
+}
+
+class _BotBubbleState extends State<_BotBubble> {
+  String? _translation;
+  var _translating = false;
+
+  Future<void> _translate() async {
+    if (_translating) return;
+    if (_translation != null) {
+      setState(() => _translation = null);
+      return;
+    }
+    setState(() => _translating = true);
+    try {
+      final tr =
+          await OpenAiChatService().translateToTurkish(widget.message.text);
+      if (!mounted) return;
+      setState(() {
+        _translation = tr.trim().isEmpty ? null : tr.trim();
+        _translating = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _translating = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppText.current.common.genericError)),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final message = widget.message;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Flexible(
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.sizeOf(context).width * 0.72,
-            ),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.black.withValues(alpha: .06)),
-            ),
-            child: message.highlight == null || message.rest == null
-                ? Text(
-                    message.text,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      height: 18 / 14,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.ink,
-                    ),
-                  )
-                : Text.rich(
-                    TextSpan(
-                      children: [
-                        WidgetSpan(
-                          alignment: PlaceholderAlignment.middle,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width * 0.72,
+                ),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border:
+                      Border.all(color: Colors.black.withValues(alpha: .06)),
+                ),
+                child: message.highlight == null || message.rest == null
+                    ? Text(
+                        message.text,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14,
+                          height: 18 / 14,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.ink,
+                        ),
+                      )
+                    : Text.rich(
+                        TextSpan(
+                          children: [
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  message.highlight!,
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 14,
+                                    height: 18 / 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
                             ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              message.highlight!,
+                            TextSpan(
+                              text: message.rest,
                               style: const TextStyle(
                                 fontFamily: 'Poppins',
                                 fontSize: 14,
                                 height: 18 / 14,
                                 fontWeight: FontWeight.w400,
-                                color: Colors.white,
+                                color: AppColors.ink,
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                        TextSpan(
-                          text: message.rest,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            height: 18 / 14,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                      ],
+                      ),
+              ),
+              if (_translation != null) ...[
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Text(
+                    _translation!,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      height: 16 / 12,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.ink.withValues(alpha: .65),
                     ),
                   ),
+                ),
+              ],
+            ],
           ),
         ),
         const SizedBox(width: 8),
         Column(
           children: [
-            const _RoundIconButton(asset: AppAssets.translate),
+            _RoundIconButton(
+              asset: AppAssets.translate,
+              onTap: _translating ? null : _translate,
+            ),
             const SizedBox(height: 8),
             _RoundIconButton(
               asset: AppAssets.speaker,
-              onTap: onSpeak,
+              onTap: widget.onSpeak,
             ),
           ],
         ),

@@ -105,7 +105,17 @@ class ShareFriendScreen extends StatelessWidget {
                       const SizedBox(height: 12),
                       PrimaryButton(
                         label: text.save,
-                        onPressed: () => Navigator.of(context).maybePop(),
+                        onPressed: () async {
+                          await Clipboard.setData(
+                            const ClipboardData(text: _inviteLink),
+                          );
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Link copied'),
+                            ),
+                          );
+                        },
                       ),
                       const Spacer(flex: 2),
                     ],

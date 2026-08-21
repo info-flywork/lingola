@@ -525,7 +525,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
       title: text.failedTitle,
       body: text.failedBody,
       buttonLabel: text.tryAgain,
-      onPressed: () {},
+      onPressed: _resetRecorderForWord,
     );
   }
 
