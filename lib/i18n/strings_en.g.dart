@@ -339,11 +339,11 @@ class Translations$previewChat$en {
 	/// en: 'Type a message...'
 	String get typeMessage => 'Type a message...';
 
-	/// en: 'Hello Emrah, it was a pleasure meeting you. Could you tell me a little about yourself?'
-	String get incoming1 => 'Hello Emrah, it was a pleasure meeting you. Could you tell me a little about yourself?';
+	/// en: 'Hi! Welcome to Lingola — I'm your AI tutor. Ready to try a quick hello in English?'
+	String get incoming1 => 'Hi! Welcome to Lingola — I\'m your AI tutor. Ready to try a quick hello in English?';
 
-	/// en: 'Hi! I just had my morning coffee and I'm ready to find that connection you mentioned.'
-	String get outgoing1 => 'Hi! I just had my morning coffee and I\'m ready to find that connection you mentioned.';
+	/// en: 'Hi! I'm ready to practice.'
+	String get outgoing1 => 'Hi! I\'m ready to practice.';
 
 	/// en: 'Günaydın'
 	String get incoming2Highlight => 'Günaydın';
@@ -351,8 +351,11 @@ class Translations$previewChat$en {
 	/// en: ', Emrah! I'm glad you're feeling ready. A morning coffee is always a great start to building a connection. What would you like to talk about?'
 	String get incoming2Rest => ', Emrah! I\'m glad you\'re feeling ready. A morning coffee is always a great start to building a connection. What would you like to talk about?';
 
-	/// en: 'Great! Let's keep practicing greetings together.'
-	String get botReply => 'Great! Let\'s keep practicing greetings together.';
+	/// en: 'Hold to speak'
+	String get holdToSpeak => 'Hold to speak';
+
+	/// en: 'Recording… release to send'
+	String get recording => 'Recording… release to send';
 }
 
 // Path: paywall
@@ -486,11 +489,11 @@ class Translations$home$en {
 	/// en: 'Lesson 2 — Greetings'
 	String get lessonProgress => 'Lesson 2 — Greetings';
 
-	/// en: '46min'
-	String get timeCurrent => '46min';
+	/// en: '0min'
+	String get timeCurrent => '0min';
 
-	/// en: '/ 60min'
-	String get timeTotal => '/ 60min';
+	/// en: '/ 15min'
+	String get timeTotal => '/ 15min';
 
 	/// en: 'Continue'
 	String get kContinue => 'Continue';
@@ -865,6 +868,93 @@ class Translations$lessonPage$en {
 
 	/// en: 'Locked'
 	String get locked => 'Locked';
+
+	/// en: 'Choose your tutor'
+	String get pickTutorTitle => 'Choose your tutor';
+
+	/// en: 'Start lesson'
+	String get startTalk => 'Start lesson';
+
+	/// en: 'Chat instead'
+	String get chatInstead => 'Chat instead';
+
+	/// en: 'Finish the previous lesson to unlock this one.'
+	String get lockedHint => 'Finish the previous lesson to unlock this one.';
+
+	/// en: 'Lesson notes'
+	String get notesTitle => 'Lesson notes';
+
+	/// en: 'What we learned today'
+	String get whatWeLearned => 'What we learned today';
+
+	/// en: 'Delete my lesson notes'
+	String get deleteNotes => 'Delete my lesson notes';
+
+	/// en: 'Delete these notes? This cannot be undone.'
+	String get deleteNotesConfirm => 'Delete these notes? This cannot be undone.';
+
+	/// en: 'Delete'
+	String get delete => 'Delete';
+
+	/// en: 'Cancel'
+	String get cancel => 'Cancel';
+
+	/// en: 'If this felt too hard, you can practice the same topic again.'
+	String get practiceCta => 'If this felt too hard, you can practice the same topic again.';
+
+	/// en: 'Practice this topic'
+	String get practiceNow => 'Practice this topic';
+
+	/// en: 'Open chat with tutor'
+	String get openChat => 'Open chat with tutor';
+
+	/// en: 'Your score'
+	String get yourScore => 'Your score';
+
+	/// en: 'Best $score/100'
+	String bestScore({required Object score}) => 'Best ${score}/100';
+
+	/// en: '$prev → $now'
+	String scoreChanged({required Object prev, required Object now}) => '${prev} → ${now}';
+
+	/// en: 'Passive participant'
+	String get participationSilent => 'Passive participant';
+
+	/// en: 'You stayed quiet this time. I think you should retake this lesson.'
+	String get participationSilentBody => 'You stayed quiet this time. I think you should retake this lesson.';
+
+	/// en: 'Low participation'
+	String get participationPassive => 'Low participation';
+
+	/// en: 'You barely spoke. Try the lesson again and say more.'
+	String get participationPassiveBody => 'You barely spoke. Try the lesson again and say more.';
+
+	/// en: 'Good participation'
+	String get participationActive => 'Good participation';
+
+	/// en: 'You joined the conversation. Keep it up!'
+	String get participationActiveBody => 'You joined the conversation. Keep it up!';
+
+	/// en: 'Strong participation'
+	String get participationStrong => 'Strong participation';
+
+	/// en: 'You spoke a lot. Great work!'
+	String get participationStrongBody => 'You spoke a lot. Great work!';
+
+	/// en: 'Retake this lesson'
+	String get retakeLesson => 'Retake this lesson';
+
+	/// en: 'Finish lesson'
+	String get finishLesson => 'Finish lesson';
+
+	/// en: 'Your tutor is writing today’s notes…'
+	String get savingNotes => 'Your tutor is writing today’s notes…';
+
+	/// en: 'Finish this lesson to get notes from your tutor.'
+	String get noNotes => 'Finish this lesson to get notes from your tutor.';
+
+	/// en: 'Lesson notes deleted'
+	String get notesDeleted => 'Lesson notes deleted';
 
 	late final Translations$lessonPage$levels$en levels = Translations$lessonPage$levels$en._(_root);
 }
@@ -1969,6 +2059,9 @@ class Translations$rolePlayPage$coffee$chat$en {
 
 	// Translations
 
+	/// en: 'Hi! Today we'll practice ordering at a coffee shop — hello, sizes, extras. I'll explain a little first, then we'll act it out. Sound good?'
+	String get briefing => 'Hi! Today we\'ll practice ordering at a coffee shop — hello, sizes, extras. I\'ll explain a little first, then we\'ll act it out. Sound good?';
+
 	/// en: 'Welcome! What can I get started for you today?'
 	String get incoming1 => 'Welcome! What can I get started for you today?';
 
@@ -1993,6 +2086,9 @@ class Translations$rolePlayPage$directions$chat$en {
 
 	// Translations
 
+	/// en: 'Hi! Today we'll practice asking for directions on the street. I'll explain a little first, then we'll act it out. Sound good?'
+	String get briefing => 'Hi! Today we\'ll practice asking for directions on the street. I\'ll explain a little first, then we\'ll act it out. Sound good?';
+
 	/// en: 'Hi there! You look a bit lost — need help finding something?'
 	String get incoming1 => 'Hi there! You look a bit lost — need help finding something?';
 
@@ -2016,6 +2112,9 @@ class Translations$rolePlayPage$interview$chat$en {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+
+	/// en: 'Hi! Today we'll practice a job interview. I'll explain a little first, then we'll act it out — I'll interview you, then we switch. Sound good?'
+	String get briefing => 'Hi! Today we\'ll practice a job interview. I\'ll explain a little first, then we\'ll act it out — I\'ll interview you, then we switch. Sound good?';
 
 	/// en: 'Thanks for coming in today. Could you briefly introduce yourself?'
 	String get incoming1 => 'Thanks for coming in today. Could you briefly introduce yourself?';
@@ -2176,11 +2275,12 @@ extension on Translations {
 			'previewChat.lessonBadge' => 'Lesson 1: Greetings',
 			'previewChat.speed' => '1x',
 			'previewChat.typeMessage' => 'Type a message...',
-			'previewChat.incoming1' => 'Hello Emrah, it was a pleasure meeting you. Could you tell me a little about yourself?',
-			'previewChat.outgoing1' => 'Hi! I just had my morning coffee and I\'m ready to find that connection you mentioned.',
+			'previewChat.incoming1' => 'Hi! Welcome to Lingola — I\'m your AI tutor. Ready to try a quick hello in English?',
+			'previewChat.outgoing1' => 'Hi! I\'m ready to practice.',
 			'previewChat.incoming2Highlight' => 'Günaydın',
 			'previewChat.incoming2Rest' => ', Emrah! I\'m glad you\'re feeling ready. A morning coffee is always a great start to building a connection. What would you like to talk about?',
-			'previewChat.botReply' => 'Great! Let\'s keep practicing greetings together.',
+			'previewChat.holdToSpeak' => 'Hold to speak',
+			'previewChat.recording' => 'Recording… release to send',
 			'paywall.title' => 'Start Speaking Today — Free',
 			'paywall.subtitle' => 'Unlimited learning opportunities',
 			'paywall.noCommitment' => 'No commitment',
@@ -2213,8 +2313,8 @@ extension on Translations {
 			'home.todayPractice' => 'Today’s Practice',
 			'home.continueConversation' => 'Continue Conversation',
 			'home.lessonProgress' => 'Lesson 2 — Greetings',
-			'home.timeCurrent' => '46min',
-			'home.timeTotal' => '/ 60min',
+			'home.timeCurrent' => '0min',
+			'home.timeTotal' => '/ 15min',
 			'home.kContinue' => 'Continue',
 			'home.learningPath' => 'A1 - Starter',
 			'home.allLessons' => 'All Lessons',
@@ -2381,6 +2481,35 @@ extension on Translations {
 			'lessonPage.language' => 'Target language',
 			'lessonPage.completed' => 'Completed',
 			'lessonPage.locked' => 'Locked',
+			'lessonPage.pickTutorTitle' => 'Choose your tutor',
+			'lessonPage.startTalk' => 'Start lesson',
+			'lessonPage.chatInstead' => 'Chat instead',
+			'lessonPage.lockedHint' => 'Finish the previous lesson to unlock this one.',
+			'lessonPage.notesTitle' => 'Lesson notes',
+			'lessonPage.whatWeLearned' => 'What we learned today',
+			'lessonPage.deleteNotes' => 'Delete my lesson notes',
+			'lessonPage.deleteNotesConfirm' => 'Delete these notes? This cannot be undone.',
+			'lessonPage.delete' => 'Delete',
+			'lessonPage.cancel' => 'Cancel',
+			'lessonPage.practiceCta' => 'If this felt too hard, you can practice the same topic again.',
+			'lessonPage.practiceNow' => 'Practice this topic',
+			'lessonPage.openChat' => 'Open chat with tutor',
+			'lessonPage.yourScore' => 'Your score',
+			'lessonPage.bestScore' => ({required Object score}) => 'Best ${score}/100',
+			'lessonPage.scoreChanged' => ({required Object prev, required Object now}) => '${prev} → ${now}',
+			'lessonPage.participationSilent' => 'Passive participant',
+			'lessonPage.participationSilentBody' => 'You stayed quiet this time. I think you should retake this lesson.',
+			'lessonPage.participationPassive' => 'Low participation',
+			'lessonPage.participationPassiveBody' => 'You barely spoke. Try the lesson again and say more.',
+			'lessonPage.participationActive' => 'Good participation',
+			'lessonPage.participationActiveBody' => 'You joined the conversation. Keep it up!',
+			'lessonPage.participationStrong' => 'Strong participation',
+			'lessonPage.participationStrongBody' => 'You spoke a lot. Great work!',
+			'lessonPage.retakeLesson' => 'Retake this lesson',
+			'lessonPage.finishLesson' => 'Finish lesson',
+			'lessonPage.savingNotes' => 'Your tutor is writing today’s notes…',
+			'lessonPage.noNotes' => 'Finish this lesson to get notes from your tutor.',
+			'lessonPage.notesDeleted' => 'Lesson notes deleted',
 			'lessonPage.levels.a1.title' => 'A1 - Starter',
 			'lessonPage.levels.a1.lessons.0' => 'Greetings',
 			'lessonPage.levels.a1.lessons.1' => 'Introductions I',
@@ -2568,6 +2697,8 @@ extension on Translations {
 			'lessonPage.levels.c1.lessons.13' => 'Global politics',
 			'lessonPage.levels.c1.lessons.14' => 'Product boom',
 			'lessonPage.levels.c1.lessons.15' => 'Will be happy?',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.16' => 'Maybe later...',
 			'lessonPage.levels.c1.lessons.17' => 'New solutions',
 			'lessonPage.levels.c1.lessons.18' => 'Contextual influence',
@@ -2598,8 +2729,6 @@ extension on Translations {
 			'lessonPage.levels.c2.lessons.18' => 'Problems, problems',
 			'lessonPage.levels.c2.lessons.19' => 'Fact or fiction?',
 			'lessonPage.levels.c2.lessons.20' => 'Sightseeing',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c2.lessons.21' => 'Volunteering',
 			'lessonPage.levels.c2.lessons.22' => 'The mind\'s eye',
 			'lessonPage.levels.c2.lessons.23' => 'Media consumption',
@@ -2613,6 +2742,7 @@ extension on Translations {
 			'rolePlayPage.business' => 'Business',
 			'rolePlayPage.coffee.title' => 'Ordering at the Coffee Shop',
 			'rolePlayPage.coffee.screenplay' => 'Order your favorite drink, ask about sizes and extras, confirm your total, and pick up your coffee at the counter.',
+			'rolePlayPage.coffee.chat.briefing' => 'Hi! Today we\'ll practice ordering at a coffee shop — hello, sizes, extras. I\'ll explain a little first, then we\'ll act it out. Sound good?',
 			'rolePlayPage.coffee.chat.incoming1' => 'Welcome! What can I get started for you today?',
 			'rolePlayPage.coffee.chat.outgoing1' => 'Hi! I\'d like a medium latte, please.',
 			'rolePlayPage.coffee.chat.incoming2Highlight' => 'Sure',
@@ -2620,6 +2750,7 @@ extension on Translations {
 			'rolePlayPage.coffee.chat.botReply' => 'Great choice. Anything else with your order?',
 			'rolePlayPage.directions.title' => 'Asking for Directions on the Street',
 			'rolePlayPage.directions.screenplay' => 'Ask for directions to a place, find out how to get to the subway or bus, get information about tickets, and listen to restaurant recommendations.',
+			'rolePlayPage.directions.chat.briefing' => 'Hi! Today we\'ll practice asking for directions on the street. I\'ll explain a little first, then we\'ll act it out. Sound good?',
 			'rolePlayPage.directions.chat.incoming1' => 'Hi there! You look a bit lost — need help finding something?',
 			'rolePlayPage.directions.chat.outgoing1' => 'Yes, I\'m looking for the nearest subway station.',
 			'rolePlayPage.directions.chat.incoming2Highlight' => 'Of course',
@@ -2627,6 +2758,7 @@ extension on Translations {
 			'rolePlayPage.directions.chat.botReply' => 'You\'re welcome! Want a restaurant tip near the station too?',
 			'rolePlayPage.interview.title' => 'Job Interview',
 			'rolePlayPage.interview.screenplay' => 'Introduce yourself, answer common interview questions, talk about your experience, and ask about the role and next steps.',
+			'rolePlayPage.interview.chat.briefing' => 'Hi! Today we\'ll practice a job interview. I\'ll explain a little first, then we\'ll act it out — I\'ll interview you, then we switch. Sound good?',
 			'rolePlayPage.interview.chat.incoming1' => 'Thanks for coming in today. Could you briefly introduce yourself?',
 			'rolePlayPage.interview.chat.outgoing1' => 'Of course. I\'m excited to be here and share my experience.',
 			'rolePlayPage.interview.chat.incoming2Highlight' => 'Wonderful',

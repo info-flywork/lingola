@@ -13,6 +13,56 @@ abstract final class AppAssets {
   static const success = 'assets/images/quizSection/succesfull.svg';
   static const failed = 'assets/images/onboarding/unseccesfull.svg';
 
+  // —— Flags ——
+  static const flagEn = 'assets/images/flags/en.svg';
+  static const flagJp = 'assets/images/flags/jp.svg';
+  static const flagCn = 'assets/images/home/flag_cn.svg';
+  static const flagEs = 'assets/images/flags/spanish_icon.svg';
+  static const flagIt = 'assets/images/flags/italian.svg';
+  static const flagDe = 'assets/images/flags/german.svg';
+  static const flagFr = 'assets/images/flags/french.svg';
+  static const flagPt = 'assets/images/flags/po.svg';
+  static const flagRu = 'assets/images/flags/russian.svg';
+  static const flagTr = 'assets/images/flags/tr.svg';
+  static const flagHi = 'assets/images/flags/hi.svg';
+  static const flagGeneric = 'assets/images/home/flag_icon.svg';
+
+  /// Tutor slug → bayrak (API null olsa bile).
+  static String? flagForTutorSlug(String? slug) {
+    switch (slug?.toLowerCase()) {
+      case 'lingola':
+        return flagGeneric;
+      case 'elena':
+        return flagEn;
+      case 'kenji':
+        return flagJp;
+      case 'freya':
+        return flagDe;
+      case 'camila':
+        return flagEs;
+      case 'marco':
+        return flagIt;
+      case 'julian':
+        return flagFr;
+      case 'ines':
+        return flagPt;
+      case 'felix':
+        return flagDe;
+      case 'diego':
+        return flagEs;
+      case 'amara':
+        return flagHi;
+      case 'erik':
+        return flagDe;
+      case 'katie':
+      case 'morgan':
+        return flagEn;
+      default:
+        // Fantasy / özel karakterlerde bayrak yok.
+        return null;
+    }
+  }
+
   // —— Quiz ——
   static const quizBook = 'assets/images/quizIcons/book.svg';
   static const quizWriting = 'assets/images/quizIcons/writing.svg';
@@ -86,7 +136,7 @@ abstract final class AppAssets {
   static const rolePlayDirections =
       'assets/images/roleplay/askingdirection.png';
   static const rolePlayInterview = 'assets/images/roleplay/jobinterview.png';
-  static const rolePlayScreenplay = 'assets/images/roleplay/screenPlay.svg';
+  static const rolePlayScreenplay = 'assets/images/roleplay/screenplay.svg';
   static const rolePlayResize =
       'assets/images/roleplay/kucultmebuyutme.svg';
   static const rolePlayRecording = 'assets/images/roleplay/seskaydi.svg';
@@ -127,6 +177,7 @@ abstract final class AppAssets {
   static const tutorUkrathRiv = 'assets/riv/ukrath.riv';
   static const tutorSantaRiv = 'assets/riv/santa_claus.riv';
   static const tutorZephyrionRiv = 'assets/riv/zephyrion.riv';
+  static const tutorLingolaRiv = 'assets/riv/Female/lingola_robot.riv';
 
   // —— Tutor Rive (Female/Male foto eşleştirmesi) ——
   static const tutorElenaRiv = 'assets/riv/Female/avatar3.riv';

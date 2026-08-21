@@ -70,9 +70,6 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.close_rounded));
     await _settle(tester);
-    expect(find.text(text.paywall.title), findsOneWidget);
-
-    await _tapVisible(tester, find.text(text.common.getStarted).last);
     expect(find.text(text.auth.continueGuest), findsOneWidget);
   });
 

@@ -1,4 +1,6 @@
 import '../../features/onboarding/onboarding_draft.dart';
+import '../../features/onboarding/services/onboarding_preview_chat_store.dart';
+import '../../features/tutor/services/tutor_chat_api_service.dart';
 import 'dart:convert';
 
 import 'api_client.dart';
@@ -67,7 +69,19 @@ abstract final class AuthService {
       user: user,
       expiresAt: expiresAt,
     );
+    await _claimOnboardingPreviewIfAny();
     return user;
+  }
+
+  static Future<void> _claimOnboardingPreviewIfAny() async {
+    final previewId = OnboardingPreviewChatStore.sessionId;
+    if (previewId == null || previewId.isEmpty) return;
+    try {
+      await TutorChatApiService.claimPreviewSession(previewId);
+      OnboardingPreviewChatStore.clear();
+    } catch (_) {
+      // Oturum claim edilmezse giriş akışını bozma.
+    }
   }
 
   static DateTime? _parseExpires(dynamic raw) {
@@ -228,14 +242,14 @@ abstract final class AuthService {
     }
     final user = AppUser.fromJson(userJson);
     final token = await SessionStore.getToken();
-    if (token != null) {
+    if (token != null && token.isNotEmpty) {
       await SessionStore.saveSession(
         token: token,
         user: user,
         expiresAt: SessionStore.expiresAt,
       );
     } else {
-      SessionStore.currentUser = user;
+      await SessionStore.updateUser(user);
     }
     return user;
   }

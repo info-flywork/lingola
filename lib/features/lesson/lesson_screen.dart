@@ -3,16 +3,349 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/auth/api_client.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../i18n/strings.g.dart';
+import '../tutor/calling_screen.dart';
+import '../tutor/chat_screen.dart';
+import '../tutor/services/calling_conversation_controller.dart';
+import '../tutor/services/tutor_api_service.dart';
+import '../tutor/services/tutor_chat_api_service.dart';
+import 'lesson_api_service.dart';
 import 'lesson_curriculum.dart';
+import 'lesson_notes_screen.dart';
+import 'lesson_tutor_sheet.dart';
 
-class LessonScreen extends StatelessWidget {
+class LessonScreen extends StatefulWidget {
   const LessonScreen({super.key});
 
-  /// İlk 2 ders tamamlanmış: Greetings ✓, Introductions aktif.
-  static const _completedCount = 2;
+  @override
+  State<LessonScreen> createState() => _LessonScreenState();
+}
+
+class _LessonScreenState extends State<LessonScreen> {
+  Map<String, List<LessonNodeDto>> _remote = const {};
+  var _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPath();
+  }
+
+  Future<void> _loadPath() async {
+    try {
+      final path = await LessonApiService.fetchPath();
+      if (!mounted) return;
+      setState(() {
+        _remote = {
+          for (final level in path.levels) level.id: level.lessons,
+        };
+      });
+    } catch (_) {
+      // Yerel müfredat durur; kilit durumu aşağıda fallback.
+    }
+  }
+
+  _NodeState _stateFor(String levelId, int index) {
+    final list = _remote[levelId];
+    if (list != null && index < list.length) {
+      final status = list[index].status;
+      if (status == 'completed') return _NodeState.completed;
+      if (status == 'available') return _NodeState.active;
+      return _NodeState.locked;
+    }
+    if (levelId == 'a1' && index == 0) return _NodeState.active;
+    return _NodeState.locked;
+  }
+
+  LessonNodeDto? _remoteAt(String levelId, int index) {
+    final list = _remote[levelId];
+    if (list == null || index >= list.length) return null;
+    return list[index];
+  }
+
+  Future<void> _onNodeTap({
+    required String levelId,
+    required int index,
+    required String label,
+  }) async {
+    if (_busy) return;
+    final text = AppText.current.lessonPage;
+    final remote = _remoteAt(levelId, index);
+    final state = _stateFor(levelId, index);
+
+    if (state == _NodeState.locked) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(text.lockedHint)),
+      );
+      return;
+    }
+
+    if (state == _NodeState.completed && remote?.hasNotes == true) {
+      await _openNotes(slug: remote?.slug, label: label, offerPractice: true);
+      return;
+    }
+
+    await _startWithTutor(
+      slug: remote?.slug,
+      label: label,
+      kind: 'lesson',
+    );
+  }
+
+  Future<void> _openNotes({
+    String? slug,
+    required String label,
+    required bool offerPractice,
+  }) async {
+    if (slug == null || slug.isEmpty) return;
+    final text = AppText.current.lessonPage;
+    try {
+      final notes = await LessonApiService.fetchNotes(slug);
+      if (!mounted) return;
+      await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => LessonNotesScreen(
+            notes: notes,
+            onPractice: () {
+              Navigator.of(context).pop();
+              _startWithTutor(slug: slug, label: label, kind: 'practice');
+            },
+            onRetake: () {
+              Navigator.of(context).pop();
+              _startWithTutor(slug: slug, label: label, kind: 'lesson');
+            },
+          ),
+        ),
+      );
+      await _loadPath();
+    } on ApiException catch (err) {
+      if (!mounted) return;
+      if (err.statusCode == 404) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(text.noNotes)),
+        );
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err.message)),
+      );
+    }
+  }
+
+  Future<void> _startWithTutor({
+    required String? slug,
+    required String label,
+    required String kind,
+  }) async {
+    if (slug == null || slug.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lesson catalog is not ready yet.')),
+      );
+      return;
+    }
+
+    final choice = await showLessonTutorSheet(context, lessonTitle: label);
+    if (choice == null || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final start = await LessonApiService.start(
+        slug: slug,
+        tutorId: choice.tutor.id,
+        tutorSlug: choice.tutor.slug,
+        kind: kind,
+      );
+      if (!mounted) return;
+
+      final tutorName = _tutorName(choice.tutor);
+      final image = choice.tutor.imagePath ?? start.tutorImage ?? '';
+      List<Map<String, String>> transcript = const [];
+
+      if (choice.mode == 'chat') {
+        final messages = await Navigator.of(context).push<List<TutorChatMessageDto>>(
+          MaterialPageRoute(
+            builder: (_) => ChatScreen(
+              tutorName: tutorName,
+              imagePath: image,
+              tutorId: choice.tutor.id,
+              tutorSlug: choice.tutor.slug,
+              sessionId: start.sessionId,
+              finishOnPop: true,
+              lessonSegmentMode: true,
+            ),
+          ),
+        );
+        transcript = [
+          for (final m in messages ?? const <TutorChatMessageDto>[])
+            {'role': m.role, 'content': m.content},
+        ];
+      } else {
+        final theme = choice.tutor.theme;
+        final callMessages = await Navigator.of(context).push<List<CallMessage>>(
+          MaterialPageRoute(
+            builder: (_) => CallingScreen(
+              tutorName: tutorName,
+              imagePath: image,
+              riveAsset: choice.tutor.rivePath ?? start.tutorRive,
+              voiceId: choice.tutor.voiceId ?? start.tutorVoiceId,
+              backgroundGradientStart: _parseHex(theme?.gradientStart),
+              backgroundGradientEnd: _parseHex(theme?.gradientEnd),
+              openingLine: start.openingMessage,
+              systemPrompt: start.systemPrompt,
+              returnTranscript: true,
+              lessonSegmentMode: true,
+              tutorSlug: choice.tutor.slug.isNotEmpty
+                  ? choice.tutor.slug
+                  : start.tutorSlug,
+            ),
+          ),
+        );
+        transcript = [
+          for (final m in callMessages ?? const <CallMessage>[])
+            {
+              'role': m.role == CallMessageRole.user ? 'user' : 'assistant',
+              'content': m.text,
+            },
+        ];
+      }
+
+      if (!mounted) return;
+      await _completeAndShowNotes(
+        slug: slug,
+        label: label,
+        tutorId: choice.tutor.id,
+        sessionId: start.sessionId,
+        kind: kind,
+        transcript: transcript,
+      );
+    } on ApiException catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err.message)),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _completeAndShowNotes({
+    required String slug,
+    required String label,
+    required String tutorId,
+    required String sessionId,
+    required String kind,
+    required List<Map<String, String>> transcript,
+  }) async {
+    final text = AppText.current.lessonPage;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        content: Row(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(width: 16),
+            Expanded(child: Text(text.savingNotes)),
+          ],
+        ),
+      ),
+    );
+    try {
+      final notes = await LessonApiService.complete(
+        slug: slug,
+        tutorId: tutorId,
+        sessionId: sessionId,
+        kind: kind,
+        transcript: transcript,
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      await _loadPath();
+      if (!mounted) return;
+      await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => LessonNotesScreen(
+            notes: notes,
+            onPractice: () {
+              Navigator.of(context).pop();
+              _startWithTutor(slug: slug, label: label, kind: 'practice');
+            },
+            onRetake: () {
+              Navigator.of(context).pop();
+              _startWithTutor(slug: slug, label: label, kind: 'lesson');
+            },
+          ),
+        ),
+      );
+      await _loadPath();
+    } catch (err) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err.toString())),
+      );
+    }
+  }
+
+  static String _tutorName(TutorDto tutor) {
+    final key = tutor.nameKey;
+    final tutors = AppText.current.tutorPage.tutors;
+    switch (key) {
+      case 'lingola':
+        return tutors.lingola;
+      case 'zephyrion':
+        return tutors.zephyrion;
+      case 'vaelen':
+        return tutors.vaelen;
+      case 'elrion':
+        return tutors.elrion;
+      case 'ukrath':
+        return tutors.ukrath;
+      case 'elena':
+        return tutors.elena;
+      case 'kenji':
+        return tutors.kenji;
+      case 'freya':
+        return tutors.freya;
+      case 'camila':
+        return tutors.camila;
+      case 'marco':
+        return tutors.marco;
+      case 'julian':
+        return tutors.julian;
+      case 'ines':
+        return tutors.ines;
+      case 'felix':
+        return tutors.felix;
+      case 'diego':
+        return tutors.diego;
+      case 'amara':
+        return tutors.amara;
+      case 'erik':
+        return tutors.erik;
+      case 'katie':
+        return tutors.katie;
+      case 'morgan':
+        return tutors.morgan;
+      case 'santa':
+        return tutors.santa;
+      default:
+        return tutor.slug;
+    }
+  }
+
+  static Color? _parseHex(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    var hex = raw.trim().replaceFirst('#', '');
+    if (hex.length == 6) hex = 'FF$hex';
+    if (hex.length != 8) return null;
+    final value = int.tryParse(hex, radix: 16);
+    if (value == null) return null;
+    return Color(value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +368,7 @@ class LessonScreen extends StatelessWidget {
       'c2': levels.c2.lessons,
     };
 
-    // Her seviye ayrı blok: başlık + bağımsız path (birleşik değil).
     final sections = <_LevelSectionData>[];
-    var globalStart = 0;
     for (final level in LessonCurriculum.levels) {
       final lessons = lessonLists[level.id]!;
       final icons = level.iconAssets;
@@ -46,16 +377,20 @@ class LessonScreen extends StatelessWidget {
           _LessonPathNodeData(
             label: lessons[i],
             iconAsset: icons[i < icons.length ? i : icons.length - 1],
+            state: _stateFor(level.id, i),
+            onTap: () => _onNodeTap(
+              levelId: level.id,
+              index: i,
+              label: lessons[i],
+            ),
           ),
       ];
       sections.add(
         _LevelSectionData(
           title: titles[level.id]!,
           nodes: levelNodes,
-          globalStartIndex: globalStart,
         ),
       );
-      globalStart += levelNodes.length;
     }
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -76,8 +411,6 @@ class LessonScreen extends StatelessWidget {
                   child: _LevelPathSection(
                     title: section.title,
                     nodes: section.nodes,
-                    globalStartIndex: section.globalStartIndex,
-                    completedCount: _completedCount,
                   ),
                 ),
               const SliverToBoxAdapter(child: SizedBox(height: 32)),
@@ -90,21 +423,26 @@ class LessonScreen extends StatelessWidget {
 }
 
 class _LessonPathNodeData {
-  const _LessonPathNodeData({required this.label, required this.iconAsset});
+  const _LessonPathNodeData({
+    required this.label,
+    required this.iconAsset,
+    required this.state,
+    required this.onTap,
+  });
   final String label;
   final String iconAsset;
+  final _NodeState state;
+  final VoidCallback onTap;
 }
 
 class _LevelSectionData {
   const _LevelSectionData({
     required this.title,
     required this.nodes,
-    required this.globalStartIndex,
   });
 
   final String title;
   final List<_LessonPathNodeData> nodes;
-  final int globalStartIndex;
 }
 
 class _LessonHeader extends StatelessWidget {
@@ -192,14 +530,10 @@ class _LevelPathSection extends StatelessWidget {
   const _LevelPathSection({
     required this.title,
     required this.nodes,
-    required this.globalStartIndex,
-    required this.completedCount,
   });
 
   final String title;
   final List<_LessonPathNodeData> nodes;
-  final int globalStartIndex;
-  final int completedCount;
 
   @override
   Widget build(BuildContext context) {
@@ -223,8 +557,6 @@ class _LevelPathSection extends StatelessWidget {
         ),
         _LevelLessonPath(
           nodes: nodes,
-          globalStartIndex: globalStartIndex,
-          completedCount: completedCount,
         ),
       ],
     );
@@ -235,13 +567,9 @@ class _LevelPathSection extends StatelessWidget {
 class _LevelLessonPath extends StatelessWidget {
   const _LevelLessonPath({
     required this.nodes,
-    required this.globalStartIndex,
-    required this.completedCount,
   });
 
   final List<_LessonPathNodeData> nodes;
-  final int globalStartIndex;
-  final int completedCount;
 
   static const _designWidth = 398.0;
   static const _leftX = 65.0;
@@ -263,13 +591,6 @@ class _LevelLessonPath extends StatelessWidget {
       nodeCenters.add((yTop + yBot) / 2);
     }
     return (hs: hs, nodeCenters: nodeCenters);
-  }
-
-  _NodeState _stateForLocal(int localIndex) {
-    final global = globalStartIndex + localIndex;
-    if (global < completedCount - 1) return _NodeState.completed;
-    if (global == completedCount - 1) return _NodeState.active;
-    return _NodeState.locked;
   }
 
   @override
@@ -321,7 +642,8 @@ class _LevelLessonPath extends StatelessWidget {
                       child: _LessonNode(
                         label: nodes[i].label,
                         iconAsset: nodes[i].iconAsset,
-                        state: _stateForLocal(i),
+                        state: nodes[i].state,
+                        onTap: nodes[i].onTap,
                         // İlk node (Greetings): Figma’da etiket ikonun altında.
                         labelSide: i == 0
                             ? _LabelSide.below
@@ -350,12 +672,14 @@ class _LessonNode extends StatelessWidget {
     required this.iconAsset,
     required this.state,
     required this.labelSide,
+    required this.onTap,
   });
 
   final String label;
   final String iconAsset;
   final _NodeState state;
   final _LabelSide labelSide;
+  final VoidCallback onTap;
 
   static const _size = 63.0;
 
@@ -371,7 +695,10 @@ class _LessonNode extends StatelessWidget {
       _NodeState.locked => AppColors.secondary,
     };
 
-    return SizedBox(
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
       width: _size,
       height: _size,
       child: Stack(
@@ -477,6 +804,7 @@ class _LessonNode extends StatelessWidget {
               ),
             ),
         ],
+      ),
       ),
     );
   }

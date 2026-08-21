@@ -77,13 +77,14 @@ Rules:
   Future<String> complete({
     required List<ChatTurn> history,
     required String userMessage,
+    String? systemPrompt,
   }) async {
     if (!AppEnv.hasOpenAi) {
       throw StateError('OPENAI_API_KEY eksik (.env)');
     }
 
     final messages = <Map<String, String>>[
-      {'role': 'system', 'content': systemPrompt},
+      {'role': 'system', 'content': systemPrompt ?? OpenAiChatService.systemPrompt},
       ...history.map((t) => t.toJson()),
       {'role': 'user', 'content': userMessage},
     ];

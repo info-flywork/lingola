@@ -1,13 +1,20 @@
 import 'dart:async';
-import 'dart:ui';
+import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
+import 'package:rive/rive.dart' show Fit;
 
+import '../core/auth/api_client.dart';
 import '../core/constants/app_assets.dart';
 import '../core/constants/app_text.dart';
 import '../core/theme/app_theme.dart';
-import 'app_widgets.dart';
+import '../features/tutor/services/openai_chat_service.dart';
+import '../features/tutor/services/tutor_tts_service.dart';
+import '../features/tutor/widgets/tutor_rive_avatar.dart';
 import 'home_asset.dart';
 
 /// Ortak sohbet mesaj modeli (onboarding preview + role play).
@@ -53,9 +60,20 @@ class LingolaChatSession extends StatefulWidget {
     this.lessonBadge,
     this.typeMessageHint,
     this.botReply,
+    /// Gerçek AI / backend: kullanıcı mesajı → asistan cevabı.
+    this.onSendAsync,
+    this.enableTts = true,
+    this.enableMic = true,
+    this.autoSpeakBot = true,
+    this.ttsVoiceId,
+    this.riveAsset,
+    this.fallbackImage,
     this.sessionLimit,
     this.onSessionExpired,
     this.showBack = true,
+    this.busy = false,
+    this.errorText,
+    this.onRetry,
     super.key,
   });
 
@@ -66,9 +84,21 @@ class LingolaChatSession extends StatefulWidget {
   final String? lessonBadge;
   final String? typeMessageHint;
   final String? botReply;
+  final Future<String?> Function(String userMessage)? onSendAsync;
+  final bool enableTts;
+  final bool enableMic;
+  final bool autoSpeakBot;
+  /// ElevenLabs voice (örn. erkek ses için TutorVoiceIds.male).
+  final String? ttsVoiceId;
+  /// Varsa Rive avatar (dudak senkronu).
+  final String? riveAsset;
+  final String? fallbackImage;
   final Duration? sessionLimit;
   final VoidCallback? onSessionExpired;
   final bool showBack;
+  final bool busy;
+  final String? errorText;
+  final VoidCallback? onRetry;
 
   @override
   State<LingolaChatSession> createState() => _LingolaChatSessionState();
@@ -81,17 +111,31 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   late final List<LingolaChatMessage> _messages;
+  final _tts = TutorTtsService();
+  final _player = AudioPlayer();
+  final _recorder = AudioRecorder();
+  final _stt = OpenAiChatService();
+  StreamSubscription<void>? _playerCompleteSub;
 
   Timer? _ticker;
   Timer? _sessionTimer;
   Duration _elapsed = Duration.zero;
   bool _finished = false;
   bool _voiceMode = false;
+  bool _sending = false;
+  bool _recording = false;
+  bool _speaking = false;
+  String? _localError;
+  String? _recordingPath;
 
   @override
   void initState() {
     super.initState();
     _messages = List<LingolaChatMessage>.of(widget.initialMessages);
+    _playerCompleteSub = _player.onPlayerComplete.listen((_) {
+      if (!mounted) return;
+      setState(() => _speaking = false);
+    });
 
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted || _finished) return;
@@ -102,6 +146,29 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     if (limit != null) {
       _sessionTimer = Timer(limit, _expireSession);
     }
+
+    if (widget.autoSpeakBot && widget.enableTts) {
+      final firstBot = _messages.cast<LingolaChatMessage?>().firstWhere(
+            (m) => m != null && !m.isUser,
+            orElse: () => null,
+          );
+      if (firstBot != null) {
+        unawaited(_speak(firstBot.text));
+      }
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant LingolaChatSession oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialMessages != widget.initialMessages &&
+        widget.initialMessages.length > _messages.length) {
+      setState(() {
+        _messages
+          ..clear()
+          ..addAll(widget.initialMessages);
+      });
+    }
   }
 
   @override
@@ -110,7 +177,19 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     _sessionTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
+    unawaited(_playerCompleteSub?.cancel());
+    unawaited(_player.dispose());
+    unawaited(_disposeRecorder());
+    _tts.dispose();
+    _stt.dispose();
     super.dispose();
+  }
+
+  Future<void> _disposeRecorder() async {
+    try {
+      if (await _recorder.isRecording()) await _recorder.stop();
+    } catch (_) {}
+    await _recorder.dispose();
   }
 
   String get _timerLabel {
@@ -134,24 +213,141 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     _finished = true;
     _ticker?.cancel();
     _sessionTimer?.cancel();
+    unawaited(_player.stop());
     widget.onClose();
   }
 
-  void _sendMessage([String? override]) {
+  Future<void> _speak(String text) async {
+    if (!widget.enableTts || text.trim().isEmpty) return;
+    try {
+      await _player.stop();
+      if (mounted) setState(() => _speaking = true);
+      final file = await _tts.synthesizeToFile(
+        text,
+        voiceId: widget.ttsVoiceId,
+      );
+      await _player.play(DeviceFileSource(file.path));
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _speaking = false;
+        _localError = e.toString();
+      });
+    }
+  }
+
+  Future<void> _sendMessage([String? override]) async {
     final value = (override ?? _controller.text).trim();
-    if (value.isEmpty || _finished) return;
+    if (value.isEmpty || _finished || _sending || widget.busy) return;
+
     setState(() {
+      _sending = true;
+      _localError = null;
       _messages.add(LingolaChatMessage.user(value));
-      final reply = widget.botReply;
-      if (reply != null && reply.isNotEmpty) {
-        _messages.add(LingolaChatMessage.bot(reply));
-      }
       _controller.clear();
     });
+    _scrollToBottom();
+
+    try {
+      String? reply;
+      final asyncSend = widget.onSendAsync;
+      if (asyncSend != null) {
+        reply = await asyncSend(value);
+      } else if (widget.botReply != null) {
+        reply = widget.botReply;
+      } else {
+        throw ApiException(AppText.current.common.connectionError);
+      }
+      if (!mounted) return;
+      if (reply != null && reply.trim().isNotEmpty) {
+        setState(() => _messages.add(LingolaChatMessage.bot(reply!.trim())));
+        _scrollToBottom();
+        if (widget.autoSpeakBot) unawaited(_speak(reply.trim()));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _localError = e is ApiException ? e.message : e.toString();
+      });
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _startMic() async {
+    if (!widget.enableMic || _recording || _sending || _finished) return;
+    await _player.stop();
+
+    final ok = await _recorder.hasPermission();
+    if (!ok) {
+      setState(() => _localError = 'Mikrofon izni gerekli');
+      return;
+    }
+
+    try {
+      final dir = await getTemporaryDirectory();
+      _recordingPath =
+          '${dir.path}/roleplay_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      await _recorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.aacLc,
+          sampleRate: 44100,
+          numChannels: 1,
+          bitRate: 128000,
+        ),
+        path: _recordingPath!,
+      );
+      if (!mounted) return;
+      HapticFeedback.mediumImpact();
+      setState(() {
+        _recording = true;
+        _localError = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _localError = 'Kayıt başlatılamadı: $e');
+    }
+  }
+
+  Future<void> _stopMicAndSend() async {
+    if (!_recording) return;
+    setState(() => _recording = false);
+    HapticFeedback.lightImpact();
+
+    try {
+      final path = await _recorder.stop();
+      final filePath = path ?? _recordingPath;
+      if (filePath == null || !File(filePath).existsSync()) {
+        setState(() => _localError = 'Kayıt alınamadı — basılı tutup konuş');
+        return;
+      }
+      final file = File(filePath);
+      if (await file.length() < 200) {
+        setState(() => _localError = 'Ses çok kısa — basılı tut (1–2 sn)');
+        return;
+      }
+      final text = (await _stt.transcribe(file)).trim();
+      try {
+        await file.delete();
+      } catch (_) {}
+      if (text.isEmpty) {
+        setState(() => _localError = 'Ses anlaşılamadı — tekrar dene');
+        return;
+      }
+      await _sendMessage(text);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _localError = e.toString());
+    } finally {
+      _recordingPath = null;
+    }
+  }
+
+  void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
       _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
+        _scrollController.position.maxScrollExtent + 80,
         duration: const Duration(milliseconds: 280),
         curve: Curves.easeOut,
       );
@@ -165,6 +361,8 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     final speed = widget.speedLabel ?? preview.speed;
     final hint = widget.typeMessageHint ?? preview.typeMessage;
     final topInset = MediaQuery.paddingOf(context).top;
+    final error = widget.errorText ?? _localError;
+    final blocked = _sending || widget.busy;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
@@ -275,7 +473,12 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                             alignment: Alignment.bottomCenter,
                             clipBehavior: Clip.none,
                             children: [
-                              const _FadedChatRobot(),
+                              _ChatRobotHero(
+                                riveAsset: widget.riveAsset,
+                                talking: _speaking,
+                                fallbackImage:
+                                    widget.fallbackImage ?? AppAssets.tutorRobot,
+                              ),
                               Positioned(
                                 left: 16,
                                 bottom: 24,
@@ -301,24 +504,87 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                             ],
                           ),
                         ),
+                        if (error != null)
+                          Material(
+                            color: const Color(0xFFFFEBEE),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      error,
+                                      style: const TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12,
+                                        color: Color(0xFFB71C1C),
+                                      ),
+                                    ),
+                                  ),
+                                  if (widget.onRetry != null)
+                                    TextButton(
+                                      onPressed: widget.onRetry,
+                                      child: Text(
+                                        AppText.current.common.tryAgain,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
                         Expanded(
                           child: ColoredBox(
                             color: Colors.white,
-                            child: ListView.separated(
-                              controller: _scrollController,
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                              itemCount: _messages.length,
-                              separatorBuilder: (_, _) =>
-                                  const SizedBox(height: 12),
-                              itemBuilder: (context, index) {
-                                final message = _messages[index];
-                                if (message.isUser) {
-                                  return _UserBubble(message.text);
-                                }
-                                return _BotBubble(message: message);
-                              },
-                            ),
+                            child: widget.busy && _messages.isEmpty
+                                ? const Center(
+                                    child: CircularProgressIndicator(
+                                      color: AppColors.primary,
+                                    ),
+                                  )
+                                : ListView.separated(
+                                    controller: _scrollController,
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      8,
+                                      16,
+                                      16,
+                                    ),
+                                    itemCount:
+                                        _messages.length + (blocked ? 1 : 0),
+                                    separatorBuilder: (_, _) =>
+                                        const SizedBox(height: 12),
+                                    itemBuilder: (context, index) {
+                                      if (index >= _messages.length) {
+                                        return const Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Padding(
+                                            padding: EdgeInsets.only(left: 8),
+                                            child: SizedBox(
+                                              width: 22,
+                                              height: 22,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: AppColors.primary,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      final message = _messages[index];
+                                      if (message.isUser) {
+                                        return _UserBubble(message.text);
+                                      }
+                                      return _BotBubble(
+                                        message: message,
+                                        onSpeak: widget.enableTts
+                                            ? () => _speak(message.text)
+                                            : null,
+                                      );
+                                    },
+                                  ),
                           ),
                         ),
                       ],
@@ -331,18 +597,90 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
               top: false,
               child: _voiceMode
                   ? _VoiceComposer(
+                      recording: _recording,
+                      statusText: _recording
+                          ? AppText.current.previewChat.recording
+                          : AppText.current.previewChat.holdToSpeak,
                       onSwitchToKeyboard: () =>
                           setState(() => _voiceMode = false),
-                      onMicTap: () {},
+                      onMicDown: _startMic,
+                      onMicUp: _stopMicAndSend,
                     )
                   : _KeyboardComposer(
                       controller: _controller,
                       hint: hint,
-                      onSend: _sendMessage,
-                      onMicTap: () => setState(() => _voiceMode = true),
+                      enabled: !blocked,
+                      onSend: () => unawaited(_sendMessage()),
+                      onMicTap: widget.enableMic
+                          ? () => setState(() => _voiceMode = true)
+                          : () {},
                     ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatHeroBackdrop extends StatelessWidget {
+  const _ChatHeroBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    return const DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF7EB6FF),
+            Color(0xFFB8D9FF),
+            Color(0xFFFFFFFF),
+          ],
+          stops: [0, 0.55, 1],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatRobotHero extends StatelessWidget {
+  const _ChatRobotHero({
+    required this.talking,
+    this.riveAsset,
+    this.fallbackImage,
+  });
+
+  final String? riveAsset;
+  final bool talking;
+  final String? fallbackImage;
+
+  @override
+  Widget build(BuildContext context) {
+    final image = fallbackImage ?? AppAssets.tutorRobot;
+    if (riveAsset == null || riveAsset!.isEmpty) {
+      return Align(
+        alignment: Alignment.bottomCenter,
+        child: HomeAsset(
+          image,
+          height: 280,
+          fit: BoxFit.contain,
+        ),
+      );
+    }
+
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SizedBox(
+        height: 300,
+        width: double.infinity,
+        child: TutorRiveAvatar(
+          assetPath: riveAsset!,
+          talking: talking,
+          fallbackImage: image,
+          fit: Fit.contain,
+          alignment: Alignment.bottomCenter,
         ),
       ),
     );
@@ -363,7 +701,7 @@ class _GlassCircleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0x80000000),
+      color: _LingolaChatSessionState._pillBg,
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
@@ -378,94 +716,20 @@ class _GlassCircleButton extends StatelessWidget {
   }
 }
 
-/// Figma: gradient + layer-blur ellipses behind robot.
-class _ChatHeroBackdrop extends StatelessWidget {
-  const _ChatHeroBackdrop();
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRect(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF63B1D9),
-                  Color(0xFF63B1D9),
-                  Color(0xFFFFFFFF),
-                  Color(0xFFFFFFFF),
-                ],
-                stops: [0, 0.22, 0.59, 1],
-              ),
-            ),
-          ),
-          Positioned(
-            left: -84,
-            top: -220,
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 90, sigmaY: 90),
-              child: Container(
-                width: 320,
-                height: 320,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF2D46FF),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: -40,
-            top: -140,
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 75, sigmaY: 75),
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF37B2E3),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: -20,
-            top: -80,
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 70, sigmaY: 70),
-              child: Container(
-                width: 280,
-                height: 280,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF2D85FF),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _KeyboardComposer extends StatelessWidget {
   const _KeyboardComposer({
     required this.controller,
     required this.hint,
     required this.onSend,
     required this.onMicTap,
+    this.enabled = true,
   });
 
   final TextEditingController controller;
   final String hint;
   final VoidCallback onSend;
   final VoidCallback onMicTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -480,7 +744,7 @@ class _KeyboardComposer extends StatelessWidget {
             shadowColor: Colors.black26,
             child: InkWell(
               customBorder: const CircleBorder(),
-              onTap: onMicTap,
+              onTap: enabled ? onMicTap : null,
               child: const SizedBox(
                 width: 46,
                 height: 46,
@@ -511,6 +775,7 @@ class _KeyboardComposer extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: controller,
+                      enabled: enabled,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => onSend(),
                       decoration: InputDecoration(
@@ -540,7 +805,7 @@ class _KeyboardComposer extends StatelessWidget {
                     color: Colors.transparent,
                     child: InkWell(
                       customBorder: const CircleBorder(),
-                      onTap: onSend,
+                      onTap: enabled ? onSend : null,
                       child: const HomeAsset(
                         AppAssets.send,
                         width: 33,
@@ -561,118 +826,117 @@ class _KeyboardComposer extends StatelessWidget {
 class _VoiceComposer extends StatelessWidget {
   const _VoiceComposer({
     required this.onSwitchToKeyboard,
-    required this.onMicTap,
+    required this.onMicDown,
+    required this.onMicUp,
+    this.recording = false,
+    this.statusText,
   });
 
   final VoidCallback onSwitchToKeyboard;
-  final VoidCallback onMicTap;
+  final Future<void> Function() onMicDown;
+  final Future<void> Function() onMicUp;
+  final bool recording;
+  final String? statusText;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 18),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Material(
-            color: const Color(0xFFE8EEFF),
-            shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: onSwitchToKeyboard,
-              child: const SizedBox(
-                width: 52,
-                height: 52,
-                child: Center(
-                  child: Icon(
-                    Icons.chat_bubble_rounded,
-                    color: AppColors.primary,
-                    size: 24,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Material(
+                color: const Color(0xFFE8F1FF),
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: onSwitchToKeyboard,
+                  child: const SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Icon(Icons.chat_bubble_rounded, color: AppColors.primary),
                   ),
                 ),
               ),
-            ),
-          ),
-          const Spacer(),
-          Material(
-            color: AppColors.primary,
-            shape: const CircleBorder(),
-            elevation: 4,
-            shadowColor: AppColors.primary.withValues(alpha: .35),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: onMicTap,
-              child: const SizedBox(
-                width: 72,
-                height: 72,
-                child: Center(
-                  child: HomeAsset(
-                    AppAssets.microphone,
-                    width: 28,
-                    height: 28,
-                    color: Colors.white,
+              const SizedBox(width: 28),
+              Listener(
+                onPointerDown: (_) => unawaited(onMicDown()),
+                onPointerUp: (_) => unawaited(onMicUp()),
+                onPointerCancel: (_) => unawaited(onMicUp()),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  width: recording ? 80 : 72,
+                  height: recording ? 80 : 72,
+                  decoration: BoxDecoration(
+                    color: recording ? const Color(0xFFEF3F3F) : AppColors.primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: (recording ? const Color(0xFFEF3F3F) : AppColors.primary)
+                            .withValues(alpha: recording ? 0.5 : 0.35),
+                        blurRadius: recording ? 22 : 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: recording
+                        ? const Icon(Icons.mic_rounded, color: Colors.white, size: 32)
+                        : const HomeAsset(
+                            AppAssets.microphone,
+                            width: 28,
+                            height: 28,
+                            color: Colors.white,
+                          ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-          const Spacer(),
-          const SizedBox(width: 52),
+          if (statusText != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              statusText!,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: recording ? const Color(0xFFEF3F3F) : AppColors.secondary,
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _FadedChatRobot extends StatelessWidget {
-  const _FadedChatRobot();
-
-  @override
-  Widget build(BuildContext context) {
-    return ShaderMask(
-      blendMode: BlendMode.dstIn,
-      shaderCallback: (bounds) {
-        return const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.white,
-            Colors.white,
-            Color(0xB3FFFFFF),
-            Color(0x00FFFFFF),
-          ],
-          stops: [0, 0.55, 0.78, 1],
-        ).createShader(bounds);
-      },
-      child: const LocalPicture(
-        'auth/account_robot.png',
-        width: 326,
-        height: 336,
-        fit: BoxFit.contain,
-        alignment: Alignment.topCenter,
-      ),
-    );
-  }
-}
-
 class _BotBubble extends StatelessWidget {
-  const _BotBubble({required this.message});
+  const _BotBubble({required this.message, this.onSpeak});
 
   final LingolaChatMessage message;
+  final VoidCallback? onSpeak;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Flexible(
           child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.sizeOf(context).width * 0.72,
+            ),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.black.withValues(alpha: .10)),
+              border: Border.all(color: Colors.black.withValues(alpha: .06)),
             ),
-            child: message.highlight == null
+            child: message.highlight == null || message.rest == null
                 ? Text(
                     message.text,
                     style: const TextStyle(
@@ -725,11 +989,14 @@ class _BotBubble extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        const Column(
+        Column(
           children: [
-            _RoundIconButton(asset: AppAssets.translate),
-            SizedBox(height: 8),
-            _RoundIconButton(asset: AppAssets.speaker),
+            const _RoundIconButton(asset: AppAssets.translate),
+            const SizedBox(height: 8),
+            _RoundIconButton(
+              asset: AppAssets.speaker,
+              onTap: onSpeak,
+            ),
           ],
         ),
       ],
@@ -771,27 +1038,25 @@ class _UserBubble extends StatelessWidget {
 }
 
 class _RoundIconButton extends StatelessWidget {
-  const _RoundIconButton({required this.asset});
+  const _RoundIconButton({required this.asset, this.onTap});
 
   final String asset;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: const Color(0xFFF3F4F6),
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: () {},
-        child: Container(
-          width: 34,
-          height: 34,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.black.withValues(alpha: .08)),
+        onTap: onTap,
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: Center(
+            child: HomeAsset(asset, width: 16, height: 16),
           ),
-          child: HomeAsset(asset, width: 16, height: 16),
         ),
       ),
     );

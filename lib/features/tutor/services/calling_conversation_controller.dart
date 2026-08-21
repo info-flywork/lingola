@@ -8,6 +8,7 @@ import 'package:record/record.dart';
 
 import 'openai_chat_service.dart';
 import 'tutor_tts_service.dart';
+import 'viseme_cue.dart';
 
 enum CallMessageRole { tutor, user }
 
@@ -32,14 +33,21 @@ class CallingConversationController extends ChangeNotifier {
     AudioRecorder? recorder,
     AudioPlayer? player,
     this.voiceId,
+    this.openingLine,
+    this.systemPrompt,
+    this.tutorSlug,
   })  : _chat = chat ?? OpenAiChatService(),
         _tts = tts ?? TutorTtsService(),
         _recorder = recorder ?? AudioRecorder(),
         _player = player ?? AudioPlayer() {
     _playerCompleteSub = _player.onPlayerComplete.listen((_) {
       _speaking = false;
+      _currentViseme = 0;
+      _visemeTrack = const [];
       notifyListeners();
+      _scheduleIdleNudge();
     });
+    _playerPositionSub = _player.onPositionChanged.listen(_onAudioPosition);
   }
 
   final OpenAiChatService _chat;
@@ -47,7 +55,11 @@ class CallingConversationController extends ChangeNotifier {
   final AudioRecorder _recorder;
   final AudioPlayer _player;
   final String? voiceId;
+  final String? openingLine;
+  final String? systemPrompt;
+  final String? tutorSlug;
   StreamSubscription<void>? _playerCompleteSub;
+  StreamSubscription<Duration>? _playerPositionSub;
 
   final List<CallMessage> messages = [];
   final List<ChatTurn> _history = [];
@@ -58,19 +70,145 @@ class CallingConversationController extends ChangeNotifier {
   var _speaking = false;
   String? _error;
   String? _recordingPath;
+  List<VisemeCue> _visemeTrack = const [];
+  double _currentViseme = 0;
+  Timer? _idleNudgeTimer;
+  Timer? _extensionSilenceTimer;
+  var _userHasSpoken = false;
+  var _nudgeCount = 0;
+  var _disposed = false;
+  double _playbackRate = 1.0;
+
+  /// none → askedOnce → askedTwice → ended
+  var _extensionAskCount = 0;
+  var _awaitingExtensionReply = false;
+
+  /// Ders 15 dk checkpoint: UI bunu dinleyip oturumu kapatabilir.
+  VoidCallback? onRequestEndLesson;
+
+  /// Kullanıcı +15 dk istediğinde UI segment zamanını sıfırlar.
+  VoidCallback? onSegmentContinued;
+
+  static const _maxNudges = 2;
+  static const playbackRates = <double>[0.5, 1.0, 1.5, 2.0];
 
   bool get busy => _busy;
   bool get listening => _listening;
   bool get speaking => _speaking;
   String? get error => _error;
+  double get playbackRate => _playbackRate;
+  String get playbackRateLabel {
+    final r = _playbackRate;
+    if (r == r.roundToDouble()) return '${r.toInt()}x';
+    return '${r}x';
+  }
+
+  /// Rive `visemeNum` — ses pozisyonuna göre lipsync.
+  double get currentViseme => _currentViseme;
+  bool get hasLipsyncTrack => _visemeTrack.isNotEmpty;
+
+  Future<void> cyclePlaybackRate() async {
+    final i = playbackRates.indexOf(_playbackRate);
+    final next = playbackRates[(i < 0 ? 0 : i + 1) % playbackRates.length];
+    _playbackRate = next;
+    try {
+      await _player.setPlaybackRate(next);
+    } catch (_) {}
+    notifyListeners();
+  }
+
+  Future<void> setPlaybackRate(double rate) async {
+    if (!playbackRates.contains(rate)) return;
+    _playbackRate = rate;
+    try {
+      await _player.setPlaybackRate(rate);
+    } catch (_) {}
+    notifyListeners();
+  }
+
+  void _onAudioPosition(Duration pos) {
+    if (!_speaking || _visemeTrack.isEmpty) return;
+    final next = visemeAt(_visemeTrack, pos.inMilliseconds / 1000.0);
+    if (next == _currentViseme) return;
+    _currentViseme = next;
+    notifyListeners();
+  }
 
   Future<void> start() async {
     await _preparePlaybackSession();
     notifyListeners();
     await _tutorSay(
-      "Hi! I'm your tutor. Let's practice English greetings. "
-      'How are you today?',
+      openingLine ??
+          "Hi! I'm your tutor. Let's practice English greetings. "
+              'How are you today?',
     );
+    if (!_speaking) _scheduleIdleNudge();
+  }
+
+  void _cancelIdleNudge() {
+    _idleNudgeTimer?.cancel();
+    _idleNudgeTimer = null;
+  }
+
+  void _scheduleIdleNudge() {
+    _cancelIdleNudge();
+    if (_disposed || _userHasSpoken || _nudgeCount >= _maxNudges) return;
+    if (_listening || _busy || _speaking) return;
+    final delay = Duration(seconds: _nudgeCount == 0 ? 7 : 10);
+    _idleNudgeTimer = Timer(delay, () {
+      unawaited(_maybeNudge());
+    });
+  }
+
+  Future<void> _maybeNudge() async {
+    if (_disposed || _userHasSpoken || _listening || _busy || _speaking) {
+      if (!_disposed && !_userHasSpoken) _scheduleIdleNudge();
+      return;
+    }
+    if (_nudgeCount >= _maxNudges) return;
+    final line = _nudgeLine(_nudgeCount);
+    _nudgeCount += 1;
+    await _tutorSay(line);
+    if (!_speaking) _scheduleIdleNudge();
+  }
+
+  String _nudgeLine(int index) {
+    final slug = (tutorSlug ?? '').toLowerCase();
+    final lines = switch (slug) {
+      'ukrath' => const [
+          "I don't love the human race much... but I must admit you're brave. You can try this.",
+          'Speak, human. Even orcs wait — but not forever. Say one word.',
+        ],
+      'zephyrion' => const [
+          "Why so silent? Or are you afraid I'll abduct you?",
+          'No kidnapping today. I promise. Just say hello, human.',
+        ],
+      'vaelen' => const [
+          'Did a spell steal your voice? I am still here.',
+          'One small word is enough magic. Try hello.',
+        ],
+      'elrion' => const [
+          'The forest is listening. Shy — or choosing your words like an elf?',
+          'The first word is a step on the leaf-path. Try hello.',
+        ],
+      'santa' => const [
+          'Ho ho — did the cookies steal your voice? Say hello!',
+          'The reindeer are waiting. One little hello, please.',
+        ],
+      'kenji' || 'marco' || 'ines' || 'morgan' => const [
+          "Are you there? It's okay if the first step feels hard — just say hi.",
+          'No pressure. Hold the mic and say hello.',
+        ],
+      'katie' => const [
+          "Still there? Let's start with one word: hello.",
+          'Hold the mic. Say hi — that counts.',
+        ],
+      _ => const [
+          "Hey — still there? Don't worry, just say hello.",
+          'The first word is the hardest. Try a simple hi.',
+        ],
+    };
+    return lines[index.clamp(0, lines.length - 1)];
   }
 
   Future<void> _preparePlaybackSession() async {
@@ -103,9 +241,12 @@ class CallingConversationController extends ChangeNotifier {
   /// Basılı tutunca kayıt; bırakınca Whisper.
   Future<void> startListening() async {
     if (_busy || _listening) return;
+    _cancelIdleNudge();
 
     await _player.stop();
     _speaking = false;
+    _currentViseme = 0;
+    _visemeTrack = const [];
     notifyListeners();
     await Future<void>.delayed(const Duration(milliseconds: 150));
 
@@ -140,6 +281,7 @@ class CallingConversationController extends ChangeNotifier {
       _recordStartedAt = null;
       _error = 'Kayıt başlatılamadı: $e';
       notifyListeners();
+      _scheduleIdleNudge();
     }
   }
 
@@ -163,7 +305,6 @@ class CallingConversationController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Çok kısa basışta encoder’ın dosyayı yazması için min. süre.
       final started = _recordStartedAt;
       if (started != null) {
         final elapsed = DateTime.now().difference(started);
@@ -185,7 +326,6 @@ class CallingConversationController extends ChangeNotifier {
       final bytes = await file.length();
       debugPrint('Mic kayıt boyutu: $bytes byte, path=$filePath');
 
-      // Eşik düşük; asıl karar Whisper’da. Boş/çok küçük dosyayı at.
       if (bytes < 200) {
         _error = 'Ses alınamadı — basılı tut (1–2 sn) ve konuş.';
         return;
@@ -211,17 +351,43 @@ class CallingConversationController extends ChangeNotifier {
       _busy = false;
       _listening = false;
       notifyListeners();
+      if (!_userHasSpoken) _scheduleIdleNudge();
     }
   }
 
   Future<void> _onUserSpeech(String text) async {
+    _userHasSpoken = true;
+    _cancelIdleNudge();
     messages.add(CallMessage(role: CallMessageRole.user, text: text));
     notifyListeners();
+
+    if (_awaitingExtensionReply) {
+      final decision = _parseExtensionDecision(text);
+      if (decision == _ExtensionDecision.continuePractice) {
+        _clearExtensionWatch();
+        _awaitingExtensionReply = false;
+        _extensionAskCount = 0;
+        onSegmentContinued?.call();
+        await _tutorSay("Great — let's keep practicing for another 15 minutes.");
+        return;
+      }
+      if (decision == _ExtensionDecision.finish) {
+        _clearExtensionWatch();
+        _awaitingExtensionReply = false;
+        await _tutorSay(
+          "Nice work today. Let's finish here — see you in the next lesson.",
+        );
+        onRequestEndLesson?.call();
+        return;
+      }
+      // Belirsiz cevap → normal ders cevabı + kısa hatırlatma
+    }
 
     try {
       final reply = await _chat.complete(
         history: _history,
         userMessage: text,
+        systemPrompt: systemPrompt,
       );
       _history.add(ChatTurn(role: 'user', content: text));
       _history.add(ChatTurn(role: 'assistant', content: reply));
@@ -229,10 +395,107 @@ class CallingConversationController extends ChangeNotifier {
         _history.removeAt(0);
       }
       await _tutorSay(reply, alreadyInHistory: true);
+      if (_awaitingExtensionReply && decisionWasUnclear(text)) {
+        await Future<void>.delayed(const Duration(milliseconds: 400));
+        if (!_disposed && _awaitingExtensionReply) {
+          await _tutorSay(
+            'Just checking — another 15 minutes of practice, or finish the lesson?',
+          );
+        }
+      }
     } catch (e) {
       _error = e.toString();
       notifyListeners();
     }
+  }
+
+  bool decisionWasUnclear(String text) =>
+      _parseExtensionDecision(text) == null;
+
+  _ExtensionDecision? _parseExtensionDecision(String raw) {
+    final t = raw.toLowerCase().trim();
+    if (t.isEmpty) return null;
+    const finishKeys = [
+      'finish',
+      'end',
+      'stop',
+      'done',
+      'enough',
+      'bitir',
+      'bitirelim',
+      'hayır',
+      'hayir',
+      'no',
+      'close',
+    ];
+    const continueKeys = [
+      'more',
+      'again',
+      'continue',
+      'practice',
+      'another',
+      'yes',
+      'evet',
+      'keep',
+      '15',
+      'pratik',
+      'devam',
+      'daha',
+    ];
+    for (final k in finishKeys) {
+      if (t.contains(k)) return _ExtensionDecision.finish;
+    }
+    for (final k in continueKeys) {
+      if (t.contains(k)) return _ExtensionDecision.continuePractice;
+    }
+    return null;
+  }
+
+  /// 15 dk dolunca çağır: uzatma sor / sessizlikte bitir.
+  Future<void> offerFifteenMinuteCheckpoint() async {
+    if (_disposed || _awaitingExtensionReply) return;
+    _cancelIdleNudge();
+    _awaitingExtensionReply = true;
+    _extensionAskCount = 1;
+    await _tutorSay(
+      "We've practiced for about 15 minutes. "
+      'Would you like another 15 minutes of practice, or shall we finish the lesson?',
+    );
+    _armExtensionSilenceWatch();
+  }
+
+  void _armExtensionSilenceWatch() {
+    _extensionSilenceTimer?.cancel();
+    _extensionSilenceTimer = Timer(const Duration(seconds: 28), () {
+      unawaited(_onExtensionSilence());
+    });
+  }
+
+  void _clearExtensionWatch() {
+    _extensionSilenceTimer?.cancel();
+    _extensionSilenceTimer = null;
+  }
+
+  Future<void> _onExtensionSilence() async {
+    if (_disposed || !_awaitingExtensionReply) return;
+    if (_listening || _busy || _speaking) {
+      _armExtensionSilenceWatch();
+      return;
+    }
+    if (_extensionAskCount < 2) {
+      _extensionAskCount = 2;
+      await _tutorSay(
+        'Still with me? Another 15 minutes of practice, or shall we finish?',
+      );
+      _armExtensionSilenceWatch();
+      return;
+    }
+    _awaitingExtensionReply = false;
+    _clearExtensionWatch();
+    await _tutorSay(
+      "I can tell you may be tired from the quiet. Let's end the lesson here.",
+    );
+    onRequestEndLesson?.call();
   }
 
   Future<void> _tutorSay(String text, {bool alreadyInHistory = false}) async {
@@ -243,13 +506,19 @@ class CallingConversationController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final file = await _tts.synthesizeToFile(text, voiceId: voiceId);
+      final speech = await _tts.synthesizeForLipsync(text, voiceId: voiceId);
       await _player.stop();
+      _visemeTrack = speech.visemes;
+      _currentViseme =
+          speech.visemes.isEmpty ? 0 : speech.visemes.first.visemeNum;
       _speaking = true;
       notifyListeners();
-      await _player.play(DeviceFileSource(file.path));
+      await _player.setPlaybackRate(_playbackRate);
+      await _player.play(DeviceFileSource(speech.file.path));
     } catch (e) {
       _speaking = false;
+      _visemeTrack = const [];
+      _currentViseme = 0;
       _error = e.toString();
       notifyListeners();
     }
@@ -298,7 +567,11 @@ class CallingConversationController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    _cancelIdleNudge();
+    _clearExtensionWatch();
     unawaited(_playerCompleteSub?.cancel());
+    unawaited(_playerPositionSub?.cancel());
     unawaited(_disposeRecorder());
     unawaited(_player.dispose());
     _chat.dispose();
@@ -315,3 +588,5 @@ class CallingConversationController extends ChangeNotifier {
     await _recorder.dispose();
   }
 }
+
+enum _ExtensionDecision { continuePractice, finish }

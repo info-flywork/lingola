@@ -200,11 +200,12 @@ class _Translations$previewChat$tr implements Translations$previewChat$en {
 	@override String get lessonBadge => 'Ders 1: Selamlaşma';
 	@override String get speed => '1x';
 	@override String get typeMessage => 'Bir mesaj yaz...';
-	@override String get incoming1 => 'Merhaba Emrah, tanıştığımıza memnun oldum. Bana biraz kendinden bahseder misin?';
-	@override String get outgoing1 => 'Selam! Sabah kahvemi içtim ve bahsettiğin bağlantıyı kurmaya hazırım.';
+	@override String get incoming1 => 'Merhaba! Lingola\'ya hoş geldin — ben senin AI hoca robotunum. İngilizce kısa bir selam denemeye hazır mısın?';
+	@override String get outgoing1 => 'Merhaba! Pratik yapmaya hazırım.';
 	@override String get incoming2Highlight => 'Günaydın';
 	@override String get incoming2Rest => ', Emrah! Hazır hissetmene sevindim. Sabah kahvesi bağlantı kurmak için harika bir başlangıç. Ne hakkında konuşmak istersin?';
-	@override String get botReply => 'Harika! Selamlaşmaları birlikte pratik etmeye devam edelim.';
+	@override String get holdToSpeak => 'Konuşmak için basılı tut';
+	@override String get recording => 'Kaydediliyor… bırakınca gönderilir';
 }
 
 // Path: paywall
@@ -273,8 +274,8 @@ class _Translations$home$tr implements Translations$home$en {
 	@override String get todayPractice => 'Bugünkü Pratik';
 	@override String get continueConversation => 'Konuşmaya Devam Et';
 	@override String get lessonProgress => 'Ders 2 — Selamlaşma';
-	@override String get timeCurrent => '46dk';
-	@override String get timeTotal => '/ 60dk';
+	@override String get timeCurrent => '0dk';
+	@override String get timeTotal => '/ 15dk';
 	@override String get kContinue => 'Devam Et';
 	@override String get learningPath => 'A1 - Başlangıç';
 	@override String get allLessons => 'Tüm Dersler';
@@ -438,6 +439,35 @@ class _Translations$lessonPage$tr implements Translations$lessonPage$en {
 	@override String get language => 'Hedef dil';
 	@override String get completed => 'Tamamlandı';
 	@override String get locked => 'Kilitli';
+	@override String get pickTutorTitle => 'Hocanı seç';
+	@override String get startTalk => 'Derse başla';
+	@override String get chatInstead => 'Mesajlaş';
+	@override String get lockedHint => 'Bu dersi açmak için önceki dersi bitir.';
+	@override String get notesTitle => 'Ders notları';
+	@override String get whatWeLearned => 'Bugün neler öğrendik';
+	@override String get deleteNotes => 'Ders notlarımı sil';
+	@override String get deleteNotesConfirm => 'Bu notlar silinsin mi? Geri alınamaz.';
+	@override String get delete => 'Sil';
+	@override String get cancel => 'Vazgeç';
+	@override String get practiceCta => 'Bu konu zor geldiyse aynı konuda tekrar pratik yapabilirsin.';
+	@override String get practiceNow => 'Bu konuda pratik yap';
+	@override String get openChat => 'Hoca ile sohbeti aç';
+	@override String get yourScore => 'Puanın';
+	@override String bestScore({required Object score}) => 'En iyi ${score}/100';
+	@override String scoreChanged({required Object prev, required Object now}) => '${prev} → ${now}';
+	@override String get participationSilent => 'Pasif katılımcı';
+	@override String get participationSilentBody => 'Bu sefer sessiz kaldın. Bence dersi tekrar almalısın.';
+	@override String get participationPassive => 'Düşük katılım';
+	@override String get participationPassiveBody => 'Neredeyse hiç konuşmadın. Dersi tekrar alıp daha çok konuş.';
+	@override String get participationActive => 'İyi katılım';
+	@override String get participationActiveBody => 'Sohbete katıldın. Böyle devam!';
+	@override String get participationStrong => 'Güçlü katılım';
+	@override String get participationStrongBody => 'Çok konuştun. Harika iş!';
+	@override String get retakeLesson => 'Dersi tekrar al';
+	@override String get finishLesson => 'Dersi bitir';
+	@override String get savingNotes => 'Hocan bugünün notlarını yazıyor…';
+	@override String get noNotes => 'Not almak için bu dersi bitir.';
+	@override String get notesDeleted => 'Ders notları silindi';
 	@override late final _Translations$lessonPage$levels$tr levels = _Translations$lessonPage$levels$tr._(_root);
 }
 
@@ -1134,6 +1164,7 @@ class _Translations$rolePlayPage$coffee$chat$tr implements Translations$rolePlay
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
+	@override String get briefing => 'Merhaba! Bugün kafede sipariş vermeyi pratik edeceğiz — selam, boyut, ekstra. Önce kısaca anlatacağım, sonra canlandıracağız. Olur mu?';
 	@override String get incoming1 => 'Hoş geldiniz! Bugün ne alırsınız?';
 	@override String get outgoing1 => 'Merhaba! Orta boy bir latte istiyorum lütfen.';
 	@override String get incoming2Highlight => 'Tabii';
@@ -1148,6 +1179,7 @@ class _Translations$rolePlayPage$directions$chat$tr implements Translations$role
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
+	@override String get briefing => 'Merhaba! Bugün sokakta yol sormayı pratik edeceğiz. Önce kısaca anlatacağım, sonra canlandıracağız. Olur mu?';
 	@override String get incoming1 => 'Merhaba! Biraz kaybolmuş görünüyorsunuz — bir yere mi bakıyorsunuz?';
 	@override String get outgoing1 => 'Evet, en yakın metro istasyonunu arıyorum.';
 	@override String get incoming2Highlight => 'Tabii ki';
@@ -1162,6 +1194,7 @@ class _Translations$rolePlayPage$interview$chat$tr implements Translations$roleP
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
+	@override String get briefing => 'Merhaba! Bugün iş görüşmesi pratik edeceğiz. Önce kısaca anlatacağım, sonra canlandıracağız — önce ben soracağım, sonra rol değiştireceğiz. Olur mu?';
 	@override String get incoming1 => 'Bugün geldiğiniz için teşekkürler. Kendinizi kısaca tanıtır mısınız?';
 	@override String get outgoing1 => 'Tabii. Burada olmaktan mutluyum ve deneyimimi paylaşmak istiyorum.';
 	@override String get incoming2Highlight => 'Harika';
@@ -1300,11 +1333,12 @@ extension on TranslationsTr {
 			'previewChat.lessonBadge' => 'Ders 1: Selamlaşma',
 			'previewChat.speed' => '1x',
 			'previewChat.typeMessage' => 'Bir mesaj yaz...',
-			'previewChat.incoming1' => 'Merhaba Emrah, tanıştığımıza memnun oldum. Bana biraz kendinden bahseder misin?',
-			'previewChat.outgoing1' => 'Selam! Sabah kahvemi içtim ve bahsettiğin bağlantıyı kurmaya hazırım.',
+			'previewChat.incoming1' => 'Merhaba! Lingola\'ya hoş geldin — ben senin AI hoca robotunum. İngilizce kısa bir selam denemeye hazır mısın?',
+			'previewChat.outgoing1' => 'Merhaba! Pratik yapmaya hazırım.',
 			'previewChat.incoming2Highlight' => 'Günaydın',
 			'previewChat.incoming2Rest' => ', Emrah! Hazır hissetmene sevindim. Sabah kahvesi bağlantı kurmak için harika bir başlangıç. Ne hakkında konuşmak istersin?',
-			'previewChat.botReply' => 'Harika! Selamlaşmaları birlikte pratik etmeye devam edelim.',
+			'previewChat.holdToSpeak' => 'Konuşmak için basılı tut',
+			'previewChat.recording' => 'Kaydediliyor… bırakınca gönderilir',
 			'paywall.title' => 'Bugün Konuşmaya Başla — Ücretsiz',
 			'paywall.subtitle' => 'Sınırsız öğrenme fırsatı',
 			'paywall.noCommitment' => 'Taahhüt yok',
@@ -1337,8 +1371,8 @@ extension on TranslationsTr {
 			'home.todayPractice' => 'Bugünkü Pratik',
 			'home.continueConversation' => 'Konuşmaya Devam Et',
 			'home.lessonProgress' => 'Ders 2 — Selamlaşma',
-			'home.timeCurrent' => '46dk',
-			'home.timeTotal' => '/ 60dk',
+			'home.timeCurrent' => '0dk',
+			'home.timeTotal' => '/ 15dk',
 			'home.kContinue' => 'Devam Et',
 			'home.learningPath' => 'A1 - Başlangıç',
 			'home.allLessons' => 'Tüm Dersler',
@@ -1505,6 +1539,35 @@ extension on TranslationsTr {
 			'lessonPage.language' => 'Hedef dil',
 			'lessonPage.completed' => 'Tamamlandı',
 			'lessonPage.locked' => 'Kilitli',
+			'lessonPage.pickTutorTitle' => 'Hocanı seç',
+			'lessonPage.startTalk' => 'Derse başla',
+			'lessonPage.chatInstead' => 'Mesajlaş',
+			'lessonPage.lockedHint' => 'Bu dersi açmak için önceki dersi bitir.',
+			'lessonPage.notesTitle' => 'Ders notları',
+			'lessonPage.whatWeLearned' => 'Bugün neler öğrendik',
+			'lessonPage.deleteNotes' => 'Ders notlarımı sil',
+			'lessonPage.deleteNotesConfirm' => 'Bu notlar silinsin mi? Geri alınamaz.',
+			'lessonPage.delete' => 'Sil',
+			'lessonPage.cancel' => 'Vazgeç',
+			'lessonPage.practiceCta' => 'Bu konu zor geldiyse aynı konuda tekrar pratik yapabilirsin.',
+			'lessonPage.practiceNow' => 'Bu konuda pratik yap',
+			'lessonPage.openChat' => 'Hoca ile sohbeti aç',
+			'lessonPage.yourScore' => 'Puanın',
+			'lessonPage.bestScore' => ({required Object score}) => 'En iyi ${score}/100',
+			'lessonPage.scoreChanged' => ({required Object prev, required Object now}) => '${prev} → ${now}',
+			'lessonPage.participationSilent' => 'Pasif katılımcı',
+			'lessonPage.participationSilentBody' => 'Bu sefer sessiz kaldın. Bence dersi tekrar almalısın.',
+			'lessonPage.participationPassive' => 'Düşük katılım',
+			'lessonPage.participationPassiveBody' => 'Neredeyse hiç konuşmadın. Dersi tekrar alıp daha çok konuş.',
+			'lessonPage.participationActive' => 'İyi katılım',
+			'lessonPage.participationActiveBody' => 'Sohbete katıldın. Böyle devam!',
+			'lessonPage.participationStrong' => 'Güçlü katılım',
+			'lessonPage.participationStrongBody' => 'Çok konuştun. Harika iş!',
+			'lessonPage.retakeLesson' => 'Dersi tekrar al',
+			'lessonPage.finishLesson' => 'Dersi bitir',
+			'lessonPage.savingNotes' => 'Hocan bugünün notlarını yazıyor…',
+			'lessonPage.noNotes' => 'Not almak için bu dersi bitir.',
+			'lessonPage.notesDeleted' => 'Ders notları silindi',
 			'lessonPage.levels.a1.title' => 'A1 - Başlangıç',
 			'lessonPage.levels.a1.lessons.0' => 'Selamlaşma',
 			'lessonPage.levels.a1.lessons.1' => 'Tanışma I',
@@ -1692,6 +1755,8 @@ extension on TranslationsTr {
 			'lessonPage.levels.c1.lessons.13' => 'Global politics',
 			'lessonPage.levels.c1.lessons.14' => 'Product boom',
 			'lessonPage.levels.c1.lessons.15' => 'Will be happy?',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.16' => 'Maybe later...',
 			'lessonPage.levels.c1.lessons.17' => 'New solutions',
 			'lessonPage.levels.c1.lessons.18' => 'Contextual influence',
@@ -1722,8 +1787,6 @@ extension on TranslationsTr {
 			'lessonPage.levels.c2.lessons.18' => 'Problems, problems',
 			'lessonPage.levels.c2.lessons.19' => 'Fact or fiction?',
 			'lessonPage.levels.c2.lessons.20' => 'Sightseeing',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c2.lessons.21' => 'Volunteering',
 			'lessonPage.levels.c2.lessons.22' => 'The mind\'s eye',
 			'lessonPage.levels.c2.lessons.23' => 'Media consumption',
@@ -1737,6 +1800,7 @@ extension on TranslationsTr {
 			'rolePlayPage.business' => 'İş',
 			'rolePlayPage.coffee.title' => 'Kafede Sipariş Verme',
 			'rolePlayPage.coffee.screenplay' => 'Favori içeceğini sipariş et, boyut ve ekstraları sor, toplamı onayla ve tezgâhtan kahveni al.',
+			'rolePlayPage.coffee.chat.briefing' => 'Merhaba! Bugün kafede sipariş vermeyi pratik edeceğiz — selam, boyut, ekstra. Önce kısaca anlatacağım, sonra canlandıracağız. Olur mu?',
 			'rolePlayPage.coffee.chat.incoming1' => 'Hoş geldiniz! Bugün ne alırsınız?',
 			'rolePlayPage.coffee.chat.outgoing1' => 'Merhaba! Orta boy bir latte istiyorum lütfen.',
 			'rolePlayPage.coffee.chat.incoming2Highlight' => 'Tabii',
@@ -1744,6 +1808,7 @@ extension on TranslationsTr {
 			'rolePlayPage.coffee.chat.botReply' => 'Harika tercih. Siparişinize başka bir şey ekleyelim mi?',
 			'rolePlayPage.directions.title' => 'Sokakta Yol Sorma',
 			'rolePlayPage.directions.screenplay' => 'Bir yere yol sor, metro veya otobüse nasıl gideceğini öğren, bilet bilgisi al ve restoran önerilerini dinle.',
+			'rolePlayPage.directions.chat.briefing' => 'Merhaba! Bugün sokakta yol sormayı pratik edeceğiz. Önce kısaca anlatacağım, sonra canlandıracağız. Olur mu?',
 			'rolePlayPage.directions.chat.incoming1' => 'Merhaba! Biraz kaybolmuş görünüyorsunuz — bir yere mi bakıyorsunuz?',
 			'rolePlayPage.directions.chat.outgoing1' => 'Evet, en yakın metro istasyonunu arıyorum.',
 			'rolePlayPage.directions.chat.incoming2Highlight' => 'Tabii ki',
@@ -1751,6 +1816,7 @@ extension on TranslationsTr {
 			'rolePlayPage.directions.chat.botReply' => 'Rica ederim! İstasyonun yanında bir restoran önerisi de ister misiniz?',
 			'rolePlayPage.interview.title' => 'İş Görüşmesi',
 			'rolePlayPage.interview.screenplay' => 'Kendini tanıt, sık sorulan soruları yanıtla, deneyiminden bahset ve rol ile sonraki adımları sor.',
+			'rolePlayPage.interview.chat.briefing' => 'Merhaba! Bugün iş görüşmesi pratik edeceğiz. Önce kısaca anlatacağım, sonra canlandıracağız — önce ben soracağım, sonra rol değiştireceğiz. Olur mu?',
 			'rolePlayPage.interview.chat.incoming1' => 'Bugün geldiğiniz için teşekkürler. Kendinizi kısaca tanıtır mısınız?',
 			'rolePlayPage.interview.chat.outgoing1' => 'Tabii. Burada olmaktan mutluyum ve deneyimimi paylaşmak istiyorum.',
 			'rolePlayPage.interview.chat.incoming2Highlight' => 'Harika',

@@ -36,7 +36,7 @@ class AppUser {
       id: json['id'] as String,
       displayName: json['displayName'] as String?,
       email: json['email'] as String?,
-      avatarUrl: json['avatarUrl'] as String?,
+      avatarUrl: (json['avatarUrl'] ?? json['avatar_url']) as String?,
       authProvider: json['authProvider'] as String? ?? 'guest',
       isGuest: json['isGuest'] as bool? ?? true,
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
@@ -57,6 +57,7 @@ class AppUser {
 
   AppUser copyWith({
     String? displayName,
+    String? avatarUrl,
     bool? notificationsEnabled,
     String? appLocale,
     DateTime? deletionRequestedAt,
@@ -67,7 +68,7 @@ class AppUser {
       id: id,
       displayName: displayName ?? this.displayName,
       email: email,
-      avatarUrl: avatarUrl,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
       authProvider: authProvider,
       isGuest: isGuest,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,

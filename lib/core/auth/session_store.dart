@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_user.dart';
@@ -11,6 +12,16 @@ abstract final class SessionStore {
 
   static AppUser? currentUser;
   static DateTime? expiresAt;
+
+  /// Profil / avatar / isim değişikliklerinde Home vb. anlık dinler.
+  static final ValueNotifier<AppUser?> userListenable =
+      ValueNotifier<AppUser?>(null);
+
+  static void _publish(AppUser? user) {
+    currentUser = user;
+    // Yeni AppUser her seferinde farklı referans → dinleyiciler tetiklenir.
+    userListenable.value = user;
+  }
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -29,11 +40,21 @@ abstract final class SessionStore {
       await prefs.setString(_expiresKey, expiresAt.toUtc().toIso8601String());
       SessionStore.expiresAt = expiresAt.toUtc();
     }
-    currentUser = user;
+    _publish(user);
+  }
+
+  /// Token’a dokunmadan kullanıcı cache’ini günceller (profil / avatar).
+  static Future<void> updateUser(AppUser user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userKey, jsonEncode(_userToJson(user)));
+    _publish(user);
   }
 
   static Future<AppUser?> loadCachedUser() async {
-    if (currentUser != null) return currentUser;
+    if (currentUser != null) {
+      if (userListenable.value == null) userListenable.value = currentUser;
+      return currentUser;
+    }
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_userKey);
     final expiresRaw = prefs.getString(_expiresKey);
@@ -45,7 +66,7 @@ abstract final class SessionStore {
       final map = jsonDecode(raw);
       if (map is! Map<String, dynamic>) return null;
       final user = AppUser.fromJson(map);
-      currentUser = user;
+      _publish(user);
       return user;
     } catch (_) {
       return null;
@@ -70,8 +91,8 @@ abstract final class SessionStore {
     await prefs.remove(_tokenKey);
     await prefs.remove(_expiresKey);
     await prefs.remove(_userKey);
-    currentUser = null;
     expiresAt = null;
+    _publish(null);
   }
 
   static Map<String, dynamic> _userToJson(AppUser user) => {

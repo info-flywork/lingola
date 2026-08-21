@@ -10,6 +10,7 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
 import 'chat_history_screen.dart';
 import 'chat_screen.dart';
+import 'calling_screen.dart';
 import 'services/tutor_api_service.dart';
 import 'tutor_filter_sheet.dart';
 
@@ -70,6 +71,22 @@ class _TutorScreenState extends State<TutorScreen> {
     );
   }
 
+  void _openCalling(_TutorData tutor) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CallingScreen(
+          tutorName: tutor.name,
+          imagePath: tutor.image,
+          riveAsset: tutor.riveAsset,
+          voiceId: tutor.voiceId,
+          backgroundGradientStart: tutor.theme?.gradientStart,
+          backgroundGradientEnd: tutor.theme?.gradientEnd,
+          tutorSlug: tutor.slug,
+        ),
+      ),
+    );
+  }
+
   Future<void> _loadRemoteTutors() async {
     try {
       final remote = await TutorApiService.fetchTutors();
@@ -104,7 +121,9 @@ class _TutorScreenState extends State<TutorScreen> {
       image: image,
       riveAsset: dto.rivePath,
       voiceId: dto.voiceId,
-      flagAsset: dto.flagAssetPath,
+      flagAsset: dto.flagAssetPath?.trim().isNotEmpty == true
+          ? dto.flagAssetPath
+          : AppAssets.flagForTutorSlug(dto.slug),
       tags: dto.tagKeys
           .map((key) => _tagDisplayName(tags, key))
           .toList(growable: false),
@@ -376,7 +395,6 @@ class _TutorScreenState extends State<TutorScreen> {
                       name: tutor.name,
                       imagePath: tutor.image,
                       tags: tutor.tags,
-                      flagAsset: tutor.flagAsset,
                       theme: tutor.theme,
                       selected: selected,
                       onHoverChanged: (hovering) {
@@ -385,7 +403,7 @@ class _TutorScreenState extends State<TutorScreen> {
                       onSelect: () => _focusTutor(tutor),
                       onStartTalk: () {
                         _focusTutor(tutor);
-                        _openChat(tutor);
+                        _openCalling(tutor);
                       },
                     );
                   },
@@ -407,6 +425,9 @@ class _TutorScreenState extends State<TutorScreen> {
         name: text.tutors.lingola,
         slug: 'lingola',
         image: AppAssets.tutorRobot,
+        riveAsset: AppAssets.tutorLingolaRiv,
+        voiceId: TutorVoiceIds.male,
+        flagAsset: AppAssets.flagGeneric,
         tags: [tags.analytic, tags.curious],
       ),
       _TutorData(
@@ -414,6 +435,7 @@ class _TutorScreenState extends State<TutorScreen> {
         slug: 'elena',
         image: AppAssets.tutorElena,
         riveAsset: AppAssets.tutorElenaRiv,
+        flagAsset: AppAssets.flagEn,
         tags: [tags.adaptive, tags.calm],
       ),
       _TutorData(
@@ -422,7 +444,7 @@ class _TutorScreenState extends State<TutorScreen> {
         image: AppAssets.tutorKenji,
         riveAsset: AppAssets.tutorKenjiRiv,
         voiceId: TutorVoiceIds.male,
-        flagAsset: 'assets/images/home/flag_cn.svg',
+        flagAsset: AppAssets.flagJp,
         tags: [tags.patient, tags.organized],
       ),
       _TutorData(
@@ -430,6 +452,7 @@ class _TutorScreenState extends State<TutorScreen> {
         slug: 'freya',
         image: AppAssets.tutorFreya,
         riveAsset: AppAssets.tutorFreyaRiv,
+        flagAsset: AppAssets.flagDe,
         tags: [tags.calm, tags.attentive],
       ),
       _TutorData(
@@ -437,6 +460,7 @@ class _TutorScreenState extends State<TutorScreen> {
         slug: 'camila',
         image: AppAssets.tutorCamila,
         riveAsset: AppAssets.tutorCamilaRiv,
+        flagAsset: AppAssets.flagEs,
         tags: [tags.adaptive, tags.relaxed],
       ),
       _TutorData(
@@ -445,6 +469,7 @@ class _TutorScreenState extends State<TutorScreen> {
         image: AppAssets.tutorMarco,
         riveAsset: AppAssets.tutorMarcoRiv,
         voiceId: TutorVoiceIds.male,
+        flagAsset: AppAssets.flagIt,
         tags: [tags.methodical, tags.patient],
       ),
       _TutorData(
@@ -453,6 +478,7 @@ class _TutorScreenState extends State<TutorScreen> {
         image: AppAssets.tutorJulian,
         riveAsset: AppAssets.tutorJulianRiv,
         voiceId: TutorVoiceIds.male,
+        flagAsset: AppAssets.flagFr,
         tags: [tags.adaptive, tags.calm],
       ),
       _TutorData(
@@ -460,6 +486,7 @@ class _TutorScreenState extends State<TutorScreen> {
         slug: 'ines',
         image: AppAssets.tutorInes,
         riveAsset: AppAssets.tutorInesRiv,
+        flagAsset: AppAssets.flagPt,
         tags: [tags.patient, tags.attentive],
       ),
       _TutorData(
@@ -468,6 +495,7 @@ class _TutorScreenState extends State<TutorScreen> {
         image: AppAssets.tutorFelix,
         riveAsset: AppAssets.tutorFelixRiv,
         voiceId: TutorVoiceIds.male,
+        flagAsset: AppAssets.flagDe,
         tags: [tags.organized, tags.relaxed],
       ),
       _TutorData(
@@ -476,6 +504,7 @@ class _TutorScreenState extends State<TutorScreen> {
         image: AppAssets.tutorDiego,
         riveAsset: AppAssets.tutorDiegoRiv,
         voiceId: TutorVoiceIds.male,
+        flagAsset: AppAssets.flagEs,
         tags: [tags.methodical, tags.calm],
       ),
       _TutorData(
@@ -483,6 +512,7 @@ class _TutorScreenState extends State<TutorScreen> {
         slug: 'amara',
         image: AppAssets.tutorAmara,
         riveAsset: AppAssets.tutorAmaraRiv,
+        flagAsset: AppAssets.flagHi,
         tags: [tags.adaptive, tags.patient],
       ),
       _TutorData(
@@ -491,6 +521,7 @@ class _TutorScreenState extends State<TutorScreen> {
         image: AppAssets.tutorErik,
         riveAsset: AppAssets.tutorErikRiv,
         voiceId: TutorVoiceIds.male,
+        flagAsset: AppAssets.flagDe,
         tags: [tags.relaxed, tags.attentive],
       ),
       _TutorData(
@@ -498,6 +529,7 @@ class _TutorScreenState extends State<TutorScreen> {
         slug: 'katie',
         image: AppAssets.tutorKatie,
         riveAsset: AppAssets.tutorKatieRiv,
+        flagAsset: AppAssets.flagEn,
         tags: [tags.disciplined, tags.decisive],
       ),
       _TutorData(
@@ -506,6 +538,7 @@ class _TutorScreenState extends State<TutorScreen> {
         image: AppAssets.tutorMorgan,
         riveAsset: AppAssets.tutorMorganRiv,
         voiceId: TutorVoiceIds.male,
+        flagAsset: AppAssets.flagEn,
         tags: [tags.smart, tags.patient],
       ),
       _TutorData(
@@ -867,7 +900,6 @@ class TutorCard extends StatelessWidget {
     this.onSelect,
     this.onHoverChanged,
     this.theme,
-    this.flagAsset,
     super.key,
   });
 
@@ -879,7 +911,6 @@ class TutorCard extends StatelessWidget {
   final VoidCallback? onSelect;
   final ValueChanged<bool>? onHoverChanged;
   final TutorCardTheme? theme;
-  final String? flagAsset;
 
   @override
   Widget build(BuildContext context) {
@@ -936,28 +967,17 @@ class TutorCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Row(
-            children: [
-              if (flagAsset != null)
-                HomeAsset(flagAsset!, width: 14, height: 11)
-              else
-                const Text('🌎', style: TextStyle(fontSize: 12, height: 1)),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 15,
-                    height: 23 / 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.ink,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 15,
+              height: 23 / 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.ink,
+            ),
           ),
           const SizedBox(height: 4),
           Wrap(

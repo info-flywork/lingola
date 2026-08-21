@@ -6,9 +6,11 @@ import '../../core/auth/session_store.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
+import '../../widgets/user_avatar.dart';
 import '../library/library_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../practice/word_practice_screen.dart';
+import '../streak/streak_api_service.dart';
 import '../quiz/quiz_screen.dart';
 import '../shell/main_shell.dart';
 
@@ -124,20 +126,28 @@ class _LearningPathSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void goLessons() => MainShell.goToLessons(context);
+
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _SectionLinkHeader(title: title, action: action),
+          child: _SectionLinkHeader(
+            title: title,
+            action: action,
+            onActionTap: goLessons,
+          ),
         ),
         // Yildizlar All Lessons butonuna degmesin.
         const SizedBox(height: 20),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: _LearningPathMap(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: _LearningPathMap(onNodeTap: goLessons),
         ),
         const SizedBox(height: 8),
-        Center(child: _ScrollPill(label: scrollLabel)),
+        Center(
+          child: _ScrollPill(label: scrollLabel, onTap: goLessons),
+        ),
       ],
     );
   }
@@ -164,6 +174,7 @@ class _LiveLessonSection extends StatelessWidget {
             title: title,
             subtitle: subtitle,
             action: action,
+            onActionTap: () => MainShell.goToTutors(context),
           ),
         ),
         const SizedBox(height: 16),
@@ -248,126 +259,132 @@ class _HomeHeader extends StatefulWidget {
 }
 
 class _HomeHeaderState extends State<_HomeHeader> {
-  String _greeting = '';
+  var _streakCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _applyUser(SessionStore.currentUser);
     _refreshUser();
+    _loadStreak();
   }
 
   Future<void> _refreshUser() async {
-    final user = await AuthService.restoreSession();
-    if (!mounted) return;
-    _applyUser(user ?? SessionStore.currentUser);
+    await AuthService.restoreSession();
   }
 
-  void _applyUser(AppUser? user) {
-    final text = AppText.current;
-    final name = AuthService.displayNameOf(user);
-    setState(() {
-      _greeting = '${text.profilePage.goodMorning} $name';
-    });
+  Future<void> _loadStreak() async {
+    try {
+      final streak = await StreakApiService.fetch();
+      if (!mounted) return;
+      setState(() => _streakCount = streak.currentStreak);
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
-    final greeting =
-        _greeting.isEmpty ? text.profilePage.goodMorning.trim() : _greeting;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () => MainShell.goToProfile(context),
-                child: Semantics(
-                  button: true,
-                  label: text.app.profile,
-                  child: const HomeAsset(
-                    'assets/images/home/profile_avatar.svg',
-                    width: 43,
-                    height: 43,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              _TopIconBadge(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    const HomeAsset(
-                      'assets/images/home/streak_icon.svg',
-                      width: 20,
-                      height: 23,
+    return ValueListenableBuilder<AppUser?>(
+      valueListenable: SessionStore.userListenable,
+      builder: (context, user, _) {
+        final effective = user ?? SessionStore.currentUser;
+        final name = AuthService.displayNameOf(effective);
+        final greeting = '${text.profilePage.goodMorning} $name';
+        final avatarUrl = effective?.avatarUrl?.trim() ?? '';
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => MainShell.goToProfile(context),
+                    child: Semantics(
+                      button: true,
+                      label: text.app.profile,
+                      child: UserAvatar(
+                        size: 43,
+                        avatarUrl: avatarUrl,
+                        displayName: name,
+                      ),
                     ),
-                    Positioned(
-                      left: 7,
-                      top: 6,
-                      child: Text(
-                        text.home.streakCount,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          height: 1,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: -0.2,
+                  ),
+                  const Spacer(),
+                  _TopIconBadge(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        const HomeAsset(
+                          'assets/images/home/streak_icon.svg',
+                          width: 20,
+                          height: 23,
+                        ),
+                        Positioned(
+                          left: 7,
+                          top: 6,
+                          child: Text(
+                            '$_streakCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              height: 1,
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const _TopIconBadge(
+                    child: HomeAsset(
+                      'assets/images/home/flag_icon.svg',
+                      width: 21,
+                      height: 21,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const NotificationsScreen(),
+                        ),
+                      );
+                    },
+                    child: _TopIconBadge(
+                      child: Semantics(
+                        button: true,
+                        label: text.app.notifications,
+                        child: const HomeAsset(
+                          'assets/images/home/notification_icon.svg',
+                          width: 15,
+                          height: 17,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              const _TopIconBadge(
-                child: HomeAsset(
-                  'assets/images/home/flag_icon.svg',
-                  width: 21,
-                  height: 21,
-                ),
-              ),
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const NotificationsScreen(),
-                    ),
-                  );
-                },
-                child: _TopIconBadge(
-                  child: Semantics(
-                    button: true,
-                    label: text.app.notifications,
-                    child: const HomeAsset(
-                      'assets/images/home/notification_icon.svg',
-                      width: 15,
-                      height: 17,
-                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(greeting, style: AppTextStyles.homeGreeting),
-              const SizedBox(height: 2),
-              Text(text.home.todayPractice, style: AppTextStyles.homeTitle),
-            ],
-          ),
-        ),
-      ],
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(greeting, style: AppTextStyles.homeGreeting),
+                  const SizedBox(height: 2),
+                  Text(text.home.todayPractice, style: AppTextStyles.homeTitle),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -517,10 +534,15 @@ class _ContinueConversationCard extends StatelessWidget {
 }
 
 class _SectionLinkHeader extends StatelessWidget {
-  const _SectionLinkHeader({required this.title, required this.action});
+  const _SectionLinkHeader({
+    required this.title,
+    required this.action,
+    this.onActionTap,
+  });
 
   final String title;
   final String action;
+  final VoidCallback? onActionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -535,7 +557,7 @@ class _SectionLinkHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        _LinkPill(label: action),
+        _LinkPill(label: action, onTap: onActionTap),
       ],
     );
   }
@@ -546,11 +568,13 @@ class _LiveLessonHeader extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.action,
+    this.onActionTap,
   });
 
   final String title;
   final String subtitle;
   final String action;
+  final VoidCallback? onActionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -567,47 +591,57 @@ class _LiveLessonHeader extends StatelessWidget {
             ],
           ),
         ),
-        _LinkPill(label: action),
+        _LinkPill(label: action, onTap: onActionTap),
       ],
     );
   }
 }
 
 class _LinkPill extends StatelessWidget {
-  const _LinkPill({required this.label});
+  const _LinkPill({required this.label, this.onTap});
 
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: AppColors.border10),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label, style: AppTextStyles.linkPill),
-          const SizedBox(width: 4),
-          Transform.rotate(
-            angle: 3.14159,
-            child: const HomeAsset(
-              'assets/images/home/arrow_circle.svg',
-              width: 24,
-              height: 24,
-            ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: AppColors.border10),
+            borderRadius: BorderRadius.circular(999),
           ),
-        ],
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(label, style: AppTextStyles.linkPill),
+              const SizedBox(width: 4),
+              Transform.rotate(
+                angle: 3.14159,
+                child: const HomeAsset(
+                  'assets/images/home/arrow_circle.svg',
+                  width: 24,
+                  height: 24,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
 class _LearningPathMap extends StatelessWidget {
-  const _LearningPathMap();
+  const _LearningPathMap({this.onNodeTap});
+
+  final VoidCallback? onNodeTap;
 
   static const _designWidth = 398.0;
   static const _designHeight = 425.0;
@@ -652,6 +686,7 @@ class _LearningPathMap extends StatelessWidget {
                       labelColor: AppColors.primary,
                       labelSide: _PathLabelSide.right,
                       showStars: true,
+                      onTap: onNodeTap,
                     ),
                   ),
                   Positioned(
@@ -663,6 +698,7 @@ class _LearningPathMap extends StatelessWidget {
                       labelColor: AppColors.ink,
                       labelSide: _PathLabelSide.below,
                       showStars: true,
+                      onTap: onNodeTap,
                     ),
                   ),
                   Positioned(
@@ -673,6 +709,7 @@ class _LearningPathMap extends StatelessWidget {
                       label: text.home.jobs,
                       labelColor: AppColors.secondary,
                       labelSide: _PathLabelSide.left,
+                      onTap: onNodeTap,
                     ),
                   ),
                   Positioned(
@@ -683,6 +720,7 @@ class _LearningPathMap extends StatelessWidget {
                       label: text.home.favoriteRoom,
                       labelColor: AppColors.secondary,
                       labelSide: _PathLabelSide.right,
+                      onTap: onNodeTap,
                     ),
                   ),
                   Positioned(
@@ -693,6 +731,7 @@ class _LearningPathMap extends StatelessWidget {
                       label: text.home.dailyRoutine,
                       labelColor: AppColors.secondary,
                       labelSide: _PathLabelSide.left,
+                      onTap: onNodeTap,
                     ),
                   ),
                   Positioned(
@@ -700,18 +739,17 @@ class _LearningPathMap extends StatelessWidget {
                     right: 0,
                     bottom: 0,
                     height: 90,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            // A1 path alt fade — eski #FFFFFF
-                            // Colors.white.withValues(alpha: 0),
-                            // Colors.white,
-                            AppColors.surface.withValues(alpha: 0),
-                            AppColors.surface,
-                          ],
+                    child: IgnorePointer(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppColors.surface.withValues(alpha: 0),
+                              AppColors.surface,
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -735,6 +773,7 @@ class _PathNode extends StatelessWidget {
     required this.labelColor,
     required this.labelSide,
     this.showStars = false,
+    this.onTap,
   });
 
   final String asset;
@@ -742,68 +781,73 @@ class _PathNode extends StatelessWidget {
   final Color labelColor;
   final _PathLabelSide labelSide;
   final bool showStars;
+  final VoidCallback? onTap;
 
   static const _nodeSize = 63.0;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: _nodeSize,
-      height: _nodeSize,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          HomeAsset(asset, width: _nodeSize, height: _nodeSize, fit: BoxFit.contain),
-          if (showStars)
-            // Figma: yıldızlar icon’a daha yakın (-10 overlap)
-            const Positioned(
-              top: -13,
-              left: (63 - 39) / 2,
-              child: _StarArc(),
-            ),
-          if (labelSide == _PathLabelSide.below)
-            Positioned(
-              top: _nodeSize + 4,
-              left: -20,
-              width: _nodeSize + 40,
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.visible,
-                style: _labelStyle(labelColor),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: SizedBox(
+        width: _nodeSize,
+        height: _nodeSize,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            HomeAsset(asset, width: _nodeSize, height: _nodeSize, fit: BoxFit.contain),
+            if (showStars)
+              // Figma: yıldızlar icon’a daha yakın (-10 overlap)
+              const Positioned(
+                top: -13,
+                left: (63 - 39) / 2,
+                child: _StarArc(),
               ),
-            ),
-          if (labelSide == _PathLabelSide.right)
-            Positioned(
-              left: _nodeSize + 8,
-              top: (_nodeSize - 16) / 2,
-              width: 110,
-              child: Text(
-                label,
-                maxLines: 2,
-                softWrap: true,
-                overflow: TextOverflow.visible,
-                style: _labelStyle(labelColor),
+            if (labelSide == _PathLabelSide.below)
+              Positioned(
+                top: _nodeSize + 4,
+                left: -20,
+                width: _nodeSize + 40,
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.visible,
+                  style: _labelStyle(labelColor),
+                ),
               ),
-            ),
-          if (labelSide == _PathLabelSide.left)
-            Positioned(
-              left: -118,
-              top: (_nodeSize - 16) / 2,
-              width: 110,
-              child: Text(
-                label,
-                maxLines: 2,
-                softWrap: true,
-                overflow: TextOverflow.visible,
-                textAlign: TextAlign.right,
-                style: _labelStyle(labelColor),
+            if (labelSide == _PathLabelSide.right)
+              Positioned(
+                left: _nodeSize + 8,
+                top: (_nodeSize - 16) / 2,
+                width: 110,
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                  style: _labelStyle(labelColor),
+                ),
               ),
-            ),
-        ],
+            if (labelSide == _PathLabelSide.left)
+              Positioned(
+                left: -118,
+                top: (_nodeSize - 16) / 2,
+                width: 110,
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                  textAlign: TextAlign.right,
+                  style: _labelStyle(labelColor),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -871,37 +915,45 @@ class _StarArc extends StatelessWidget {
 }
 
 class _ScrollPill extends StatelessWidget {
-  const _ScrollPill({required this.label});
+  const _ScrollPill({required this.label, this.onTap});
 
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.primaryTint10,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const HomeAsset(
-            'assets/images/home/arrow_down.svg',
-            width: 19,
-            height: 19,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.primaryTint10,
+            borderRadius: BorderRadius.circular(999),
           ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontSize: 12,
-              height: 16 / 12,
-              fontWeight: FontWeight.w500,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const HomeAsset(
+                'assets/images/home/arrow_down.svg',
+                width: 19,
+                height: 19,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 12,
+                  height: 16 / 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

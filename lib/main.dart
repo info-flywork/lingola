@@ -2,11 +2,14 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:rive/rive.dart';
 
 import 'app/lingola_app.dart';
+import 'core/config/app_env.dart';
 import 'core/config/firebase_options.dart';
 import 'i18n/strings.g.dart';
 
@@ -29,6 +32,11 @@ Future<void> main() async {
   }
 
   LocaleSettings.setLocaleSync(AppLocale.en);
+  if (kDebugMode) {
+    // ignore: avoid_print
+    print('[lingola] API_BASE_URL=${AppEnv.apiBaseUrl}');
+  }
+  await _configureRevenueCat();
   runApp(const LingolaApp());
 }
 
@@ -44,4 +52,30 @@ Future<void> _requestLocalNetworkAccess() async {
     );
     socket.close();
   } catch (_) {}
+}
+
+Future<void> _configureRevenueCat() async {
+  if (kIsWeb) return;
+
+  final apiKey = switch (defaultTargetPlatform) {
+    TargetPlatform.iOS => AppEnv.revenueCatIosPublicKey,
+    TargetPlatform.android => AppEnv.revenueCatAndroidPublicKey,
+    _ => '',
+  };
+  if (apiKey.isEmpty) return;
+
+  try {
+    await Purchases.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.warn);
+    await Purchases.configure(PurchasesConfiguration(apiKey));
+  } on MissingPluginException catch (e) {
+    if (kDebugMode) {
+      // ignore: avoid_print
+      print('[lingola] RevenueCat plugin not linked — stop app, full rebuild: $e');
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      // ignore: avoid_print
+      print('[lingola] RevenueCat init failed: $e');
+    }
+  }
 }

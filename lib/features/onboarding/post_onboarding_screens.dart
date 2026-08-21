@@ -5,10 +5,12 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/auth/api_client.dart';
 import '../../core/auth/auth_service.dart';
+import '../../core/config/app_env.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
@@ -448,14 +450,45 @@ class PaywallScreen extends StatefulWidget {
 }
 
 class _PaywallScreenState extends State<PaywallScreen> {
-  bool _trialActive = true;
+  var _presentingRevenueCat = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _presentRevenueCatPaywall();
+    });
+  }
 
   void _openAuth() {
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
         builder: (_) => AuthScreen(draft: widget.draft),
       ),
     );
+  }
+
+  Future<void> _presentRevenueCatPaywall() async {
+    if (_presentingRevenueCat || !mounted) return;
+    final hasKey = AppEnv.revenueCatIosPublicKey.isNotEmpty ||
+        AppEnv.revenueCatAndroidPublicKey.isNotEmpty;
+    if (!hasKey) {
+      _openAuth();
+      return;
+    }
+
+    _presentingRevenueCat = true;
+    try {
+      await RevenueCatUI.presentPaywall(displayCloseButton: true).timeout(
+        const Duration(seconds: 8),
+      );
+    } catch (_) {
+      // Paywall açılamazsa onboarding akışı bloke olmasın.
+    } finally {
+      _presentingRevenueCat = false;
+      if (mounted) _openAuth();
+    }
   }
 
   @override
@@ -483,119 +516,27 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   alignment: Alignment.centerRight,
                   child: IconButton(
                     tooltip: text.common.close,
-                    onPressed: _openAuth,
+                    onPressed: _presentingRevenueCat ? null : _openAuth,
                     icon: const Icon(Icons.close_rounded),
                   ),
                 ),
                 const _PaywallHero(),
                 Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            text.paywall.title,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 22,
-                              height: 28 / 22,
-                              fontWeight: FontWeight.w700,
-                            ),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(color: AppColors.primary),
+                        const SizedBox(height: 12),
+                        Text(
+                          text.paywall.title,
+                          style: const TextStyle(
+                            color: AppColors.ink,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            text.paywall.subtitle,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: AppColors.ink,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          _PaywallCheck(text.paywall.noCommitment),
-                          _PaywallCheck(text.paywall.cancelAnytime),
-                          _PaywallCheck(text.paywall.noPaymentToday),
-                          const SizedBox(height: 14),
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryTint05,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: AppColors.primary.withValues(alpha: .35),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  text.paywall.daysFree,
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  text.paywall.thenPrice,
-                                  style: const TextStyle(
-                                    color: AppColors.ink,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  text.paywall.trialActive,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              Switch.adaptive(
-                                value: _trialActive,
-                                activeThumbColor: Colors.white,
-                                activeTrackColor: AppColors.primary,
-                                onChanged: (value) =>
-                                    setState(() => _trialActive = value),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          _PaywallMetaRow(
-                            left: text.paywall.payableToday,
-                            right: text.paywall.payableValue,
-                          ),
-                          const SizedBox(height: 8),
-                          _PaywallMetaRow(
-                            left: text.paywall.paymentDate,
-                            right: text.paywall.paymentAmount,
-                          ),
-                          const SizedBox(height: 18),
-                          PrimaryButton(
-                            label: text.common.getStarted,
-                            onPressed: _openAuth,
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -660,65 +601,6 @@ class _PaywallHero extends StatelessWidget {
   }
 }
 
-class _PaywallCheck extends StatelessWidget {
-  const _PaywallCheck(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          const Icon(Icons.check_rounded, color: AppColors.primary, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PaywallMetaRow extends StatelessWidget {
-  const _PaywallMetaRow({required this.left, required this.right});
-
-  final String left;
-  final String right;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            left,
-            style: const TextStyle(
-              color: Color(0xFF6F6F6F),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Text(
-          right,
-          style: const TextStyle(
-            color: Color(0xFF6F6F6F),
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key, required this.draft});
 
@@ -740,6 +622,16 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  void _showApiError(ApiException err) {
+    final detail = err.debugDetail;
+    final text = kDebugMode && detail != null && detail.isNotEmpty
+        ? '${err.message}\n$detail'
+        : err.message;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text)),
+    );
+  }
+
   Future<void> _continueAsGuest() async {
     if (_busy) return;
     setState(() => _busy = true);
@@ -749,9 +641,7 @@ class _AuthScreenState extends State<AuthScreen> {
       _enterApp();
     } on ApiException catch (err) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(err.message)),
-      );
+      _showApiError(err);
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -771,9 +661,7 @@ class _AuthScreenState extends State<AuthScreen> {
       _enterApp();
     } on ApiException catch (err) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(err.message)),
-      );
+      _showApiError(err);
     } catch (err) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -793,9 +681,7 @@ class _AuthScreenState extends State<AuthScreen> {
       _enterApp();
     } on ApiException catch (err) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(err.message)),
-      );
+      _showApiError(err);
     } catch (err) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -817,30 +703,15 @@ class _AuthScreenState extends State<AuthScreen> {
         systemNavigationBarColor: AppColors.primary,
       ),
       child: Scaffold(
-        backgroundColor: AppColors.primary,
-        body: DecoratedBox(
-          decoration: const BoxDecoration(
-            // Figma: beyaz → yumuşak ton geçişiyle maviye (keskin bant yok)
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white,
-                Color(0xFFF7F9FF),
-                Color(0xFFE4EBFF),
-                Color(0xFFC5D0FF),
-                Color(0xFF8FA3FF),
-                Color(0xFF546BFF),
-                AppColors.primary,
-                Color(0xFF1F33C9),
-              ],
-              stops: [0.0, 0.16, 0.28, 0.40, 0.55, 0.70, 0.86, 1.0],
-            ),
-          ),
-          child: SafeArea(
-            top: false,
-            bottom: true,
-            child: LayoutBuilder(
+        backgroundColor: Colors.white,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            const Positioned.fill(child: _AuthBackground()),
+            SafeArea(
+              top: false,
+              bottom: true,
+              child: LayoutBuilder(
               builder: (context, constraints) {
                 return SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
@@ -854,28 +725,9 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Full-bleed + hafif zoom: PNG’deki siyah yan boşluklar kırpılır.
-                          // scale↑ → yan boşluk daha az (örn. 1.08 → 1.15)
-                          AspectRatio(
-                            aspectRatio: 860 / 380,
-                            child: ClipRect(
-                              child: Transform.scale(
-                                scale: 1.12,
-                                alignment: Alignment.topCenter,
-                                child: Image.asset(
-                                  'assets/images/loginHero.png',
-                                  width: double.infinity,
-                                  fit: BoxFit.fitWidth,
-                                  alignment: Alignment.topCenter,
-                                  filterQuality: FilterQuality.high,
-                                  gaplessPlayback: true,
-                                ),
-                              ),
-                            ),
-                          ),
+                          const _AuthHero(),
                           Transform.translate(
-                            // Negatif = yukarı; küçültünce badge aşağı iner
-                            offset: const Offset(0, 20),
+                            offset: const Offset(0, 8),
                             child: Center(
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -922,6 +774,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                 fontSize: 32,
                                 height: 36 / 32,
                                 fontWeight: FontWeight.w600,
+                                shadows: [
+                                  Shadow(
+                                    color: Color(0x40002A66),
+                                    blurRadius: 18,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -932,7 +791,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               text.auth.body,
                               style: TextStyle(
                                 fontFamily: 'Poppins',
-                                color: Colors.white.withValues(alpha: .92),
+                                color: Colors.white.withValues(alpha: .88),
                                 fontSize: 14,
                                 height: 20 / 14,
                                 fontWeight: FontWeight.w400,
@@ -1018,9 +877,145 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 );
               },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Yüzler tam görünsün; fade yalnızca omuz/göğüs altında.
+class _AuthHero extends StatelessWidget {
+  const _AuthHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 860 / 380,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/loginHero.png',
+            width: double.infinity,
+            fit: BoxFit.fitWidth,
+            alignment: Alignment.topCenter,
+            filterQuality: FilterQuality.high,
+            gaplessPlayback: true,
+          ),
+          const IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x00FFFFFF),
+                    Color(0x00FFFFFF),
+                    Color(0x66FFFFFF),
+                    Color(0xFFFFFFFF),
+                  ],
+                  stops: [0.0, 0.68, 0.86, 1.0],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Üst beyaz; mavi glow yalnızca alt yarıda (başlık/butonlar).
+class _AuthBackground extends StatelessWidget {
+  const _AuthBackground();
+
+  static const _figmaW = 430.0;
+  static const _figmaH = 852.0;
+  static const _blurPad = 140.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final sx = size.width / _figmaW;
+    final sy = size.height / _figmaH;
+    final s = (sx + sy) / 2;
+
+    Widget circle({
+      required double left,
+      required double top,
+      required double diameter,
+      required Color color,
+      double blur = 70,
+    }) {
+      final d = diameter * s;
+      final sigma = blur * s;
+      return Positioned(
+        left: left * sx - _blurPad,
+        top: top * sy - _blurPad,
+        width: d + _blurPad * 2,
+        height: d + _blurPad * 2,
+        child: ImageFiltered(
+          imageFilter: ImageFilter.blur(
+            sigmaX: sigma,
+            sigmaY: sigma,
+            tileMode: TileMode.decal,
+          ),
+          child: Center(
+            child: Container(
+              width: d,
+              height: d,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
             ),
           ),
         ),
+      );
+    }
+
+    return IgnorePointer(
+      child: Stack(
+        fit: StackFit.expand,
+        clipBehavior: Clip.none,
+        children: [
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.white,
+                  Colors.white,
+                  Color(0xFFD6EBFF),
+                  Color(0xFF7EB8F5),
+                ],
+                stops: [0, 0.24, 0.40, 1],
+              ),
+            ),
+          ),
+          circle(
+            left: -22,
+            top: 360,
+            diameter: 490,
+            color: const Color(0xFF2D85FF),
+          ),
+          circle(
+            left: -81,
+            top: 430,
+            diameter: 594,
+            color: const Color(0xFF37B2E3),
+          ),
+          circle(
+            left: -65,
+            top: 580,
+            diameter: 559,
+            color: const Color(0xFF2D46FF),
+          ),
+        ],
       ),
     );
   }
@@ -1139,29 +1134,28 @@ class _SocialAuthButton extends StatelessWidget {
     if (glassGradient) {
       return SizedBox(
         height: 52,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white.withValues(alpha: .28),
-                Colors.white.withValues(alpha: .12),
-              ],
-            ),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: .28),
-            ),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onPressed,
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                child: content,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white.withValues(alpha: .22),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: .32),
+                ),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onPressed,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: content,
+                  ),
+                ),
               ),
             ),
           ),

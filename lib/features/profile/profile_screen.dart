@@ -9,7 +9,9 @@ import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
+import '../../widgets/user_avatar.dart';
 import '../onboarding/onboarding_flow.dart';
+import '../streak/streak_api_service.dart';
 import 'faq_screen.dart';
 import 'profile_settings_screen.dart';
 import 'progress_screen.dart';
@@ -41,17 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   static const _streakIdle = Color(0xFFD7D7D7);
   static const _badgeStart = Color(0xFF000088);
 
-  // Demo: Mon–Wed done, Thu today, Fri–Sun idle
-  static const _streakStates = <_StreakDayState>[
-    _StreakDayState.done,
-    _StreakDayState.done,
-    _StreakDayState.done,
-    _StreakDayState.today,
-    _StreakDayState.idle,
-    _StreakDayState.idle,
-    _StreakDayState.idle,
-  ];
-
+  var _streakStates = _streakStatesFromSummary(StreakSummaryDto.empty());
   var _notificationsOn = true;
   var _notificationsBusy = false;
   var _displayName = '';
@@ -61,7 +53,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    SessionStore.userListenable.addListener(_onSessionUserChanged);
     _loadProfile();
+    _loadStreak();
+  }
+
+  static List<_StreakDayState> _streakStatesFromSummary(
+    StreakSummaryDto summary,
+  ) {
+    if (summary.days.length == 7) {
+      return summary.days.map(_mapStreakVisualState).toList();
+    }
+    return _streakStatesFromSummary(StreakSummaryDto.empty());
+  }
+
+  static _StreakDayState _mapStreakVisualState(StreakDayDto day) {
+    switch (day.state) {
+      case StreakDayVisualState.done:
+        return _StreakDayState.done;
+      case StreakDayVisualState.today:
+        return _StreakDayState.today;
+      case StreakDayVisualState.idle:
+        return _StreakDayState.idle;
+    }
+  }
+
+  Future<void> _loadStreak() async {
+    try {
+      final streak = await StreakApiService.fetch();
+      if (!mounted) return;
+      setState(() => _streakStates = _streakStatesFromSummary(streak));
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    SessionStore.userListenable.removeListener(_onSessionUserChanged);
+    super.dispose();
+  }
+
+  void _onSessionUserChanged() {
+    final user = SessionStore.userListenable.value;
+    if (!mounted || user == null) return;
+    setState(() {
+      _notificationsOn = user.notificationsEnabled;
+      _displayName = AuthService.displayNameOf(user);
+      _avatarUrl = user.avatarUrl?.trim() ?? '';
+      _appLocale = user.appLocale;
+    });
   }
 
   Future<void> _loadProfile() async {
@@ -154,24 +193,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 20),
               Center(
-                child: ClipOval(
-                  child: _avatarUrl.isNotEmpty
-                      ? Image.network(
-                          _avatarUrl,
-                          width: 86,
-                          height: 86,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => const HomeAsset(
-                            AppAssets.profileAvatar,
-                            width: 86,
-                            height: 86,
-                          ),
-                        )
-                      : const HomeAsset(
-                          AppAssets.profileAvatar,
-                          width: 86,
-                          height: 86,
-                        ),
+                child: UserAvatar(
+                  size: 86,
+                  avatarUrl: _avatarUrl,
+                  displayName: _displayName,
                 ),
               ),
               const SizedBox(height: 12),

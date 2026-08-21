@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/auth/api_client.dart';
@@ -13,6 +15,14 @@ class ChatScreen extends StatefulWidget {
     this.tutorId,
     this.tutorSlug,
     this.sessionId,
+    this.sessionTitle,
+    this.openingMessage,
+    this.forceNew = false,
+    this.lessonSlug,
+    this.kind,
+    this.finishOnPop = false,
+    this.lessonSegmentMode = false,
+    this.segmentDuration = const Duration(minutes: 15),
     super.key,
   });
 
@@ -21,6 +31,16 @@ class ChatScreen extends StatefulWidget {
   final String? tutorId;
   final String? tutorSlug;
   final String? sessionId;
+  final String? sessionTitle;
+  final String? openingMessage;
+  final bool forceNew;
+  final String? lessonSlug;
+  final String? kind;
+  final bool finishOnPop;
+
+  /// Ders: 15 dk sonra uzatma / bitirme sorusu.
+  final bool lessonSegmentMode;
+  final Duration segmentDuration;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -35,18 +55,89 @@ class _ChatScreenState extends State<ChatScreen> {
   var _loading = true;
   var _sending = false;
   String? _error;
+  Timer? _segmentTimer;
+  DateTime _segmentStartedAt = DateTime.now();
+  var _checkpointOpen = false;
 
   @override
   void initState() {
     super.initState();
+    _segmentStartedAt = DateTime.now();
+    if (widget.lessonSegmentMode || widget.finishOnPop) {
+      _segmentTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+        _maybeOfferSegment();
+      });
+    }
     _bootstrap();
   }
 
   @override
   void dispose() {
+    _segmentTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _maybeOfferSegment() {
+    if (!mounted || _checkpointOpen || _loading || _sending) return;
+    if (!(widget.lessonSegmentMode || widget.finishOnPop)) return;
+    final spent = DateTime.now().difference(_segmentStartedAt);
+    if (spent < widget.segmentDuration) return;
+    _checkpointOpen = true;
+    unawaited(_showSegmentDialog());
+  }
+
+  Future<void> _showSegmentDialog({bool askAgain = false}) async {
+    if (!mounted) return;
+    final continuePractice = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(
+            askAgain ? 'Still there?' : '15 minutes done',
+            style: const TextStyle(fontFamily: 'Poppins'),
+          ),
+          content: Text(
+            askAgain
+                ? 'Want another 15 minutes of practice, or finish the lesson?'
+                : "We've practiced for about 15 minutes. Another 15 minutes of practice, or finish the lesson?",
+            style: const TextStyle(fontFamily: 'Poppins'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Finish'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('15 more min'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted) return;
+    if (continuePractice == true) {
+      _segmentStartedAt = DateTime.now();
+      _checkpointOpen = false;
+      return;
+    }
+    if (continuePractice == false) {
+      Navigator.of(context).pop(widget.finishOnPop ? _messages : null);
+      return;
+    }
+    // Dialog dismissed unexpectedly — ask once more, then end on silence.
+    if (!askAgain) {
+      await Future<void>.delayed(const Duration(seconds: 20));
+      if (!mounted) return;
+      await _showSegmentDialog(askAgain: true);
+      return;
+    }
+    if (!mounted) return;
+    Navigator.of(context).pop(widget.finishOnPop ? _messages : null);
   }
 
   Future<void> _bootstrap() async {
@@ -70,6 +161,11 @@ class _ChatScreenState extends State<ChatScreen> {
         final session = await TutorChatApiService.openSession(
           tutorId: widget.tutorId,
           tutorSlug: widget.tutorSlug,
+          forceNew: widget.forceNew,
+          title: widget.sessionTitle,
+          openingMessage: widget.openingMessage,
+          lessonSlug: widget.lessonSlug,
+          kind: widget.kind,
         );
         final messages = await TutorChatApiService.listMessages(session.id);
         if (!mounted) return;
@@ -159,7 +255,9 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         leading: IconButton(
           tooltip: AppText.current.common.back,
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () => Navigator.of(context).pop(
+            widget.finishOnPop ? _messages : null,
+          ),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
         titleSpacing: 0,
@@ -189,6 +287,19 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ],
         ),
+        actions: [
+          if (widget.finishOnPop)
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(_messages),
+              child: Text(
+                AppText.current.lessonPage.finishLesson,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
       ),
       body: Column(
         children: [

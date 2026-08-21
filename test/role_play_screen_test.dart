@@ -32,7 +32,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text(text.rolePlayPage.directions.chat.incoming1),
+      find.text(text.rolePlayPage.directions.chat.briefing),
       findsOneWidget,
     );
     expect(find.text(text.previewChat.brand), findsOneWidget);

@@ -960,12 +960,26 @@ class _PlanNode extends StatelessWidget {
               ],
             ),
             alignment: Alignment.center,
-            child: Text(
-              emoji,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 28,
-                height: 1,
+            // Figma: ikonlar SVG değil, 36px Text (emoji).
+            child: SizedBox(
+              width: 36,
+              height: 36,
+              child: Center(
+                child: Text(
+                  emoji,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 36,
+                    height: 1,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 36 * -0.02,
+                    fontFamilyFallback: [
+                      'Apple Color Emoji',
+                      'Noto Color Emoji',
+                      'Segoe UI Emoji',
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

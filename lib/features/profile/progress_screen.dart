@@ -9,6 +9,7 @@ import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/practice/practice_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../streak/streak_api_service.dart';
 import '../../widgets/home_asset.dart';
 import '../library/library_screen.dart';
 import '../onboarding/language_flag.dart';
@@ -23,27 +24,53 @@ class ProgressScreen extends StatefulWidget {
   static const _flame = Color(0xFFF97316);
   static const _starBg = Color(0xFFE8F1FF);
 
-  static const _streakStates = <_ProgressStreakState>[
-    _ProgressStreakState.done,
-    _ProgressStreakState.done,
-    _ProgressStreakState.done,
-    _ProgressStreakState.today,
-    _ProgressStreakState.idle,
-    _ProgressStreakState.idle,
-    _ProgressStreakState.idle,
-  ];
-
   @override
   State<ProgressScreen> createState() => _ProgressScreenState();
 }
 
 class _ProgressScreenState extends State<ProgressScreen> {
   var _savedCount = 0;
+  var _currentStreak = 0;
+  var _streakStates = _ProgressScreenState._streakStatesFromSummary(
+    StreakSummaryDto.empty(),
+  );
+
+  static List<_ProgressStreakState> _streakStatesFromSummary(
+    StreakSummaryDto summary,
+  ) {
+    if (summary.days.length == 7) {
+      return summary.days.map(_mapStreakVisualState).toList();
+    }
+    return _streakStatesFromSummary(StreakSummaryDto.empty());
+  }
+
+  static _ProgressStreakState _mapStreakVisualState(StreakDayDto day) {
+    switch (day.state) {
+      case StreakDayVisualState.done:
+        return _ProgressStreakState.done;
+      case StreakDayVisualState.today:
+        return _ProgressStreakState.today;
+      case StreakDayVisualState.idle:
+        return _ProgressStreakState.idle;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _loadSavedCount();
+    _loadStreak();
+  }
+
+  Future<void> _loadStreak() async {
+    try {
+      final streak = await StreakApiService.fetch();
+      if (!mounted) return;
+      setState(() {
+        _currentStreak = streak.currentStreak;
+        _streakStates = _streakStatesFromSummary(streak);
+      });
+    } catch (_) {}
   }
 
   Future<void> _loadSavedCount() async {
@@ -220,7 +247,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                   Expanded(
                                     child: _ProgressStreakDay(
                                       label: dayLabels[i],
-                                      state: ProgressScreen._streakStates[i],
+                                      state: _streakStates[i],
                                     ),
                                   ),
                               ],
@@ -321,7 +348,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               height: 25,
                               color: ProgressScreen._flame,
                             ),
-                            value: '12',
+                            value: '$_currentStreak',
                             label: text.dayStreakLabel,
                           ),
                         ),

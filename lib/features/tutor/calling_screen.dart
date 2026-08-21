@@ -19,6 +19,14 @@ class CallingScreen extends StatefulWidget {
     required this.imagePath,
     this.riveAsset,
     this.voiceId,
+    this.backgroundGradientStart,
+    this.backgroundGradientEnd,
+    this.openingLine,
+    this.systemPrompt,
+    this.returnTranscript = false,
+    this.tutorSlug,
+    this.lessonSegmentMode = false,
+    this.segmentDuration = const Duration(minutes: 15),
     super.key,
   });
 
@@ -28,6 +36,17 @@ class CallingScreen extends StatefulWidget {
   final String? riveAsset;
   /// ElevenLabs voice ID (hoca özel sesi).
   final String? voiceId;
+  /// Özel karakter kartı renkleri (Santa / uzaylı / cadı / ork / elf).
+  final Color? backgroundGradientStart;
+  final Color? backgroundGradientEnd;
+  final String? openingLine;
+  final String? systemPrompt;
+  final bool returnTranscript;
+  final String? tutorSlug;
+
+  /// Ders oturumu: ~15 dk sonra uzatma sor / sessizlikte bitir.
+  final bool lessonSegmentMode;
+  final Duration segmentDuration;
 
   @override
   State<CallingScreen> createState() => _CallingScreenState();
@@ -45,17 +64,55 @@ class _CallingScreenState extends State<CallingScreen> {
   /// İpucu (ampul).
   var _hintsOn = false;
 
+  /// false = yarım ekran (sohbet altta), true = tam ekran calling.
+  var _expanded = false;
+
+  DateTime _segmentStartedAt = DateTime.now();
+  var _checkpointFired = false;
+
   @override
   void initState() {
     super.initState();
     _watch = Stopwatch()..start();
+    _segmentStartedAt = DateTime.now();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
       setState(() => _elapsed = _watch.elapsed);
+      _maybeOfferSegmentCheckpoint();
     });
-    _conversation = CallingConversationController(voiceId: widget.voiceId)
-      ..addListener(_onConvo);
+    _conversation = CallingConversationController(
+      voiceId: widget.voiceId,
+      openingLine: widget.openingLine,
+      systemPrompt: widget.systemPrompt,
+      tutorSlug: widget.tutorSlug,
+    )
+      ..addListener(_onConvo)
+      ..onRequestEndLesson = _endLessonFromCheckpoint
+      ..onSegmentContinued = _resetSegmentClock;
     unawaited(_conversation.start());
+  }
+
+  void _resetSegmentClock() {
+    _segmentStartedAt = DateTime.now();
+    _checkpointFired = false;
+  }
+
+  void _maybeOfferSegmentCheckpoint() {
+    if (!widget.lessonSegmentMode || _checkpointFired) return;
+    final spent = DateTime.now().difference(_segmentStartedAt);
+    if (spent < widget.segmentDuration) return;
+    if (_conversation.listening || _conversation.busy || _conversation.speaking) {
+      return;
+    }
+    _checkpointFired = true;
+    unawaited(_conversation.offerFifteenMinuteCheckpoint());
+  }
+
+  void _endLessonFromCheckpoint() {
+    if (!mounted) return;
+    Navigator.of(context).pop(
+      widget.returnTranscript ? _conversation.messages : null,
+    );
   }
 
   void _onConvo() {
@@ -78,179 +135,355 @@ class _CallingScreenState extends State<CallingScreen> {
     return '$h:$m:$s';
   }
 
+  /// Kart teması varsa o renkler; yoksa varsayılan mavi calling gradient.
+  List<Color> get _callingBackgroundColors {
+    final start = widget.backgroundGradientStart;
+    final end = widget.backgroundGradientEnd;
+    if (start == null || end == null) {
+      return const [
+        Color(0xFF2D46FF),
+        Color(0xFF5B9FFF),
+        Color(0xFFB8D4F0),
+      ];
+    }
+    final mid = Color.lerp(start, end, 0.5) ?? end;
+    final bottom = Color.lerp(end, Colors.black, 0.15) ?? end;
+    return [start, mid, bottom];
+  }
+
+  Color get _topScrimColor =>
+      widget.backgroundGradientStart ?? const Color(0xFF2D46FF);
+
+  void _toggleExpanded() {
+    setState(() => _expanded = !_expanded);
+  }
+
+  void _close() {
+    Navigator.of(context).pop(
+      widget.returnTranscript ? _conversation.messages : null,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final text = AppText.current.tutorPage;
-    final calling = text.calling;
-    final bottom = MediaQuery.paddingOf(context).bottom;
-    final listening = _conversation.listening;
-    final busy = _conversation.busy;
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
+        systemNavigationBarColor: _expanded ? Colors.black : Colors.white,
       ),
-      child: Scaffold(
-        backgroundColor: const Color(0xFF1A2A4A),
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFF2D46FF),
-                    Color(0xFF5B9FFF),
-                    Color(0xFFB8D4F0),
-                  ],
-                  stops: [0, 0.35, 1],
+      child: PopScope(
+        canPop: !widget.returnTranscript,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop || !widget.returnTranscript) return;
+          Navigator.of(context).pop(_conversation.messages);
+        },
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 280),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          child: _expanded
+              ? KeyedSubtree(
+                  key: const ValueKey('calling-expanded'),
+                  child: _buildExpanded(context),
+                )
+              : KeyedSubtree(
+                  key: const ValueKey('calling-compact'),
+                  child: _buildCompact(context),
                 ),
-              ),
-            ),
-            // Hoca kartındaki riveAsset; yoksa statik görsel.
-            Positioned.fill(
-              child: widget.riveAsset != null
-                  ? TutorRiveAvatar(
-                      assetPath: widget.riveAsset!,
-                      talking: _conversation.speaking,
-                      fallbackImage: widget.imagePath,
-                      fit: Fit.cover,
-                      alignment: const Alignment(0, -0.35),
-                    )
-                  : Image.asset(
-                      widget.imagePath,
-                      fit: BoxFit.cover,
-                      alignment: const Alignment(0, -0.35),
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-            ),
-            const Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              height: 160,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0x992D46FF),
-                      Color(0x002D46FF),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 320,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0x00000000),
-                      Color(0x99000000),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+        ),
+      ),
+    );
+  }
 
-            SafeArea(
-              bottom: false,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                  child: Row(
+  Widget _buildTopBar({required bool onDark}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+      child: Row(
+        children: [
+          _GlassCircleButton(
+            onTap: _toggleExpanded,
+            child: const HomeAsset(
+              AppAssets.callingResize,
+              width: 16,
+              height: 16,
+            ),
+          ),
+          const SizedBox(width: 8),
+          _GlassPill(
+            child: Text(
+              widget.tutorName,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const Spacer(),
+          // Kırmızı kayıt pill’i: tıklayınca hız 0.5 → 1 → 1.5 → 2
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(999),
+              onTap: () => unawaited(_conversation.cyclePlaybackRate()),
+              child: _GlassPill(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFF3B30),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _conversation.playbackRateLabel,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _timerLabel,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _GlassCircleButton(
+            onTap: _close,
+            child: const Icon(
+              Icons.close_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSpeedChip() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: () => unawaited(_conversation.cyclePlaybackRate()),
+        child: _GlassPill(
+          child: Text(
+            _conversation.playbackRateLabel,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar({
+    required EdgeInsets padding,
+    Alignment alignment = Alignment.bottomCenter,
+  }) {
+    return Padding(
+      padding: padding,
+      child: widget.riveAsset != null
+          ? TutorRiveAvatar(
+              assetPath: widget.riveAsset!,
+              talking: _conversation.speaking,
+              fallbackImage: widget.imagePath,
+              fit: Fit.contain,
+              alignment: alignment,
+              lipsyncViseme: _conversation.hasLipsyncTrack
+                  ? _conversation.currentViseme
+                  : null,
+              loadingBackgroundColor:
+                  widget.backgroundGradientStart ?? widget.backgroundGradientEnd,
+            )
+          : Image.asset(
+              widget.imagePath,
+              fit: BoxFit.contain,
+              alignment: alignment,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+    );
+  }
+
+  Widget _buildMicRow({required bool darkChrome}) {
+    final listening = _conversation.listening;
+    final busy = _conversation.busy;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _ControlCircle(
+          size: 56,
+          light: !darkChrome,
+          onTap: () => setState(() => _captionsOn = !_captionsOn),
+          child: darkChrome
+              ? HomeAsset(
+                  _captionsOn
+                      ? AppAssets.callingEye
+                      : AppAssets.callingClosedEye,
+                  width: 24,
+                  height: 24,
+                )
+              : Icon(
+                  Icons.chat_bubble_rounded,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
+        ),
+        const SizedBox(width: 28),
+        _MicButton(
+          active: listening || !busy,
+          listening: listening,
+          busy: busy,
+          onPressStart: () => unawaited(_conversation.startListening()),
+          onPressEnd: () => unawaited(_conversation.stopListening()),
+        ),
+        const SizedBox(width: 28),
+        _ControlCircle(
+          size: 56,
+          light: !darkChrome,
+          onTap: () => setState(() => _hintsOn = !_hintsOn),
+          child: HomeAsset(
+            _hintsOn ? AppAssets.lightbulb : AppAssets.hint,
+            width: 22,
+            height: 22,
+            color: darkChrome ? Colors.white : AppColors.primary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Yarım ekran: üstte Rive hoca, altta sohbet + mikrofon.
+  Widget _buildCompact(BuildContext context) {
+    final text = AppText.current.tutorPage.calling;
+    final topInset = MediaQuery.paddingOf(context).top;
+    const heroHeight = 340.0;
+    final listening = _conversation.listening;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          Expanded(
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: topInset + heroHeight,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: _callingBackgroundColors,
+                        stops: const [0, 0.55, 1],
+                      ),
+                    ),
+                  ),
+                ),
+                SafeArea(
+                  bottom: false,
+                  child: Column(
                     children: [
-                      _GlassCircleButton(
-                        onTap: () {},
-                        child: const HomeAsset(
-                          AppAssets.callingResize,
-                          width: 16,
-                          height: 16,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      _GlassPill(
-                        child: Text(
-                          text.tutors.lingola,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      _GlassPill(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      _buildTopBar(onDark: true),
+                      SizedBox(
+                        height: heroHeight - 48,
+                        child: Stack(
+                          alignment: Alignment.bottomCenter,
                           children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFFF3B30),
-                                shape: BoxShape.circle,
+                            _buildAvatar(
+                              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                            ),
+                            Positioned(
+                              right: 16,
+                              bottom: 16,
+                              child: _GlassPill(
+                                child: Text(
+                                  text.lessonBadge,
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _timerLabel,
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                                fontFeatures: [FontFeature.tabularFigures()],
-                              ),
+                            Positioned(
+                              left: 16,
+                              bottom: 16,
+                              child: _buildSpeedChip(),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      _GlassCircleButton(
-                        onTap: () => Navigator.of(context).maybePop(),
-                        child: const Icon(
-                          Icons.close_rounded,
+                      Expanded(
+                        child: ColoredBox(
                           color: Colors.white,
-                          size: 20,
+                          child: _captionsOn
+                              ? _CompactMessageList(
+                                  messages: _conversation.messages,
+                                  onTranslateSentence:
+                                      _conversation.toggleSentenceTranslation,
+                                  onTranslateWord: _conversation.translateText,
+                                )
+                              : const SizedBox.expand(),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
+              ],
             ),
-
-            Positioned(
-              left: 20,
-              right: 20,
-              bottom: bottom + 28,
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (_captionsOn) ...[
-                    _ScrollingChat(
-                      messages: _conversation.messages,
-                      onTranslateSentence:
-                          _conversation.toggleSentenceTranslation,
-                      onTranslateWord: _conversation.translateText,
+                  if (_conversation.error != null) ...[
+                    Text(
+                      _conversation.error!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 11,
+                        color: Color(0xFFB71C1C),
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                   ],
-                  if (_conversation.listening) ...[
+                  if (listening) ...[
                     const Text(
                       'Basılı tut — konuş — bırak',
                       textAlign: TextAlign.center,
@@ -258,81 +491,216 @@ class _CallingScreenState extends State<CallingScreen> {
                         fontFamily: 'Poppins',
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white,
+                        color: AppColors.secondary,
                       ),
                     ),
                     const SizedBox(height: 8),
                   ],
-                  if (_conversation.error != null) ...[
-                    Text(
-                      _conversation.error!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 11,
-                        color: Colors.white.withValues(alpha: .75),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  _GlassPill(
-                    child: Text(
-                      calling.lessonBadge,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _ControlCircle(
-                        size: 56,
-                        onTap: () =>
-                            setState(() => _captionsOn = !_captionsOn),
-                        child: HomeAsset(
-                          _captionsOn
-                              ? AppAssets.callingEye
-                              : AppAssets.callingClosedEye,
-                          width: 24,
-                          height: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 28),
-                      _MicButton(
-                        active: listening || (!busy && _captionsOn),
-                        listening: listening,
-                        busy: busy,
-                        onPressStart: () =>
-                            unawaited(_conversation.startListening()),
-                        onPressEnd: () =>
-                            unawaited(_conversation.stopListening()),
-                      ),
-                      const SizedBox(width: 28),
-                      _ControlCircle(
-                        size: 56,
-                        onTap: () => setState(() => _hintsOn = !_hintsOn),
-                        child: HomeAsset(
-                          _hintsOn ? AppAssets.lightbulb : AppAssets.hint,
-                          width: 22,
-                          height: 22,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildMicRow(darkChrome: false),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  /// Tam ekran calling (eski layout).
+  Widget _buildExpanded(BuildContext context) {
+    final text = AppText.current.tutorPage;
+    final calling = text.calling;
+    final bottom = MediaQuery.paddingOf(context).bottom;
+    final listening = _conversation.listening;
+
+    return Scaffold(
+      backgroundColor:
+          widget.backgroundGradientStart ?? const Color(0xFF1A2A4A),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: _callingBackgroundColors,
+                stops: const [0, 0.45, 1],
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: _buildAvatar(
+              padding: const EdgeInsets.fromLTRB(12, 72, 12, 160),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            height: 160,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    _topScrimColor.withValues(alpha: 0.55),
+                    _topScrimColor.withValues(alpha: 0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 320,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x00000000),
+                    Color(0x99000000),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            bottom: false,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: _buildTopBar(onDark: true),
+            ),
+          ),
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: bottom + 28,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_captionsOn) ...[
+                  _ScrollingChat(
+                    messages: _conversation.messages,
+                    onTranslateSentence:
+                        _conversation.toggleSentenceTranslation,
+                    onTranslateWord: _conversation.translateText,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (listening) ...[
+                  const Text(
+                    'Basılı tut — konuş — bırak',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                if (_conversation.error != null) ...[
+                  Text(
+                    _conversation.error!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: .75),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                _GlassPill(
+                  child: Text(
+                    calling.lessonBadge,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _buildSpeedChip(),
+                const SizedBox(height: 18),
+                _buildMicRow(darkChrome: true),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Yarım ekranda beyaz zemin için sohbet listesi.
+class _CompactMessageList extends StatelessWidget {
+  const _CompactMessageList({
+    required this.messages,
+    required this.onTranslateSentence,
+    required this.onTranslateWord,
+  });
+
+  final List<CallMessage> messages;
+  final Future<void> Function(int messageIndex) onTranslateSentence;
+  final Future<String> Function(String word) onTranslateWord;
+
+  @override
+  Widget build(BuildContext context) {
+    if (messages.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: AppColors.primary,
+          ),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      itemCount: messages.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final msg = messages[index];
+        final isUser = msg.role == CallMessageRole.user;
+        return Align(
+          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 300),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: isUser ? AppColors.primary : const Color(0xFFF2F4F7),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                msg.text,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  height: 1.4,
+                  fontWeight: FontWeight.w500,
+                  color: isUser ? Colors.white : AppColors.ink,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -780,16 +1148,18 @@ class _ControlCircle extends StatelessWidget {
     required this.size,
     required this.onTap,
     required this.child,
+    this.light = false,
   });
 
   final double size;
   final VoidCallback onTap;
   final Widget child;
+  final bool light;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.black.withValues(alpha: .28),
+      color: light ? const Color(0xFFE8F1FF) : Colors.black.withValues(alpha: .28),
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
@@ -800,7 +1170,9 @@ class _ControlCircle extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: .85)),
+            border: light
+                ? null
+                : Border.all(color: Colors.white.withValues(alpha: .85)),
           ),
           child: child,
         ),

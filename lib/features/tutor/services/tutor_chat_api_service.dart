@@ -95,9 +95,84 @@ class TutorChatMessageDto {
 }
 
 abstract final class TutorChatApiService {
+  static Future<({
+    TutorChatSessionDto session,
+    List<TutorChatMessageDto> messages,
+  })> openPreviewSession({
+    String? tutorId,
+    String? tutorSlug,
+    String? title,
+    String? openingMessage,
+    String? kind,
+  }) async {
+    final data = await ApiClient.post(
+      '/chat/preview/sessions',
+      body: {
+        if (tutorId != null && tutorId.isNotEmpty) 'tutorId': tutorId,
+        if (tutorSlug != null && tutorSlug.isNotEmpty) 'tutorSlug': tutorSlug,
+        if (title != null && title.isNotEmpty) 'title': title,
+        if (openingMessage != null && openingMessage.isNotEmpty)
+          'openingMessage': openingMessage,
+        if (kind != null && kind.isNotEmpty) 'kind': kind,
+      },
+    );
+    if (data.isEmpty) {
+      throw ApiException('Invalid preview session response');
+    }
+    final session = data['session'];
+    if (session is! Map<String, dynamic>) {
+      throw ApiException('Invalid preview session payload');
+    }
+    final rawMessages = data['messages'];
+    final messages = rawMessages is List
+        ? rawMessages
+            .whereType<Map<String, dynamic>>()
+            .map(TutorChatMessageDto.fromJson)
+            .toList(growable: false)
+        : const <TutorChatMessageDto>[];
+    return (
+      session: TutorChatSessionDto.fromJson(session),
+      messages: messages,
+    );
+  }
+
+  static Future<({
+    TutorChatMessageDto userMessage,
+    TutorChatMessageDto assistantMessage,
+  })> sendPreviewMessage({
+    required String sessionId,
+    required String content,
+  }) async {
+    final data = await ApiClient.post(
+      '/chat/preview/sessions/$sessionId/messages',
+      body: {'content': content},
+    );
+    if (data.isEmpty) {
+      throw ApiException('Invalid preview message response');
+    }
+    final user = data['userMessage'];
+    final assistant = data['assistantMessage'];
+    if (user is! Map<String, dynamic> || assistant is! Map<String, dynamic>) {
+      throw ApiException('Invalid preview message payload');
+    }
+    return (
+      userMessage: TutorChatMessageDto.fromJson(user),
+      assistantMessage: TutorChatMessageDto.fromJson(assistant),
+    );
+  }
+
+  static Future<void> claimPreviewSession(String sessionId) async {
+    await ApiClient.post('/chat/preview/sessions/$sessionId/claim', auth: true);
+  }
+
   static Future<TutorChatSessionDto> openSession({
     String? tutorId,
     String? tutorSlug,
+    bool forceNew = false,
+    String? title,
+    String? openingMessage,
+    String? lessonSlug,
+    String? kind,
   }) async {
     final json = await ApiClient.post(
       '/chat/sessions',
@@ -105,6 +180,12 @@ abstract final class TutorChatApiService {
       body: {
         if (tutorId != null && tutorId.isNotEmpty) 'tutorId': tutorId,
         if (tutorSlug != null && tutorSlug.isNotEmpty) 'tutorSlug': tutorSlug,
+        if (forceNew) 'forceNew': true,
+        if (title != null && title.isNotEmpty) 'title': title,
+        if (openingMessage != null && openingMessage.isNotEmpty)
+          'openingMessage': openingMessage,
+        if (lessonSlug != null && lessonSlug.isNotEmpty) 'lessonSlug': lessonSlug,
+        if (kind != null && kind.isNotEmpty) 'kind': kind,
       },
     );
     final session = json['session'];

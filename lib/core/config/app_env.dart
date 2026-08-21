@@ -2,8 +2,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Local `.env` — gitignore’da. Key’leri asla kaynak koda yazma.
 abstract final class AppEnv {
-  /// Fiziksel cihaz için Mac LAN IP (`.env` / tunnel yoksa fallback).
-  static const _devLanApi = 'http://192.168.1.106:3000';
+  /// `.env` / dart-define yoksa fallback (iOS Simulator).
+  static const _devLanApi = 'http://127.0.0.1:3001';
 
   static String get openAiApiKey =>
       dotenv.isInitialized ? (dotenv.env['OPENAI_API_KEY']?.trim() ?? '') : '';
@@ -17,21 +17,18 @@ abstract final class AppEnv {
     return (id != null && id.isNotEmpty) ? id : 'WZlYpi1yf6zJhNWXih74';
   }
 
-  /// Öncelik: `--dart-define=API_BASE_URL=` → `.env` → LAN fallback.
-  /// Fiziksel cihazda `127.0.0.1` Mac’e gitmez; tunnel (https://…trycloudflare.com) tercih et.
+  /// Öncelik: `--dart-define` → `.env` → fallback.
+  /// Profil bazlı adres geçişi için launch.json'daki define her zaman kazanır.
   static String get apiBaseUrl {
     const fromDefine = String.fromEnvironment('API_BASE_URL');
-    if (fromDefine.trim().isNotEmpty) return fromDefine.trim().replaceAll(RegExp(r'/+$'), '');
+    if (fromDefine.trim().isNotEmpty) {
+      return fromDefine.trim().replaceAll(RegExp(r'/+$'), '');
+    }
 
     if (dotenv.isInitialized) {
       final fromEnv = dotenv.env['API_BASE_URL']?.trim();
       if (fromEnv != null && fromEnv.isNotEmpty) {
-        final cleaned = fromEnv.replaceAll(RegExp(r'/+$'), '');
-        // Simulator/desktop dışında localhost fiziksel telefonda işe yaramaz.
-        if (cleaned.contains('127.0.0.1') || cleaned.contains('localhost')) {
-          return _devLanApi;
-        }
-        return cleaned;
+        return fromEnv.replaceAll(RegExp(r'/+$'), '');
       }
     }
     return _devLanApi;
@@ -39,6 +36,16 @@ abstract final class AppEnv {
 
   static bool get hasOpenAi => openAiApiKey.isNotEmpty;
   static bool get hasElevenLabs => elevenLabsApiKey.isNotEmpty;
+
+  static String get revenueCatIosPublicKey =>
+      dotenv.isInitialized
+          ? (dotenv.env['REVENUECAT_IOS_PUBLIC_KEY']?.trim() ?? '')
+          : '';
+
+  static String get revenueCatAndroidPublicKey =>
+      dotenv.isInitialized
+          ? (dotenv.env['REVENUECAT_ANDROID_PUBLIC_KEY']?.trim() ?? '')
+          : '';
 }
 
 /// Hoca bazlı ElevenLabs voice ID’leri.

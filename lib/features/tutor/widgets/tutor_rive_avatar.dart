@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
+import '../../../core/cdn/cdn_file_cache.dart';
+
 /// Mindcoach ile aynı model: `talk` + `visemeNum` + `duration`.
 /// Sadece talk yetmez; bu riv ağız şeklini viseme ile sürüyor.
 class TutorRiveAvatar extends StatefulWidget {
@@ -12,6 +14,9 @@ class TutorRiveAvatar extends StatefulWidget {
     this.fallbackImage,
     this.fit = Fit.contain,
     this.alignment = Alignment.bottomCenter,
+    /// Ses zamanına hizalı viseme (null → yavaş fake cycle).
+    this.lipsyncViseme,
+    this.loadingBackgroundColor,
     super.key,
   });
 
@@ -20,58 +25,112 @@ class TutorRiveAvatar extends StatefulWidget {
   final String? fallbackImage;
   final Fit fit;
   final Alignment alignment;
+  final double? lipsyncViseme;
+  /// Riv yüklenirken arka plan (özel karakter teması).
+  final Color? loadingBackgroundColor;
 
   @override
   State<TutorRiveAvatar> createState() => _TutorRiveAvatarState();
 }
 
 class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
-  late final FileLoader _fileLoader;
+  FileLoader? _fileLoader;
   ViewModelInstance? _viewModel;
   BooleanInput? _smTalk;
   NumberInput? _smViseme;
   NumberInput? _smDuration;
   Timer? _visemeTimer;
   var _failed = false;
+  var _resolving = true;
+  var _loadGen = 0;
   var _visemePhase = 0;
 
   static const _visemeCycle = <double>[0, 6, 14, 6, 10, 2];
-  static const _openBlendMs = 40.0;
-  static const _closeBlendMs = 26.0;
-  static const _visemeBlendMs = 24.0;
+  static const _openBlendMs = 80.0;
+  static const _closeBlendMs = 60.0;
+  static const _visemeBlendMs = 70.0;
 
   @override
   void initState() {
     super.initState();
-    final isNetwork = widget.assetPath.startsWith('http://') ||
-        widget.assetPath.startsWith('https://');
-    _fileLoader = isNetwork
-        ? FileLoader.fromUrl(
-            widget.assetPath,
-            riveFactory: Factory.rive,
-          )
-        : FileLoader.fromAsset(
-            widget.assetPath,
-            riveFactory: Factory.rive,
-          );
+    _loadFile();
   }
 
   @override
   void didUpdateWidget(covariant TutorRiveAvatar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.assetPath != widget.assetPath) {
+      _loadFile();
+      return;
+    }
     if (oldWidget.talking != widget.talking) {
       _syncTalk(widget.talking);
+    } else if (widget.talking &&
+        widget.lipsyncViseme != null &&
+        oldWidget.lipsyncViseme != widget.lipsyncViseme) {
+      _applyLipsyncViseme(widget.lipsyncViseme!);
     }
   }
 
   @override
   void dispose() {
+    _loadGen++;
     _visemeTimer?.cancel();
     _smTalk?.dispose();
     _smViseme?.dispose();
     _smDuration?.dispose();
-    _fileLoader.dispose();
+    _fileLoader?.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadFile() async {
+    final gen = ++_loadGen;
+    final source = widget.assetPath.trim();
+    _fileLoader?.dispose();
+    _fileLoader = null;
+    _viewModel = null;
+    _failed = false;
+    _resolving = true;
+    if (mounted) setState(() {});
+
+    try {
+      final loader = await _loaderFor(source);
+      if (!mounted || gen != _loadGen) {
+        loader.dispose();
+        return;
+      }
+      setState(() {
+        _fileLoader = loader;
+        _resolving = false;
+      });
+    } catch (err) {
+      if (!mounted || gen != _loadGen) return;
+      debugPrint('Rive cache/load hatası ($source): $err');
+      setState(() {
+        _failed = true;
+        _resolving = false;
+      });
+    }
+  }
+
+  Future<FileLoader> _loaderFor(String source) async {
+    final isNetwork =
+        source.startsWith('http://') || source.startsWith('https://');
+    if (!isNetwork) {
+      return FileLoader.fromAsset(source, riveFactory: Factory.rive);
+    }
+
+    try {
+      final localPath = await CdnFileCache.resolve(source, kind: 'rive');
+      final decoded = await File.path(localPath, riveFactory: Factory.rive);
+      if (decoded != null) {
+        return FileLoader.fromFile(decoded, riveFactory: Factory.rive);
+      }
+    } catch (err) {
+      debugPrint('Rive disk cache miss, CDN fallback: $err');
+    }
+
+    return FileLoader.fromUrl(source, riveFactory: Factory.rive);
   }
 
   RiveWidgetController _createController(File file) {
@@ -164,7 +223,13 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     if (talking) {
       _setBool('talk', true);
       _setNumber('duration', _openBlendMs);
-      _startVisemeLoop();
+      if (widget.lipsyncViseme != null) {
+        _visemeTimer?.cancel();
+        _visemeTimer = null;
+        _applyLipsyncViseme(widget.lipsyncViseme!);
+      } else {
+        _startVisemeLoop();
+      }
     } else {
       _visemeTimer?.cancel();
       _visemeTimer = null;
@@ -174,16 +239,20 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     }
   }
 
+  void _applyLipsyncViseme(double id) {
+    _setNumber('visemeNum', id);
+    _setNumber('duration', _visemeBlendMs);
+  }
+
   void _startVisemeLoop() {
     _visemeTimer?.cancel();
     _visemePhase = 0;
-    // Ses varken ağız şekillerini döndür (Mindcoach’taki RMS yerine basit cycle).
-    _visemeTimer = Timer.periodic(const Duration(milliseconds: 90), (_) {
-      if (!widget.talking) return;
+    // Fallback (timestamp yok): yavaş cycle — önceki 90ms çok hızlıydı.
+    _visemeTimer = Timer.periodic(const Duration(milliseconds: 160), (_) {
+      if (!widget.talking || widget.lipsyncViseme != null) return;
       final id = _visemeCycle[_visemePhase % _visemeCycle.length];
       _visemePhase++;
-      _setNumber('visemeNum', id);
-      _setNumber('duration', _visemeBlendMs);
+      _applyLipsyncViseme(id);
     });
   }
 
@@ -249,16 +318,26 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       return _Fallback(imagePath: widget.fallbackImage);
     }
 
+    final loader = _fileLoader;
+    if (_resolving || loader == null) {
+      return ColoredBox(
+        color: widget.loadingBackgroundColor ?? const Color(0xFF2D46FF),
+        child: const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+      );
+    }
+
     return RiveWidgetBuilder(
-      fileLoader: _fileLoader,
+      fileLoader: loader,
       controller: _createController,
       onLoaded: _onLoaded,
       onFailed: _onFailed,
       builder: (context, state) {
         return switch (state) {
-          RiveLoading() => const ColoredBox(
-              color: Color(0xFF2D46FF),
-              child: Center(
+          RiveLoading() => ColoredBox(
+              color: widget.loadingBackgroundColor ?? const Color(0xFF2D46FF),
+              child: const Center(
                 child: CircularProgressIndicator(color: Colors.white),
               ),
             ),
@@ -292,7 +371,7 @@ class _Fallback extends StatelessWidget {
     }
     return Image.asset(
       imagePath!,
-      fit: BoxFit.cover,
+      fit: BoxFit.contain,
       alignment: alignment,
       width: double.infinity,
       height: double.infinity,

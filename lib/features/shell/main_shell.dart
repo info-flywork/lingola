@@ -21,6 +21,12 @@ class MainShell extends StatefulWidget {
 
   static void goToProfile(BuildContext context) => goToTab(context, 4);
 
+  /// Bottom nav Lessons (index 2).
+  static void goToLessons(BuildContext context) => goToTab(context, 2);
+
+  /// Bottom nav Tutors (index 1).
+  static void goToTutors(BuildContext context) => goToTab(context, 1);
+
   @override
   State<MainShell> createState() => _MainShellState();
 }
@@ -86,13 +92,16 @@ class _MainShellState extends State<MainShell> {
         backgroundColor: AppColors.surface,
         body: SafeArea(
           bottom: false,
-          child: switch (_index) {
-            0 => const HomeScreen(),
-            1 => const TutorScreen(),
-            2 => const LessonScreen(),
-            3 => const RolePlayScreen(),
-            _ => const ProfileScreen(),
-          },
+          child: IndexedStack(
+            index: _index,
+            children: const [
+              HomeScreen(),
+              TutorScreen(),
+              LessonScreen(),
+              RolePlayScreen(),
+              ProfileScreen(),
+            ],
+          ),
         ),
         bottomNavigationBar: DecoratedBox(
           decoration: BoxDecoration(
