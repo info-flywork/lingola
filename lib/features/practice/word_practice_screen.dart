@@ -206,26 +206,36 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   String _nativeLanguageLabel(String code) {
-    final t = AppText.current.targetLanguage;
+    final target = AppText.current.targetLanguage;
+    final language = AppText.current.language;
     switch (code.toLowerCase()) {
       case 'tr':
-        return t.turkish.toUpperCase();
+        return target.turkish.toUpperCase();
       case 'de':
-        return t.german.toUpperCase();
+        return target.german.toUpperCase();
       case 'it':
-        return t.italian.toUpperCase();
+        return target.italian.toUpperCase();
+      case 'fr':
+        return language.french.toUpperCase();
+      case 'es':
+        return language.spanish.toUpperCase();
+      case 'ru':
+        return language.russian.toUpperCase();
+      case 'ja':
+      case 'jp':
+        return language.japanese.toUpperCase();
       case 'pt':
-        return t.portuguese.toUpperCase();
+        return target.portuguese.toUpperCase();
       case 'ko':
-        return t.korean.toUpperCase();
+        return target.korean.toUpperCase();
       case 'zh':
-        return t.simplifiedChinese.toUpperCase();
+        return target.simplifiedChinese.toUpperCase();
       case 'ar':
-        return t.arabic.toUpperCase();
+        return target.arabic.toUpperCase();
       case 'hi':
-        return t.hindi.toUpperCase();
+        return target.hindi.toUpperCase();
       case 'en':
-        return 'ENGLISH';
+        return language.english.toUpperCase();
       default:
         return code.toUpperCase();
     }

@@ -1,0 +1,67 @@
+Lingola – Privacy Policy  
+Last Updated: 2025  
+Welcome to Lingola. At Lingola, we take user privacy seriously; we are committed to processing your personal data in a secure, transparent, and controlled manner.  
+This Privacy Policy is prepared to explain how the information collected through the Lingola mobile application and website (“Platform”) is processed, stored, and protected.  
+By using Lingola, you are deemed to accept the practices outlined in this policy.  
+
+1. Collected Information  
+Lingola collects limited and necessary data to provide services and enhance user experience. The collected information is categorized as follows:  
+a) Information Provided by the User  
+   • Name, username, or profile information  
+   • Email address  
+   • App preferences  
+   • Language selections and usage settings  
+b) Automatically Collected Information  
+   • Device information (device model, operating system, app version, etc.)  
+   • IP address and basic interaction logs  
+   • In-app usage and navigation information  
+This information is used for the operation, development, and performance improvement of the application.  
+
+2. Purposes of Data Use  
+The collected information is processed for the following purposes:  
+   • Account creation and management  
+   • User authentication and secure login  
+   • Personalization of the language learning experience  
+   • Enhancement of app performance and stability  
+   • Development of new features  
+   • Prevention of security issues and abuse  
+   • Provision of informational and promotional content with user consent  
+Lingola processes personal data only for explicit, legitimate, and limited purposes. Personal information is not sold to third parties without your consent.  
+
+3. Third-Party Services  
+Lingola may work with third-party service providers that offer analytics, performance measurement, and technical infrastructure services.  
+These service providers process data only on behalf of Lingola and within the framework of their own privacy policies.  
+Third-party access is limited to improving user experience and ensuring the proper functioning of the application.  
+
+4. Cookies and Similar Technologies  
+Lingola may use cookies and similar technologies to remember user preferences, analyze performance, and enhance service quality.  
+Details regarding the use of these technologies are explained in the Cookie Policy.  
+
+5. Data Retention Period  
+Personal data is retained only for as long as necessary for the purposes of processing.  
+When legal obligations expire or the user account is deleted, data is securely deleted or anonymized within a reasonable time frame.  
+
+6. Data Security  
+Lingola implements technical and administrative security measures in accordance with industry standards to protect user data.  
+Regular security checks are conducted against unauthorized access, data loss, or abuse risks.  
+However, no data transmission over the internet can be guaranteed to be 100% secure. Therefore, it is important for users to be aware of this.  
+
+7. User Rights  
+Users have the following rights:  
+   • Access to their personal data  
+   • Request correction of inaccurate or incomplete data  
+   • Request deletion of their account and data  
+   • Withdraw consent for data processing  
+These requests are evaluated through the support team.  
+
+8. International Data Transfers  
+Lingola may work with infrastructure providers that offer services on a global scale.  
+This may require the transfer of data to servers located in different countries. In such cases, appropriate technical and legal protection measures are implemented.  
+
+9. Policy Changes  
+Lingola may update the Privacy Policy in line with technological developments or legal requirements.  
+The current version will always be accessible through the app and website.  
+
+10. Contact  
+For any questions or requests regarding privacy, data usage, or this policy, you can contact us:  
+📩 Email: support@fly-work.com

@@ -56,7 +56,14 @@ class LessonNodeDto {
     this.needsPractice = false,
     this.hasNotes = false,
     this.tutorId,
+    this.tutorSlug,
+    this.tutorNameKey,
     this.chatSessionId,
+    this.titleEn,
+    this.titleTr,
+    this.startedAt,
+    this.elapsedSeconds = 0,
+    this.remainingSeconds = 15 * 60,
   });
 
   final String slug;
@@ -64,20 +71,40 @@ class LessonNodeDto {
   final bool needsPractice;
   final bool hasNotes;
   final String? tutorId;
+  final String? tutorSlug;
+  final String? tutorNameKey;
   final String? chatSessionId;
+  final String? titleEn;
+  final String? titleTr;
+  final String? startedAt;
+  final int elapsedSeconds;
+  final int remainingSeconds;
 
   bool get isLocked => status == 'locked';
   bool get isAvailable => status == 'available';
   bool get isCompleted => status == 'completed';
 
+  int get elapsedMinutes => (elapsedSeconds / 60).floor().clamp(0, 15);
+  int get remainingMinutes => (remainingSeconds / 60).ceil().clamp(0, 15);
+
   factory LessonNodeDto.fromJson(Map<String, dynamic> json) {
+    final elapsed = (json['elapsedSeconds'] as num?)?.toInt() ?? 0;
+    final remaining = (json['remainingSeconds'] as num?)?.toInt() ??
+        (15 * 60 - elapsed).clamp(0, 15 * 60);
     return LessonNodeDto(
       slug: json['slug'] as String? ?? '',
       status: json['status'] as String? ?? 'locked',
       needsPractice: json['needsPractice'] == true,
       hasNotes: json['hasNotes'] == true,
       tutorId: json['tutorId'] as String?,
+      tutorSlug: json['tutorSlug'] as String?,
+      tutorNameKey: json['tutorNameKey'] as String?,
       chatSessionId: json['chatSessionId'] as String?,
+      titleEn: json['titleEn'] as String?,
+      titleTr: json['titleTr'] as String?,
+      startedAt: json['startedAt'] as String?,
+      elapsedSeconds: elapsed.clamp(0, 15 * 60),
+      remainingSeconds: remaining.clamp(0, 15 * 60),
     );
   }
 }
@@ -96,6 +123,8 @@ class LessonStartDto {
     this.tutorVoiceId,
     this.tutorRive,
     this.titleEn,
+    this.lessonElapsedSeconds = 0,
+    this.remainingSeconds = 15 * 60,
   });
 
   final String slug;
@@ -110,6 +139,8 @@ class LessonStartDto {
   final String? tutorVoiceId;
   final String? tutorRive;
   final String? titleEn;
+  final int lessonElapsedSeconds;
+  final int remainingSeconds;
 
   factory LessonStartDto.fromJson(Map<String, dynamic> json) {
     final lesson = json['lesson'];
@@ -118,6 +149,12 @@ class LessonStartDto {
     final lessonMap = lesson is Map<String, dynamic> ? lesson : const <String, dynamic>{};
     final sessionMap = session is Map<String, dynamic> ? session : const <String, dynamic>{};
     final tutorMap = tutor is Map<String, dynamic> ? tutor : const <String, dynamic>{};
+    final elapsed = (json['elapsedSeconds'] as num?)?.toInt() ??
+        (lessonMap['elapsedSeconds'] as num?)?.toInt() ??
+        0;
+    final remaining = (json['remainingSeconds'] as num?)?.toInt() ??
+        (lessonMap['remainingSeconds'] as num?)?.toInt() ??
+        (15 * 60 - elapsed);
     return LessonStartDto(
       slug: lessonMap['slug'] as String? ?? '',
       titleEn: lessonMap['titleEn'] as String?,
@@ -135,6 +172,8 @@ class LessonStartDto {
       tutorRive: (tutorMap['riveCdnUrl'] as String?)?.isNotEmpty == true
           ? tutorMap['riveCdnUrl'] as String
           : tutorMap['localRivePath'] as String?,
+      lessonElapsedSeconds: elapsed.clamp(0, 15 * 60),
+      remainingSeconds: remaining.clamp(0, 15 * 60),
     );
   }
 }
@@ -246,6 +285,8 @@ abstract final class LessonApiService {
     String? sessionId,
     String kind = 'lesson',
     List<Map<String, String>> transcript = const [],
+    int? addElapsedSeconds,
+    int? elapsedSeconds,
   }) async {
     final json = await ApiClient.post(
       '/lessons/$slug/complete',
@@ -255,9 +296,37 @@ abstract final class LessonApiService {
         if (sessionId != null && sessionId.isNotEmpty) 'sessionId': sessionId,
         'kind': kind,
         'transcript': transcript,
+        if (addElapsedSeconds != null) 'addElapsedSeconds': addElapsedSeconds,
+        if (elapsedSeconds != null) 'elapsedSeconds': elapsedSeconds,
       },
     );
     return LessonNotesDto.fromJson(json);
+  }
+
+  static Future<LessonNodeDto> saveProgress({
+    required String slug,
+    String? tutorId,
+    String? sessionId,
+    List<Map<String, String>> transcript = const [],
+    int? addElapsedSeconds,
+    int? elapsedSeconds,
+  }) async {
+    final json = await ApiClient.post(
+      '/lessons/$slug/progress',
+      auth: true,
+      body: {
+        if (tutorId != null && tutorId.isNotEmpty) 'tutorId': tutorId,
+        if (sessionId != null && sessionId.isNotEmpty) 'sessionId': sessionId,
+        'transcript': transcript,
+        if (addElapsedSeconds != null) 'addElapsedSeconds': addElapsedSeconds,
+        if (elapsedSeconds != null) 'elapsedSeconds': elapsedSeconds,
+      },
+    );
+    final lesson = json['lesson'];
+    if (lesson is Map<String, dynamic>) {
+      return LessonNodeDto.fromJson(lesson);
+    }
+    return LessonNodeDto(slug: slug, status: 'available');
   }
 
   static Future<LessonNotesDto> fetchNotes(String slug) async {

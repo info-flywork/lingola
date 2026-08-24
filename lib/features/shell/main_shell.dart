@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/app_text.dart';
+import '../../core/i18n/app_locale_sync.dart';
 import '../../core/theme/app_theme.dart';
+import '../../i18n/strings.g.dart';
 import '../home/home_screen.dart';
 import '../lesson/lesson_screen.dart';
 import '../profile/profile_screen.dart';
@@ -92,15 +94,21 @@ class _MainShellState extends State<MainShell> {
         backgroundColor: AppColors.surface,
         body: SafeArea(
           bottom: false,
-          child: IndexedStack(
-            index: _index,
-            children: const [
-              HomeScreen(),
-              TutorScreen(),
-              LessonScreen(),
-              RolePlayScreen(),
-              ProfileScreen(),
-            ],
+          child: ValueListenableBuilder<AppLocale>(
+            valueListenable: AppLocaleSync.localeChanges,
+            builder: (context, locale, _) {
+              final localeKey = locale.languageCode;
+              return IndexedStack(
+                index: _index,
+                children: [
+                  HomeScreen(key: ValueKey('home-$localeKey')),
+                  TutorScreen(key: ValueKey('tutor-$localeKey')),
+                  LessonScreen(key: ValueKey('lesson-$localeKey')),
+                  RolePlayScreen(key: ValueKey('roleplay-$localeKey')),
+                  ProfileScreen(key: ValueKey('profile-$localeKey')),
+                ],
+              );
+            },
           ),
         ),
         bottomNavigationBar: DecoratedBox(

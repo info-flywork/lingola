@@ -80,6 +80,8 @@
 	<string>Profil fotoğrafı çekmek için kamera erişimi gerekir.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Kelimeleri sesli okumanı dinlemek için mikrofona ihtiyacımız var.</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>Lingola, ara verdiğinde nazik pratik hatırlatmaları gönderir.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Okuduğun İngilizce kelimeleri tanımak için konuşma tanıma kullanılır.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

@@ -1,3 +1,5 @@
+import '../../core/i18n/app_locale_sync.dart';
+
 /// Onboarding cevapları — ekranlar arası taşınır, auth sırasında API'ye gider.
 /// Dil kodları açık string (12+ dil); UI enum'a kilitlenmez.
 class OnboardingDraft {
@@ -7,8 +9,8 @@ class OnboardingDraft {
     this.goal,
     this.level,
     this.pace,
-    this.appLocale = 'en',
-  });
+    String? appLocale,
+  }) : appLocale = appLocale ?? AppLocaleSync.deviceLocaleCode();
 
   String nativeLanguageCode;
   String targetLanguageCode;
@@ -16,7 +18,7 @@ class OnboardingDraft {
   String? level;
   String? pace;
 
-  /// Uygulama UI dili (ileride 12 dil).
+  /// Uygulama UI dili — ilk kurulumda telefon dili (destek yoksa en).
   String appLocale;
 
   static const goals = [

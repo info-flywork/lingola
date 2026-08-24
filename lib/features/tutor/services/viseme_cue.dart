@@ -83,10 +83,35 @@ List<VisemeCue> visemesFromAlignment({
   return cues;
 }
 
-double visemeAt(List<VisemeCue> cues, double tSec) {
+double visemeAt(
+  List<VisemeCue> cues,
+  double tSec, {
+  double? cutOffSec,
+}) {
+  if (cutOffSec != null && tSec >= cutOffSec) return 0;
   if (cues.isEmpty) return 0;
   for (final cue in cues) {
     if (tSec >= cue.startSec && tSec < cue.endSec) return cue.visemeNum;
   }
   return 0;
+}
+
+/// Dudak hareketinin ses bitmeden hemen önce durması için efektif bitiş.
+double effectiveSpeechEndSec({
+  required List<VisemeCue> visemes,
+  double? audioDurationSec,
+}) {
+  var lastMouth = 0.0;
+  for (final cue in visemes) {
+    if (cue.visemeNum != 0) lastMouth = cue.endSec;
+  }
+
+  if (audioDurationSec != null && audioDurationSec > 0) {
+    final lipStop =
+        (audioDurationSec - 0.08).clamp(0.0, audioDurationSec).toDouble();
+    if (lastMouth > 0) return lastMouth < lipStop ? lastMouth : lipStop;
+    return lipStop;
+  }
+
+  return lastMouth;
 }

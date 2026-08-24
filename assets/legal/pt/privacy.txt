@@ -1,0 +1,68 @@
+Lingola – Política de Privacidade  
+Última Atualização: 2025  
+Bem-vindo ao Lingola. No Lingola, levamos a privacidade dos usuários a sério; nos comprometemos a processar seus dados pessoais de forma segura, transparente e controlada.  
+Esta Política de Privacidade foi elaborada para explicar como as informações coletadas através do aplicativo móvel e do site do Lingola (“Plataforma”) são processadas, armazenadas e protegidas.  
+Ao usar o Lingola, você concorda com as práticas descritas nesta política.  
+
+1. Informações Coletadas  
+O Lingola coleta dados limitados e necessários para fornecer serviços e melhorar a experiência do usuário. As informações coletadas são divididas nas seguintes categorias:  
+a) Informações Fornecidas pelo Usuário  
+	•	Nome, nome de usuário ou informações de perfil  
+	•	Endereço de e-mail  
+	•	Preferências do aplicativo  
+	•	Escolhas de idioma e configurações de uso  
+b) Informações Coletadas Automaticamente  
+	•	Informações do dispositivo (modelo do dispositivo, sistema operacional, versão do aplicativo, etc.)  
+	•	Endereço IP e registros básicos de interação  
+	•	Informações de uso e navegação dentro do aplicativo  
+Essas informações são usadas para o funcionamento, desenvolvimento e melhoria do desempenho do aplicativo.  
+
+2. Finalidades do Uso dos Dados  
+As informações coletadas são processadas para os seguintes fins:  
+	•	Criação e gerenciamento de contas  
+	•	Verificação de usuários e acesso seguro  
+	•	Pessoalização da experiência de aprendizado de idiomas  
+	•	Aumento do desempenho e estabilidade do aplicativo  
+	•	Desenvolvimento de novos recursos  
+	•	Segurança e prevenção de abusos  
+	•	Apresentação de conteúdos informativos e promocionais, caso o usuário consinta  
+O Lingola processa dados pessoais apenas para fins claros, legítimos e limitados.  
+As informações pessoais não são vendidas a terceiros sem o seu consentimento.  
+
+3. Serviços de Terceiros  
+O Lingola pode trabalhar com provedores de serviços terceirizados que oferecem serviços de análise, medição de desempenho e infraestrutura técnica.  
+Esses provedores de serviços processam os dados apenas em nome do Lingola e dentro de suas próprias políticas de privacidade.  
+Os acessos de terceiros são limitados a melhorar a experiência do usuário e garantir o funcionamento saudável do aplicativo.  
+
+4. Cookies e Tecnologias Semelhantes  
+O Lingola pode usar cookies e tecnologias semelhantes para lembrar preferências do usuário, analisar desempenho e melhorar a qualidade do serviço.  
+Os detalhes sobre o uso dessas tecnologias são explicados na Política de Cookies.  
+
+5. Prazo de Armazenamento dos Dados  
+Os dados pessoais são armazenados apenas pelo tempo necessário para os fins de processamento.  
+Quando as obrigações legais terminam ou a conta do usuário é excluída, os dados são excluídos ou tornados anônimos de forma segura dentro de um prazo razoável.  
+
+6. Segurança dos Dados  
+O Lingola aplica medidas de segurança técnicas e administrativas em conformidade com os padrões da indústria para proteger os dados dos usuários.  
+Controles de segurança regulares são realizados para mitigar riscos de acesso não autorizado, perda de dados ou abuso.  
+No entanto, não se pode garantir que nenhuma transferência de dados pela internet seja 100% segura. Portanto, é importante que os usuários estejam cientes disso.  
+
+7. Direitos dos Usuários  
+Os usuários têm os seguintes direitos:  
+	•	Acessar seus dados pessoais  
+	•	Solicitar a correção de dados incorretos ou incompletos  
+	•	Solicitar a exclusão de sua conta e dados  
+	•	Retirar o consentimento para o processamento de dados autorizados  
+Essas solicitações são avaliadas através da equipe de suporte.  
+
+8. Transferências Internacionais de Dados  
+O Lingola pode trabalhar com provedores de infraestrutura que oferecem serviços em escala global.  
+Isso pode exigir a transferência de dados para servidores localizados em diferentes países. Nesses casos, medidas de proteção técnica e legal adequadas são aplicadas.  
+
+9. Alterações na Política  
+O Lingola pode atualizar a Política de Privacidade em conformidade com desenvolvimentos tecnológicos ou requisitos legais.  
+A versão mais recente estará sempre acessível através do aplicativo e do site.  
+
+10. Contato  
+Para qualquer dúvida ou solicitação relacionada à privacidade, uso de dados ou esta política, você pode entrar em contato conosco:  
+📩 E-mail: support@fly-work.com

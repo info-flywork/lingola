@@ -78,8 +78,36 @@ class QuizEvalResult {
   factory QuizEvalResult.fromJson(Map<String, dynamic> json) {
     return QuizEvalResult(
       matched: json['matched'] == true,
-      expected: json['expected'] as String? ?? '',
+      expected: json['expected'] as String? ??
+          json['promptEn'] as String? ??
+          '',
       transcript: json['transcript'] as String? ?? '',
+    );
+  }
+}
+
+class QuizSpeakingPrompt {
+  const QuizSpeakingPrompt({
+    required this.id,
+    required this.promptEn,
+    required this.promptNative,
+    required this.keywords,
+  });
+
+  final String id;
+  final String promptEn;
+  final String promptNative;
+  final List<String> keywords;
+
+  factory QuizSpeakingPrompt.fromJson(Map<String, dynamic> json) {
+    final keywords = json['keywords'];
+    return QuizSpeakingPrompt(
+      id: json['id'] as String? ?? '',
+      promptEn: json['promptEn'] as String? ?? '',
+      promptNative: json['promptNative'] as String? ?? '',
+      keywords: keywords is List
+          ? keywords.map((e) => e.toString()).toList()
+          : const [],
     );
   }
 }
@@ -144,6 +172,36 @@ abstract final class QuizService {
         'wordId': wordId,
         'audioBase64': base64Encode(bytes),
         'contentType': contentType,
+      },
+    );
+    return QuizEvalResult.fromJson(json);
+  }
+
+  static Future<List<QuizSpeakingPrompt>> fetchSpeakingPrompts({
+    int count = 6,
+  }) async {
+    final json = await ApiClient.get(
+      '/quiz/speaking/prompts?count=$count',
+      auth: true,
+    );
+    final prompts = json['prompts'];
+    if (prompts is! List) return const [];
+    return prompts
+        .whereType<Map<String, dynamic>>()
+        .map(QuizSpeakingPrompt.fromJson)
+        .toList();
+  }
+
+  static Future<QuizEvalResult> evaluateSpeaking({
+    required String promptId,
+    required String transcript,
+  }) async {
+    final json = await ApiClient.post(
+      '/quiz/speaking/evaluate',
+      auth: true,
+      body: {
+        'promptId': promptId,
+        'transcript': transcript,
       },
     );
     return QuizEvalResult.fromJson(json);

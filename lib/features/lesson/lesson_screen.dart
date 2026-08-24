@@ -9,16 +9,34 @@ import '../../core/theme/app_theme.dart';
 import '../../i18n/strings.g.dart';
 import '../tutor/calling_screen.dart';
 import '../tutor/chat_screen.dart';
-import '../tutor/services/calling_conversation_controller.dart';
 import '../tutor/services/tutor_api_service.dart';
-import '../tutor/services/tutor_chat_api_service.dart';
 import 'lesson_api_service.dart';
 import 'lesson_curriculum.dart';
 import 'lesson_notes_screen.dart';
+import 'lesson_session_result.dart';
 import 'lesson_tutor_sheet.dart';
 
 class LessonScreen extends StatefulWidget {
   const LessonScreen({super.key});
+
+  static _LessonScreenState? _state;
+
+  /// Home Continue kartından dersi aynı/farklı hoca ile sürdür.
+  static Future<void> resumeFromHome({
+    required String slug,
+    required String label,
+    String? tutorId,
+    String? tutorSlug,
+  }) async {
+    final state = _state;
+    if (state == null) return;
+    await state.resumeFromHome(
+      slug: slug,
+      label: label,
+      tutorId: tutorId,
+      tutorSlug: tutorSlug,
+    );
+  }
 
   @override
   State<LessonScreen> createState() => _LessonScreenState();
@@ -31,7 +49,14 @@ class _LessonScreenState extends State<LessonScreen> {
   @override
   void initState() {
     super.initState();
+    LessonScreen._state = this;
     _loadPath();
+  }
+
+  @override
+  void dispose() {
+    if (LessonScreen._state == this) LessonScreen._state = null;
+    super.dispose();
   }
 
   Future<void> _loadPath() async {
@@ -66,6 +91,12 @@ class _LessonScreenState extends State<LessonScreen> {
     return list[index];
   }
 
+  String? _slugFor(String levelId, int index) {
+    final remote = _remoteAt(levelId, index);
+    if (remote != null && remote.slug.isNotEmpty) return remote.slug;
+    return LessonCurriculum.slugAt(levelId, index);
+  }
+
   Future<void> _onNodeTap({
     required String levelId,
     required int index,
@@ -74,6 +105,7 @@ class _LessonScreenState extends State<LessonScreen> {
     if (_busy) return;
     final text = AppText.current.lessonPage;
     final remote = _remoteAt(levelId, index);
+    final slug = _slugFor(levelId, index);
     final state = _stateFor(levelId, index);
 
     if (state == _NodeState.locked) {
@@ -84,12 +116,12 @@ class _LessonScreenState extends State<LessonScreen> {
     }
 
     if (state == _NodeState.completed && remote?.hasNotes == true) {
-      await _openNotes(slug: remote?.slug, label: label, offerPractice: true);
+      await _openNotes(slug: slug, label: label, offerPractice: true);
       return;
     }
 
     await _startWithTutor(
-      slug: remote?.slug,
+      slug: slug,
       label: label,
       kind: 'lesson',
     );
@@ -139,6 +171,8 @@ class _LessonScreenState extends State<LessonScreen> {
     required String? slug,
     required String label,
     required String kind,
+    TutorDto? preferredTutor,
+    String preferredMode = 'talk',
   }) async {
     if (slug == null || slug.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -147,7 +181,12 @@ class _LessonScreenState extends State<LessonScreen> {
       return;
     }
 
-    final choice = await showLessonTutorSheet(context, lessonTitle: label);
+    LessonTutorChoice? choice;
+    if (preferredTutor != null) {
+      choice = LessonTutorChoice(tutor: preferredTutor, mode: preferredMode);
+    } else {
+      choice = await showLessonTutorSheet(context, lessonTitle: label);
+    }
     if (choice == null || !mounted) return;
 
     setState(() => _busy = true);
@@ -162,34 +201,36 @@ class _LessonScreenState extends State<LessonScreen> {
 
       final tutorName = _tutorName(choice.tutor);
       final image = choice.tutor.imagePath ?? start.tutorImage ?? '';
-      List<Map<String, String>> transcript = const [];
+      final priorElapsed = Duration(seconds: start.lessonElapsedSeconds);
+      final remaining = Duration(
+        seconds: start.remainingSeconds.clamp(60, 15 * 60),
+      );
+      LessonSessionResult? sessionResult;
 
       if (choice.mode == 'chat') {
-        final messages = await Navigator.of(context).push<List<TutorChatMessageDto>>(
+        sessionResult = await Navigator.of(context).push<LessonSessionResult>(
           MaterialPageRoute(
             builder: (_) => ChatScreen(
               tutorName: tutorName,
               imagePath: image,
-              tutorId: choice.tutor.id,
+              tutorId: choice!.tutor.id,
               tutorSlug: choice.tutor.slug,
               sessionId: start.sessionId,
               finishOnPop: true,
               lessonSegmentMode: true,
+              segmentDuration: remaining,
+              initialElapsed: priorElapsed,
             ),
           ),
         );
-        transcript = [
-          for (final m in messages ?? const <TutorChatMessageDto>[])
-            {'role': m.role, 'content': m.content},
-        ];
       } else {
         final theme = choice.tutor.theme;
-        final callMessages = await Navigator.of(context).push<List<CallMessage>>(
+        sessionResult = await Navigator.of(context).push<LessonSessionResult>(
           MaterialPageRoute(
             builder: (_) => CallingScreen(
               tutorName: tutorName,
               imagePath: image,
-              riveAsset: choice.tutor.rivePath ?? start.tutorRive,
+              riveAsset: choice!.tutor.rivePath ?? start.tutorRive,
               voiceId: choice.tutor.voiceId ?? start.tutorVoiceId,
               backgroundGradientStart: _parseHex(theme?.gradientStart),
               backgroundGradientEnd: _parseHex(theme?.gradientEnd),
@@ -197,30 +238,50 @@ class _LessonScreenState extends State<LessonScreen> {
               systemPrompt: start.systemPrompt,
               returnTranscript: true,
               lessonSegmentMode: true,
+              segmentDuration: remaining,
+              initialElapsed: priorElapsed,
               tutorSlug: choice.tutor.slug.isNotEmpty
                   ? choice.tutor.slug
                   : start.tutorSlug,
             ),
           ),
         );
-        transcript = [
-          for (final m in callMessages ?? const <CallMessage>[])
-            {
-              'role': m.role == CallMessageRole.user ? 'user' : 'assistant',
-              'content': m.text,
-            },
-        ];
       }
 
-      if (!mounted) return;
-      await _completeAndShowNotes(
-        slug: slug,
-        label: label,
-        tutorId: choice.tutor.id,
-        sessionId: start.sessionId,
-        kind: kind,
-        transcript: transcript,
-      );
+      if (!mounted || sessionResult == null) return;
+
+      final transcript = sessionResult.transcript;
+      final sessionSeconds = sessionResult.elapsedSeconds;
+
+      if (sessionResult.finish) {
+        await _completeAndShowNotes(
+          slug: slug,
+          label: label,
+          tutorId: choice.tutor.id,
+          sessionId: start.sessionId,
+          kind: kind,
+          transcript: transcript,
+          addElapsedSeconds: sessionSeconds - priorElapsed.inSeconds,
+        );
+      } else {
+        await LessonApiService.saveProgress(
+          slug: slug,
+          tutorId: choice.tutor.id,
+          sessionId: start.sessionId,
+          transcript: transcript,
+          addElapsedSeconds: (sessionSeconds - priorElapsed.inSeconds)
+              .clamp(0, 15 * 60),
+        );
+        await _loadPath();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppText.current.home.continueConversation,
+            ),
+          ),
+        );
+      }
     } on ApiException catch (err) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -231,6 +292,104 @@ class _LessonScreenState extends State<LessonScreen> {
     }
   }
 
+  /// Home "Continue" — aynı hoca veya yeni hoca seçimi.
+  Future<void> resumeFromHome({
+    required String slug,
+    required String label,
+    String? tutorId,
+    String? tutorSlug,
+  }) async {
+    final text = AppText.current;
+    TutorDto? previous;
+    if (tutorId != null || (tutorSlug != null && tutorSlug.isNotEmpty)) {
+      try {
+        final tutors = await TutorApiService.fetchTutors();
+        for (final t in tutors) {
+          if ((tutorId != null && t.id == tutorId) ||
+              (tutorSlug != null && t.slug == tutorSlug)) {
+            previous = t;
+            break;
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (!mounted) return;
+
+    if (previous != null) {
+      final action = await showModalBottomSheet<String>(
+        context: context,
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (ctx) {
+          final name = _tutorName(previous!);
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    text.home.continueConversation,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    text.home.continueWithTutor(name: name),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(ctx, 'same'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    child: Text(text.home.continueSameTutor(name: name)),
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton(
+                    onPressed: () => Navigator.pop(ctx, 'other'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    child: Text(text.home.chooseOtherTutor),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+      if (!mounted) return;
+      if (action == 'same') {
+        await _startWithTutor(
+          slug: slug,
+          label: label,
+          kind: 'lesson',
+          preferredTutor: previous,
+        );
+        return;
+      }
+      if (action != 'other') return;
+    }
+
+    await _startWithTutor(slug: slug, label: label, kind: 'lesson');
+  }
+
   Future<void> _completeAndShowNotes({
     required String slug,
     required String label,
@@ -238,6 +397,7 @@ class _LessonScreenState extends State<LessonScreen> {
     required String sessionId,
     required String kind,
     required List<Map<String, String>> transcript,
+    int? addElapsedSeconds,
   }) async {
     final text = AppText.current.lessonPage;
     showDialog<void>(
@@ -260,6 +420,7 @@ class _LessonScreenState extends State<LessonScreen> {
         sessionId: sessionId,
         kind: kind,
         transcript: transcript,
+        addElapsedSeconds: addElapsedSeconds,
       );
       if (!mounted) return;
       Navigator.of(context).pop();

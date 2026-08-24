@@ -11,7 +11,7 @@ import 'package:rive/rive.dart';
 import 'app/lingola_app.dart';
 import 'core/config/app_env.dart';
 import 'core/config/firebase_options.dart';
-import 'i18n/strings.g.dart';
+import 'core/i18n/app_locale_sync.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +31,7 @@ Future<void> main() async {
     await Firebase.initializeApp(options: firebaseOptions);
   }
 
-  LocaleSettings.setLocaleSync(AppLocale.en);
+  await AppLocaleSync.bootstrapFromCache();
   if (kDebugMode) {
     // ignore: avoid_print
     print('[lingola] API_BASE_URL=${AppEnv.apiBaseUrl}');

@@ -1,0 +1,49 @@
+Lingola – Çerez Politikası
+Son Güncelleme: 2025
+Lingola’ya hoş geldiniz. Lingola olarak, platformu kullandığınızda deneyiminizin daha güvenli, tutarlı ve işlevsel olması için çerezler ve benzeri teknolojiler kullanırız.  Bu Çerez Politikası; çerezlerin ne olduğunu, hangi amaçlarla kullanıldığını ve tercihlerinizi nasıl yönetebileceğinizi açıklamak amacıyla hazırlanmıştır.
+Lingola’yı kullanarak bu politikada belirtilen çerez kullanımını kabul etmiş olursunuz.
+1. Çerez Nedir?
+Çerezler, cihazınıza kaydedilen küçük veri dosyalarıdır.  Lingola’nın düzgün çalışmasını sağlar, tercihlerinizi hatırlar ve uygulamanın nasıl kullanıldığını teknik düzeyde anlamamıza yardımcı olur.
+Çerezler:
+	•	Kimliğinizi doğrudan tanımlamaz 
+	•	Kişisel içerik barındırmaz 
+	•	Teknik ve kullanım odaklı bilgiler içerir 
+2. Hangi Çerezleri Kullanıyoruz?
+Lingola, aşağıdaki çerez türlerini kullanabilir:
+a) Zorunlu Çerezler
+Uygulamanın temel işlevlerinin çalışması için gereklidir.  Oturum yönetimi, güvenlik kontrolleri ve temel sistem bileşenlerinin doğru çalışmasını sağlar.
+Bu çerezler olmadan Lingola’nın bazı özellikleri düzgün çalışmayabilir.
+b) Performans ve Analitik Çerezleri
+Uygulamanın nasıl kullanıldığını anlamamıza yardımcı olur.  Hangi özelliklerin daha sık kullanıldığını ve hangi alanların geliştirilmesi gerektiğini analiz etmemizi sağlar.
+Bu veriler toplu ve anonim şekilde değerlendirilir.
+c) Kişiselleştirme Çerezleri
+Dil seçimi, görünüm ayarları veya kullanım tercihleri gibi bilgileri hatırlayarak daha tutarlı bir deneyim sunar.
+d) Pazarlama ve Tanıtım Çerezleri
+Kullanıcının onay vermesi halinde, uygulama içi içeriklerin daha uygun şekilde sunulmasını destekler.  Bazı durumlarda üçüncü taraf hizmetlerle entegre şekilde çalışabilir.
+3. Çerezleri Neden Kullanıyoruz?
+Lingola çerezleri aşağıdaki amaçlarla kullanır:
+	•	Uygulamanın güvenli ve stabil çalışmasını sağlamak 
+	•	Kullanıcı tercihlerini hatırlamak 
+	•	Performans ve kullanım analizleri yapmak 
+	•	Hizmet kalitesini geliştirmek 
+	•	Kullanıcı arayüzünü daha tutarlı hâle getirmek 
+4. Üçüncü Taraf Çerezleri
+Lingola, analiz veya ölçümleme hizmetleri sunan üçüncü taraf sağlayıcılarla çalışabilir.  Bu sağlayıcılar kendi çerezlerini kullanabilir ve bu çerezler ilgili hizmet sağlayıcının gizlilik ve çerez politikalarına tabidir.
+Lingola, üçüncü taraf çerezlerini yalnızca hizmet kalitesini artırma amacıyla kullanır.
+5. Çerez Yönetimi
+Çerez tercihleri üzerinde kontrol size aittir. Dilerseniz:
+	•	Cihaz ayarlarından 
+	•	Uygulama izinlerinden 
+	•	Tarayıcı ayarlarından 
+çerezleri sınırlayabilir, silebilir veya tamamen devre dışı bırakabilirsiniz.
+Not: Zorunlu çerezlerin devre dışı bırakılması, Lingola’nın bazı temel özelliklerinin çalışmamasına neden olabilir.
+
+6. Verilerin Kullanımı
+Çerezler aracılığıyla toplanan bilgiler kişisel veri niteliği taşıyorsa, Lingola Gizlilik Politikası kapsamında işlenir.  Veriler yalnızca yasal sınırlar içinde, açık amaçlarla ve güvenli yöntemlerle kullanılır.
+7. Politika Güncellemeleri
+Teknolojik gelişmeler veya yasal düzenlemeler doğrultusunda bu Çerez Politikası güncellenebilir.  Güncel sürüm her zaman uygulama ve web sitesi üzerinden erişilebilir olacaktır.
+8. İletişim
+Çerezler veya bu politika hakkında sorularınız için bizimle iletişime geçebilirsiniz:
+📩 E-posta: support@fly-work.com
+
+

@@ -1,0 +1,68 @@
+Lingola – Datenschutzrichtlinie  
+Letzte Aktualisierung: 2025  
+Willkommen bei Lingola. Bei Lingola nehmen wir den Datenschutz der Nutzer ernst; wir verpflichten uns, Ihre personenbezogenen Daten sicher, transparent und kontrolliert zu verarbeiten.  
+Diese Datenschutzrichtlinie wurde erstellt, um zu erklären, wie die über die Lingola mobile Anwendung und die Website (“Plattform”) gesammelten Informationen verarbeitet, gespeichert und geschützt werden.  
+Durch die Nutzung von Lingola stimmen Sie den in dieser Richtlinie beschriebenen Praktiken zu.  
+
+1. Gesammelte Informationen  
+Lingola erhebt nur die notwendigen und begrenzten Daten, um Dienstleistungen anzubieten und die Nutzererfahrung zu verbessern. Die gesammelten Informationen werden in die folgenden Kategorien unterteilt:  
+a) Vom Nutzer bereitgestellte Informationen  
+	•	Name, Benutzername oder Profilinformationen  
+	•	E-Mail-Adresse  
+	•	App-Präferenzen  
+	•	Spracheinstellungen und Nutzungseinstellungen  
+b) Automatisch gesammelte Informationen  
+	• Geräteinformationen (Gerätemodell, Betriebssystem, App-Version usw.)  
+	•	IP-Adresse und grundlegende Interaktionsprotokolle  
+	•	Informationen zur Nutzung und Navigation innerhalb der App  
+Diese Informationen werden verwendet, um die Funktionsweise der Anwendung zu gewährleisten, sie weiterzuentwickeln und die Leistung zu verbessern.  
+
+2. Zwecke der Datenverwendung  
+Die gesammelten Informationen werden zu folgenden Zwecken verarbeitet:  
+	•	Erstellung und Verwaltung von Konten  
+	•	Nutzerverifizierung und sichere Anmeldung  
+	•	Persönliche Anpassung der Sprachlernerfahrung  
+	•	Verbesserung der App-Leistung und Stabilität  
+	•	Entwicklung neuer Funktionen  
+	•	Sicherheit und Verhinderung von Missbrauch  
+	•	Angebot von Informations- und Werbeinhalten, sofern der Nutzer zustimmt  
+Lingola verarbeitet personenbezogene Daten nur zu klaren, legitimen und begrenzten Zwecken.  
+Personenbezogene Informationen werden ohne Ihre Zustimmung nicht an Dritte verkauft.  
+
+3. Dienste Dritter  
+Lingola kann mit Drittanbietern zusammenarbeiten, die Analyse-, Leistungsbewertungs- und technische Infrastruktur-Dienstleistungen anbieten.  
+Diese Dienstanbieter verarbeiten Daten nur im Auftrag von Lingola und im Rahmen ihrer eigenen Datenschutzrichtlinien.  
+Zugriffe von Dritten sind auf die Verbesserung der Nutzererfahrung und die Gewährleistung einer ordnungsgemäßen Funktionsweise der Anwendung beschränkt.  
+
+4. Cookies und ähnliche Technologien  
+Lingola kann Cookies und ähnliche Technologien verwenden, um Nutzerpräferenzen zu speichern, die Leistung zu analysieren und die Servicequalität zu verbessern.  
+Details zur Verwendung dieser Technologien werden in der Cookie-Richtlinie erläutert.  
+
+5. Aufbewahrungsdauer der Daten  
+Personenbezogene Daten werden nur so lange aufbewahrt, wie es die Verarbeitungszwecke erfordern.  
+Nach Ablauf der gesetzlichen Verpflichtungen oder bei Löschung des Nutzerkontos werden die Daten innerhalb einer angemessenen Frist sicher gelöscht oder anonymisiert.  
+
+6. Datensicherheit  
+Lingola wendet technische und administrative Sicherheitsmaßnahmen an, die den Branchenstandards entsprechen, um die Nutzerdaten zu schützen.  
+Regelmäßige Sicherheitsüberprüfungen werden durchgeführt, um unbefugten Zugriff, Datenverlust oder Missbrauchsrisiken zu minimieren.  
+Es kann jedoch keine 100%ige Sicherheit bei der Übertragung von Daten über das Internet garantiert werden. Daher ist es wichtig, dass die Nutzer sich dessen bewusst sind.  
+
+7. Nutzerrechte  
+Nutzer haben folgende Rechte:  
+	•	Zugriff auf ihre personenbezogenen Daten  
+	•	Anforderung der Berichtigung falscher oder unvollständiger Daten  
+	•	Anforderung der Löschung ihres Kontos und ihrer Daten  
+	•	Widerruf der Zustimmung zu den Datenverarbeitungen  
+Diese Anfragen werden über das Support-Team bearbeitet.  
+
+8. Internationale Datenübertragungen  
+Lingola kann mit Infrastruktur-Anbietern zusammenarbeiten, die weltweit Dienstleistungen anbieten.  
+Dies kann die Übertragung von Daten auf Server in verschiedenen Ländern erfordern. In solchen Fällen werden geeignete technische und rechtliche Schutzmaßnahmen ergriffen.  
+
+9. Änderungen der Richtlinie  
+Lingola kann die Datenschutzrichtlinie gemäß technologischen Entwicklungen oder gesetzlichen Anforderungen aktualisieren.  
+Die aktuelle Version wird jederzeit über die App und die Website zugänglich sein.  
+
+10. Kontakt  
+Für Fragen und Anfragen zu Datenschutz, Datennutzung oder dieser Richtlinie können Sie uns kontaktieren:  
+📩 E-Mail: support@fly-work.com

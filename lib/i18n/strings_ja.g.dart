@@ -1,0 +1,2097 @@
+///
+/// Generated file. Do not edit.
+///
+// coverage:ignore-file
+// ignore_for_file: type=lint, unused_import
+// dart format off
+
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:slang/generated.dart';
+import 'strings.g.dart';
+
+// Path: <root>
+class TranslationsJa with BaseTranslations<AppLocale, Translations> implements Translations {
+	/// You can call this constructor and build your own translation instance of this locale.
+	/// Constructing via the enum [AppLocale.build] is preferred.
+	TranslationsJa({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver, TranslationMetadata<AppLocale, Translations>? meta})
+		: assert(overrides == null, 'Set "translation_overrides: true" in order to enable this feature.'),
+		  $meta = meta ?? TranslationMetadata(
+		    locale: AppLocale.ja,
+		    overrides: overrides ?? {},
+		    cardinalResolver: cardinalResolver,
+		    ordinalResolver: ordinalResolver,
+		  ) {
+		$meta.setFlatMapFunction(_flatMapFunction);
+	}
+
+	/// Metadata for the translations of <ja>.
+	@override final TranslationMetadata<AppLocale, Translations> $meta;
+
+	/// Access flat map
+	@override dynamic operator[](String key) => $meta.getTranslation(key);
+
+	late final TranslationsJa _root = this; // ignore: unused_field
+
+	@override 
+	TranslationsJa $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsJa(meta: meta ?? this.$meta);
+
+	// Translations
+	@override late final _Translations$app$ja app = _Translations$app$ja._(_root);
+	@override late final _Translations$common$ja common = _Translations$common$ja._(_root);
+	@override late final _Translations$onboarding$ja onboarding = _Translations$onboarding$ja._(_root);
+	@override late final _Translations$targetLanguage$ja targetLanguage = _Translations$targetLanguage$ja._(_root);
+	@override late final _Translations$language$ja language = _Translations$language$ja._(_root);
+	@override late final _Translations$setup$ja setup = _Translations$setup$ja._(_root);
+	@override late final _Translations$accountCreating$ja accountCreating = _Translations$accountCreating$ja._(_root);
+	@override late final _Translations$previewChat$ja previewChat = _Translations$previewChat$ja._(_root);
+	@override late final _Translations$paywall$ja paywall = _Translations$paywall$ja._(_root);
+	@override late final _Translations$auth$ja auth = _Translations$auth$ja._(_root);
+	@override late final _Translations$nav$ja nav = _Translations$nav$ja._(_root);
+	@override late final _Translations$home$ja home = _Translations$home$ja._(_root);
+	@override late final _Translations$libraryPage$ja libraryPage = _Translations$libraryPage$ja._(_root);
+	@override late final _Translations$wordPracticePage$ja wordPracticePage = _Translations$wordPracticePage$ja._(_root);
+	@override late final _Translations$quizPage$ja quizPage = _Translations$quizPage$ja._(_root);
+	@override late final _Translations$placeholder$ja placeholder = _Translations$placeholder$ja._(_root);
+	@override late final _Translations$tutorPage$ja tutorPage = _Translations$tutorPage$ja._(_root);
+	@override late final _Translations$lessonPage$ja lessonPage = _Translations$lessonPage$ja._(_root);
+	@override late final _Translations$rolePlayPage$ja rolePlayPage = _Translations$rolePlayPage$ja._(_root);
+	@override late final _Translations$notificationsPage$ja notificationsPage = _Translations$notificationsPage$ja._(_root);
+	@override late final _Translations$profilePage$ja profilePage = _Translations$profilePage$ja._(_root);
+	@override late final _Translations$pushNotifications$ja pushNotifications = _Translations$pushNotifications$ja._(_root);
+}
+
+// Path: app
+class _Translations$app$ja implements Translations$app$en {
+	_Translations$app$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get name => 'Lingola';
+	@override String get premium => 'プレミアム';
+	@override String get notifications => '通知';
+	@override String get streak => '学習の連続日数';
+	@override String get profile => 'プロフィール';
+}
+
+// Path: common
+class _Translations$common$ja implements Translations$common$en {
+	_Translations$common$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get continueLabel => '続ける';
+	@override String get back => '戻る';
+	@override String get locked => 'ロックされています';
+	@override String minutes({required Object value}) => '${value} 分';
+	@override String get close => '閉じる';
+	@override String get getStarted => '始める';
+	@override String get connectionError => '接続できません。インターネットを確認して再試行してください。';
+	@override String get genericError => '何かがうまくいきませんでした。もう一度お試しください。';
+	@override String get tryAgain => '再試行';
+}
+
+// Path: onboarding
+class _Translations$onboarding$ja implements Translations$onboarding$en {
+	_Translations$onboarding$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String pageA11y({required Object current, required Object total}) => 'オンボーディングページ ${current} / ${total}';
+	@override late final _Translations$onboarding$slide1$ja slide1 = _Translations$onboarding$slide1$ja._(_root);
+	@override late final _Translations$onboarding$slide2$ja slide2 = _Translations$onboarding$slide2$ja._(_root);
+	@override late final _Translations$onboarding$slide3$ja slide3 = _Translations$onboarding$slide3$ja._(_root);
+}
+
+// Path: targetLanguage
+class _Translations$targetLanguage$ja implements Translations$targetLanguage$en {
+	_Translations$targetLanguage$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '学びたい言語を選んでください';
+	@override String get comingSoon => 'さらに多くの言語がもうすぐ登場します';
+	@override String get korean => '韓国語';
+	@override String get portuguese => 'ポルトガル語';
+	@override String get portugueseBrazil => 'ポルトガル語（ブラジル）';
+	@override String get german => 'ドイツ語';
+	@override String get italian => 'イタリア語';
+	@override String get simplifiedChinese => '簡体字中国語';
+	@override String get arabic => 'アラビア語';
+	@override String get turkish => 'トルコ語';
+	@override String get hindi => 'ヒンディー語';
+}
+
+// Path: language
+class _Translations$language$ja implements Translations$language$en {
+	_Translations$language$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String step({required Object total, required Object current}) => '${total}のうち${current}ステップ';
+	@override String get title => '何を話したいですか？';
+	@override String get nativeSection => '私は話します';
+	@override String get nativeField => '母国語';
+	@override String get nativeName => 'トルコ語';
+	@override String get targetSection => '学びたい言語';
+	@override String get targetField => '目標言語';
+	@override String get targetName => '英語';
+	@override String get direction => '言語の方向';
+	@override String get selectLanguage => '言語を選択';
+	@override String get comingSoonBadge => '近日公開...';
+	@override String get english => '英語';
+	@override String get french => 'フランス語';
+	@override String get japanese => '日本語';
+	@override String get spanish => 'スペイン語';
+	@override String get russian => 'ロシア語';
+}
+
+// Path: setup
+class _Translations$setup$ja implements Translations$setup$en {
+	_Translations$setup$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get goalTitle => 'あなたの目標は何ですか？';
+	@override String get goalCareer => 'キャリア開発';
+	@override String get goalTravel => '旅行';
+	@override String get goalLiving => '海外生活';
+	@override String get goalStudying => '留学';
+	@override String get goalOther => 'その他';
+	@override String get levelTitle => 'あなたの現在の言語レベルは？';
+	@override String get levelBeginner => '初心者 — 単語をいくつか知っています';
+	@override String get levelIntermediate => '中級者 — 簡単な会話ができます';
+	@override String get levelAdvanced => '上級者 — 話せますが、もっと上達したいです';
+	@override String get paceTitle => 'どのくらいの速さで上達したいですか？';
+	@override String get paceLight => '1日5-10分（ライト）';
+	@override String get paceRecommended => '1日15-20分（推奨）';
+	@override String get paceFast => '1日30分以上（早い結果）';
+}
+
+// Path: accountCreating
+class _Translations$accountCreating$ja implements Translations$accountCreating$en {
+	_Translations$accountCreating$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'あなたの個人アカウントが作成中です';
+	@override String get stepContent => 'コンテンツが作成中です';
+	@override String get stepDialogues => 'ダイアログが準備中です';
+	@override String get stepLessons => 'レッスンが最適化中です';
+	@override String get stepPlan => 'あなたのプランが最終調整中です';
+	@override String get optimization => '最適化';
+	@override String progress({required Object value}) => '${value}%';
+}
+
+// Path: previewChat
+class _Translations$previewChat$ja implements Translations$previewChat$en {
+	_Translations$previewChat$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get brand => 'Lingola';
+	@override String get lessonBadge => 'レッスン 1: 挨拶';
+	@override String get speed => '1x';
+	@override String get typeMessage => 'メッセージを入力...';
+	@override String get incoming1 => 'こんにちは！Lingolaへようこそ — 私があなたのAIチューターです。英語で簡単な挨拶を試してみる準備はできていますか？';
+	@override String get outgoing1 => 'こんにちは！練習する準備ができています。';
+	@override String get incoming2Highlight => 'おはよう';
+	@override String get incoming2Rest => '、エムラ！あなたが準備ができていると聞いて嬉しいです。朝のコーヒーは、つながりを築く素晴らしいスタートです。何について話したいですか？';
+	@override String get holdToSpeak => '話すには長押し';
+	@override String get recording => '録音中…送信するには離してください';
+	@override String get slideUpToLock => '上にスワイプしてロック';
+	@override String get slideLeftToCancel => '左にスワイプしてキャンセル';
+	@override String get recordingLockedHint => '終わったら送信をタップ';
+}
+
+// Path: paywall
+class _Translations$paywall$ja implements Translations$paywall$en {
+	_Translations$paywall$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '今日から話し始めよう — 無料';
+	@override String get subtitle => '無限の学習機会';
+	@override String get noCommitment => '契約不要';
+	@override String get cancelAnytime => 'いつでもキャンセル可能';
+	@override String get noPaymentToday => '今日は支払いなし';
+	@override String get daysFree => '3日間無料';
+	@override String get thenPrice => 'その後は\$1.99/月';
+	@override String get trialActive => '無料トライアル中';
+	@override String get payableToday => '今日の支払い';
+	@override String get payableValue => '3日間無料 0.00\$';
+	@override String get paymentDate => '支払い日: 2026年3月13日';
+	@override String get paymentAmount => '9.99\$';
+}
+
+// Path: auth
+class _Translations$auth$ja implements Translations$auth$en {
+	_Translations$auth$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get trainersBadge => '多様なAIトレーナーたち';
+	@override String get title => '今日から新しい言語を話し始めよう';
+	@override String get body => 'AIとのリアルな会話を練習しよう。\nプレッシャーなし、ジャッジなし。';
+	@override String get continueGoogle => 'Googleで続ける';
+	@override String get continueApple => 'Appleで続ける';
+	@override String get continueGuest => 'ゲストとして続ける';
+	@override String get legal => 'Lingolaにサインアップすることで、利用規約に同意したことになります。プライバシーポリシーとクッキーポリシーでデータの処理方法を学んでください。';
+	@override String get terms => '利用規約';
+	@override String get privacy => 'プライバシーポリシー';
+	@override String get cookies => 'クッキーポリシー';
+}
+
+// Path: nav
+class _Translations$nav$ja implements Translations$nav$en {
+	_Translations$nav$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get home => 'ホーム';
+	@override String get tutor => 'チューター';
+	@override String get lesson => 'レッスン';
+	@override String get rolePlay => 'ロールプレイ';
+	@override String get profile => 'プロフィール';
+}
+
+// Path: home
+class _Translations$home$ja implements Translations$home$en {
+	_Translations$home$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get streakCount => '2';
+	@override String get greeting => 'おはよう、Jhon';
+	@override String get todayPractice => '今日の練習';
+	@override String get continueConversation => '会話を続ける';
+	@override String continueWithTutor({required Object name}) => '${name} と続けますか？それとも別のチューターを選びますか？';
+	@override String continueSameTutor({required Object name}) => '${name} と続ける';
+	@override String get chooseOtherTutor => '別のチューターを選ぶ';
+	@override String minutesLeft({required Object value}) => '残り ${value} 分';
+	@override String get lessonProgress => 'レッスン2 — 挨拶';
+	@override String get timeCurrent => '0分';
+	@override String get timeTotal => '/ 15分';
+	@override String get kContinue => '続ける';
+	@override String get learningPath => 'A1 - スターター';
+	@override String get allLessons => 'すべてのレッスン';
+	@override String get introductions => '自己紹介 I';
+	@override String get greetings => '挨拶';
+	@override String get jobs => '仕事';
+	@override String get favoriteRoom => 'お気に入りの部屋';
+	@override String get dailyRoutine => '日常生活';
+	@override String get scroll => 'スクロール';
+	@override String get liveLesson => 'ライブレッスン';
+	@override String get liveLessonSubtitle => '私たちのチューターとビデオ通話をしましょう';
+	@override String get moreTutor => 'もっとチューター';
+	@override String get startTalkNow => '今すぐ話し始める';
+	@override String get tutorLingola => 'Lingola';
+	@override String get tutorMei => 'Mei Lin';
+	@override String get tutorKate => 'Kate';
+	@override String get tagAdaptive => '適応型';
+	@override String get tagCalm => '落ち着いた';
+	@override String get tagPatient => '忍耐強い';
+	@override String get tagMethodical => '計画的';
+	@override String get tagEncouraging => '励まし';
+	@override String get tagMore => '+5';
+	@override String get moreFeatures => 'もっと機能';
+	@override String get practiceLabel => '練習';
+	@override String get wordPractice => '単語練習';
+	@override String get wordPracticeBody => '選んだ言語の語彙を毎日増やそう';
+	@override String get immersiveLabel => '没入型';
+	@override String get quiz => 'クイズ';
+	@override String get quizBodyLine1 => '実際の';
+	@override String get quizBodyLine2 => '文脈の例を通じて学ぶ';
+	@override String get getStarted => '始める';
+	@override String get library => 'ライブラリ';
+	@override String get libraryTitle => '学び、保存する';
+	@override String get learnMore => 'もっと学ぶ';
+	@override late final _Translations$home$premium$ja premium = _Translations$home$premium$ja._(_root);
+}
+
+// Path: libraryPage
+class _Translations$libraryPage$ja implements Translations$libraryPage$en {
+	_Translations$libraryPage$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'ライブラリ';
+	@override String get searchWord => '検索ワード';
+	@override String savedWordCount({required Object count}) => '${count} 保存した単語';
+	@override String get savedWordTab => '保存した単語';
+	@override String get dictionaryTab => '辞書';
+	@override String get dictionaryLabel => '辞書';
+}
+
+// Path: wordPracticePage
+class _Translations$wordPracticePage$ja implements Translations$wordPracticePage$en {
+	_Translations$wordPracticePage$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '単語練習';
+	@override String get turkish => 'トルコ語';
+	@override String get save => '保存する';
+	@override String get listen => '聞く';
+	@override String get hint => 'ヒント';
+	@override String get previous => '前へ';
+	@override String get next => '次へ';
+}
+
+// Path: quizPage
+class _Translations$quizPage$ja implements Translations$quizPage$en {
+	_Translations$quizPage$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'クイズ';
+	@override String get headline => '今日は何を改善したいですか？';
+	@override String get subtitle => 'トレーニングを選んで — 3分以内で終わります 🚀';
+	@override String get readingTitle => 'リーディング';
+	@override String get readingBody => '記事やストーリーを通じた理解';
+	@override String get writingTitle => 'ライティング';
+	@override String get writingBody => '文法と語彙の練習';
+	@override String get speakingTitle => 'スピーキング';
+	@override String get speakingBody => 'AI音声エンジンによる発音';
+	@override String get readingTestTitle => 'リーディングテスト';
+	@override String get read => '読む';
+	@override String get listeningHint => '英単語をはっきりと話してください…';
+	@override String get micPermissionDenied => 'マイクまたは音声認識が利用できません。';
+	@override String get matchSuccess => '素晴らしい！その単語と一致しました。';
+	@override String matchFail({required Object heard}) => '"${heard}"が聞こえました。もう一度試してください。';
+	@override String get successfulTitle => '成功！';
+	@override String get successfulBody => 'ネイティブスピーカーのような発音！';
+	@override String get failedTitle => '失敗';
+	@override String get failedBody => 'ほぼできていました、もう一度チャンスを与えてください';
+	@override String get tryAgain => 'もう一度試す';
+	@override String get writingTestTitle => 'ライティングテスト';
+	@override String get sourceLanguage => 'ソース言語';
+	@override String get answer => '回答';
+	@override String get writeAnswerHint => 'ここにあなたの答えを書いてください...';
+	@override String get submit => '送信';
+	@override String get speakingTestTitle => 'スピーキングテスト';
+	@override String get speakingProficiency => 'スピーキング能力';
+	@override String get speakClearlyHint => 'マイクに向かってはっきり話してください：';
+	@override String get speakUp => '大きな声で話す';
+	@override String get recording => '録音中...';
+	@override String questionOf({required Object current, required Object total}) => '質問 ${current} / ${total}';
+}
+
+// Path: placeholder
+class _Translations$placeholder$ja implements Translations$placeholder$en {
+	_Translations$placeholder$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String title({required Object tab}) => '${tab} が準備中です';
+	@override String body({required Object tab}) => '${tab} のための集中した体験を準備しています。';
+}
+
+// Path: tutorPage
+class _Translations$tutorPage$ja implements Translations$tutorPage$en {
+	_Translations$tutorPage$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'チューター';
+	@override String get chatWithLingola => 'Lingolaとチャット';
+	@override String chatWithTutor({required Object name}) => '${name}とチャット';
+	@override String get chatHistory => 'チャット履歴';
+	@override String get history => '履歴';
+	@override String get filter => 'フィルター';
+	@override String get country => '国';
+	@override String get focus => 'フォーカス';
+	@override String get moreCountries => '8カ国以上';
+	@override String get moreFocus => '+8';
+	@override String get save => '保存';
+	@override String get startTalkNow => '今すぐ話し始める';
+	@override String get typeMessage => 'メッセージを入力...';
+	@override String get speaker => 'スピーカー';
+	@override String get messagesCount => '12';
+	@override late final _Translations$tutorPage$tutors$ja tutors = _Translations$tutorPage$tutors$ja._(_root);
+	@override late final _Translations$tutorPage$tags$ja tags = _Translations$tutorPage$tags$ja._(_root);
+	@override String get historyPreview1 => 'やあ！退屈で爆発しそうだった...';
+	@override String get historyPreview2 => '今日は食べ物の注文を練習しようか？';
+	@override String get time1 => '午前11:00';
+	@override String get time2 => '昨日';
+	@override late final _Translations$tutorPage$chat$ja chat = _Translations$tutorPage$chat$ja._(_root);
+	@override late final _Translations$tutorPage$calling$ja calling = _Translations$tutorPage$calling$ja._(_root);
+}
+
+// Path: lessonPage
+class _Translations$lessonPage$ja implements Translations$lessonPage$en {
+	_Translations$lessonPage$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '学びを続ける';
+	@override String get profile => 'プロフィール';
+	@override String get language => '目標言語';
+	@override String get completed => '完了';
+	@override String get locked => 'ロック中';
+	@override String get pickTutorTitle => 'チューターを選ぶ';
+	@override String get startTalk => 'レッスンを始める';
+	@override String get chatInstead => '代わりにチャットする';
+	@override String get lockedHint => 'このレッスンを解除するには、前のレッスンを終わらせてください。';
+	@override String get notesTitle => 'レッスンノート';
+	@override String get whatWeLearned => '今日学んだこと';
+	@override String get deleteNotes => 'レッスンノートを削除する';
+	@override String get deleteNotesConfirm => 'これらのノートを削除しますか？これは元に戻せません。';
+	@override String get delete => '削除';
+	@override String get cancel => 'キャンセル';
+	@override String get practiceCta => 'これが難しすぎた場合は、同じトピックを再度練習できます。';
+	@override String get practiceNow => 'このトピックを練習する';
+	@override String get openChat => 'チューターとのチャットを開く';
+	@override String get yourScore => 'あなたのスコア';
+	@override String bestScore({required Object score}) => '最高 ${score}/100';
+	@override String scoreChanged({required Object prev, required Object now}) => '${prev} → ${now}';
+	@override String get participationSilent => '受動的参加者';
+	@override String get participationSilentBody => '今回は静かでしたね。このレッスンを再受講した方がいいと思います。';
+	@override String get participationPassive => '低い参加';
+	@override String get participationPassiveBody => 'ほとんど話しませんでした。レッスンを再度試して、もっと話してみてください。';
+	@override String get participationActive => '良い参加';
+	@override String get participationActiveBody => '会話に参加しました。これを続けてください！';
+	@override String get participationStrong => '強い参加';
+	@override String get participationStrongBody => 'たくさん話しました。素晴らしい仕事です！';
+	@override String get retakeLesson => 'このレッスンを再受講する';
+	@override String get finishLesson => 'レッスンを終わらせる';
+	@override String get savingNotes => 'あなたのチューターが今日のノートを書いています…';
+	@override String get noNotes => 'このレッスンを終わらせて、チューターからのノートを受け取りましょう。';
+	@override String get notesDeleted => 'レッスンノートが削除されました';
+	@override late final _Translations$lessonPage$levels$ja levels = _Translations$lessonPage$levels$ja._(_root);
+}
+
+// Path: rolePlayPage
+class _Translations$rolePlayPage$ja implements Translations$rolePlayPage$en {
+	_Translations$rolePlayPage$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'ロールプレイ';
+	@override String get subtitle => '役割を選んで — 実際のシナリオを体験しよう 🎭';
+	@override String progressCompleted({required Object value}) => '%${value} 完了';
+	@override String minutes({required Object value}) => '${value} 分';
+	@override String get beginner => '初心者';
+	@override String get screenplay => 'シナリオ';
+	@override String get dailyInteractions => '日常のやり取り';
+	@override String get business => 'ビジネス';
+	@override late final _Translations$rolePlayPage$coffee$ja coffee = _Translations$rolePlayPage$coffee$ja._(_root);
+	@override late final _Translations$rolePlayPage$directions$ja directions = _Translations$rolePlayPage$directions$ja._(_root);
+	@override late final _Translations$rolePlayPage$interview$ja interview = _Translations$rolePlayPage$interview$ja._(_root);
+}
+
+// Path: notificationsPage
+class _Translations$notificationsPage$ja implements Translations$notificationsPage$en {
+	_Translations$notificationsPage$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '通知';
+	@override late final _Translations$notificationsPage$translation$ja translation = _Translations$notificationsPage$translation$ja._(_root);
+	@override late final _Translations$notificationsPage$offer$ja offer = _Translations$notificationsPage$offer$ja._(_root);
+	@override late final _Translations$notificationsPage$stories$ja stories = _Translations$notificationsPage$stories$ja._(_root);
+}
+
+// Path: profilePage
+class _Translations$profilePage$ja implements Translations$profilePage$en {
+	_Translations$profilePage$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'プロフィール';
+	@override String get userName => 'ジョン・ドー';
+	@override String get freeVersion => '無料版';
+	@override String get dayStreak => '連続学習日数！';
+	@override String get accountSettings => 'アカウント設定';
+	@override String get general => '一般';
+	@override String get profileSettings => 'プロフィール設定';
+	@override String get fullName => 'フルネーム';
+	@override String get email => 'Eメール';
+	@override String get deleteAccount => 'アカウントを削除';
+	@override String get save => '保存';
+	@override String get deleteTitle => 'あなたが去るのは望んでいませんが、理解しています。';
+	@override String get deleteBody => 'Lingolaの体験を向上させるために、なぜ離れたいのか教えてもらえますか？';
+	@override late final _Translations$profilePage$deleteReasons$ja deleteReasons = _Translations$profilePage$deleteReasons$ja._(_root);
+	@override String get messageOptional => 'メッセージ（任意）';
+	@override String get messageHint => 'メッセージがあれば、ぜひ書いてください。';
+	@override String get next => '次へ';
+	@override String get specialOfferTitle => '特別オファー';
+	@override String get specialOfferBody => '去る前に、あなたのために用意したオファーをチェックしてください。';
+	@override String get monthlyPlanTitle => '1ヶ月プランに切り替え';
+	@override String get monthlyPlanPrice => '\$79/月、いつでもキャンセル可能';
+	@override String get monthlyPlanDesc => '長期契約は不要です。月ごとにコミュニティとつながり続けましょう。';
+	@override String get whatYoullKeep => '保持するもの:';
+	@override String get keepCharacters => 'すべてのキャラクターにアクセス';
+	@override String get keepVideo => '無制限のビデオ通話';
+	@override String get keepCourses => 'すべてのコースにアクセス';
+	@override String get switchMonthlyCta => '月額プランに切り替え';
+	@override String get confirmTitle => '本当に大丈夫ですか？';
+	@override String get confirmBody => 'あなたが去るのは本当に見たくありません。失うものはこれです:';
+	@override String get loseCharacters => '無制限のキャラクターアクセス';
+	@override String get loseVideo => '無制限のビデオ通話アクセス';
+	@override String get loseCourses => 'すべてのコースへのアクセス';
+	@override String get discountTitle => '留まって1ヶ月60%オフ';
+	@override String get discountSubtitle => '今までで最高のオファー。たったの\$27.60/月';
+	@override String get acceptDiscountCta => '60%オフを受け入れて留まる';
+	@override String get farewellTitle => 'あなたが去るのは悲しいです';
+	@override String farewellBody({required Object date}) => 'あなたのメンバーシップはキャンセルされました。${date}まで現在の請求期間にアクセスできます。';
+	@override String get changeMindTitle => '✨ 気が変わった？';
+	@override String changeMindBody({required Object date}) => 'あなたの特典を保持するために、${date}の前にいつでもメンバーシップを再アクティブ化できます。';
+	@override String get reactivateCta => '待って、再アクティブ化したい';
+	@override String get done => '完了';
+	@override String get notifications => '通知';
+	@override String get appLanguage => 'アプリ言語';
+	@override String get selectLanguageTitle => '言語を選択';
+	@override String get premium => 'プレミアム';
+	@override String get passive => 'パッシブ';
+	@override String get shareFriend => '友達と共有';
+	@override String get shareWithFriendTitle => '友達と共有';
+	@override String get shareInviteBody => '友達を招待して、一緒に翻訳を楽しもう';
+	@override String get rateUs => '評価する';
+	@override String get faq => 'Lingola FAQ';
+	@override late final _Translations$profilePage$faqItems$ja faqItems = _Translations$profilePage$faqItems$ja._(_root);
+	@override String get support => 'サポート';
+	@override String get feedback => 'フィードバック';
+	@override String get progression => '進捗';
+	@override String get progressTitle => '進捗';
+	@override String get goodMorning => 'おはようございます、';
+	@override String get progressUserName => 'ジョン';
+	@override String get progressLanguage => '英語';
+	@override String get past7Days => '過去7日間';
+	@override String get past7DaysBody => '毎日勉強して連続学習日数を築き、強力な学習習慣を作りましょう。';
+	@override String get currentLevel => '現在のレベル';
+	@override String xpLeft({required Object level, required Object xp}) => '${level}に到達するまで、あと${xp} XPです！';
+	@override String get toNextLevel => '次のレベルへ';
+	@override String get dayStreakLabel => '連続学習日数';
+	@override String get totalPoints => '合計ポイント';
+	@override String get savedWords => '保存した単語';
+	@override String itemsToReview({required Object count}) => '${count} 件のレビューアイテム';
+	@override String get logout => 'ログアウト';
+	@override String get logoutTitle => 'ログアウトしようとしています';
+	@override String get logoutBody => 'またすぐにお会いしましょう！あなたの呼吸エクササイズが恋しいです。';
+	@override String get logoutConfirm => 'ログアウト';
+	@override String get logoutCancel => 'キャンセル';
+	@override late final _Translations$profilePage$days$ja days = _Translations$profilePage$days$ja._(_root);
+}
+
+// Path: pushNotifications
+class _Translations$pushNotifications$ja implements Translations$pushNotifications$en {
+	_Translations$pushNotifications$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Lingola';
+	@override List<String> get h2 => [
+		'ちょっとした休憩を取ったようですね。',
+		'一言の時間はありますか？',
+		'私たちはここにいます — 焦らずに。',
+		'学習のリズムが少し止まりましたね。',
+		'ミニレビューをしてみると気持ちが良いかもしれません。',
+	];
+	@override List<String> get h4 => [
+		'今日は新しい言葉が待っているかもしれません 👀',
+		'ちょっとした練習ができるかもしれません。',
+		'役立つフレーズを見逃したかもしれません。',
+		'今日の進捗はまだ開いています。',
+		'一言、一文…もしかしたら両方。',
+	];
+	@override List<String> get h8 => [
+		'毎日進む必要はありません。',
+		'少しのレビューも大切です。',
+		'今日は勉強しなくても何も失いませんでした。',
+		'あなたの準備ができたら、私たちも準備万端です。',
+		'言語学習はマラソンです、スプリントではありません。',
+	];
+	@override List<String> get h24 => [
+		'1日が過ぎました。あなたの言葉はまだここにあります。',
+		'休憩を取るのは普通のことです。',
+		'あなたの場所は、あなたが離れたところにそのままです。',
+		'いつでも続けてください。',
+		'言語は逃げません — 私たちも逃げません。',
+	];
+}
+
+// Path: onboarding.slide1
+class _Translations$onboarding$slide1$ja implements Translations$onboarding$slide1$en {
+	_Translations$onboarding$slide1$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '数週間で自信を持って話そう — 数ヶ月ではなく';
+	@override String get body => 'AIとリアルな会話を練習しよう。毎日、アクセント、自信、流暢さを向上させる。';
+	@override String get testimonialName => 'サラ・ウィリアムズ、24歳';
+	@override String get testimonialBody => '以前は英語を話せませんでした。今では毎日仕事で話しています。';
+}
+
+// Path: onboarding.slide2
+class _Translations$onboarding$slide2$ja implements Translations$onboarding$slide2$en {
+	_Translations$onboarding$slide2$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '価格なしのプライベートチューター';
+	@override String get body => 'リアルな会話。即時フィードバック。\nスケジュールなし。プレッシャーなし。';
+	@override String get realTutor => 'リアルチューター';
+	@override String get lingola => 'Lingola';
+	@override String get priceReal => '\$30 / 時間';
+	@override String get priceLingola => '\$9.99 / 年';
+	@override String get versus => 'VS';
+	@override String get scheduled => 'スケジュール済み';
+	@override String get anytime => 'いつでも';
+	@override String get stressful => 'ストレスがかかる';
+	@override String get noPressure => 'プレッシャーなし';
+	@override String get price => '価格';
+	@override String get availability => '利用可能性';
+	@override String get feeling => '感覚';
+}
+
+// Path: onboarding.slide3
+class _Translations$onboarding$slide3$ja implements Translations$onboarding$slide3$en {
+	_Translations$onboarding$slide3$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'あなたに合わせた学習プラン';
+	@override String get body => 'あなたの目標、あなたのペース、あなたのレベル。\n初心者から流暢まで — 一歩ずつ。';
+	@override String get goal => '目標';
+	@override String get practice => '練習';
+	@override String get progress => '進捗';
+}
+
+// Path: home.premium
+class _Translations$home$premium$ja implements Translations$home$premium$en {
+	_Translations$home$premium$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get titleBefore => '流暢に話すための';
+	@override String get titleHighlight => '道';
+	@override String get titleAfter => 'ミスを恐れずに。';
+	@override String get descriptionBefore => '世界中の何百万もの学生に参加しよう。今日から言語の壁を打破しよう — ';
+	@override String get descriptionHighlight => '最初の3日間は完全無料。';
+	@override String get feature1 => '24/7アクセス可能なAIチューター';
+	@override String get feature2 => 'プライベートチューターへの無制限アクセス';
+	@override String get feature3 => 'あなたに合わせた毎日のレッスンプラン';
+	@override String get priceAmount => '1.99\$';
+	@override String get pricePeriod => '/月';
+	@override String get discount => '年契約で40%オフ';
+	@override String get cta => '始める';
+}
+
+// Path: tutorPage.tutors
+class _Translations$tutorPage$tutors$ja implements Translations$tutorPage$tutors$en {
+	_Translations$tutorPage$tutors$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get lingola => 'Lingola';
+	@override String get zephyrion => 'ゼファリオン';
+	@override String get vaelen => 'ヴァエレン';
+	@override String get elrion => 'エルリオン';
+	@override String get ukrath => 'ウクラト';
+	@override String get elena => 'エレナ';
+	@override String get kenji => 'ケンジ';
+	@override String get freya => 'フレイヤ';
+	@override String get camila => 'カミラ';
+	@override String get marco => 'マルコ';
+	@override String get julian => 'ジュリアン';
+	@override String get ines => 'イネス';
+	@override String get felix => 'フェリックス';
+	@override String get diego => 'ディエゴ';
+	@override String get amara => 'アマラ';
+	@override String get erik => 'エリック';
+	@override String get katie => 'ケイティ';
+	@override String get morgan => 'モーガン';
+	@override String get santa => 'サンタクロース';
+}
+
+// Path: tutorPage.tags
+class _Translations$tutorPage$tags$ja implements Translations$tutorPage$tags$en {
+	_Translations$tutorPage$tags$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get adaptive => '適応力がある';
+	@override String get calm => '落ち着いている';
+	@override String get patient => '忍耐強い';
+	@override String get organized => '整理整頓された';
+	@override String get relaxed => 'リラックスした';
+	@override String get methodical => '体系的な';
+	@override String get attentive => '注意深い';
+	@override String get more => '+5';
+	@override String get curious => '好奇心旺盛';
+	@override String get observer => '観察者';
+	@override String get ancientKnowledge => '古代の知識';
+	@override String get wise => '賢い';
+	@override String get clear => '明確な';
+	@override String get decisive => '決断力がある';
+	@override String get disciplined => '規律正しい';
+	@override String get smart => '賢い';
+	@override String get analytic => '分析的';
+	@override String get cheerful => '陽気な';
+	@override String get generous => '寛大な';
+}
+
+// Path: tutorPage.chat
+class _Translations$tutorPage$chat$ja implements Translations$tutorPage$chat$en {
+	_Translations$tutorPage$chat$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get incoming1 => 'おはよう！今日は練習する準備ができているのが嬉しいよ。';
+	@override String get outgoing1 => 'うん、挨拶から始めよう。';
+	@override String get incoming2 => '完璧。同僚にどうやって挨拶する？';
+	@override String get typing => '入力中';
+}
+
+// Path: tutorPage.calling
+class _Translations$tutorPage$calling$ja implements Translations$tutorPage$calling$en {
+	_Translations$tutorPage$calling$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get lessonBadge => 'レッスン1 : 挨拶';
+	@override String get nativeLine => '退屈？';
+	@override String get englishLine => '退屈？その言葉は私の語彙から消したよ。立ち上がって、計画はもう決まってる：カディキョイの新しいアーケードバーに行くよ。';
+	@override String get highlight => '退屈？';
+	@override String get close => '通話を終了';
+	@override String get toggleCaptions => '字幕を切り替え';
+	@override String get toggleHints => 'ヒントを切り替え';
+	@override String get toggleMic => 'マイクを切り替え';
+}
+
+// Path: lessonPage.levels
+class _Translations$lessonPage$levels$ja implements Translations$lessonPage$levels$en {
+	_Translations$lessonPage$levels$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$lessonPage$levels$a1$ja a1 = _Translations$lessonPage$levels$a1$ja._(_root);
+	@override late final _Translations$lessonPage$levels$a2$ja a2 = _Translations$lessonPage$levels$a2$ja._(_root);
+	@override late final _Translations$lessonPage$levels$b1$ja b1 = _Translations$lessonPage$levels$b1$ja._(_root);
+	@override late final _Translations$lessonPage$levels$b2$ja b2 = _Translations$lessonPage$levels$b2$ja._(_root);
+	@override late final _Translations$lessonPage$levels$c1$ja c1 = _Translations$lessonPage$levels$c1$ja._(_root);
+	@override late final _Translations$lessonPage$levels$c2$ja c2 = _Translations$lessonPage$levels$c2$ja._(_root);
+}
+
+// Path: rolePlayPage.coffee
+class _Translations$rolePlayPage$coffee$ja implements Translations$rolePlayPage$coffee$en {
+	_Translations$rolePlayPage$coffee$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'コーヒーショップでの注文';
+	@override String get screenplay => 'お気に入りの飲み物を注文し、サイズやトッピングを尋ね、合計を確認して、カウンターでコーヒーを受け取ります。';
+	@override late final _Translations$rolePlayPage$coffee$chat$ja chat = _Translations$rolePlayPage$coffee$chat$ja._(_root);
+}
+
+// Path: rolePlayPage.directions
+class _Translations$rolePlayPage$directions$ja implements Translations$rolePlayPage$directions$en {
+	_Translations$rolePlayPage$directions$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '道を尋ねる';
+	@override String get screenplay => '場所への道を尋ね、地下鉄やバスの行き方を確認し、チケットの情報を得て、レストランのおすすめを聞きます。';
+	@override late final _Translations$rolePlayPage$directions$chat$ja chat = _Translations$rolePlayPage$directions$chat$ja._(_root);
+}
+
+// Path: rolePlayPage.interview
+class _Translations$rolePlayPage$interview$ja implements Translations$rolePlayPage$interview$en {
+	_Translations$rolePlayPage$interview$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '就職面接';
+	@override String get screenplay => '自己紹介をし、一般的な面接の質問に答え、経験について話し、役割や次のステップについて尋ねます。';
+	@override late final _Translations$rolePlayPage$interview$chat$ja chat = _Translations$rolePlayPage$interview$chat$ja._(_root);
+}
+
+// Path: notificationsPage.translation
+class _Translations$notificationsPage$translation$ja implements Translations$notificationsPage$translation$en {
+	_Translations$notificationsPage$translation$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '新しい翻訳が準備できました';
+	@override String get body => 'あなたの音声翻訳ファイルはテキストに変換され、翻訳されました。';
+}
+
+// Path: notificationsPage.offer
+class _Translations$notificationsPage$offer$ja implements Translations$notificationsPage$offer$en {
+	_Translations$notificationsPage$offer$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '特別オファーが待っています';
+	@override String get body => 'プレミアムにアップグレードして、無制限の写真翻訳を50％オフで利用しましょう。';
+}
+
+// Path: notificationsPage.stories
+class _Translations$notificationsPage$stories$ja implements Translations$notificationsPage$stories$en {
+	_Translations$notificationsPage$stories$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => '新しいストーリーを発見しよう';
+	@override String get body => 'ストーリーを通じて新しい単語を学びましょう';
+}
+
+// Path: profilePage.deleteReasons
+class _Translations$profilePage$deleteReasons$ja implements Translations$profilePage$deleteReasons$en {
+	_Translations$profilePage$deleteReasons$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get aiCharacters => 'AIキャラクターがリアルだとは思えませんでした。';
+	@override String get videoIssues => 'ビデオチャットで技術的な問題が発生しています。';
+	@override String get pricing => 'サブスクリプションの価格が期待以上です。';
+	@override String get noMatch => '探しているスタイルのキャラクターが見つかりませんでした。';
+	@override String get shortTrial => '短期間だけ試したかったです。';
+	@override String get other => 'その他';
+}
+
+// Path: profilePage.faqItems
+class _Translations$profilePage$faqItems$ja implements Translations$profilePage$faqItems$en {
+	_Translations$profilePage$faqItems$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override late final _Translations$profilePage$faqItems$supportedLanguages$ja supportedLanguages = _Translations$profilePage$faqItems$supportedLanguages$ja._(_root);
+	@override late final _Translations$profilePage$faqItems$howAiWorks$ja howAiWorks = _Translations$profilePage$faqItems$howAiWorks$ja._(_root);
+	@override late final _Translations$profilePage$faqItems$offlineUse$ja offlineUse = _Translations$profilePage$faqItems$offlineUse$ja._(_root);
+	@override late final _Translations$profilePage$faqItems$isFree$ja isFree = _Translations$profilePage$faqItems$isFree$ja._(_root);
+	@override late final _Translations$profilePage$faqItems$pronunciationEval$ja pronunciationEval = _Translations$profilePage$faqItems$pronunciationEval$ja._(_root);
+	@override late final _Translations$profilePage$faqItems$dailyPractice$ja dailyPractice = _Translations$profilePage$faqItems$dailyPractice$ja._(_root);
+	@override late final _Translations$profilePage$faqItems$levelDetermination$ja levelDetermination = _Translations$profilePage$faqItems$levelDetermination$ja._(_root);
+	@override late final _Translations$profilePage$faqItems$realPeopleChat$ja realPeopleChat = _Translations$profilePage$faqItems$realPeopleChat$ja._(_root);
+	@override late final _Translations$profilePage$faqItems$dataSecurity$ja dataSecurity = _Translations$profilePage$faqItems$dataSecurity$ja._(_root);
+	@override late final _Translations$profilePage$faqItems$disableReminders$ja disableReminders = _Translations$profilePage$faqItems$disableReminders$ja._(_root);
+}
+
+// Path: profilePage.days
+class _Translations$profilePage$days$ja implements Translations$profilePage$days$en {
+	_Translations$profilePage$days$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get mon => '月';
+	@override String get tue => '火';
+	@override String get wed => '水';
+	@override String get thu => '木';
+	@override String get fri => '金';
+	@override String get sat => '土';
+	@override String get sun => '日';
+}
+
+// Path: lessonPage.levels.a1
+class _Translations$lessonPage$levels$a1$ja implements Translations$lessonPage$levels$a1$en {
+	_Translations$lessonPage$levels$a1$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'A1 - スターター';
+	@override List<String> get lessons => [
+		'挨拶',
+		'自己紹介 I',
+		'仕事',
+		'お気に入りの部屋',
+		'日常生活',
+		'果物',
+		'アドバイス 1',
+		'家族 1',
+		'日常のもの',
+		'故郷',
+		'家',
+		'食べ物の好み',
+		'趣味 1',
+		'成功した人々',
+		'食べ物と飲み物',
+		'レストランでの注文',
+		'ペット',
+		'健康とフィットネス',
+		'天気',
+		'新しいライフスタイル',
+		'上達する',
+		'趣味 2',
+		'場所についての質問',
+		'所有',
+		'買い物 1',
+		'時間を伝える',
+		'道案内 1',
+		'買い物 2',
+		'あなたを知る',
+		'物の場所',
+		'外見',
+		'道案内 2',
+	];
+}
+
+// Path: lessonPage.levels.a2
+class _Translations$lessonPage$levels$a2$ja implements Translations$lessonPage$levels$a2$en {
+	_Translations$lessonPage$levels$a2$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'A2 - 基本';
+	@override List<String> get lessons => [
+		'家族 2',
+		'人と場所',
+		'家族 3',
+		'物の説明',
+		'都市',
+		'建物プロジェクト',
+		'我が家',
+		'今何時？',
+		'日常生活 2',
+		'自由時間',
+		'食べ物と栄養',
+		'ショッピングと消費者',
+		'休日',
+		'週末の計画',
+		'フォーマルかカジュアルか',
+		'ファッション',
+		'ショッピング 3',
+		'アドバイス 2',
+		'あなたならできる',
+		'ショッピング 4',
+		'雑談',
+		'ラテを一杯ください',
+		'食べ物',
+		'移動手段',
+		'旅行の準備',
+		'旅行 1',
+		'都市の逃避',
+		'旅行 2',
+		'宿泊場所',
+		'とてもワクワクする',
+		'正しい人',
+		'学校',
+		'音楽の好み',
+		'スポーツ',
+		'レースのルール',
+		'メッセージを残す',
+		'リクエスト',
+		'招待状',
+		'旅行の経験',
+		'過去形 1',
+		'過去形 2',
+		'過去形 3',
+		'過去についての質問',
+		'年齢は関係ない',
+		'子供の頃の思い出',
+		'褒め言葉',
+		'言い訳',
+		'本当にイライラする！',
+		'デジタルの世界',
+		'仕事の生活',
+		'それは理解できなかった',
+		'貯めるか使うか？',
+		'ごめんなさいと言う',
+	];
+}
+
+// Path: lessonPage.levels.b1
+class _Translations$lessonPage$levels$b1$ja implements Translations$lessonPage$levels$b1$en {
+	_Translations$lessonPage$levels$b1$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'B1 - 中級';
+	@override List<String> get lessons => [
+		'文化的伝統',
+		'有名人',
+		'アートとクリエイティビティ',
+		'未来の計画',
+		'イベントの計画',
+		'目標と計画',
+		'歴史的な出来事',
+		'テクノロジー',
+		'決して',
+		'何があるのか',
+		'夢のバケーション',
+		'ソーシャルメディア',
+		'本のおすすめ',
+		'そんな日',
+		'特別な写真',
+		'個人的な成果',
+		'お気に入りの映画',
+		'ニュース速報',
+		'幸せ',
+		'忙しい週',
+		'私が育った場所',
+		'学校の日々',
+		'プロフィール',
+		'ライフマップ',
+		'日常',
+		'次は何か',
+		'提案作り',
+		'何が起こったのか',
+		'思い出',
+		'カルチャーショック',
+		'興味のあるフレーズ',
+		'就職面接',
+		'バケットリスト',
+		'私の好きな街',
+		'インターネット世代',
+		'人気ブランド',
+		'意見のフレーズ',
+		'どう見えるか',
+		'住空間',
+		'健康的な食事',
+		'珍しい趣味',
+		'難しい選択',
+		'行動を起こす',
+		'新しいスキル',
+		'苦情を言う',
+		'教育',
+		'グリーンシティ',
+		'仕事に何があるか',
+		'個人的な挑戦',
+		'面接のフレーズ',
+		'丁寧な締めくくり',
+		'ヘッドラインニュース',
+		'小さな変化',
+		'謝罪の言い訳',
+		'電話のマナー',
+		'お邪魔してすみません…',
+		'苦情への返答',
+	];
+}
+
+// Path: lessonPage.levels.b2
+class _Translations$lessonPage$levels$b2$ja implements Translations$lessonPage$levels$b2$en {
+	_Translations$lessonPage$levels$b2$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'B2 - 上級中級';
+	@override List<String> get lessons => [
+		'個性',
+		'素晴らしいリード',
+		'健康的なライフスタイル',
+		'真実とは？',
+		'自己成長',
+		'意見を言う',
+		'演じる？',
+		'覚えてる...',
+		'社会的フィードバック',
+		'犯罪現場',
+		'丁寧なトラブル',
+		'対立解決',
+		'好きか嫌いか？',
+		'環境問題',
+		'解決できるよ',
+		'ミステリーと犯罪',
+		'可能な未来',
+		'ビジネスプラン',
+		'会議の決定',
+		'とても予測可能...',
+		'仕事中',
+		'科学と技術',
+		'時間管理',
+		'人権',
+	];
+}
+
+// Path: lessonPage.levels.c1
+class _Translations$lessonPage$levels$c1$ja implements Translations$lessonPage$levels$c1$en {
+	_Translations$lessonPage$levels$c1$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'C1 - 上級';
+	@override List<String> get lessons => [
+		'文化的規範',
+		'ソーシャルメディアの影響',
+		'キャリアの選択',
+		'パフォーマンスを加速する',
+		'発明',
+		'タイムトラベル',
+		'所有物',
+		'仕事のスキル',
+		'歴史的変化',
+		'レビューライティング',
+		'ミステリー',
+		'奇妙な理論',
+		'セレブリティ',
+		'グローバル政治',
+		'製品ブーム',
+		'幸せになるのかな？',
+		'後でかも...',
+		'新しい解決策',
+		'文脈的影響',
+		'失われたロゴ',
+		'親切な行為',
+		'なんて映画だ',
+		'うざいな',
+		'ニュースで',
+	];
+}
+
+// Path: lessonPage.levels.c2
+class _Translations$lessonPage$levels$c2$ja implements Translations$lessonPage$levels$c2$en {
+	_Translations$lessonPage$levels$c2$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'C2 - エキスパート';
+	@override List<String> get lessons => [
+		'グローバリゼーション',
+		'自然災害',
+		'情報への反応',
+		'ワークライフバランス',
+		'リモートワーク',
+		'家族の問題',
+		'基本的な人体解剖学',
+		'健康予測',
+		'医療アクセス',
+		'グローバルな旅行体験',
+		'超能力',
+		'チームビルディング',
+		'バイオ蛍光',
+		'ジレンマ',
+		'社会的熱意',
+		'変化',
+		'働く、働く、働く',
+		'地域の問題',
+		'問題、問題',
+		'事実かフィクションか？',
+		'観光',
+		'ボランティア活動',
+		'心の目',
+		'メディア消費',
+	];
+}
+
+// Path: rolePlayPage.coffee.chat
+class _Translations$rolePlayPage$coffee$chat$ja implements Translations$rolePlayPage$coffee$chat$en {
+	_Translations$rolePlayPage$coffee$chat$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'こんにちは！今日はコーヒーショップでの注文を練習します — こんにちは、サイズ、トッピング。最初に少し説明してから、演じますね。いいですか？';
+	@override String get incoming1 => 'いらっしゃいませ！今日は何をお作りしましょうか？';
+	@override String get outgoing1 => 'こんにちは！ミディアムラテをお願いします。';
+	@override String get incoming2Highlight => 'もちろん';
+	@override String get incoming2Rest => '! ホットですか、それともアイスですか？トッピングはどうしますか？';
+	@override String get botReply => '素晴らしい選択ですね。他に何かご注文はありますか？';
+}
+
+// Path: rolePlayPage.directions.chat
+class _Translations$rolePlayPage$directions$chat$ja implements Translations$rolePlayPage$directions$chat$en {
+	_Translations$rolePlayPage$directions$chat$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'こんにちは！今日は道を尋ねる練習をします。最初に少し説明してから、演じますね。いいですか？';
+	@override String get incoming1 => 'こんにちは！少し迷っているようですね — 何か探してますか？';
+	@override String get outgoing1 => 'はい、最寄りの地下鉄駅を探しています。';
+	@override String get incoming2Highlight => 'もちろん';
+	@override String get incoming2Rest => '! あちらに2ブロック歩いて、左に曲がってください。入口が見えますよ。';
+	@override String get botReply => 'どういたしまして！駅の近くのレストランのヒントも欲しいですか？';
+}
+
+// Path: rolePlayPage.interview.chat
+class _Translations$rolePlayPage$interview$chat$ja implements Translations$rolePlayPage$interview$chat$en {
+	_Translations$rolePlayPage$interview$chat$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'こんにちは！今日は就職面接の練習をします。最初に少し説明してから、演じますね — 私があなたを面接して、その後交代します。いいですか？';
+	@override String get incoming1 => '今日はお越しいただきありがとうございます。簡単に自己紹介をしていただけますか？';
+	@override String get outgoing1 => 'もちろんです。ここに来られて嬉しく、自分の経験を共有できることにワクワクしています。';
+	@override String get incoming2Highlight => '素晴らしい';
+	@override String get incoming2Rest => 'ですね。最近誇りに思っているプロジェクトについて教えてください。';
+	@override String get botReply => 'それは素晴らしいですね。この役割について何か質問はありますか？';
+}
+
+// Path: profilePage.faqItems.supportedLanguages
+class _Translations$profilePage$faqItems$supportedLanguages$ja implements Translations$profilePage$faqItems$supportedLanguages$en {
+	_Translations$profilePage$faqItems$supportedLanguages$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => 'アプリはどの言語をサポートしていますか？';
+	@override String get answer => 'アプリは現在、英語、トルコ語、ドイツ語をサポートしています。新しい言語は定期的に追加されます。';
+}
+
+// Path: profilePage.faqItems.howAiWorks
+class _Translations$profilePage$faqItems$howAiWorks$ja implements Translations$profilePage$faqItems$howAiWorks$en {
+	_Translations$profilePage$faqItems$howAiWorks$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => 'AIはどのように機能しますか？';
+	@override String get answer => 'AIは本物のチューターのようにあなたと対話します。会話を分析し、間違いを検出し、進捗に基づいてパーソナライズされたフィードバックを提供します。';
+}
+
+// Path: profilePage.faqItems.offlineUse
+class _Translations$profilePage$faqItems$offlineUse$ja implements Translations$profilePage$faqItems$offlineUse$en {
+	_Translations$profilePage$faqItems$offlineUse$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => 'アプリをオフラインで使用できますか？';
+	@override String get answer => 'はい。特定のレッスンや会話シナリオを事前にダウンロードしてオフラインで使用できます。ただし、ライブチャットにはインターネット接続が必要です。';
+}
+
+// Path: profilePage.faqItems.isFree
+class _Translations$profilePage$faqItems$isFree$ja implements Translations$profilePage$faqItems$isFree$en {
+	_Translations$profilePage$faqItems$isFree$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => 'アプリは無料ですか？';
+	@override String get answer => '基本版は無料です。プレミアムにすると、高度なチャットシナリオ、発音分析、個人チューターモードが利用できます。';
+}
+
+// Path: profilePage.faqItems.pronunciationEval
+class _Translations$profilePage$faqItems$pronunciationEval$ja implements Translations$profilePage$faqItems$pronunciationEval$en {
+	_Translations$profilePage$faqItems$pronunciationEval$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => '私の発音はどのように評価されますか？';
+	@override String get answer => 'アプリはあなたの声を分析し、AIによる音声認識を使用してアクセントと発音をスコアリングします。改善が必要な単語がハイライトされます。';
+}
+
+// Path: profilePage.faqItems.dailyPractice
+class _Translations$profilePage$faqItems$dailyPractice$ja implements Translations$profilePage$faqItems$dailyPractice$en {
+	_Translations$profilePage$faqItems$dailyPractice$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => '毎日練習する必要がありますか？';
+	@override String get answer => 'はい。システムは毎日あなたの進捗を追跡します。1日10〜15分のスピーキング練習で、言語学習が明らかに加速します。';
+}
+
+// Path: profilePage.faqItems.levelDetermination
+class _Translations$profilePage$faqItems$levelDetermination$ja implements Translations$profilePage$faqItems$levelDetermination$en {
+	_Translations$profilePage$faqItems$levelDetermination$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => '私の学習レベルはどのように決定されますか？';
+	@override String get answer => '最初にサインインしたときの短いレベルチェックで、現在の知識を分析します。その後、AIが自動的にあなたのレベルに合ったレッスンを推薦します。';
+}
+
+// Path: profilePage.faqItems.realPeopleChat
+class _Translations$profilePage$faqItems$realPeopleChat$ja implements Translations$profilePage$faqItems$realPeopleChat$en {
+	_Translations$profilePage$faqItems$realPeopleChat$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => '本物の人と話すことはできますか？';
+	@override String get answer => 'はい。プレミアムユーザーは、本物のチューターとの短い練習セッションをスケジュールできます。';
+}
+
+// Path: profilePage.faqItems.dataSecurity
+class _Translations$profilePage$faqItems$dataSecurity$ja implements Translations$profilePage$faqItems$dataSecurity$en {
+	_Translations$profilePage$faqItems$dataSecurity$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => '私のデータは安全ですか？';
+	@override String get answer => 'もちろんです。すべての会話とユーザーデータは暗号化されて保存されます。あなたの個人情報は第三者と共有されることはありません。';
+}
+
+// Path: profilePage.faqItems.disableReminders
+class _Translations$profilePage$faqItems$disableReminders$ja implements Translations$profilePage$faqItems$disableReminders$en {
+	_Translations$profilePage$faqItems$disableReminders$ja._(this._root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get question => '毎日のリマインダーをオフにするにはどうすればいいですか？';
+	@override String get answer => 'プロフィール設定に移動し、通知を開いてリマインダーの頻度を変更するか、通知を完全にオフにします。';
+}
+
+/// The flat map containing all translations for locale <ja>.
+/// Only for edge cases! For simple maps, use the map function of this library.
+///
+/// The Dart AOT compiler has issues with very large switch statements,
+/// so the map is split into smaller functions (512 entries each).
+extension on TranslationsJa {
+	dynamic _flatMapFunction(String path) {
+		return switch (path) {
+			'app.name' => 'Lingola',
+			'app.premium' => 'プレミアム',
+			'app.notifications' => '通知',
+			'app.streak' => '学習の連続日数',
+			'app.profile' => 'プロフィール',
+			'common.continueLabel' => '続ける',
+			'common.back' => '戻る',
+			'common.locked' => 'ロックされています',
+			'common.minutes' => ({required Object value}) => '${value} 分',
+			'common.close' => '閉じる',
+			'common.getStarted' => '始める',
+			'common.connectionError' => '接続できません。インターネットを確認して再試行してください。',
+			'common.genericError' => '何かがうまくいきませんでした。もう一度お試しください。',
+			'common.tryAgain' => '再試行',
+			'onboarding.pageA11y' => ({required Object current, required Object total}) => 'オンボーディングページ ${current} / ${total}',
+			'onboarding.slide1.title' => '数週間で自信を持って話そう — 数ヶ月ではなく',
+			'onboarding.slide1.body' => 'AIとリアルな会話を練習しよう。毎日、アクセント、自信、流暢さを向上させる。',
+			'onboarding.slide1.testimonialName' => 'サラ・ウィリアムズ、24歳',
+			'onboarding.slide1.testimonialBody' => '以前は英語を話せませんでした。今では毎日仕事で話しています。',
+			'onboarding.slide2.title' => '価格なしのプライベートチューター',
+			'onboarding.slide2.body' => 'リアルな会話。即時フィードバック。\nスケジュールなし。プレッシャーなし。',
+			'onboarding.slide2.realTutor' => 'リアルチューター',
+			'onboarding.slide2.lingola' => 'Lingola',
+			'onboarding.slide2.priceReal' => '\$30 / 時間',
+			'onboarding.slide2.priceLingola' => '\$9.99 / 年',
+			'onboarding.slide2.versus' => 'VS',
+			'onboarding.slide2.scheduled' => 'スケジュール済み',
+			'onboarding.slide2.anytime' => 'いつでも',
+			'onboarding.slide2.stressful' => 'ストレスがかかる',
+			'onboarding.slide2.noPressure' => 'プレッシャーなし',
+			'onboarding.slide2.price' => '価格',
+			'onboarding.slide2.availability' => '利用可能性',
+			'onboarding.slide2.feeling' => '感覚',
+			'onboarding.slide3.title' => 'あなたに合わせた学習プラン',
+			'onboarding.slide3.body' => 'あなたの目標、あなたのペース、あなたのレベル。\n初心者から流暢まで — 一歩ずつ。',
+			'onboarding.slide3.goal' => '目標',
+			'onboarding.slide3.practice' => '練習',
+			'onboarding.slide3.progress' => '進捗',
+			'targetLanguage.title' => '学びたい言語を選んでください',
+			'targetLanguage.comingSoon' => 'さらに多くの言語がもうすぐ登場します',
+			'targetLanguage.korean' => '韓国語',
+			'targetLanguage.portuguese' => 'ポルトガル語',
+			'targetLanguage.portugueseBrazil' => 'ポルトガル語（ブラジル）',
+			'targetLanguage.german' => 'ドイツ語',
+			'targetLanguage.italian' => 'イタリア語',
+			'targetLanguage.simplifiedChinese' => '簡体字中国語',
+			'targetLanguage.arabic' => 'アラビア語',
+			'targetLanguage.turkish' => 'トルコ語',
+			'targetLanguage.hindi' => 'ヒンディー語',
+			'language.step' => ({required Object total, required Object current}) => '${total}のうち${current}ステップ',
+			'language.title' => '何を話したいですか？',
+			'language.nativeSection' => '私は話します',
+			'language.nativeField' => '母国語',
+			'language.nativeName' => 'トルコ語',
+			'language.targetSection' => '学びたい言語',
+			'language.targetField' => '目標言語',
+			'language.targetName' => '英語',
+			'language.direction' => '言語の方向',
+			'language.selectLanguage' => '言語を選択',
+			'language.comingSoonBadge' => '近日公開...',
+			'language.english' => '英語',
+			'language.french' => 'フランス語',
+			'language.japanese' => '日本語',
+			'language.spanish' => 'スペイン語',
+			'language.russian' => 'ロシア語',
+			'setup.goalTitle' => 'あなたの目標は何ですか？',
+			'setup.goalCareer' => 'キャリア開発',
+			'setup.goalTravel' => '旅行',
+			'setup.goalLiving' => '海外生活',
+			'setup.goalStudying' => '留学',
+			'setup.goalOther' => 'その他',
+			'setup.levelTitle' => 'あなたの現在の言語レベルは？',
+			'setup.levelBeginner' => '初心者 — 単語をいくつか知っています',
+			'setup.levelIntermediate' => '中級者 — 簡単な会話ができます',
+			'setup.levelAdvanced' => '上級者 — 話せますが、もっと上達したいです',
+			'setup.paceTitle' => 'どのくらいの速さで上達したいですか？',
+			'setup.paceLight' => '1日5-10分（ライト）',
+			'setup.paceRecommended' => '1日15-20分（推奨）',
+			'setup.paceFast' => '1日30分以上（早い結果）',
+			'accountCreating.title' => 'あなたの個人アカウントが作成中です',
+			'accountCreating.stepContent' => 'コンテンツが作成中です',
+			'accountCreating.stepDialogues' => 'ダイアログが準備中です',
+			'accountCreating.stepLessons' => 'レッスンが最適化中です',
+			'accountCreating.stepPlan' => 'あなたのプランが最終調整中です',
+			'accountCreating.optimization' => '最適化',
+			'accountCreating.progress' => ({required Object value}) => '${value}%',
+			'previewChat.brand' => 'Lingola',
+			'previewChat.lessonBadge' => 'レッスン 1: 挨拶',
+			'previewChat.speed' => '1x',
+			'previewChat.typeMessage' => 'メッセージを入力...',
+			'previewChat.incoming1' => 'こんにちは！Lingolaへようこそ — 私があなたのAIチューターです。英語で簡単な挨拶を試してみる準備はできていますか？',
+			'previewChat.outgoing1' => 'こんにちは！練習する準備ができています。',
+			'previewChat.incoming2Highlight' => 'おはよう',
+			'previewChat.incoming2Rest' => '、エムラ！あなたが準備ができていると聞いて嬉しいです。朝のコーヒーは、つながりを築く素晴らしいスタートです。何について話したいですか？',
+			'previewChat.holdToSpeak' => '話すには長押し',
+			'previewChat.recording' => '録音中…送信するには離してください',
+			'previewChat.slideUpToLock' => '上にスワイプしてロック',
+			'previewChat.slideLeftToCancel' => '左にスワイプしてキャンセル',
+			'previewChat.recordingLockedHint' => '終わったら送信をタップ',
+			'paywall.title' => '今日から話し始めよう — 無料',
+			'paywall.subtitle' => '無限の学習機会',
+			'paywall.noCommitment' => '契約不要',
+			'paywall.cancelAnytime' => 'いつでもキャンセル可能',
+			'paywall.noPaymentToday' => '今日は支払いなし',
+			'paywall.daysFree' => '3日間無料',
+			'paywall.thenPrice' => 'その後は\$1.99/月',
+			'paywall.trialActive' => '無料トライアル中',
+			'paywall.payableToday' => '今日の支払い',
+			'paywall.payableValue' => '3日間無料 0.00\$',
+			'paywall.paymentDate' => '支払い日: 2026年3月13日',
+			'paywall.paymentAmount' => '9.99\$',
+			'auth.trainersBadge' => '多様なAIトレーナーたち',
+			'auth.title' => '今日から新しい言語を話し始めよう',
+			'auth.body' => 'AIとのリアルな会話を練習しよう。\nプレッシャーなし、ジャッジなし。',
+			'auth.continueGoogle' => 'Googleで続ける',
+			'auth.continueApple' => 'Appleで続ける',
+			'auth.continueGuest' => 'ゲストとして続ける',
+			'auth.legal' => 'Lingolaにサインアップすることで、利用規約に同意したことになります。プライバシーポリシーとクッキーポリシーでデータの処理方法を学んでください。',
+			'auth.terms' => '利用規約',
+			'auth.privacy' => 'プライバシーポリシー',
+			'auth.cookies' => 'クッキーポリシー',
+			'nav.home' => 'ホーム',
+			'nav.tutor' => 'チューター',
+			'nav.lesson' => 'レッスン',
+			'nav.rolePlay' => 'ロールプレイ',
+			'nav.profile' => 'プロフィール',
+			'home.streakCount' => '2',
+			'home.greeting' => 'おはよう、Jhon',
+			'home.todayPractice' => '今日の練習',
+			'home.continueConversation' => '会話を続ける',
+			'home.continueWithTutor' => ({required Object name}) => '${name} と続けますか？それとも別のチューターを選びますか？',
+			'home.continueSameTutor' => ({required Object name}) => '${name} と続ける',
+			'home.chooseOtherTutor' => '別のチューターを選ぶ',
+			'home.minutesLeft' => ({required Object value}) => '残り ${value} 分',
+			'home.lessonProgress' => 'レッスン2 — 挨拶',
+			'home.timeCurrent' => '0分',
+			'home.timeTotal' => '/ 15分',
+			'home.kContinue' => '続ける',
+			'home.learningPath' => 'A1 - スターター',
+			'home.allLessons' => 'すべてのレッスン',
+			'home.introductions' => '自己紹介 I',
+			'home.greetings' => '挨拶',
+			'home.jobs' => '仕事',
+			'home.favoriteRoom' => 'お気に入りの部屋',
+			'home.dailyRoutine' => '日常生活',
+			'home.scroll' => 'スクロール',
+			'home.liveLesson' => 'ライブレッスン',
+			'home.liveLessonSubtitle' => '私たちのチューターとビデオ通話をしましょう',
+			'home.moreTutor' => 'もっとチューター',
+			'home.startTalkNow' => '今すぐ話し始める',
+			'home.tutorLingola' => 'Lingola',
+			'home.tutorMei' => 'Mei Lin',
+			'home.tutorKate' => 'Kate',
+			'home.tagAdaptive' => '適応型',
+			'home.tagCalm' => '落ち着いた',
+			'home.tagPatient' => '忍耐強い',
+			'home.tagMethodical' => '計画的',
+			'home.tagEncouraging' => '励まし',
+			'home.tagMore' => '+5',
+			'home.moreFeatures' => 'もっと機能',
+			'home.practiceLabel' => '練習',
+			'home.wordPractice' => '単語練習',
+			'home.wordPracticeBody' => '選んだ言語の語彙を毎日増やそう',
+			'home.immersiveLabel' => '没入型',
+			'home.quiz' => 'クイズ',
+			'home.quizBodyLine1' => '実際の',
+			'home.quizBodyLine2' => '文脈の例を通じて学ぶ',
+			'home.getStarted' => '始める',
+			'home.library' => 'ライブラリ',
+			'home.libraryTitle' => '学び、保存する',
+			'home.learnMore' => 'もっと学ぶ',
+			'home.premium.titleBefore' => '流暢に話すための',
+			'home.premium.titleHighlight' => '道',
+			'home.premium.titleAfter' => 'ミスを恐れずに。',
+			'home.premium.descriptionBefore' => '世界中の何百万もの学生に参加しよう。今日から言語の壁を打破しよう — ',
+			'home.premium.descriptionHighlight' => '最初の3日間は完全無料。',
+			'home.premium.feature1' => '24/7アクセス可能なAIチューター',
+			'home.premium.feature2' => 'プライベートチューターへの無制限アクセス',
+			'home.premium.feature3' => 'あなたに合わせた毎日のレッスンプラン',
+			'home.premium.priceAmount' => '1.99\$',
+			'home.premium.pricePeriod' => '/月',
+			'home.premium.discount' => '年契約で40%オフ',
+			'home.premium.cta' => '始める',
+			'libraryPage.title' => 'ライブラリ',
+			'libraryPage.searchWord' => '検索ワード',
+			'libraryPage.savedWordCount' => ({required Object count}) => '${count} 保存した単語',
+			'libraryPage.savedWordTab' => '保存した単語',
+			'libraryPage.dictionaryTab' => '辞書',
+			'libraryPage.dictionaryLabel' => '辞書',
+			'wordPracticePage.title' => '単語練習',
+			'wordPracticePage.turkish' => 'トルコ語',
+			'wordPracticePage.save' => '保存する',
+			'wordPracticePage.listen' => '聞く',
+			'wordPracticePage.hint' => 'ヒント',
+			'wordPracticePage.previous' => '前へ',
+			'wordPracticePage.next' => '次へ',
+			'quizPage.title' => 'クイズ',
+			'quizPage.headline' => '今日は何を改善したいですか？',
+			'quizPage.subtitle' => 'トレーニングを選んで — 3分以内で終わります 🚀',
+			'quizPage.readingTitle' => 'リーディング',
+			'quizPage.readingBody' => '記事やストーリーを通じた理解',
+			'quizPage.writingTitle' => 'ライティング',
+			'quizPage.writingBody' => '文法と語彙の練習',
+			'quizPage.speakingTitle' => 'スピーキング',
+			'quizPage.speakingBody' => 'AI音声エンジンによる発音',
+			'quizPage.readingTestTitle' => 'リーディングテスト',
+			'quizPage.read' => '読む',
+			'quizPage.listeningHint' => '英単語をはっきりと話してください…',
+			'quizPage.micPermissionDenied' => 'マイクまたは音声認識が利用できません。',
+			'quizPage.matchSuccess' => '素晴らしい！その単語と一致しました。',
+			'quizPage.matchFail' => ({required Object heard}) => '"${heard}"が聞こえました。もう一度試してください。',
+			'quizPage.successfulTitle' => '成功！',
+			'quizPage.successfulBody' => 'ネイティブスピーカーのような発音！',
+			'quizPage.failedTitle' => '失敗',
+			'quizPage.failedBody' => 'ほぼできていました、もう一度チャンスを与えてください',
+			'quizPage.tryAgain' => 'もう一度試す',
+			'quizPage.writingTestTitle' => 'ライティングテスト',
+			'quizPage.sourceLanguage' => 'ソース言語',
+			'quizPage.answer' => '回答',
+			'quizPage.writeAnswerHint' => 'ここにあなたの答えを書いてください...',
+			'quizPage.submit' => '送信',
+			'quizPage.speakingTestTitle' => 'スピーキングテスト',
+			'quizPage.speakingProficiency' => 'スピーキング能力',
+			'quizPage.speakClearlyHint' => 'マイクに向かってはっきり話してください：',
+			'quizPage.speakUp' => '大きな声で話す',
+			'quizPage.recording' => '録音中...',
+			'quizPage.questionOf' => ({required Object current, required Object total}) => '質問 ${current} / ${total}',
+			'placeholder.title' => ({required Object tab}) => '${tab} が準備中です',
+			'placeholder.body' => ({required Object tab}) => '${tab} のための集中した体験を準備しています。',
+			'tutorPage.title' => 'チューター',
+			'tutorPage.chatWithLingola' => 'Lingolaとチャット',
+			'tutorPage.chatWithTutor' => ({required Object name}) => '${name}とチャット',
+			'tutorPage.chatHistory' => 'チャット履歴',
+			'tutorPage.history' => '履歴',
+			'tutorPage.filter' => 'フィルター',
+			'tutorPage.country' => '国',
+			'tutorPage.focus' => 'フォーカス',
+			'tutorPage.moreCountries' => '8カ国以上',
+			'tutorPage.moreFocus' => '+8',
+			'tutorPage.save' => '保存',
+			'tutorPage.startTalkNow' => '今すぐ話し始める',
+			'tutorPage.typeMessage' => 'メッセージを入力...',
+			'tutorPage.speaker' => 'スピーカー',
+			'tutorPage.messagesCount' => '12',
+			'tutorPage.tutors.lingola' => 'Lingola',
+			'tutorPage.tutors.zephyrion' => 'ゼファリオン',
+			'tutorPage.tutors.vaelen' => 'ヴァエレン',
+			'tutorPage.tutors.elrion' => 'エルリオン',
+			'tutorPage.tutors.ukrath' => 'ウクラト',
+			'tutorPage.tutors.elena' => 'エレナ',
+			'tutorPage.tutors.kenji' => 'ケンジ',
+			'tutorPage.tutors.freya' => 'フレイヤ',
+			'tutorPage.tutors.camila' => 'カミラ',
+			'tutorPage.tutors.marco' => 'マルコ',
+			'tutorPage.tutors.julian' => 'ジュリアン',
+			'tutorPage.tutors.ines' => 'イネス',
+			'tutorPage.tutors.felix' => 'フェリックス',
+			'tutorPage.tutors.diego' => 'ディエゴ',
+			'tutorPage.tutors.amara' => 'アマラ',
+			'tutorPage.tutors.erik' => 'エリック',
+			'tutorPage.tutors.katie' => 'ケイティ',
+			'tutorPage.tutors.morgan' => 'モーガン',
+			'tutorPage.tutors.santa' => 'サンタクロース',
+			'tutorPage.tags.adaptive' => '適応力がある',
+			'tutorPage.tags.calm' => '落ち着いている',
+			'tutorPage.tags.patient' => '忍耐強い',
+			'tutorPage.tags.organized' => '整理整頓された',
+			'tutorPage.tags.relaxed' => 'リラックスした',
+			'tutorPage.tags.methodical' => '体系的な',
+			'tutorPage.tags.attentive' => '注意深い',
+			'tutorPage.tags.more' => '+5',
+			'tutorPage.tags.curious' => '好奇心旺盛',
+			'tutorPage.tags.observer' => '観察者',
+			'tutorPage.tags.ancientKnowledge' => '古代の知識',
+			'tutorPage.tags.wise' => '賢い',
+			'tutorPage.tags.clear' => '明確な',
+			'tutorPage.tags.decisive' => '決断力がある',
+			'tutorPage.tags.disciplined' => '規律正しい',
+			'tutorPage.tags.smart' => '賢い',
+			'tutorPage.tags.analytic' => '分析的',
+			'tutorPage.tags.cheerful' => '陽気な',
+			'tutorPage.tags.generous' => '寛大な',
+			'tutorPage.historyPreview1' => 'やあ！退屈で爆発しそうだった...',
+			'tutorPage.historyPreview2' => '今日は食べ物の注文を練習しようか？',
+			'tutorPage.time1' => '午前11:00',
+			'tutorPage.time2' => '昨日',
+			'tutorPage.chat.incoming1' => 'おはよう！今日は練習する準備ができているのが嬉しいよ。',
+			'tutorPage.chat.outgoing1' => 'うん、挨拶から始めよう。',
+			'tutorPage.chat.incoming2' => '完璧。同僚にどうやって挨拶する？',
+			'tutorPage.chat.typing' => '入力中',
+			'tutorPage.calling.lessonBadge' => 'レッスン1 : 挨拶',
+			'tutorPage.calling.nativeLine' => '退屈？',
+			'tutorPage.calling.englishLine' => '退屈？その言葉は私の語彙から消したよ。立ち上がって、計画はもう決まってる：カディキョイの新しいアーケードバーに行くよ。',
+			'tutorPage.calling.highlight' => '退屈？',
+			'tutorPage.calling.close' => '通話を終了',
+			'tutorPage.calling.toggleCaptions' => '字幕を切り替え',
+			'tutorPage.calling.toggleHints' => 'ヒントを切り替え',
+			'tutorPage.calling.toggleMic' => 'マイクを切り替え',
+			'lessonPage.title' => '学びを続ける',
+			'lessonPage.profile' => 'プロフィール',
+			'lessonPage.language' => '目標言語',
+			'lessonPage.completed' => '完了',
+			'lessonPage.locked' => 'ロック中',
+			'lessonPage.pickTutorTitle' => 'チューターを選ぶ',
+			'lessonPage.startTalk' => 'レッスンを始める',
+			'lessonPage.chatInstead' => '代わりにチャットする',
+			'lessonPage.lockedHint' => 'このレッスンを解除するには、前のレッスンを終わらせてください。',
+			'lessonPage.notesTitle' => 'レッスンノート',
+			'lessonPage.whatWeLearned' => '今日学んだこと',
+			'lessonPage.deleteNotes' => 'レッスンノートを削除する',
+			'lessonPage.deleteNotesConfirm' => 'これらのノートを削除しますか？これは元に戻せません。',
+			'lessonPage.delete' => '削除',
+			'lessonPage.cancel' => 'キャンセル',
+			'lessonPage.practiceCta' => 'これが難しすぎた場合は、同じトピックを再度練習できます。',
+			'lessonPage.practiceNow' => 'このトピックを練習する',
+			'lessonPage.openChat' => 'チューターとのチャットを開く',
+			'lessonPage.yourScore' => 'あなたのスコア',
+			'lessonPage.bestScore' => ({required Object score}) => '最高 ${score}/100',
+			'lessonPage.scoreChanged' => ({required Object prev, required Object now}) => '${prev} → ${now}',
+			'lessonPage.participationSilent' => '受動的参加者',
+			'lessonPage.participationSilentBody' => '今回は静かでしたね。このレッスンを再受講した方がいいと思います。',
+			'lessonPage.participationPassive' => '低い参加',
+			'lessonPage.participationPassiveBody' => 'ほとんど話しませんでした。レッスンを再度試して、もっと話してみてください。',
+			'lessonPage.participationActive' => '良い参加',
+			'lessonPage.participationActiveBody' => '会話に参加しました。これを続けてください！',
+			'lessonPage.participationStrong' => '強い参加',
+			'lessonPage.participationStrongBody' => 'たくさん話しました。素晴らしい仕事です！',
+			'lessonPage.retakeLesson' => 'このレッスンを再受講する',
+			'lessonPage.finishLesson' => 'レッスンを終わらせる',
+			'lessonPage.savingNotes' => 'あなたのチューターが今日のノートを書いています…',
+			'lessonPage.noNotes' => 'このレッスンを終わらせて、チューターからのノートを受け取りましょう。',
+			'lessonPage.notesDeleted' => 'レッスンノートが削除されました',
+			'lessonPage.levels.a1.title' => 'A1 - スターター',
+			'lessonPage.levels.a1.lessons.0' => '挨拶',
+			'lessonPage.levels.a1.lessons.1' => '自己紹介 I',
+			'lessonPage.levels.a1.lessons.2' => '仕事',
+			'lessonPage.levels.a1.lessons.3' => 'お気に入りの部屋',
+			'lessonPage.levels.a1.lessons.4' => '日常生活',
+			'lessonPage.levels.a1.lessons.5' => '果物',
+			'lessonPage.levels.a1.lessons.6' => 'アドバイス 1',
+			'lessonPage.levels.a1.lessons.7' => '家族 1',
+			'lessonPage.levels.a1.lessons.8' => '日常のもの',
+			'lessonPage.levels.a1.lessons.9' => '故郷',
+			'lessonPage.levels.a1.lessons.10' => '家',
+			'lessonPage.levels.a1.lessons.11' => '食べ物の好み',
+			'lessonPage.levels.a1.lessons.12' => '趣味 1',
+			'lessonPage.levels.a1.lessons.13' => '成功した人々',
+			'lessonPage.levels.a1.lessons.14' => '食べ物と飲み物',
+			'lessonPage.levels.a1.lessons.15' => 'レストランでの注文',
+			'lessonPage.levels.a1.lessons.16' => 'ペット',
+			'lessonPage.levels.a1.lessons.17' => '健康とフィットネス',
+			'lessonPage.levels.a1.lessons.18' => '天気',
+			'lessonPage.levels.a1.lessons.19' => '新しいライフスタイル',
+			'lessonPage.levels.a1.lessons.20' => '上達する',
+			'lessonPage.levels.a1.lessons.21' => '趣味 2',
+			'lessonPage.levels.a1.lessons.22' => '場所についての質問',
+			'lessonPage.levels.a1.lessons.23' => '所有',
+			'lessonPage.levels.a1.lessons.24' => '買い物 1',
+			'lessonPage.levels.a1.lessons.25' => '時間を伝える',
+			'lessonPage.levels.a1.lessons.26' => '道案内 1',
+			'lessonPage.levels.a1.lessons.27' => '買い物 2',
+			'lessonPage.levels.a1.lessons.28' => 'あなたを知る',
+			'lessonPage.levels.a1.lessons.29' => '物の場所',
+			'lessonPage.levels.a1.lessons.30' => '外見',
+			'lessonPage.levels.a1.lessons.31' => '道案内 2',
+			'lessonPage.levels.a2.title' => 'A2 - 基本',
+			'lessonPage.levels.a2.lessons.0' => '家族 2',
+			'lessonPage.levels.a2.lessons.1' => '人と場所',
+			'lessonPage.levels.a2.lessons.2' => '家族 3',
+			'lessonPage.levels.a2.lessons.3' => '物の説明',
+			'lessonPage.levels.a2.lessons.4' => '都市',
+			'lessonPage.levels.a2.lessons.5' => '建物プロジェクト',
+			'lessonPage.levels.a2.lessons.6' => '我が家',
+			'lessonPage.levels.a2.lessons.7' => '今何時？',
+			'lessonPage.levels.a2.lessons.8' => '日常生活 2',
+			'lessonPage.levels.a2.lessons.9' => '自由時間',
+			'lessonPage.levels.a2.lessons.10' => '食べ物と栄養',
+			'lessonPage.levels.a2.lessons.11' => 'ショッピングと消費者',
+			'lessonPage.levels.a2.lessons.12' => '休日',
+			'lessonPage.levels.a2.lessons.13' => '週末の計画',
+			'lessonPage.levels.a2.lessons.14' => 'フォーマルかカジュアルか',
+			'lessonPage.levels.a2.lessons.15' => 'ファッション',
+			'lessonPage.levels.a2.lessons.16' => 'ショッピング 3',
+			'lessonPage.levels.a2.lessons.17' => 'アドバイス 2',
+			'lessonPage.levels.a2.lessons.18' => 'あなたならできる',
+			'lessonPage.levels.a2.lessons.19' => 'ショッピング 4',
+			'lessonPage.levels.a2.lessons.20' => '雑談',
+			'lessonPage.levels.a2.lessons.21' => 'ラテを一杯ください',
+			'lessonPage.levels.a2.lessons.22' => '食べ物',
+			'lessonPage.levels.a2.lessons.23' => '移動手段',
+			'lessonPage.levels.a2.lessons.24' => '旅行の準備',
+			'lessonPage.levels.a2.lessons.25' => '旅行 1',
+			'lessonPage.levels.a2.lessons.26' => '都市の逃避',
+			'lessonPage.levels.a2.lessons.27' => '旅行 2',
+			'lessonPage.levels.a2.lessons.28' => '宿泊場所',
+			'lessonPage.levels.a2.lessons.29' => 'とてもワクワクする',
+			'lessonPage.levels.a2.lessons.30' => '正しい人',
+			'lessonPage.levels.a2.lessons.31' => '学校',
+			'lessonPage.levels.a2.lessons.32' => '音楽の好み',
+			'lessonPage.levels.a2.lessons.33' => 'スポーツ',
+			'lessonPage.levels.a2.lessons.34' => 'レースのルール',
+			'lessonPage.levels.a2.lessons.35' => 'メッセージを残す',
+			'lessonPage.levels.a2.lessons.36' => 'リクエスト',
+			'lessonPage.levels.a2.lessons.37' => '招待状',
+			'lessonPage.levels.a2.lessons.38' => '旅行の経験',
+			'lessonPage.levels.a2.lessons.39' => '過去形 1',
+			'lessonPage.levels.a2.lessons.40' => '過去形 2',
+			'lessonPage.levels.a2.lessons.41' => '過去形 3',
+			'lessonPage.levels.a2.lessons.42' => '過去についての質問',
+			'lessonPage.levels.a2.lessons.43' => '年齢は関係ない',
+			'lessonPage.levels.a2.lessons.44' => '子供の頃の思い出',
+			'lessonPage.levels.a2.lessons.45' => '褒め言葉',
+			'lessonPage.levels.a2.lessons.46' => '言い訳',
+			'lessonPage.levels.a2.lessons.47' => '本当にイライラする！',
+			'lessonPage.levels.a2.lessons.48' => 'デジタルの世界',
+			'lessonPage.levels.a2.lessons.49' => '仕事の生活',
+			'lessonPage.levels.a2.lessons.50' => 'それは理解できなかった',
+			'lessonPage.levels.a2.lessons.51' => '貯めるか使うか？',
+			'lessonPage.levels.a2.lessons.52' => 'ごめんなさいと言う',
+			'lessonPage.levels.b1.title' => 'B1 - 中級',
+			'lessonPage.levels.b1.lessons.0' => '文化的伝統',
+			'lessonPage.levels.b1.lessons.1' => '有名人',
+			'lessonPage.levels.b1.lessons.2' => 'アートとクリエイティビティ',
+			'lessonPage.levels.b1.lessons.3' => '未来の計画',
+			'lessonPage.levels.b1.lessons.4' => 'イベントの計画',
+			'lessonPage.levels.b1.lessons.5' => '目標と計画',
+			'lessonPage.levels.b1.lessons.6' => '歴史的な出来事',
+			'lessonPage.levels.b1.lessons.7' => 'テクノロジー',
+			'lessonPage.levels.b1.lessons.8' => '決して',
+			'lessonPage.levels.b1.lessons.9' => '何があるのか',
+			'lessonPage.levels.b1.lessons.10' => '夢のバケーション',
+			'lessonPage.levels.b1.lessons.11' => 'ソーシャルメディア',
+			'lessonPage.levels.b1.lessons.12' => '本のおすすめ',
+			'lessonPage.levels.b1.lessons.13' => 'そんな日',
+			'lessonPage.levels.b1.lessons.14' => '特別な写真',
+			'lessonPage.levels.b1.lessons.15' => '個人的な成果',
+			'lessonPage.levels.b1.lessons.16' => 'お気に入りの映画',
+			'lessonPage.levels.b1.lessons.17' => 'ニュース速報',
+			'lessonPage.levels.b1.lessons.18' => '幸せ',
+			'lessonPage.levels.b1.lessons.19' => '忙しい週',
+			'lessonPage.levels.b1.lessons.20' => '私が育った場所',
+			'lessonPage.levels.b1.lessons.21' => '学校の日々',
+			'lessonPage.levels.b1.lessons.22' => 'プロフィール',
+			'lessonPage.levels.b1.lessons.23' => 'ライフマップ',
+			'lessonPage.levels.b1.lessons.24' => '日常',
+			'lessonPage.levels.b1.lessons.25' => '次は何か',
+			'lessonPage.levels.b1.lessons.26' => '提案作り',
+			'lessonPage.levels.b1.lessons.27' => '何が起こったのか',
+			'lessonPage.levels.b1.lessons.28' => '思い出',
+			'lessonPage.levels.b1.lessons.29' => 'カルチャーショック',
+			'lessonPage.levels.b1.lessons.30' => '興味のあるフレーズ',
+			'lessonPage.levels.b1.lessons.31' => '就職面接',
+			'lessonPage.levels.b1.lessons.32' => 'バケットリスト',
+			'lessonPage.levels.b1.lessons.33' => '私の好きな街',
+			'lessonPage.levels.b1.lessons.34' => 'インターネット世代',
+			'lessonPage.levels.b1.lessons.35' => '人気ブランド',
+			'lessonPage.levels.b1.lessons.36' => '意見のフレーズ',
+			'lessonPage.levels.b1.lessons.37' => 'どう見えるか',
+			'lessonPage.levels.b1.lessons.38' => '住空間',
+			'lessonPage.levels.b1.lessons.39' => '健康的な食事',
+			'lessonPage.levels.b1.lessons.40' => '珍しい趣味',
+			'lessonPage.levels.b1.lessons.41' => '難しい選択',
+			'lessonPage.levels.b1.lessons.42' => '行動を起こす',
+			'lessonPage.levels.b1.lessons.43' => '新しいスキル',
+			'lessonPage.levels.b1.lessons.44' => '苦情を言う',
+			'lessonPage.levels.b1.lessons.45' => '教育',
+			'lessonPage.levels.b1.lessons.46' => 'グリーンシティ',
+			'lessonPage.levels.b1.lessons.47' => '仕事に何があるか',
+			'lessonPage.levels.b1.lessons.48' => '個人的な挑戦',
+			'lessonPage.levels.b1.lessons.49' => '面接のフレーズ',
+			'lessonPage.levels.b1.lessons.50' => '丁寧な締めくくり',
+			'lessonPage.levels.b1.lessons.51' => 'ヘッドラインニュース',
+			'lessonPage.levels.b1.lessons.52' => '小さな変化',
+			'lessonPage.levels.b1.lessons.53' => '謝罪の言い訳',
+			'lessonPage.levels.b1.lessons.54' => '電話のマナー',
+			'lessonPage.levels.b1.lessons.55' => 'お邪魔してすみません…',
+			'lessonPage.levels.b1.lessons.56' => '苦情への返答',
+			'lessonPage.levels.b2.title' => 'B2 - 上級中級',
+			'lessonPage.levels.b2.lessons.0' => '個性',
+			'lessonPage.levels.b2.lessons.1' => '素晴らしいリード',
+			'lessonPage.levels.b2.lessons.2' => '健康的なライフスタイル',
+			'lessonPage.levels.b2.lessons.3' => '真実とは？',
+			'lessonPage.levels.b2.lessons.4' => '自己成長',
+			'lessonPage.levels.b2.lessons.5' => '意見を言う',
+			'lessonPage.levels.b2.lessons.6' => '演じる？',
+			'lessonPage.levels.b2.lessons.7' => '覚えてる...',
+			'lessonPage.levels.b2.lessons.8' => '社会的フィードバック',
+			'lessonPage.levels.b2.lessons.9' => '犯罪現場',
+			'lessonPage.levels.b2.lessons.10' => '丁寧なトラブル',
+			'lessonPage.levels.b2.lessons.11' => '対立解決',
+			'lessonPage.levels.b2.lessons.12' => '好きか嫌いか？',
+			'lessonPage.levels.b2.lessons.13' => '環境問題',
+			'lessonPage.levels.b2.lessons.14' => '解決できるよ',
+			'lessonPage.levels.b2.lessons.15' => 'ミステリーと犯罪',
+			'lessonPage.levels.b2.lessons.16' => '可能な未来',
+			'lessonPage.levels.b2.lessons.17' => 'ビジネスプラン',
+			'lessonPage.levels.b2.lessons.18' => '会議の決定',
+			'lessonPage.levels.b2.lessons.19' => 'とても予測可能...',
+			'lessonPage.levels.b2.lessons.20' => '仕事中',
+			'lessonPage.levels.b2.lessons.21' => '科学と技術',
+			'lessonPage.levels.b2.lessons.22' => '時間管理',
+			'lessonPage.levels.b2.lessons.23' => '人権',
+			'lessonPage.levels.c1.title' => 'C1 - 上級',
+			'lessonPage.levels.c1.lessons.0' => '文化的規範',
+			'lessonPage.levels.c1.lessons.1' => 'ソーシャルメディアの影響',
+			'lessonPage.levels.c1.lessons.2' => 'キャリアの選択',
+			'lessonPage.levels.c1.lessons.3' => 'パフォーマンスを加速する',
+			'lessonPage.levels.c1.lessons.4' => '発明',
+			'lessonPage.levels.c1.lessons.5' => 'タイムトラベル',
+			'lessonPage.levels.c1.lessons.6' => '所有物',
+			'lessonPage.levels.c1.lessons.7' => '仕事のスキル',
+			'lessonPage.levels.c1.lessons.8' => '歴史的変化',
+			_ => null,
+		} ?? switch (path) {
+			'lessonPage.levels.c1.lessons.9' => 'レビューライティング',
+			'lessonPage.levels.c1.lessons.10' => 'ミステリー',
+			'lessonPage.levels.c1.lessons.11' => '奇妙な理論',
+			'lessonPage.levels.c1.lessons.12' => 'セレブリティ',
+			'lessonPage.levels.c1.lessons.13' => 'グローバル政治',
+			'lessonPage.levels.c1.lessons.14' => '製品ブーム',
+			'lessonPage.levels.c1.lessons.15' => '幸せになるのかな？',
+			'lessonPage.levels.c1.lessons.16' => '後でかも...',
+			'lessonPage.levels.c1.lessons.17' => '新しい解決策',
+			'lessonPage.levels.c1.lessons.18' => '文脈的影響',
+			'lessonPage.levels.c1.lessons.19' => '失われたロゴ',
+			'lessonPage.levels.c1.lessons.20' => '親切な行為',
+			'lessonPage.levels.c1.lessons.21' => 'なんて映画だ',
+			'lessonPage.levels.c1.lessons.22' => 'うざいな',
+			'lessonPage.levels.c1.lessons.23' => 'ニュースで',
+			'lessonPage.levels.c2.title' => 'C2 - エキスパート',
+			'lessonPage.levels.c2.lessons.0' => 'グローバリゼーション',
+			'lessonPage.levels.c2.lessons.1' => '自然災害',
+			'lessonPage.levels.c2.lessons.2' => '情報への反応',
+			'lessonPage.levels.c2.lessons.3' => 'ワークライフバランス',
+			'lessonPage.levels.c2.lessons.4' => 'リモートワーク',
+			'lessonPage.levels.c2.lessons.5' => '家族の問題',
+			'lessonPage.levels.c2.lessons.6' => '基本的な人体解剖学',
+			'lessonPage.levels.c2.lessons.7' => '健康予測',
+			'lessonPage.levels.c2.lessons.8' => '医療アクセス',
+			'lessonPage.levels.c2.lessons.9' => 'グローバルな旅行体験',
+			'lessonPage.levels.c2.lessons.10' => '超能力',
+			'lessonPage.levels.c2.lessons.11' => 'チームビルディング',
+			'lessonPage.levels.c2.lessons.12' => 'バイオ蛍光',
+			'lessonPage.levels.c2.lessons.13' => 'ジレンマ',
+			'lessonPage.levels.c2.lessons.14' => '社会的熱意',
+			'lessonPage.levels.c2.lessons.15' => '変化',
+			'lessonPage.levels.c2.lessons.16' => '働く、働く、働く',
+			'lessonPage.levels.c2.lessons.17' => '地域の問題',
+			'lessonPage.levels.c2.lessons.18' => '問題、問題',
+			'lessonPage.levels.c2.lessons.19' => '事実かフィクションか？',
+			'lessonPage.levels.c2.lessons.20' => '観光',
+			'lessonPage.levels.c2.lessons.21' => 'ボランティア活動',
+			'lessonPage.levels.c2.lessons.22' => '心の目',
+			'lessonPage.levels.c2.lessons.23' => 'メディア消費',
+			'rolePlayPage.title' => 'ロールプレイ',
+			'rolePlayPage.subtitle' => '役割を選んで — 実際のシナリオを体験しよう 🎭',
+			'rolePlayPage.progressCompleted' => ({required Object value}) => '%${value} 完了',
+			'rolePlayPage.minutes' => ({required Object value}) => '${value} 分',
+			'rolePlayPage.beginner' => '初心者',
+			'rolePlayPage.screenplay' => 'シナリオ',
+			'rolePlayPage.dailyInteractions' => '日常のやり取り',
+			'rolePlayPage.business' => 'ビジネス',
+			'rolePlayPage.coffee.title' => 'コーヒーショップでの注文',
+			'rolePlayPage.coffee.screenplay' => 'お気に入りの飲み物を注文し、サイズやトッピングを尋ね、合計を確認して、カウンターでコーヒーを受け取ります。',
+			'rolePlayPage.coffee.chat.briefing' => 'こんにちは！今日はコーヒーショップでの注文を練習します — こんにちは、サイズ、トッピング。最初に少し説明してから、演じますね。いいですか？',
+			'rolePlayPage.coffee.chat.incoming1' => 'いらっしゃいませ！今日は何をお作りしましょうか？',
+			'rolePlayPage.coffee.chat.outgoing1' => 'こんにちは！ミディアムラテをお願いします。',
+			'rolePlayPage.coffee.chat.incoming2Highlight' => 'もちろん',
+			'rolePlayPage.coffee.chat.incoming2Rest' => '! ホットですか、それともアイスですか？トッピングはどうしますか？',
+			'rolePlayPage.coffee.chat.botReply' => '素晴らしい選択ですね。他に何かご注文はありますか？',
+			'rolePlayPage.directions.title' => '道を尋ねる',
+			'rolePlayPage.directions.screenplay' => '場所への道を尋ね、地下鉄やバスの行き方を確認し、チケットの情報を得て、レストランのおすすめを聞きます。',
+			'rolePlayPage.directions.chat.briefing' => 'こんにちは！今日は道を尋ねる練習をします。最初に少し説明してから、演じますね。いいですか？',
+			'rolePlayPage.directions.chat.incoming1' => 'こんにちは！少し迷っているようですね — 何か探してますか？',
+			'rolePlayPage.directions.chat.outgoing1' => 'はい、最寄りの地下鉄駅を探しています。',
+			'rolePlayPage.directions.chat.incoming2Highlight' => 'もちろん',
+			'rolePlayPage.directions.chat.incoming2Rest' => '! あちらに2ブロック歩いて、左に曲がってください。入口が見えますよ。',
+			'rolePlayPage.directions.chat.botReply' => 'どういたしまして！駅の近くのレストランのヒントも欲しいですか？',
+			'rolePlayPage.interview.title' => '就職面接',
+			'rolePlayPage.interview.screenplay' => '自己紹介をし、一般的な面接の質問に答え、経験について話し、役割や次のステップについて尋ねます。',
+			'rolePlayPage.interview.chat.briefing' => 'こんにちは！今日は就職面接の練習をします。最初に少し説明してから、演じますね — 私があなたを面接して、その後交代します。いいですか？',
+			'rolePlayPage.interview.chat.incoming1' => '今日はお越しいただきありがとうございます。簡単に自己紹介をしていただけますか？',
+			'rolePlayPage.interview.chat.outgoing1' => 'もちろんです。ここに来られて嬉しく、自分の経験を共有できることにワクワクしています。',
+			'rolePlayPage.interview.chat.incoming2Highlight' => '素晴らしい',
+			'rolePlayPage.interview.chat.incoming2Rest' => 'ですね。最近誇りに思っているプロジェクトについて教えてください。',
+			'rolePlayPage.interview.chat.botReply' => 'それは素晴らしいですね。この役割について何か質問はありますか？',
+			'notificationsPage.title' => '通知',
+			'notificationsPage.translation.title' => '新しい翻訳が準備できました',
+			'notificationsPage.translation.body' => 'あなたの音声翻訳ファイルはテキストに変換され、翻訳されました。',
+			'notificationsPage.offer.title' => '特別オファーが待っています',
+			'notificationsPage.offer.body' => 'プレミアムにアップグレードして、無制限の写真翻訳を50％オフで利用しましょう。',
+			'notificationsPage.stories.title' => '新しいストーリーを発見しよう',
+			'notificationsPage.stories.body' => 'ストーリーを通じて新しい単語を学びましょう',
+			'profilePage.title' => 'プロフィール',
+			'profilePage.userName' => 'ジョン・ドー',
+			'profilePage.freeVersion' => '無料版',
+			'profilePage.dayStreak' => '連続学習日数！',
+			'profilePage.accountSettings' => 'アカウント設定',
+			'profilePage.general' => '一般',
+			'profilePage.profileSettings' => 'プロフィール設定',
+			'profilePage.fullName' => 'フルネーム',
+			'profilePage.email' => 'Eメール',
+			'profilePage.deleteAccount' => 'アカウントを削除',
+			'profilePage.save' => '保存',
+			'profilePage.deleteTitle' => 'あなたが去るのは望んでいませんが、理解しています。',
+			'profilePage.deleteBody' => 'Lingolaの体験を向上させるために、なぜ離れたいのか教えてもらえますか？',
+			'profilePage.deleteReasons.aiCharacters' => 'AIキャラクターがリアルだとは思えませんでした。',
+			'profilePage.deleteReasons.videoIssues' => 'ビデオチャットで技術的な問題が発生しています。',
+			'profilePage.deleteReasons.pricing' => 'サブスクリプションの価格が期待以上です。',
+			'profilePage.deleteReasons.noMatch' => '探しているスタイルのキャラクターが見つかりませんでした。',
+			'profilePage.deleteReasons.shortTrial' => '短期間だけ試したかったです。',
+			'profilePage.deleteReasons.other' => 'その他',
+			'profilePage.messageOptional' => 'メッセージ（任意）',
+			'profilePage.messageHint' => 'メッセージがあれば、ぜひ書いてください。',
+			'profilePage.next' => '次へ',
+			'profilePage.specialOfferTitle' => '特別オファー',
+			'profilePage.specialOfferBody' => '去る前に、あなたのために用意したオファーをチェックしてください。',
+			'profilePage.monthlyPlanTitle' => '1ヶ月プランに切り替え',
+			'profilePage.monthlyPlanPrice' => '\$79/月、いつでもキャンセル可能',
+			'profilePage.monthlyPlanDesc' => '長期契約は不要です。月ごとにコミュニティとつながり続けましょう。',
+			'profilePage.whatYoullKeep' => '保持するもの:',
+			'profilePage.keepCharacters' => 'すべてのキャラクターにアクセス',
+			'profilePage.keepVideo' => '無制限のビデオ通話',
+			'profilePage.keepCourses' => 'すべてのコースにアクセス',
+			'profilePage.switchMonthlyCta' => '月額プランに切り替え',
+			'profilePage.confirmTitle' => '本当に大丈夫ですか？',
+			'profilePage.confirmBody' => 'あなたが去るのは本当に見たくありません。失うものはこれです:',
+			'profilePage.loseCharacters' => '無制限のキャラクターアクセス',
+			'profilePage.loseVideo' => '無制限のビデオ通話アクセス',
+			'profilePage.loseCourses' => 'すべてのコースへのアクセス',
+			'profilePage.discountTitle' => '留まって1ヶ月60%オフ',
+			'profilePage.discountSubtitle' => '今までで最高のオファー。たったの\$27.60/月',
+			'profilePage.acceptDiscountCta' => '60%オフを受け入れて留まる',
+			'profilePage.farewellTitle' => 'あなたが去るのは悲しいです',
+			'profilePage.farewellBody' => ({required Object date}) => 'あなたのメンバーシップはキャンセルされました。${date}まで現在の請求期間にアクセスできます。',
+			'profilePage.changeMindTitle' => '✨ 気が変わった？',
+			'profilePage.changeMindBody' => ({required Object date}) => 'あなたの特典を保持するために、${date}の前にいつでもメンバーシップを再アクティブ化できます。',
+			'profilePage.reactivateCta' => '待って、再アクティブ化したい',
+			'profilePage.done' => '完了',
+			'profilePage.notifications' => '通知',
+			'profilePage.appLanguage' => 'アプリ言語',
+			'profilePage.selectLanguageTitle' => '言語を選択',
+			'profilePage.premium' => 'プレミアム',
+			'profilePage.passive' => 'パッシブ',
+			'profilePage.shareFriend' => '友達と共有',
+			'profilePage.shareWithFriendTitle' => '友達と共有',
+			'profilePage.shareInviteBody' => '友達を招待して、一緒に翻訳を楽しもう',
+			'profilePage.rateUs' => '評価する',
+			'profilePage.faq' => 'Lingola FAQ',
+			'profilePage.faqItems.supportedLanguages.question' => 'アプリはどの言語をサポートしていますか？',
+			'profilePage.faqItems.supportedLanguages.answer' => 'アプリは現在、英語、トルコ語、ドイツ語をサポートしています。新しい言語は定期的に追加されます。',
+			'profilePage.faqItems.howAiWorks.question' => 'AIはどのように機能しますか？',
+			'profilePage.faqItems.howAiWorks.answer' => 'AIは本物のチューターのようにあなたと対話します。会話を分析し、間違いを検出し、進捗に基づいてパーソナライズされたフィードバックを提供します。',
+			'profilePage.faqItems.offlineUse.question' => 'アプリをオフラインで使用できますか？',
+			'profilePage.faqItems.offlineUse.answer' => 'はい。特定のレッスンや会話シナリオを事前にダウンロードしてオフラインで使用できます。ただし、ライブチャットにはインターネット接続が必要です。',
+			'profilePage.faqItems.isFree.question' => 'アプリは無料ですか？',
+			'profilePage.faqItems.isFree.answer' => '基本版は無料です。プレミアムにすると、高度なチャットシナリオ、発音分析、個人チューターモードが利用できます。',
+			'profilePage.faqItems.pronunciationEval.question' => '私の発音はどのように評価されますか？',
+			'profilePage.faqItems.pronunciationEval.answer' => 'アプリはあなたの声を分析し、AIによる音声認識を使用してアクセントと発音をスコアリングします。改善が必要な単語がハイライトされます。',
+			'profilePage.faqItems.dailyPractice.question' => '毎日練習する必要がありますか？',
+			'profilePage.faqItems.dailyPractice.answer' => 'はい。システムは毎日あなたの進捗を追跡します。1日10〜15分のスピーキング練習で、言語学習が明らかに加速します。',
+			'profilePage.faqItems.levelDetermination.question' => '私の学習レベルはどのように決定されますか？',
+			'profilePage.faqItems.levelDetermination.answer' => '最初にサインインしたときの短いレベルチェックで、現在の知識を分析します。その後、AIが自動的にあなたのレベルに合ったレッスンを推薦します。',
+			'profilePage.faqItems.realPeopleChat.question' => '本物の人と話すことはできますか？',
+			'profilePage.faqItems.realPeopleChat.answer' => 'はい。プレミアムユーザーは、本物のチューターとの短い練習セッションをスケジュールできます。',
+			'profilePage.faqItems.dataSecurity.question' => '私のデータは安全ですか？',
+			'profilePage.faqItems.dataSecurity.answer' => 'もちろんです。すべての会話とユーザーデータは暗号化されて保存されます。あなたの個人情報は第三者と共有されることはありません。',
+			'profilePage.faqItems.disableReminders.question' => '毎日のリマインダーをオフにするにはどうすればいいですか？',
+			'profilePage.faqItems.disableReminders.answer' => 'プロフィール設定に移動し、通知を開いてリマインダーの頻度を変更するか、通知を完全にオフにします。',
+			'profilePage.support' => 'サポート',
+			'profilePage.feedback' => 'フィードバック',
+			'profilePage.progression' => '進捗',
+			'profilePage.progressTitle' => '進捗',
+			'profilePage.goodMorning' => 'おはようございます、',
+			'profilePage.progressUserName' => 'ジョン',
+			'profilePage.progressLanguage' => '英語',
+			'profilePage.past7Days' => '過去7日間',
+			'profilePage.past7DaysBody' => '毎日勉強して連続学習日数を築き、強力な学習習慣を作りましょう。',
+			'profilePage.currentLevel' => '現在のレベル',
+			'profilePage.xpLeft' => ({required Object level, required Object xp}) => '${level}に到達するまで、あと${xp} XPです！',
+			'profilePage.toNextLevel' => '次のレベルへ',
+			'profilePage.dayStreakLabel' => '連続学習日数',
+			'profilePage.totalPoints' => '合計ポイント',
+			'profilePage.savedWords' => '保存した単語',
+			'profilePage.itemsToReview' => ({required Object count}) => '${count} 件のレビューアイテム',
+			'profilePage.logout' => 'ログアウト',
+			'profilePage.logoutTitle' => 'ログアウトしようとしています',
+			'profilePage.logoutBody' => 'またすぐにお会いしましょう！あなたの呼吸エクササイズが恋しいです。',
+			'profilePage.logoutConfirm' => 'ログアウト',
+			'profilePage.logoutCancel' => 'キャンセル',
+			'profilePage.days.mon' => '月',
+			'profilePage.days.tue' => '火',
+			'profilePage.days.wed' => '水',
+			'profilePage.days.thu' => '木',
+			'profilePage.days.fri' => '金',
+			'profilePage.days.sat' => '土',
+			'profilePage.days.sun' => '日',
+			'pushNotifications.title' => 'Lingola',
+			'pushNotifications.h2.0' => 'ちょっとした休憩を取ったようですね。',
+			'pushNotifications.h2.1' => '一言の時間はありますか？',
+			'pushNotifications.h2.2' => '私たちはここにいます — 焦らずに。',
+			'pushNotifications.h2.3' => '学習のリズムが少し止まりましたね。',
+			'pushNotifications.h2.4' => 'ミニレビューをしてみると気持ちが良いかもしれません。',
+			'pushNotifications.h4.0' => '今日は新しい言葉が待っているかもしれません 👀',
+			'pushNotifications.h4.1' => 'ちょっとした練習ができるかもしれません。',
+			'pushNotifications.h4.2' => '役立つフレーズを見逃したかもしれません。',
+			'pushNotifications.h4.3' => '今日の進捗はまだ開いています。',
+			'pushNotifications.h4.4' => '一言、一文…もしかしたら両方。',
+			'pushNotifications.h8.0' => '毎日進む必要はありません。',
+			'pushNotifications.h8.1' => '少しのレビューも大切です。',
+			'pushNotifications.h8.2' => '今日は勉強しなくても何も失いませんでした。',
+			'pushNotifications.h8.3' => 'あなたの準備ができたら、私たちも準備万端です。',
+			'pushNotifications.h8.4' => '言語学習はマラソンです、スプリントではありません。',
+			'pushNotifications.h24.0' => '1日が過ぎました。あなたの言葉はまだここにあります。',
+			'pushNotifications.h24.1' => '休憩を取るのは普通のことです。',
+			'pushNotifications.h24.2' => 'あなたの場所は、あなたが離れたところにそのままです。',
+			'pushNotifications.h24.3' => 'いつでも続けてください。',
+			'pushNotifications.h24.4' => '言語は逃げません — 私たちも逃げません。',
+			_ => null,
+		};
+	}
+}

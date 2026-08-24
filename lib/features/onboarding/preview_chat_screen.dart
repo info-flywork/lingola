@@ -5,6 +5,7 @@ import '../../core/auth/api_client.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../i18n/strings.g.dart';
 import '../tutor/services/tutor_chat_api_service.dart';
 import '../../widgets/lingola_chat_session.dart';
 import 'onboarding_draft.dart';
@@ -26,6 +27,10 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
   String? _error;
   List<LingolaChatMessage> _messages = const [];
 
+  /// Onboarding robot tutor always speaks English (target language).
+  static String get _openingMessageEnglish =>
+      AppLocale.en.buildSync().previewChat.incoming1;
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +38,6 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
   }
 
   Future<void> _bootstrap() async {
-    final text = AppText.current.previewChat;
     setState(() {
       _loading = true;
       _error = null;
@@ -45,7 +49,7 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
       final payload = await TutorChatApiService.openPreviewSession(
         tutorSlug: 'lingola',
         title: 'Onboarding Preview',
-        openingMessage: text.incoming1,
+        openingMessage: _openingMessageEnglish,
         kind: 'practice',
       );
       if (!mounted) return;
@@ -93,7 +97,8 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
     return result.assistantMessage.content;
   }
 
-  void _goPaywall(BuildContext context) {
+  void _goPaywall() {
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
         builder: (_) => PaywallScreen(draft: widget.draft),
@@ -107,7 +112,8 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
     final canChat = _sessionId != null && !_loading;
 
     return LingolaChatSession(
-      key: ValueKey(_sessionId ?? 'preview-loading-$_loading'),
+      // Timer only after session is ready — full 1 minute of chat.
+      key: ValueKey(canChat ? 'preview-$_sessionId' : 'preview-loading'),
       brand: text.brand,
       speedLabel: text.speed,
       lessonBadge: text.lessonBadge,
@@ -116,9 +122,9 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
       busy: _loading,
       errorText: _error,
       onRetry: _error != null ? _bootstrap : null,
-      sessionLimit: const Duration(minutes: 1),
-      onClose: () => _goPaywall(context),
-      onSessionExpired: () => _goPaywall(context),
+      sessionLimit: canChat ? const Duration(minutes: 1) : null,
+      onClose: _goPaywall,
+      onSessionExpired: _goPaywall,
       initialMessages: _messages,
       ttsVoiceId: TutorVoiceIds.male,
       riveAsset: AppAssets.tutorLingolaRiv,

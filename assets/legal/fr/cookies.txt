@@ -1,0 +1,62 @@
+Lingola – Politique de Cookies  
+Dernière mise à jour : 2025  
+Bienvenue sur Lingola. En tant que Lingola, nous utilisons des cookies et des technologies similaires pour rendre votre expérience sur notre plateforme plus sécurisée, cohérente et fonctionnelle.  
+Cette Politique de Cookies a été élaborée pour expliquer ce que sont les cookies, à quelles fins ils sont utilisés et comment vous pouvez gérer vos préférences.  
+En utilisant Lingola, vous acceptez l'utilisation des cookies décrite dans cette politique.  
+
+1. Qu'est-ce qu'un cookie ?  
+Les cookies sont de petits fichiers de données enregistrés sur votre appareil.  
+Ils permettent à Lingola de fonctionner correctement, se souviennent de vos préférences et nous aident à comprendre techniquement comment l'application est utilisée.  
+Les cookies :  
+	•	Ne vous identifient pas directement  
+	•	Ne contiennent pas de contenu personnel  
+	•	Contiennent des informations techniques et axées sur l'utilisation  
+
+2. Quels cookies utilisons-nous ?  
+Lingola peut utiliser les types de cookies suivants :  
+a) Cookies nécessaires  
+Ils sont essentiels au fonctionnement des fonctionnalités de base de l'application.  
+Ils assurent la gestion des sessions, les contrôles de sécurité et le bon fonctionnement des composants système fondamentaux.  
+Sans ces cookies, certaines fonctionnalités de Lingola peuvent ne pas fonctionner correctement.  
+b) Cookies de performance et d'analyse  
+Ils nous aident à comprendre comment l'application est utilisée.  
+Ils nous permettent d'analyser quelles fonctionnalités sont utilisées plus fréquemment et quels domaines doivent être améliorés.  
+Ces données sont évaluées de manière agrégée et anonyme.  
+c) Cookies de personnalisation  
+Ils offrent une expérience plus cohérente en se souvenant d'informations telles que le choix de la langue, les paramètres d'affichage ou les préférences d'utilisation.  
+d) Cookies de marketing et de promotion  
+Avec l'accord de l'utilisateur, ils soutiennent la présentation plus appropriée des contenus au sein de l'application.  
+Dans certains cas, ils peuvent fonctionner de manière intégrée avec des services tiers.  
+
+3. Pourquoi utilisons-nous des cookies ?  
+Lingola utilise des cookies pour les objectifs suivants :  
+	•	Assurer le fonctionnement sécurisé et stable de l'application  
+	•	Se souvenir des préférences des utilisateurs  
+	•	Réaliser des analyses de performance et d'utilisation  
+	•	Améliorer la qualité du service  
+	•	Rendre l'interface utilisateur plus cohérente  
+
+4. Cookies tiers  
+Lingola peut travailler avec des fournisseurs tiers qui offrent des services d'analyse ou de mesure.  
+Ces fournisseurs peuvent utiliser leurs propres cookies, qui sont soumis aux politiques de confidentialité et de cookies de ces fournisseurs.  
+Lingola utilise des cookies tiers uniquement dans le but d'améliorer la qualité du service.  
+
+5. Gestion des cookies  
+Le contrôle des préférences en matière de cookies vous appartient. Si vous le souhaitez :  
+	•	Vous pouvez les limiter, les supprimer ou les désactiver complètement via :  
+		•	Les paramètres de votre appareil  
+		•	Les autorisations de l'application  
+		•	Les paramètres de votre navigateur  
+Remarque : La désactivation des cookies nécessaires peut entraîner le non-fonctionnement de certaines fonctionnalités de base de Lingola.  
+
+6. Utilisation des données  
+Les informations collectées via les cookies, si elles sont considérées comme des données personnelles, sont traitées conformément à la Politique de Confidentialité de Lingola.  
+Les données ne sont utilisées que dans les limites légales, à des fins explicites et par des méthodes sécurisées.  
+
+7. Mises à jour de la politique  
+Cette Politique de Cookies peut être mise à jour en fonction des évolutions technologiques ou des réglementations légales.  
+La version actuelle sera toujours accessible via l'application et le site web.  
+
+8. Contact  
+Pour toute question concernant les cookies ou cette politique, vous pouvez nous contacter :  
+📩 E-mail : support@fly-work.com

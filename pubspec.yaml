@@ -56,6 +56,9 @@ dependencies:
   image_picker: ^1.2.3
   purchases_flutter: ^10.9.0
   purchases_ui_flutter: ^10.9.0
+  flutter_local_notifications: ^19.4.0
+  timezone: ^0.10.1
+  flutter_timezone: ^4.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -112,6 +115,18 @@ flutter:
     - assets/images/profilIcons/
     - assets/images/profilIcons/tutor/
     - assets/images/callinScreen/
+    - assets/legal/
+    - assets/legal/tr/
+    - assets/legal/en/
+    - assets/legal/de/
+    - assets/legal/fr/
+    - assets/legal/it/
+    - assets/legal/ja/
+    - assets/legal/es/
+    - assets/legal/ru/
+    - assets/legal/hi/
+    - assets/legal/pt/
+    - assets/legal/zh/
     - assets/riv/
     - assets/riv/Female/
     - assets/riv/Male/

@@ -115,7 +115,10 @@
     "incoming2Highlight": "Günaydın",
     "incoming2Rest": ", Emrah! I'm glad you're feeling ready. A morning coffee is always a great start to building a connection. What would you like to talk about?",
     "holdToSpeak": "Hold to speak",
-    "recording": "Recording… release to send"
+    "recording": "Recording… release to send",
+    "slideUpToLock": "Slide up to lock",
+    "slideLeftToCancel": "Slide left to cancel",
+    "recordingLockedHint": "Tap send when finished"
   },
   "paywall": {
     "title": "Start Speaking Today — Free",
@@ -155,6 +158,10 @@
     "greeting": "Good Morning, Jhon",
     "todayPractice": "Today’s Practice",
     "continueConversation": "Continue Conversation",
+    "continueWithTutor": "Continue with $name, or choose another tutor?",
+    "continueSameTutor": "Continue with $name",
+    "chooseOtherTutor": "Choose another tutor",
+    "minutesLeft": "$value min left",
     "lessonProgress": "Lesson 2 — Greetings",
     "timeCurrent": "0min",
     "timeTotal": "/ 15min",
@@ -668,6 +675,37 @@
       }
     }
   },
+  "pushNotifications": {
+    "title": "Lingola",
+    "h2": [
+      "Looks like you took a short break.",
+      "Got a moment for one word?",
+      "We're here — no rush.",
+      "Your learning rhythm paused for a bit.",
+      "A mini review might feel good."
+    ],
+    "h4": [
+      "A new word might be waiting for you today 👀",
+      "You might be missing a quick practice.",
+      "You might have skipped a useful phrase.",
+      "Today's progress is still open.",
+      "One word, one sentence… maybe both."
+    ],
+    "h8": [
+      "You don't have to progress every day.",
+      "Even a little review counts.",
+      "You didn't lose anything by not studying today.",
+      "We're ready when you are.",
+      "Language learning is a marathon, not a sprint."
+    ],
+    "h24": [
+      "A day passed. Your words are still here.",
+      "Taking a break is normal.",
+      "Your place is right where you left it.",
+      "Continue whenever you want.",
+      "Language won't run away — neither will we."
+    ]
+  },
   "notificationsPage": {
     "title": "Notifications",
     "translation": {
@@ -741,19 +779,47 @@
     "shareWithFriendTitle": "Share with Friend",
     "shareInviteBody": "Invite your friends and enjoy translate together",
     "rateUs": "Rate Us",
-    "faq": "F.A.Q.",
+    "faq": "Lingola FAQ",
     "faqItems": {
-      "howItWorks": {
-        "question": "How does this app work?",
-        "answer": "Our app uses artificial intelligence to analyze your emotional state through your written or spoken inputs. It provides personalized insights, mood tracking, and mental-wellness exercises designed to help you better understand and manage your emotions."
+      "supportedLanguages": {
+        "question": "Which languages does the app support?",
+        "answer": "The app currently supports English, Turkish, and German. New languages are added regularly."
       },
-      "replacePsychologist": {
-        "question": "Can this app replace a real psychologist?",
-        "answer": "No. This app is designed to support your wellbeing and learning journey, but it does not replace professional mental health care. If you need clinical support, please consult a licensed specialist."
+      "howAiWorks": {
+        "question": "How does the AI work?",
+        "answer": "The AI interacts with you like a real tutor. It analyzes your conversations, detects mistakes, and offers personalized feedback based on your progress."
       },
-      "dataPrivate": {
-        "question": "Are my conversations and data private?",
-        "answer": "Yes. Your conversations and personal data are kept private and handled according to our privacy policy. We do not sell your data to third parties."
+      "offlineUse": {
+        "question": "Can I use the app offline?",
+        "answer": "Yes. You can download certain lessons and conversation scenarios in advance and use them offline. However, live chat requires an internet connection."
+      },
+      "isFree": {
+        "question": "Is the app free?",
+        "answer": "The basic version is free. With Premium, you get advanced chat scenarios, pronunciation analysis, and personal tutor mode."
+      },
+      "pronunciationEval": {
+        "question": "How is my pronunciation evaluated?",
+        "answer": "The app analyzes your voice and uses AI-powered speech recognition to score your accent and pronunciation. Words you need to improve are highlighted."
+      },
+      "dailyPractice": {
+        "question": "Do I need to practice daily?",
+        "answer": "Yes. The system tracks your progress every day. Just 10–15 minutes of speaking practice per day can noticeably speed up your language learning."
+      },
+      "levelDetermination": {
+        "question": "How is my learning level determined?",
+        "answer": "A short level check when you first sign in analyzes your current knowledge. After that, the AI automatically recommends lessons suited to your level."
+      },
+      "realPeopleChat": {
+        "question": "Can I talk with real people?",
+        "answer": "Yes. Premium users can schedule short practice sessions with real tutors."
+      },
+      "dataSecurity": {
+        "question": "Is my data safe?",
+        "answer": "Absolutely. All conversations and user data are stored encrypted. Your personal information is never shared with third parties."
+      },
+      "disableReminders": {
+        "question": "How do I turn off daily reminders?",
+        "answer": "Go to Profile settings, open Notifications, and change the reminder frequency or turn notifications off completely."
       }
     },
     "support": "Support",

@@ -1,0 +1,53 @@
+Lingola – Gizlilik Politikası
+Son Güncelleme: 2025
+Lingola’ya hoş geldiniz. Lingola olarak kullanıcı gizliliğini ciddiyetle ele alıyor; kişisel verilerinizi güvenli, şeffaf ve kontrollü bir şekilde işlemeyi taahhüt ediyoruz. Bu Gizlilik Politikası, Lingola mobil uygulaması ve web sitesi (“Platform”) üzerinden toplanan bilgilerin nasıl işlendiğini, saklandığını ve korunduğunu açıklamak amacıyla hazırlanmıştır.
+Lingola’yı kullanarak bu politikada belirtilen uygulamaları kabul etmiş sayılırsınız.
+1. Toplanan Bilgiler
+Lingola, hizmet sunabilmek ve kullanıcı deneyimini geliştirmek amacıyla sınırlı ve gerekli verileri toplar. Toplanan bilgiler aşağıdaki kategorilere ayrılır:
+a) Kullanıcı Tarafından Sağlanan Bilgiler
+	•	Ad, kullanıcı adı veya profil bilgileri 
+	•	E-posta adresi 
+	•	Uygulama tercihleri 
+	•	Dil seçimleri ve kullanım ayarları 
+b) Otomatik Olarak Toplanan Bilgiler
+	•	Cihaz bilgileri (cihaz modeli, işletim sistemi, uygulama sürümü vb.) 
+	•	IP adresi ve temel etkileşim kayıtları 
+	•	Uygulama içi kullanım ve gezinme bilgileri 
+Bu bilgiler, uygulamanın çalışması, geliştirilmesi ve performansının iyileştirilmesi amacıyla kullanılır.
+2. Verilerin Kullanım Amaçları
+Toplanan bilgiler aşağıdaki amaçlarla işlenir:
+	•	Hesap oluşturma ve yönetimi 
+	•	Kullanıcı doğrulaması ve güvenli giriş 
+	•	Dil öğrenme deneyiminin kişiselleştirilmesi 
+	•	Uygulama performansının ve kararlılığının artırılması 
+	•	Yeni özelliklerin geliştirilmesi 
+	•	Güvenlik ve kötüye kullanımın önlenmesi 
+	•	Kullanıcının onay vermesi halinde bilgilendirme ve tanıtım içeriklerinin sunulması 
+Lingola, kişisel verileri yalnızca açık, meşru ve sınırlı amaçlarla işler.  Kişisel bilgiler izniniz olmadan üçüncü taraflara satılmaz.
+3. Üçüncü Taraf Hizmetler
+Lingola; analiz, performans ölçümü ve teknik altyapı hizmetleri sunan üçüncü taraf servis sağlayıcılarla çalışabilir.  Bu hizmet sağlayıcılar, verileri yalnızca Lingola adına ve kendi gizlilik politikaları çerçevesinde işler.
+Üçüncü taraf erişimleri, kullanıcı deneyimini geliştirmek ve uygulamanın sağlıklı çalışmasını sağlamakla sınırlıdır.
+4. Çerezler ve Benzeri Teknolojiler
+Lingola, kullanıcı tercihlerini hatırlamak, performansı analiz etmek ve hizmet kalitesini artırmak amacıyla çerezler ve benzeri teknolojiler kullanabilir.  Bu teknolojilerin kullanımıyla ilgili detaylar Çerez Politikası kapsamında açıklanır.
+5. Verilerin Saklanma Süresi
+Kişisel veriler, yalnızca işleme amaçlarının gerektirdiği süre boyunca saklanır.  Yasal yükümlülükler sona erdiğinde veya kullanıcı hesabı silindiğinde, veriler makul süre içinde güvenli şekilde silinir veya anonim hâle getirilir.
+6. Veri Güvenliği
+Lingola, kullanıcı verilerini korumak için endüstri standartlarına uygun teknik ve idari güvenlik önlemleri uygular.  Yetkisiz erişim, veri kaybı veya kötüye kullanım risklerine karşı düzenli güvenlik kontrolleri yapılır.
+Ancak internet üzerinden yapılan hiçbir veri aktarımının %100 güvenli olduğu garanti edilemez. Bu nedenle kullanıcıların bu konuda bilinçli olması önemlidir.
+
+7. Kullanıcı Hakları
+Kullanıcılar aşağıdaki haklara sahiptir:
+	•	Kişisel verilerine erişme 
+	•	Yanlış veya eksik verilerin düzeltilmesini talep etme 
+	•	Hesap ve verilerinin silinmesini isteme 
+	•	Onay verilen veri işlemlerini geri çekme 
+Bu talepler, destek ekibi aracılığıyla değerlendirilir.
+8. Uluslararası Veri Aktarımları
+Lingola, küresel ölçekte hizmet sunan altyapı sağlayıcılarla çalışabilir.  Bu durum, verilerin farklı ülkelerde bulunan sunuculara aktarılmasını gerektirebilir. Böyle durumlarda uygun teknik ve hukuki koruma önlemleri uygulanır.
+9. Politika Değişiklikleri
+Lingola, teknolojik gelişmeler veya yasal gereklilikler doğrultusunda Gizlilik Politikası’nı güncelleyebilir.  Güncel sürüm her zaman uygulama ve web sitesi üzerinden erişilebilir olacaktır.
+10. İletişim
+Gizlilik, veri kullanımı veya bu politika ile ilgili her türlü soru ve talep için bizimle iletişime geçebilirsiniz:
+📩 E-posta: support@fly-work.com
+
+

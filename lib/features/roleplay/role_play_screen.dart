@@ -6,15 +6,47 @@ import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
+import 'role_play_api_service.dart';
 import 'role_play_chat_screen.dart';
 
-class RolePlayScreen extends StatelessWidget {
+class RolePlayScreen extends StatefulWidget {
   const RolePlayScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final text = AppText.current;
-    final scenarios = [
+  State<RolePlayScreen> createState() => _RolePlayScreenState();
+}
+
+class _RolePlayScreenState extends State<RolePlayScreen> {
+  List<_RolePlayScenario>? _remoteScenarios;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadScenarios();
+  }
+
+  Future<void> _loadScenarios() async {
+    try {
+      final remote = await RolePlayApiService.fetchScenarios();
+      if (!mounted || remote.isEmpty) return;
+      final text = AppText.current;
+      final mapped = remote
+          .map((dto) => _mapScenario(dto, text))
+          .whereType<_RolePlayScenario>()
+          .toList();
+      if (mapped.isEmpty) return;
+      setState(() => _remoteScenarios = mapped);
+    } catch (_) {
+      // Yerel katalog korunur.
+    }
+  }
+
+  List<_RolePlayScenario> _scenariosFor(dynamic text) {
+    return _remoteScenarios ?? _fallbackScenarios(text);
+  }
+
+  static List<_RolePlayScenario> _fallbackScenarios(dynamic text) {
+    return [
       _RolePlayScenario(
         id: 'coffee',
         title: text.rolePlayPage.coffee.title,
@@ -43,6 +75,64 @@ class RolePlayScreen extends StatelessWidget {
         section: text.rolePlayPage.business,
       ),
     ];
+  }
+
+  static _RolePlayScenario? _mapScenario(RolePlayScenarioDto dto, dynamic text) {
+    final page = text.rolePlayPage;
+    final title = _titleFor(page, dto.titleKey);
+    final screenplay = _screenplayFor(page, dto.titleKey);
+    if (title == null || screenplay == null) return null;
+    return _RolePlayScenario(
+      id: dto.id,
+      title: title,
+      image: dto.imageAsset.isNotEmpty ? dto.imageAsset : _imageFor(dto.id),
+      progress: dto.progressPercent > 0 ? dto.progressPercent : null,
+      minutes: dto.minutes,
+      level: page.beginner as String,
+      screenplay: screenplay,
+      section: _sectionFor(page, dto.sectionKey),
+    );
+  }
+
+  static String? _titleFor(dynamic page, String key) {
+    return switch (key) {
+      'coffee' => page.coffee.title as String?,
+      'directions' => page.directions.title as String?,
+      'interview' => page.interview.title as String?,
+      _ => null,
+    };
+  }
+
+  static String? _screenplayFor(dynamic page, String key) {
+    return switch (key) {
+      'coffee' => page.coffee.screenplay as String?,
+      'directions' => page.directions.screenplay as String?,
+      'interview' => page.interview.screenplay as String?,
+      _ => null,
+    };
+  }
+
+  static String? _sectionFor(dynamic page, String? key) {
+    return switch (key) {
+      'dailyInteractions' => page.dailyInteractions as String?,
+      'business' => page.business as String?,
+      _ => null,
+    };
+  }
+
+  static String _imageFor(String id) {
+    return switch (id) {
+      'coffee' => AppAssets.rolePlayCoffee,
+      'directions' => AppAssets.rolePlayDirections,
+      'interview' => AppAssets.rolePlayInterview,
+      _ => AppAssets.rolePlayCoffee,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = AppText.current;
+    final scenarios = _scenariosFor(text);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(

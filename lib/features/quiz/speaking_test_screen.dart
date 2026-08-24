@@ -7,6 +7,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/quiz/quiz_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
@@ -20,38 +21,46 @@ class SpeakingTestScreen extends StatefulWidget {
 
 class _SpeakingTestScreenState extends State<SpeakingTestScreen>
     with SingleTickerProviderStateMixin {
-  static const _prompts = <_SpeakingPrompt>[
+  static const _defaultPrompts = <_SpeakingPrompt>[
     _SpeakingPrompt(
+      id: 'hobby',
       en: 'Describe your favorite hobby.',
       tr: 'En sevdiğin hobini anlat.',
       keywords: ['hobby', 'read', 'music', 'sport', 'movie', 'film'],
     ),
     _SpeakingPrompt(
+      id: 'weekend',
       en: 'Talk about your last weekend.',
       tr: 'Geçen hafta sonunu anlat.',
       keywords: ['weekend', 'saturday', 'sunday', 'friend', 'home'],
     ),
     _SpeakingPrompt(
+      id: 'happy',
       en: 'What makes you happy?',
       tr: 'Seni ne mutlu eder?',
       keywords: ['happy', 'family', 'friend', 'music', 'travel'],
     ),
     _SpeakingPrompt(
+      id: 'food',
       en: 'Describe your favorite food.',
       tr: 'En sevdiğin yemeği anlat.',
       keywords: ['food', 'eat', 'pizza', 'pasta', 'rice', 'soup'],
     ),
     _SpeakingPrompt(
+      id: 'travel',
       en: 'Where do you want to travel?',
       tr: 'Nereye seyahat etmek istersin?',
       keywords: ['travel', 'visit', 'country', 'city', 'beach'],
     ),
     _SpeakingPrompt(
+      id: 'friend',
       en: 'Tell me about your best friend.',
       tr: 'En iyi arkadaşını anlat.',
       keywords: ['friend', 'kind', 'funny', 'meet', 'together'],
     ),
   ];
+
+  var _prompts = _defaultPrompts;
 
   final _speech = SpeechToText();
 
@@ -85,6 +94,28 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
       duration: const Duration(milliseconds: 1400),
     )..repeat();
     _initSpeech();
+    _loadPrompts();
+  }
+
+  Future<void> _loadPrompts() async {
+    try {
+      final remote = await QuizService.fetchSpeakingPrompts();
+      if (!mounted || remote.isEmpty) return;
+      setState(() {
+        _prompts = remote
+            .map(
+              (row) => _SpeakingPrompt(
+                id: row.id,
+                en: row.promptEn,
+                tr: row.promptNative,
+                keywords: row.keywords,
+              ),
+            )
+            .toList();
+      });
+    } catch (_) {
+      // Yerel prompt listesi korunur.
+    }
   }
 
   @override
@@ -237,7 +268,16 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
 
   Future<void> _evaluateAnswer() async {
     final heard = _heardText;
-    final matched = _matchesPrompt(heard, _current);
+    var matched = false;
+    try {
+      final result = await QuizService.evaluateSpeaking(
+        promptId: _current.id,
+        transcript: heard,
+      );
+      matched = result.matched;
+    } catch (_) {
+      matched = _matchesPrompt(heard, _current);
+    }
     if (matched) {
       await _showResultSheet(
         iconAsset: AppAssets.success,
@@ -395,7 +435,6 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
                       prompt: '“$prompt”',
                       speakUpLabel: text.speakUp,
                       submitLabel: text.submit,
-                      recordingLabel: text.recording,
                       durationLabel: _durationLabel,
                       isRecording: _isRecording,
                       hasRecording: _hasRecording,
@@ -450,11 +489,13 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
 
 class _SpeakingPrompt {
   const _SpeakingPrompt({
+    required this.id,
     required this.en,
     required this.tr,
     required this.keywords,
   });
 
+  final String id;
   final String en;
   final String tr;
   final List<String> keywords;
@@ -470,7 +511,6 @@ class _SpeakingCard extends StatelessWidget {
     required this.prompt,
     required this.speakUpLabel,
     required this.submitLabel,
-    required this.recordingLabel,
     required this.durationLabel,
     required this.isRecording,
     required this.hasRecording,
@@ -491,7 +531,6 @@ class _SpeakingCard extends StatelessWidget {
   final String prompt;
   final String speakUpLabel;
   final String submitLabel;
-  final String recordingLabel;
   final String durationLabel;
   final bool isRecording;
   final bool hasRecording;
@@ -638,7 +677,6 @@ class _SpeakingCard extends StatelessWidget {
             const SizedBox(height: 16),
             _RecordingPanel(
               isRecording: isRecording,
-              recordingLabel: recordingLabel,
               durationLabel: durationLabel,
               level: level,
               wave: wave,
@@ -784,14 +822,12 @@ class _SubmitPill extends StatelessWidget {
 class _RecordingPanel extends StatelessWidget {
   const _RecordingPanel({
     required this.isRecording,
-    required this.recordingLabel,
     required this.durationLabel,
     required this.level,
     required this.wave,
   });
 
   final bool isRecording;
-  final String recordingLabel;
   final String durationLabel;
   final double level;
   final Animation<double> wave;
@@ -800,7 +836,7 @@ class _RecordingPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: AppColors.border10),
@@ -809,15 +845,15 @@ class _RecordingPanel extends StatelessWidget {
       child: Column(
         children: [
           SizedBox(
-            height: 72,
+            height: 90,
             width: double.infinity,
             child: AnimatedBuilder(
               animation: wave,
               builder: (context, _) {
                 return CustomPaint(
-                  painter: _SineWavePainter(
-                    progress: isRecording ? wave.value : 0.15,
-                    amplitude: isRecording ? level : 0.55,
+                  painter: _LayeredPulseWavePainter(
+                    progress: isRecording ? wave.value : 0.12,
+                    amplitude: isRecording ? level : 0.6,
                     color: AppColors.primary,
                     animate: isRecording,
                   ),
@@ -825,37 +861,25 @@ class _RecordingPanel extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 12),
-          if (isRecording)
-            Text(
-              recordingLabel,
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: .10),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              durationLabel,
               style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,
                 height: 18 / 14,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.28,
                 color: AppColors.primary,
               ),
-            )
-          else
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: .10),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                durationLabel,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 12,
-                  height: 18 / 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.24,
-                  color: AppColors.primary,
-                ),
-              ),
             ),
+          ),
         ],
       ),
     );
@@ -884,9 +908,9 @@ class _IconTap extends StatelessWidget {
   }
 }
 
-/// Figma’daki mavi sine-wave recording göstergesi.
-class _SineWavePainter extends CustomPainter {
-  _SineWavePainter({
+/// Figma’daki katmanlı pulse dalga göstergesi (4 tepe + iç içe çizgiler).
+class _LayeredPulseWavePainter extends CustomPainter {
+  _LayeredPulseWavePainter({
     required this.progress,
     required this.amplitude,
     required this.color,
@@ -898,47 +922,64 @@ class _SineWavePainter extends CustomPainter {
   final Color color;
   final bool animate;
 
+  static const _pulseCenters = [0.11, 0.34, 0.57, 0.80];
+  static const _pulseAmps = [0.30, 1.0, 0.54, 0.26];
+  static const _pulseSigmas = [0.042, 0.088, 0.060, 0.038];
+  static const _layerCount = 6;
+
+  double _pulseEnvelope(double x, double phase) {
+    var sum = 0.0;
+    for (var i = 0; i < _pulseCenters.length; i++) {
+      final center = _pulseCenters[i];
+      final sigma = _pulseSigmas[i];
+      var amp = _pulseAmps[i];
+      if (animate) {
+        amp *= 0.72 + amplitude * 0.28;
+        amp *= 1 + 0.07 * math.sin(phase + i * 1.15);
+      }
+      final d = (x - center) / sigma;
+      sum += amp * math.exp(-0.5 * d * d);
+    }
+    return sum;
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
-    final midY = size.height / 2;
-    final baseAmp = size.height * 0.18 * (0.35 + amplitude * 0.9);
+    final midY = size.height * 0.52;
+    final maxAmp = size.height * 0.38;
     final phase = progress * math.pi * 2;
 
-    final axis = Paint()
-      ..color = color.withValues(alpha: .35)
-      ..strokeWidth = 1.2
-      ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset(0, midY), Offset(size.width, midY), axis);
-
-    for (var layer = 0; layer < 3; layer++) {
+    for (var layer = 0; layer < _layerCount; layer++) {
+      final layerScale = 1 - layer * 0.13;
       final path = Path();
-      final amp = baseAmp * (1 - layer * 0.22);
-      final freq = 2.2 + layer * 0.55;
-      final layerPhase = phase + layer * 0.7;
 
-      for (var x = 0.0; x <= size.width; x += 1.5) {
-        final t = x / size.width;
-        final envelope = math.sin(t * math.pi).clamp(0.15, 1.0);
-        final y = midY +
-            math.sin((t * freq * math.pi * 2) + layerPhase) * amp * envelope;
-        if (x == 0) {
-          path.moveTo(x, y);
+      for (var xi = 0.0; xi <= size.width; xi += 1.2) {
+        final x = xi / size.width;
+        final envelope = _pulseEnvelope(x, phase + layer * 0.22);
+        final ripple = math.sin(
+          (x * math.pi * 5.6) + phase * 1.4 + layer * 0.55,
+        );
+        final y = midY - envelope * maxAmp * layerScale * (0.82 + ripple * 0.18);
+
+        if (xi == 0) {
+          path.moveTo(xi, y);
         } else {
-          path.lineTo(x, y);
+          path.lineTo(xi, y);
         }
       }
 
       final paint = Paint()
-        ..color = color.withValues(alpha: 1 - layer * 0.25)
-        ..strokeWidth = 1.6 - layer * 0.2
+        ..color = color.withValues(alpha: (1 - layer * 0.11).clamp(0.35, 1.0))
+        ..strokeWidth = 1.15 - layer * 0.08
         ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round;
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
       canvas.drawPath(path, paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _SineWavePainter oldDelegate) {
+  bool shouldRepaint(covariant _LayeredPulseWavePainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.amplitude != amplitude ||
         oldDelegate.color != color ||

@@ -1,0 +1,62 @@
+Lingola – Cookie Policy  
+Last Updated: 2025  
+Welcome to Lingola. At Lingola, we use cookies and similar technologies to make your experience safer, more consistent, and functional when using the platform.  
+This Cookie Policy is prepared to explain what cookies are, for what purposes they are used, and how you can manage your preferences.  
+By using Lingola, you accept the use of cookies as stated in this policy.  
+
+1. What are Cookies?  
+Cookies are small data files stored on your device.  
+They ensure the proper functioning of Lingola, remember your preferences, and help us understand how the application is used at a technical level.  
+Cookies:  
+   • Do not directly identify you  
+   • Do not contain personal content  
+   • Contain technical and usage-focused information  
+
+2. What Cookies Do We Use?  
+Lingola may use the following types of cookies:  
+a) Essential Cookies  
+These are necessary for the basic functions of the application to work.  
+They ensure session management, security controls, and the proper functioning of essential system components.  
+Without these cookies, some features of Lingola may not work properly.  
+b) Performance and Analytical Cookies  
+These help us understand how the application is used.  
+They allow us to analyze which features are used more frequently and which areas need improvement.  
+This data is evaluated in an aggregated and anonymous manner.  
+c) Personalization Cookies  
+These remember information such as language selection, appearance settings, or usage preferences to provide a more consistent experience.  
+d) Marketing and Promotional Cookies  
+With the user's consent, these support the more appropriate presentation of in-app content.  
+In some cases, they may work in integration with third-party services.  
+
+3. Why Do We Use Cookies?  
+Lingola uses cookies for the following purposes:  
+   • To ensure the secure and stable operation of the application  
+   • To remember user preferences  
+   • To conduct performance and usage analyses  
+   • To improve service quality  
+   • To make the user interface more consistent  
+
+4. Third-Party Cookies  
+Lingola may work with third-party providers that offer analytics or measurement services.  
+These providers may use their own cookies, and these cookies are subject to the privacy and cookie policies of the respective service provider.  
+Lingola uses third-party cookies solely for the purpose of enhancing service quality.  
+
+5. Cookie Management  
+Control over cookie preferences is yours. If you wish, you can:  
+   • Limit, delete, or completely disable cookies from  
+   • Device settings  
+   • Application permissions  
+   • Browser settings  
+Note: Disabling essential cookies may cause some core features of Lingola to not function.  
+
+6. Use of Data  
+If the information collected through cookies qualifies as personal data, it will be processed under the Lingola Privacy Policy.  
+Data will only be used within legal limits, for explicit purposes, and through secure methods.  
+
+7. Policy Updates  
+This Cookie Policy may be updated in accordance with technological developments or legal regulations.  
+The current version will always be accessible through the application and website.  
+
+8. Contact  
+If you have any questions about cookies or this policy, you can contact us:  
+📩 Email: support@fly-work.com

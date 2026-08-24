@@ -7,11 +7,12 @@ import '../../core/auth/auth_service.dart';
 import '../../core/auth/app_user.dart';
 import '../../core/auth/session_store.dart';
 import '../../core/config/app_env.dart';
-import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/i18n/app_locale_sync.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
 import '../../widgets/user_avatar.dart';
+import '../lesson/lesson_screen.dart';
 import '../library/library_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../practice/word_practice_screen.dart';
@@ -21,6 +22,7 @@ import '../streak/streak_api_service.dart';
 import '../quiz/quiz_screen.dart';
 import '../shell/main_shell.dart';
 import '../tutor/calling_screen.dart';
+import 'services/home_data_service.dart';
 
 Future<void> _presentHomePaywall(BuildContext context) async {
   final hasKey = AppEnv.revenueCatIosPublicKey.isNotEmpty ||
@@ -49,16 +51,54 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _heavyContentReady = false;
+  HomeRemoteData? _remoteData;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _loadRemoteData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       setState(() => _heavyContentReady = true);
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_loadRemoteData());
+    }
+  }
+
+  Future<void> _loadRemoteData() async {
+    final data = await HomeDataService.fetch();
+    if (!mounted || data == null) return;
+    setState(() => _remoteData = data);
+  }
+
+  Future<void> _onContinueTap() async {
+    final data = _remoteData?.continueData;
+    MainShell.goToLessons(context);
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    if (!mounted) return;
+    if (data == null || data.slug.isEmpty) return;
+    await LessonScreen.resumeFromHome(
+      slug: data.slug,
+      label: data.lessonLabel,
+      tutorId: data.tutorId,
+      tutorSlug: data.tutorSlug,
+    );
+    if (!mounted) return;
+    await _loadRemoteData();
   }
 
   @override
@@ -91,9 +131,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 // Figma: Today's Practice ↔ Continue = 10
                 const SizedBox(height: 10),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: _ContinueConversationCard(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _ContinueConversationCard(
+                    data: _remoteData?.continueData,
+                    onContinue: _onContinueTap,
+                  ),
                 ),
                 if (!_heavyContentReady)
                   const Padding(
@@ -111,12 +154,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: text.home.learningPath,
                     action: text.home.allLessons,
                     scrollLabel: text.home.scroll,
+                    pathNodes: _remoteData?.pathNodes,
                   ),
                   const SizedBox(height: 16),
                   _LiveLessonSection(
                     title: text.home.liveLesson,
                     subtitle: text.home.liveLessonSubtitle,
                     action: text.home.moreTutor,
+                    tutors: _remoteData?.tutors,
                   ),
                   const SizedBox(height: 16),
                   const Padding(
@@ -146,11 +191,13 @@ class _LearningPathSection extends StatelessWidget {
     required this.title,
     required this.action,
     required this.scrollLabel,
+    this.pathNodes,
   });
 
   final String title;
   final String action;
   final String scrollLabel;
+  final List<HomePathPreviewNode>? pathNodes;
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +217,10 @@ class _LearningPathSection extends StatelessWidget {
         const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _LearningPathMap(onNodeTap: goLessons),
+          child: _LearningPathMap(
+            onNodeTap: goLessons,
+            nodes: pathNodes,
+          ),
         ),
         const SizedBox(height: 8),
         Center(
@@ -186,11 +236,13 @@ class _LiveLessonSection extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.action,
+    this.tutors,
   });
 
   final String title;
   final String subtitle;
   final String action;
+  final List<HomeTutorCarouselItem>? tutors;
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +258,7 @@ class _LiveLessonSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        const _LiveTutorCarousel(),
+        _LiveTutorCarousel(tutors: tutors),
       ],
     );
   }
@@ -387,6 +439,7 @@ class _HomeHeaderState extends State<_HomeHeader> {
                         ),
                       );
                       if (code == null || code.isEmpty) return;
+                      await AppLocaleSync.applyCode(code);
                       try {
                         await AuthService.updateProfile(appLocale: code);
                       } catch (_) {}
@@ -463,18 +516,27 @@ class _TopIconBadge extends StatelessWidget {
 }
 
 class _ContinueConversationCard extends StatelessWidget {
-  const _ContinueConversationCard();
+  const _ContinueConversationCard({this.data, this.onContinue});
+
+  final HomeContinueData? data;
+  final VoidCallback? onContinue;
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
+    final lessonLabel = data?.lessonLabel ?? text.home.lessonProgress;
+    final remaining = data?.remainingMinutes ?? data?.totalMinutes ?? 15;
+    final total = data?.totalMinutes ?? 15;
+    final progressFactor = data?.progressFactor ?? 0.05;
+    final timeCurrent = text.home.minutesLeft(value: remaining);
+    final timeTotal = '/ ${total}min';
     // Figma: 398×138, pad dikey 10, gap 10; üst satır space-between
     return Material(
       color: AppColors.primaryTint05,
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
-        onTap: () => MainShell.goToLessons(context),
+        onTap: onContinue ?? () => MainShell.goToLessons(context),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(10, 16, 10, 16),
@@ -494,7 +556,7 @@ class _ContinueConversationCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    text.home.lessonProgress,
+                    lessonLabel,
                     maxLines: 1,
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
@@ -521,7 +583,7 @@ class _ContinueConversationCard extends StatelessWidget {
                       TextSpan(
                         children: [
                           TextSpan(
-                            text: text.home.timeCurrent,
+                            text: timeCurrent,
                             style: const TextStyle(
                               color: AppColors.ink,
                               fontSize: 24,
@@ -530,7 +592,7 @@ class _ContinueConversationCard extends StatelessWidget {
                             ),
                           ),
                           TextSpan(
-                            text: ' ${text.home.timeTotal}',
+                            text: ' $timeTotal',
                             style: AppTextStyles.sectionSubtitle.copyWith(
                               fontSize: 14,
                               height: 18 / 14,
@@ -577,7 +639,7 @@ class _ContinueConversationCard extends StatelessWidget {
                     children: [
                       Container(color: AppColors.progressTrack),
                       FractionallySizedBox(
-                        widthFactor: 101 / 378,
+                        widthFactor: progressFactor.clamp(0.0, 1.0),
                         child: Container(color: AppColors.primary),
                       ),
                     ],
@@ -698,16 +760,37 @@ class _LinkPill extends StatelessWidget {
 }
 
 class _LearningPathMap extends StatelessWidget {
-  const _LearningPathMap({this.onNodeTap});
+  const _LearningPathMap({this.onNodeTap, this.nodes});
 
   final VoidCallback? onNodeTap;
+  final List<HomePathPreviewNode>? nodes;
 
   static const _designWidth = 398.0;
   static const _designHeight = 425.0;
 
+  static const _layout = <({double left, double top, _PathLabelSide side})>[
+    (left: 65, top: 30, side: _PathLabelSide.right),
+    (left: 278, top: -12, side: _PathLabelSide.below),
+    (left: 278, top: 115, side: _PathLabelSide.left),
+    (left: 65, top: 204, side: _PathLabelSide.right),
+    (left: 278, top: 297, side: _PathLabelSide.left),
+  ];
+
+  static const _fallbackAssets = <String>[
+    'assets/images/home/node_introductions.svg',
+    'assets/images/home/node_greetings.svg',
+    'assets/images/home/node_jobs.svg',
+    'assets/images/home/node_favorite_room.svg',
+    'assets/images/home/node_daily_routine.svg',
+  ];
+
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
+    final preview = nodes;
+    final labels = preview != null && preview.length >= _layout.length
+        ? preview
+        : null;
     return LayoutBuilder(
       builder: (context, constraints) {
         final height =
@@ -736,63 +819,29 @@ class _LearningPathMap extends StatelessWidget {
                   ),
                   // Path ikonları: hafif yukarı (-8); Greetings yıldızları
                   // All Lessons’a değmesin diye min top 18
-                  Positioned(
-                    left: 65,
-                    top: 30,
-                    child: _PathNode(
-                      asset: 'assets/images/home/node_introductions.svg',
-                      label: text.home.introductions,
-                      labelColor: AppColors.primary,
-                      labelSide: _PathLabelSide.right,
-                      showStars: true,
-                      onTap: onNodeTap,
+                  for (var i = 0; i < _layout.length; i++)
+                    Positioned(
+                      left: _layout[i].left,
+                      top: _layout[i].top,
+                      child: _PathNode(
+                        asset: labels != null
+                            ? labels[i].asset
+                            : _fallbackAssets[i],
+                        label: labels != null
+                            ? labels[i].label
+                            : _fallbackLabel(text, i),
+                        labelColor: Color(
+                          labels != null
+                              ? labels[i].labelColor
+                              : _fallbackColor(i),
+                        ),
+                        labelSide: _layout[i].side,
+                        showStars: labels != null
+                            ? labels[i].showStars
+                            : i < 2,
+                        onTap: onNodeTap,
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    left: 278,
-                    top: -12,
-                    child: _PathNode(
-                      asset: 'assets/images/home/node_greetings.svg',
-                      label: text.home.greetings,
-                      labelColor: AppColors.ink,
-                      labelSide: _PathLabelSide.below,
-                      showStars: true,
-                      onTap: onNodeTap,
-                    ),
-                  ),
-                  Positioned(
-                    left: 278,
-                    top: 115,
-                    child: _PathNode(
-                      asset: 'assets/images/home/node_jobs.svg',
-                      label: text.home.jobs,
-                      labelColor: AppColors.secondary,
-                      labelSide: _PathLabelSide.left,
-                      onTap: onNodeTap,
-                    ),
-                  ),
-                  Positioned(
-                    left: 65,
-                    top: 204,
-                    child: _PathNode(
-                      asset: 'assets/images/home/node_favorite_room.svg',
-                      label: text.home.favoriteRoom,
-                      labelColor: AppColors.secondary,
-                      labelSide: _PathLabelSide.right,
-                      onTap: onNodeTap,
-                    ),
-                  ),
-                  Positioned(
-                    left: 278,
-                    top: 297,
-                    child: _PathNode(
-                      asset: 'assets/images/home/node_daily_routine.svg',
-                      label: text.home.dailyRoutine,
-                      labelColor: AppColors.secondary,
-                      labelSide: _PathLabelSide.left,
-                      onTap: onNodeTap,
-                    ),
-                  ),
                   Positioned(
                     left: 0,
                     right: 0,
@@ -820,6 +869,24 @@ class _LearningPathMap extends StatelessWidget {
         );
       },
     );
+  }
+
+  static String _fallbackLabel(dynamic text, int index) {
+    return switch (index) {
+      0 => text.home.introductions as String,
+      1 => text.home.greetings as String,
+      2 => text.home.jobs as String,
+      3 => text.home.favoriteRoom as String,
+      _ => text.home.dailyRoutine as String,
+    };
+  }
+
+  static int _fallbackColor(int index) {
+    return switch (index) {
+      0 => AppColors.primary.toARGB32(),
+      1 => AppColors.ink.toARGB32(),
+      _ => AppColors.secondary.toARGB32(),
+    };
   }
 }
 
@@ -1019,45 +1086,16 @@ class _ScrollPill extends StatelessWidget {
 }
 
 class _LiveTutorCarousel extends StatelessWidget {
-  const _LiveTutorCarousel();
+  const _LiveTutorCarousel({this.tutors});
+
+  final List<HomeTutorCarouselItem>? tutors;
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
-    final tutors = [
-      (
-        text.home.tutorLingola,
-        'assets/images/tutor_lingola.png',
-        null,
-        [
-          text.home.tagAdaptive,
-          text.home.tagCalm,
-          text.home.tagPatient,
-          text.home.tagMore,
-        ],
-      ),
-      (
-        text.home.tutorMei,
-        'assets/images/tutor_mei.png',
-        'assets/images/home/flag_cn.svg',
-        [
-          text.home.tagPatient,
-          text.home.tagMethodical,
-          text.home.tagEncouraging,
-          text.home.tagMore,
-        ],
-      ),
-      (
-        text.home.tutorKate,
-        'assets/images/tutor_kate.png',
-        null,
-        [
-          text.home.tagAdaptive,
-          text.home.tagPatient,
-          text.home.tagMore,
-        ],
-      ),
-    ];
+    final items = (tutors != null && tutors!.isNotEmpty)
+        ? tutors!
+        : HomeDataService.fallbackTutors(text);
 
     return SizedBox(
       height: 300,
@@ -1065,26 +1103,25 @@ class _LiveTutorCarousel extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         clipBehavior: Clip.none,
-        itemCount: tutors.length,
+        itemCount: items.length,
         separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (_, index) {
-          final tutor = tutors[index];
+          final tutor = items[index];
           return _TutorCard(
-            name: tutor.$1,
-            image: tutor.$2,
-            flagAsset: tutor.$3,
-            tags: tutor.$4,
+            name: tutor.name,
+            image: tutor.image,
+            flagAsset: tutor.flagAsset,
+            tags: tutor.tags,
             startTalkLabel: text.home.startTalkNow,
             onStartTalk: () {
-              final isLingola = index == 0;
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => CallingScreen(
-                    tutorName: tutor.$1,
-                    imagePath: tutor.$2,
-                    riveAsset: isLingola ? AppAssets.tutorLingolaRiv : null,
-                    voiceId: TutorVoiceIds.male,
-                    tutorSlug: isLingola ? 'lingola' : null,
+                    tutorName: tutor.name,
+                    imagePath: tutor.image,
+                    riveAsset: tutor.riveAsset,
+                    voiceId: tutor.voiceId ?? TutorVoiceIds.male,
+                    tutorSlug: tutor.slug,
                   ),
                 ),
               );
@@ -1211,28 +1248,31 @@ class _TutorCard extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const HomeAsset(
-                      'assets/images/home/video_icon.svg',
-                      width: 15,
-                      height: 15,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      startTalkLabel,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        color: Colors.white,
-                        fontSize: 12,
-                        height: 14 / 12,
-                        fontWeight: FontWeight.w500,
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                alignment: Alignment.center,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const HomeAsset(
+                        'assets/images/home/video_icon.svg',
+                        width: 15,
+                        height: 15,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Text(
+                        startTalkLabel,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          color: Colors.white,
+                          fontSize: 12,
+                          height: 14 / 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
@@ -14,6 +15,7 @@ import '../../core/config/app_env.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
+import '../legal/legal_document_screen.dart';
 import '../shell/main_shell.dart';
 import 'language_flag.dart';
 import 'onboarding_draft.dart';
@@ -452,14 +454,6 @@ class PaywallScreen extends StatefulWidget {
 class _PaywallScreenState extends State<PaywallScreen> {
   var _presentingRevenueCat = false;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _presentRevenueCatPaywall();
-    });
-  }
-
   void _openAuth() {
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
@@ -478,17 +472,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
       return;
     }
 
-    _presentingRevenueCat = true;
+    setState(() => _presentingRevenueCat = true);
     try {
-      await RevenueCatUI.presentPaywall(displayCloseButton: true).timeout(
-        const Duration(seconds: 8),
-      );
+      await RevenueCatUI.presentPaywall(displayCloseButton: true);
     } catch (_) {
-      // Paywall açılamazsa onboarding akışı bloke olmasın.
-    } finally {
-      _presentingRevenueCat = false;
-      if (mounted) _openAuth();
+      // Paywall açılamazsa Flutter premium ekranı kalsın.
     }
+    if (!mounted) return;
+    setState(() => _presentingRevenueCat = false);
   }
 
   @override
@@ -516,27 +507,59 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   alignment: Alignment.centerRight,
                   child: IconButton(
                     tooltip: text.common.close,
-                    onPressed: _presentingRevenueCat ? null : _openAuth,
+                    onPressed: _openAuth,
                     icon: const Icon(Icons.close_rounded),
                   ),
                 ),
                 const _PaywallHero(),
                 Expanded(
                   child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const CircularProgressIndicator(color: AppColors.primary),
-                        const SizedBox(height: 12),
-                        Text(
-                          text.paywall.title,
-                          style: const TextStyle(
-                            color: AppColors.ink,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_presentingRevenueCat)
+                            const CircularProgressIndicator(
+                              color: AppColors.primary,
+                            )
+                          else
+                            Text(
+                              text.paywall.title,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                color: AppColors.ink,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          const SizedBox(height: 10),
+                          Text(
+                            text.paywall.subtitle,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              color: AppColors.secondary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 24),
+                          if (!_presentingRevenueCat)
+                            FilledButton(
+                              onPressed: _presentRevenueCatPaywall,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                minimumSize: const Size(double.infinity, 48),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(text.common.getStarted),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -1021,7 +1044,7 @@ class _AuthBackground extends StatelessWidget {
   }
 }
 
-class _AuthLegalText extends StatelessWidget {
+class _AuthLegalText extends StatefulWidget {
   const _AuthLegalText({
     required this.fullText,
     required this.terms,
@@ -1035,7 +1058,38 @@ class _AuthLegalText extends StatelessWidget {
   final String cookies;
 
   @override
+  State<_AuthLegalText> createState() => _AuthLegalTextState();
+}
+
+class _AuthLegalTextState extends State<_AuthLegalText> {
+  final _recognizers = <TapGestureRecognizer>[];
+
+  @override
+  void dispose() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    super.dispose();
+  }
+
+  LegalDocumentKind? _kindForKey(String key) {
+    if (key == widget.terms) return LegalDocumentKind.terms;
+    if (key == widget.privacy) return LegalDocumentKind.privacy;
+    if (key == widget.cookies) return LegalDocumentKind.cookies;
+    return null;
+  }
+
+  TapGestureRecognizer _recognizerFor(LegalDocumentKind kind) {
+    final r = TapGestureRecognizer()
+      ..onTap = () => LegalDocumentSheet.open(context, kind);
+    _recognizers.add(r);
+    return r;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _recognizers.clear();
+
     final base = TextStyle(
       fontFamily: 'Poppins',
       color: Colors.white.withValues(alpha: .90),
@@ -1050,8 +1104,8 @@ class _AuthLegalText extends StatelessWidget {
     );
 
     final spans = <InlineSpan>[];
-    var remaining = fullText;
-    final keys = [terms, privacy, cookies];
+    var remaining = widget.fullText;
+    final keys = [widget.terms, widget.privacy, widget.cookies];
 
     while (remaining.isNotEmpty) {
       var nextIndex = -1;
@@ -1074,7 +1128,15 @@ class _AuthLegalText extends StatelessWidget {
           TextSpan(text: remaining.substring(0, nextIndex), style: base),
         );
       }
-      spans.add(TextSpan(text: nextKey, style: link));
+
+      final kind = _kindForKey(nextKey);
+      spans.add(
+        TextSpan(
+          text: nextKey,
+          style: link,
+          recognizer: kind == null ? null : _recognizerFor(kind),
+        ),
+      );
       remaining = remaining.substring(nextIndex + nextKey.length);
     }
 

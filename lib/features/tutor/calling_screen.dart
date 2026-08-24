@@ -9,6 +9,7 @@ import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
+import '../lesson/lesson_session_result.dart';
 import 'services/calling_conversation_controller.dart';
 import 'widgets/tutor_rive_avatar.dart';
 
@@ -27,6 +28,7 @@ class CallingScreen extends StatefulWidget {
     this.tutorSlug,
     this.lessonSegmentMode = false,
     this.segmentDuration = const Duration(minutes: 15),
+    this.initialElapsed = Duration.zero,
     super.key,
   });
 
@@ -47,6 +49,8 @@ class CallingScreen extends StatefulWidget {
   /// Ders oturumu: ~15 dk sonra uzatma sor / sessizlikte bitir.
   final bool lessonSegmentMode;
   final Duration segmentDuration;
+  /// Önceki oturumlardan biriken süre (resume).
+  final Duration initialElapsed;
 
   @override
   State<CallingScreen> createState() => _CallingScreenState();
@@ -74,10 +78,11 @@ class _CallingScreenState extends State<CallingScreen> {
   void initState() {
     super.initState();
     _watch = Stopwatch()..start();
+    _elapsed = widget.initialElapsed;
     _segmentStartedAt = DateTime.now();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
-      setState(() => _elapsed = _watch.elapsed);
+      setState(() => _elapsed = widget.initialElapsed + _watch.elapsed);
       _maybeOfferSegmentCheckpoint();
     });
     _conversation = CallingConversationController(
@@ -85,9 +90,12 @@ class _CallingScreenState extends State<CallingScreen> {
       openingLine: widget.openingLine,
       systemPrompt: widget.systemPrompt,
       tutorSlug: widget.tutorSlug,
-    )
+    );
+    _conversation
       ..addListener(_onConvo)
-      ..onRequestEndLesson = _endLessonFromCheckpoint
+      ..onRequestEndLesson = () {
+        _popSession(finish: true);
+      }
       ..onSegmentContinued = _resetSegmentClock;
     unawaited(_conversation.start());
   }
@@ -108,8 +116,21 @@ class _CallingScreenState extends State<CallingScreen> {
     unawaited(_conversation.offerFifteenMinuteCheckpoint());
   }
 
-  void _endLessonFromCheckpoint() {
+  int get _sessionElapsedSeconds =>
+      (widget.initialElapsed + _watch.elapsed).inSeconds;
+
+  void _popSession({required bool finish}) {
     if (!mounted) return;
+    if (widget.lessonSegmentMode && widget.returnTranscript) {
+      Navigator.of(context).pop(
+        LessonSessionResult(
+          finish: finish,
+          elapsedSeconds: _sessionElapsedSeconds,
+          callMessages: List<CallMessage>.of(_conversation.messages),
+        ),
+      );
+      return;
+    }
     Navigator.of(context).pop(
       widget.returnTranscript ? _conversation.messages : null,
     );
@@ -159,9 +180,7 @@ class _CallingScreenState extends State<CallingScreen> {
   }
 
   void _close() {
-    Navigator.of(context).pop(
-      widget.returnTranscript ? _conversation.messages : null,
-    );
+    _popSession(finish: false);
   }
 
   @override
@@ -175,7 +194,7 @@ class _CallingScreenState extends State<CallingScreen> {
         canPop: !widget.returnTranscript,
         onPopInvokedWithResult: (didPop, result) {
           if (didPop || !widget.returnTranscript) return;
-          Navigator.of(context).pop(_conversation.messages);
+          _popSession(finish: false);
         },
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 280),

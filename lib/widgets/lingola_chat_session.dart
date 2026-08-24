@@ -12,6 +12,7 @@ import '../core/auth/api_client.dart';
 import '../core/constants/app_assets.dart';
 import '../core/constants/app_text.dart';
 import '../core/theme/app_theme.dart';
+import '../i18n/strings.g.dart';
 import '../features/tutor/services/openai_chat_service.dart';
 import '../features/tutor/services/tutor_tts_service.dart';
 import '../features/tutor/widgets/tutor_rive_avatar.dart';
@@ -119,14 +120,21 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   Timer? _ticker;
   Timer? _sessionTimer;
+  Timer? _recordingTicker;
   Duration _elapsed = Duration.zero;
+  Duration _recordingElapsed = Duration.zero;
   bool _finished = false;
-  bool _voiceMode = false;
   bool _sending = false;
   bool _recording = false;
+  bool _recordingLocked = false;
+  bool _cancelRecordingPending = false;
   bool _speaking = false;
   String? _localError;
   String? _recordingPath;
+  Offset? _micDownGlobal;
+
+  static const _lockSlideThreshold = 72.0;
+  static const _cancelSlideThreshold = 72.0;
 
   @override
   void initState() {
@@ -144,7 +152,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
     final limit = widget.sessionLimit;
     if (limit != null) {
-      _sessionTimer = Timer(limit, _expireSession);
+      _sessionTimer = Timer(limit, () => unawaited(_expireSession()));
     }
 
     if (widget.autoSpeakBot && widget.enableTts) {
@@ -175,6 +183,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   void dispose() {
     _ticker?.cancel();
     _sessionTimer?.cancel();
+    _recordingTicker?.cancel();
     _controller.dispose();
     _scrollController.dispose();
     unawaited(_playerCompleteSub?.cancel());
@@ -200,11 +209,123 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     return '$hours:$minutes:$seconds';
   }
 
-  void _expireSession() {
+  String get _recordingTimerLabel {
+    final total = _recordingElapsed.inSeconds.clamp(0, 59 * 60 + 59);
+    final minutes = (total ~/ 60).toString().padLeft(2, '0');
+    final seconds = (total % 60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
+  void _startRecordingTimer() {
+    _recordingTicker?.cancel();
+    _recordingElapsed = Duration.zero;
+    _recordingTicker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted || !_recording) return;
+      setState(() => _recordingElapsed += const Duration(seconds: 1));
+    });
+  }
+
+  void _stopRecordingTimer() {
+    _recordingTicker?.cancel();
+    _recordingTicker = null;
+    _recordingElapsed = Duration.zero;
+  }
+
+  Future<void> _onMicPointerDown(PointerDownEvent event) async {
+    if (!widget.enableMic || _sending || _finished || _recording) return;
+    _micDownGlobal = event.position;
+    _cancelRecordingPending = false;
+    await _startMic();
+    if (_recording) _startRecordingTimer();
+  }
+
+  void _onMicPointerMove(PointerMoveEvent event) {
+    if (!_recording || _recordingLocked || _micDownGlobal == null) return;
+    final delta = event.position - _micDownGlobal!;
+
+    if (delta.dy < -_lockSlideThreshold) {
+      HapticFeedback.mediumImpact();
+      setState(() => _recordingLocked = true);
+      _micDownGlobal = null;
+      return;
+    }
+
+    final shouldCancel = delta.dx < -_cancelSlideThreshold;
+    if (shouldCancel != _cancelRecordingPending) {
+      if (shouldCancel) HapticFeedback.lightImpact();
+      setState(() => _cancelRecordingPending = shouldCancel);
+    }
+  }
+
+  Future<void> _onMicPointerCancel(PointerCancelEvent event) async {
+    if (_recordingLocked) return;
+    await _cancelRecording();
+  }
+
+  Future<void> _onMicPointerUp(PointerUpEvent event) async {
+    if (_recordingLocked) return;
+    _micDownGlobal = null;
+    _stopRecordingTimer();
+
+    if (_cancelRecordingPending) {
+      await _cancelRecording();
+      return;
+    }
+    if (_recording) {
+      await _stopMicAndSend();
+    }
+  }
+
+  Future<void> _cancelRecording() async {
+    if (!_recording && !_recordingLocked) return;
+    _stopRecordingTimer();
+    _micDownGlobal = null;
+    try {
+      if (await _recorder.isRecording()) await _recorder.stop();
+    } catch (_) {}
+    final path = _recordingPath;
+    _recordingPath = null;
+    if (path != null) {
+      try {
+        await File(path).delete();
+      } catch (_) {}
+    }
+    if (!mounted) return;
+    setState(() {
+      _recording = false;
+      _recordingLocked = false;
+      _cancelRecordingPending = false;
+    });
+  }
+
+  Future<void> _finishLockedRecording() async {
+    if (!_recordingLocked || !_recording) return;
+    _stopRecordingTimer();
+    await _stopMicAndSend();
+    if (!mounted) return;
+    setState(() => _recordingLocked = false);
+  }
+
+  Future<void> _expireSession() async {
     if (_finished || !mounted) return;
     _finished = true;
     _ticker?.cancel();
     _sessionTimer?.cancel();
+    _recordingTicker?.cancel();
+    unawaited(_player.stop());
+    try {
+      if (_recording || await _recorder.isRecording()) {
+        await _recorder.stop();
+      }
+    } catch (_) {}
+    _recordingPath = null;
+    if (!mounted) return;
+    setState(() {
+      _recording = false;
+      _recordingLocked = false;
+      _cancelRecordingPending = false;
+      _speaking = false;
+    });
     (widget.onSessionExpired ?? widget.onClose)();
   }
 
@@ -213,7 +334,9 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     _finished = true;
     _ticker?.cancel();
     _sessionTimer?.cancel();
+    _recordingTicker?.cancel();
     unawaited(_player.stop());
+    unawaited(_cancelRecording());
     widget.onClose();
   }
 
@@ -311,7 +434,11 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   Future<void> _stopMicAndSend() async {
     if (!_recording) return;
-    setState(() => _recording = false);
+    setState(() {
+      _recording = false;
+      _recordingLocked = false;
+      _cancelRecordingPending = false;
+    });
     HapticFeedback.lightImpact();
 
     try {
@@ -371,11 +498,13 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       ),
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: Column(
+        body: Stack(
           children: [
-            Expanded(
-              child: Stack(
-                children: [
+            Column(
+              children: [
+                Expanded(
+                  child: Stack(
+                    children: [
                   Positioned(
                     top: 0,
                     left: 0,
@@ -595,27 +724,35 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
             ),
             SafeArea(
               top: false,
-              child: _voiceMode
-                  ? _VoiceComposer(
-                      recording: _recording,
-                      statusText: _recording
-                          ? AppText.current.previewChat.recording
-                          : AppText.current.previewChat.holdToSpeak,
-                      onSwitchToKeyboard: () =>
-                          setState(() => _voiceMode = false),
-                      onMicDown: _startMic,
-                      onMicUp: _stopMicAndSend,
-                    )
-                  : _KeyboardComposer(
-                      controller: _controller,
-                      hint: hint,
-                      enabled: !blocked,
-                      onSend: () => unawaited(_sendMessage()),
-                      onMicTap: widget.enableMic
-                          ? () => setState(() => _voiceMode = true)
-                          : () {},
-                    ),
+              child: _WhatsAppChatComposer(
+                controller: _controller,
+                hint: hint,
+                enabled: !blocked,
+                enableMic: widget.enableMic,
+                recording: _recording,
+                recordingLocked: _recordingLocked,
+                cancelPending: _cancelRecordingPending,
+                recordingTimer: _recordingTimerLabel,
+                chatLabels: AppText.current.previewChat,
+                onSend: () => unawaited(_sendMessage()),
+                onMicPointerDown: _onMicPointerDown,
+                onMicPointerCancel: (e) => unawaited(_onMicPointerCancel(e)),
+                onCancelRecording: () => unawaited(_cancelRecording()),
+                onFinishLockedRecording: () =>
+                    unawaited(_finishLockedRecording()),
+              ),
             ),
+              ],
+            ),
+            if (_recording && !_recordingLocked)
+              Positioned.fill(
+                child: Listener(
+                  behavior: HitTestBehavior.translucent,
+                  onPointerMove: _onMicPointerMove,
+                  onPointerUp: _onMicPointerUp,
+                  onPointerCancel: _onMicPointerCancel,
+                ),
+              ),
           ],
         ),
       ),
@@ -716,199 +853,296 @@ class _GlassCircleButton extends StatelessWidget {
   }
 }
 
-class _KeyboardComposer extends StatelessWidget {
-  const _KeyboardComposer({
+class _WhatsAppChatComposer extends StatelessWidget {
+  const _WhatsAppChatComposer({
     required this.controller,
     required this.hint,
+    required this.enabled,
+    required this.enableMic,
+    required this.recording,
+    required this.recordingLocked,
+    required this.cancelPending,
+    required this.recordingTimer,
+    required this.chatLabels,
     required this.onSend,
-    required this.onMicTap,
-    this.enabled = true,
+    required this.onMicPointerDown,
+    required this.onMicPointerCancel,
+    required this.onCancelRecording,
+    required this.onFinishLockedRecording,
   });
 
   final TextEditingController controller;
   final String hint;
-  final VoidCallback onSend;
-  final VoidCallback onMicTap;
   final bool enabled;
+  final bool enableMic;
+  final bool recording;
+  final bool recordingLocked;
+  final bool cancelPending;
+  final String recordingTimer;
+  final Translations$previewChat$en chatLabels;
+  final VoidCallback onSend;
+  final void Function(PointerDownEvent) onMicPointerDown;
+  final void Function(PointerCancelEvent) onMicPointerCancel;
+  final VoidCallback onCancelRecording;
+  final VoidCallback onFinishLockedRecording;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-      child: Row(
-        children: [
-          Material(
-            color: Colors.white,
-            shape: const CircleBorder(),
-            elevation: 1.5,
-            shadowColor: Colors.black26,
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: enabled ? onMicTap : null,
-              child: const SizedBox(
-                width: 46,
-                height: 46,
-                child: Center(
-                  child: HomeAsset(
-                    AppAssets.microphone,
-                    width: 22,
-                    height: 22,
-                  ),
+    if (recording || recordingLocked) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!recordingLocked)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.lock_outline_rounded,
+                      size: 16,
+                      color: AppColors.primary.withValues(alpha: .85),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      chatLabels.slideUpToLock,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.secondary.withValues(alpha: .9),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Container(
+            Container(
               height: 48,
-              padding: const EdgeInsets.only(left: 16, right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
-                  color: Colors.black.withValues(alpha: .05),
+                  color: recordingLocked
+                      ? AppColors.primary.withValues(alpha: .25)
+                      : const Color(0xFFEF3F3F).withValues(alpha: .35),
                 ),
               ),
               child: Row(
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: controller,
-                      enabled: enabled,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => onSend(),
-                      decoration: InputDecoration(
-                        hintText: hint,
-                        border: InputBorder.none,
-                        isDense: true,
-                        hintStyle: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 13,
-                          color: AppColors.secondary,
-                        ),
+                  if (recordingLocked)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      onPressed: enabled ? onCancelRecording : null,
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: Color(0xFFEF3F3F),
                       ),
+                    )
+                  else
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.chevron_left_rounded,
+                            color: cancelPending
+                                ? const Color(0xFFEF3F3F)
+                                : AppColors.secondary,
+                          ),
+                          Flexible(
+                            child: Text(
+                              chatLabels.slideLeftToCancel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: cancelPending
+                                    ? const Color(0xFFEF3F3F)
+                                    : AppColors.secondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: recordingLocked
+                          ? AppColors.primary
+                          : const Color(0xFFEF3F3F),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    recordingTimer,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: recordingLocked
+                          ? AppColors.primary
+                          : const Color(0xFFEF3F3F),
+                    ),
+                  ),
+                  const Spacer(),
+                  if (recordingLocked) ...[
+                    Text(
+                      chatLabels.recordingLockedHint,
                       style: const TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 13,
-                        color: AppColors.ink,
+                        fontSize: 11,
+                        color: AppColors.secondary,
                       ),
                     ),
-                  ),
-                  const HomeAsset(
-                    AppAssets.lightbulb,
-                    width: 18,
-                    height: 22,
-                  ),
-                  const SizedBox(width: 10),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: enabled ? onSend : null,
-                      child: const HomeAsset(
-                        AppAssets.send,
-                        width: 33,
-                        height: 33,
+                    const SizedBox(width: 8),
+                    Material(
+                      color: AppColors.primary,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: enabled ? onFinishLockedRecording : null,
+                        child: const SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: Center(
+                            child: HomeAsset(
+                              AppAssets.send,
+                              width: 18,
+                              height: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ] else
+                    Text(
+                      chatLabels.recording,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.secondary,
+                      ),
+                    ),
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+          ],
+        ),
+      );
+    }
 
-class _VoiceComposer extends StatelessWidget {
-  const _VoiceComposer({
-    required this.onSwitchToKeyboard,
-    required this.onMicDown,
-    required this.onMicUp,
-    this.recording = false,
-    this.statusText,
-  });
-
-  final VoidCallback onSwitchToKeyboard;
-  final Future<void> Function() onMicDown;
-  final Future<void> Function() onMicUp;
-  final bool recording;
-  final String? statusText;
-
-  @override
-  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+      child: ValueListenableBuilder<TextEditingValue>(
+        valueListenable: controller,
+        builder: (context, value, _) {
+          final hasText = value.text.trim().isNotEmpty;
+          return Row(
             children: [
-              Material(
-                color: const Color(0xFFE8F1FF),
-                shape: const CircleBorder(),
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: onSwitchToKeyboard,
-                  child: const SizedBox(
-                    width: 48,
-                    height: 48,
-                    child: Icon(Icons.chat_bubble_rounded, color: AppColors.primary),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 28),
-              Listener(
-                onPointerDown: (_) => unawaited(onMicDown()),
-                onPointerUp: (_) => unawaited(onMicUp()),
-                onPointerCancel: (_) => unawaited(onMicUp()),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: recording ? 80 : 72,
-                  height: recording ? 80 : 72,
+              Expanded(
+                child: Container(
+                  height: 48,
+                  padding: const EdgeInsets.only(left: 16, right: 8),
                   decoration: BoxDecoration(
-                    color: recording ? const Color(0xFFEF3F3F) : AppColors.primary,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: (recording ? const Color(0xFFEF3F3F) : AppColors.primary)
-                            .withValues(alpha: recording ? 0.5 : 0.35),
-                        blurRadius: recording ? 22 : 16,
-                        offset: const Offset(0, 6),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: .05),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: controller,
+                          enabled: enabled,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: (_) => onSend(),
+                          decoration: InputDecoration(
+                            hintText: hint,
+                            border: InputBorder.none,
+                            isDense: true,
+                            hintStyle: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 13,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 13,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                      ),
+                      const HomeAsset(
+                        AppAssets.lightbulb,
+                        width: 18,
+                        height: 22,
                       ),
                     ],
                   ),
-                  child: Center(
-                    child: recording
-                        ? const Icon(Icons.mic_rounded, color: Colors.white, size: 32)
-                        : const HomeAsset(
-                            AppAssets.microphone,
-                            width: 28,
-                            height: 28,
-                            color: Colors.white,
-                          ),
-                  ),
                 ),
               ),
+              const SizedBox(width: 10),
+              if (hasText)
+                Material(
+                  color: AppColors.primary,
+                  shape: const CircleBorder(),
+                  elevation: 1.5,
+                  shadowColor: Colors.black26,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: enabled ? onSend : null,
+                    child: const SizedBox(
+                      width: 46,
+                      height: 46,
+                      child: Center(
+                        child: HomeAsset(
+                          AppAssets.send,
+                          width: 22,
+                          height: 22,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              else if (enableMic)
+                Material(
+                  color: AppColors.primary,
+                  shape: const CircleBorder(),
+                  elevation: 1.5,
+                  shadowColor: Colors.black26,
+                  child: Listener(
+                    onPointerDown: enabled ? onMicPointerDown : null,
+                    onPointerCancel: enabled ? onMicPointerCancel : null,
+                    child: const SizedBox(
+                      width: 46,
+                      height: 46,
+                      child: Center(
+                        child: HomeAsset(
+                          AppAssets.microphone,
+                          width: 22,
+                          height: 22,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
-          ),
-          if (statusText != null) ...[
-            const SizedBox(height: 10),
-            Text(
-              statusText!,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: recording ? const Color(0xFFEF3F3F) : AppColors.secondary,
-              ),
-            ),
-          ],
-        ],
+          );
+        },
       ),
     );
   }

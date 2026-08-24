@@ -59,6 +59,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$tutorPage$en tutorPage = Translations$tutorPage$en._(_root);
 	late final Translations$lessonPage$en lessonPage = Translations$lessonPage$en._(_root);
 	late final Translations$rolePlayPage$en rolePlayPage = Translations$rolePlayPage$en._(_root);
+	late final Translations$pushNotifications$en pushNotifications = Translations$pushNotifications$en._(_root);
 	late final Translations$notificationsPage$en notificationsPage = Translations$notificationsPage$en._(_root);
 	late final Translations$profilePage$en profilePage = Translations$profilePage$en._(_root);
 }
@@ -356,6 +357,15 @@ class Translations$previewChat$en {
 
 	/// en: 'Recording… release to send'
 	String get recording => 'Recording… release to send';
+
+	/// en: 'Slide up to lock'
+	String get slideUpToLock => 'Slide up to lock';
+
+	/// en: 'Slide left to cancel'
+	String get slideLeftToCancel => 'Slide left to cancel';
+
+	/// en: 'Tap send when finished'
+	String get recordingLockedHint => 'Tap send when finished';
 }
 
 // Path: paywall
@@ -485,6 +495,18 @@ class Translations$home$en {
 
 	/// en: 'Continue Conversation'
 	String get continueConversation => 'Continue Conversation';
+
+	/// en: 'Continue with $name, or choose another tutor?'
+	String continueWithTutor({required Object name}) => 'Continue with ${name}, or choose another tutor?';
+
+	/// en: 'Continue with $name'
+	String continueSameTutor({required Object name}) => 'Continue with ${name}';
+
+	/// en: 'Choose another tutor'
+	String get chooseOtherTutor => 'Choose another tutor';
+
+	/// en: '$value min left'
+	String minutesLeft({required Object value}) => '${value} min left';
 
 	/// en: 'Lesson 2 — Greetings'
 	String get lessonProgress => 'Lesson 2 — Greetings';
@@ -996,6 +1018,47 @@ class Translations$rolePlayPage$en {
 	late final Translations$rolePlayPage$interview$en interview = Translations$rolePlayPage$interview$en._(_root);
 }
 
+// Path: pushNotifications
+class Translations$pushNotifications$en {
+	Translations$pushNotifications$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Lingola'
+	String get title => 'Lingola';
+
+	List<String> get h2 => [
+		'Looks like you took a short break.',
+		'Got a moment for one word?',
+		'We\'re here — no rush.',
+		'Your learning rhythm paused for a bit.',
+		'A mini review might feel good.',
+	];
+	List<String> get h4 => [
+		'A new word might be waiting for you today 👀',
+		'You might be missing a quick practice.',
+		'You might have skipped a useful phrase.',
+		'Today\'s progress is still open.',
+		'One word, one sentence… maybe both.',
+	];
+	List<String> get h8 => [
+		'You don\'t have to progress every day.',
+		'Even a little review counts.',
+		'You didn\'t lose anything by not studying today.',
+		'We\'re ready when you are.',
+		'Language learning is a marathon, not a sprint.',
+	];
+	List<String> get h24 => [
+		'A day passed. Your words are still here.',
+		'Taking a break is normal.',
+		'Your place is right where you left it.',
+		'Continue whenever you want.',
+		'Language won\'t run away — neither will we.',
+	];
+}
+
 // Path: notificationsPage
 class Translations$notificationsPage$en {
 	Translations$notificationsPage$en._(this._root);
@@ -1169,8 +1232,8 @@ class Translations$profilePage$en {
 	/// en: 'Rate Us'
 	String get rateUs => 'Rate Us';
 
-	/// en: 'F.A.Q.'
-	String get faq => 'F.A.Q.';
+	/// en: 'Lingola FAQ'
+	String get faq => 'Lingola FAQ';
 
 	late final Translations$profilePage$faqItems$en faqItems = Translations$profilePage$faqItems$en._(_root);
 
@@ -1712,9 +1775,16 @@ class Translations$profilePage$faqItems$en {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	late final Translations$profilePage$faqItems$howItWorks$en howItWorks = Translations$profilePage$faqItems$howItWorks$en._(_root);
-	late final Translations$profilePage$faqItems$replacePsychologist$en replacePsychologist = Translations$profilePage$faqItems$replacePsychologist$en._(_root);
-	late final Translations$profilePage$faqItems$dataPrivate$en dataPrivate = Translations$profilePage$faqItems$dataPrivate$en._(_root);
+	late final Translations$profilePage$faqItems$supportedLanguages$en supportedLanguages = Translations$profilePage$faqItems$supportedLanguages$en._(_root);
+	late final Translations$profilePage$faqItems$howAiWorks$en howAiWorks = Translations$profilePage$faqItems$howAiWorks$en._(_root);
+	late final Translations$profilePage$faqItems$offlineUse$en offlineUse = Translations$profilePage$faqItems$offlineUse$en._(_root);
+	late final Translations$profilePage$faqItems$isFree$en isFree = Translations$profilePage$faqItems$isFree$en._(_root);
+	late final Translations$profilePage$faqItems$pronunciationEval$en pronunciationEval = Translations$profilePage$faqItems$pronunciationEval$en._(_root);
+	late final Translations$profilePage$faqItems$dailyPractice$en dailyPractice = Translations$profilePage$faqItems$dailyPractice$en._(_root);
+	late final Translations$profilePage$faqItems$levelDetermination$en levelDetermination = Translations$profilePage$faqItems$levelDetermination$en._(_root);
+	late final Translations$profilePage$faqItems$realPeopleChat$en realPeopleChat = Translations$profilePage$faqItems$realPeopleChat$en._(_root);
+	late final Translations$profilePage$faqItems$dataSecurity$en dataSecurity = Translations$profilePage$faqItems$dataSecurity$en._(_root);
+	late final Translations$profilePage$faqItems$disableReminders$en disableReminders = Translations$profilePage$faqItems$disableReminders$en._(_root);
 }
 
 // Path: profilePage.days
@@ -2132,49 +2202,154 @@ class Translations$rolePlayPage$interview$chat$en {
 	String get botReply => 'That\'s impressive. What questions do you have about the role?';
 }
 
-// Path: profilePage.faqItems.howItWorks
-class Translations$profilePage$faqItems$howItWorks$en {
-	Translations$profilePage$faqItems$howItWorks$en._(this._root);
+// Path: profilePage.faqItems.supportedLanguages
+class Translations$profilePage$faqItems$supportedLanguages$en {
+	Translations$profilePage$faqItems$supportedLanguages$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
 
-	/// en: 'How does this app work?'
-	String get question => 'How does this app work?';
+	/// en: 'Which languages does the app support?'
+	String get question => 'Which languages does the app support?';
 
-	/// en: 'Our app uses artificial intelligence to analyze your emotional state through your written or spoken inputs. It provides personalized insights, mood tracking, and mental-wellness exercises designed to help you better understand and manage your emotions.'
-	String get answer => 'Our app uses artificial intelligence to analyze your emotional state through your written or spoken inputs. It provides personalized insights, mood tracking, and mental-wellness exercises designed to help you better understand and manage your emotions.';
+	/// en: 'The app currently supports English, Turkish, and German. New languages are added regularly.'
+	String get answer => 'The app currently supports English, Turkish, and German. New languages are added regularly.';
 }
 
-// Path: profilePage.faqItems.replacePsychologist
-class Translations$profilePage$faqItems$replacePsychologist$en {
-	Translations$profilePage$faqItems$replacePsychologist$en._(this._root);
+// Path: profilePage.faqItems.howAiWorks
+class Translations$profilePage$faqItems$howAiWorks$en {
+	Translations$profilePage$faqItems$howAiWorks$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
 
-	/// en: 'Can this app replace a real psychologist?'
-	String get question => 'Can this app replace a real psychologist?';
+	/// en: 'How does the AI work?'
+	String get question => 'How does the AI work?';
 
-	/// en: 'No. This app is designed to support your wellbeing and learning journey, but it does not replace professional mental health care. If you need clinical support, please consult a licensed specialist.'
-	String get answer => 'No. This app is designed to support your wellbeing and learning journey, but it does not replace professional mental health care. If you need clinical support, please consult a licensed specialist.';
+	/// en: 'The AI interacts with you like a real tutor. It analyzes your conversations, detects mistakes, and offers personalized feedback based on your progress.'
+	String get answer => 'The AI interacts with you like a real tutor. It analyzes your conversations, detects mistakes, and offers personalized feedback based on your progress.';
 }
 
-// Path: profilePage.faqItems.dataPrivate
-class Translations$profilePage$faqItems$dataPrivate$en {
-	Translations$profilePage$faqItems$dataPrivate$en._(this._root);
+// Path: profilePage.faqItems.offlineUse
+class Translations$profilePage$faqItems$offlineUse$en {
+	Translations$profilePage$faqItems$offlineUse$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
 
-	/// en: 'Are my conversations and data private?'
-	String get question => 'Are my conversations and data private?';
+	/// en: 'Can I use the app offline?'
+	String get question => 'Can I use the app offline?';
 
-	/// en: 'Yes. Your conversations and personal data are kept private and handled according to our privacy policy. We do not sell your data to third parties.'
-	String get answer => 'Yes. Your conversations and personal data are kept private and handled according to our privacy policy. We do not sell your data to third parties.';
+	/// en: 'Yes. You can download certain lessons and conversation scenarios in advance and use them offline. However, live chat requires an internet connection.'
+	String get answer => 'Yes. You can download certain lessons and conversation scenarios in advance and use them offline. However, live chat requires an internet connection.';
+}
+
+// Path: profilePage.faqItems.isFree
+class Translations$profilePage$faqItems$isFree$en {
+	Translations$profilePage$faqItems$isFree$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Is the app free?'
+	String get question => 'Is the app free?';
+
+	/// en: 'The basic version is free. With Premium, you get advanced chat scenarios, pronunciation analysis, and personal tutor mode.'
+	String get answer => 'The basic version is free. With Premium, you get advanced chat scenarios, pronunciation analysis, and personal tutor mode.';
+}
+
+// Path: profilePage.faqItems.pronunciationEval
+class Translations$profilePage$faqItems$pronunciationEval$en {
+	Translations$profilePage$faqItems$pronunciationEval$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How is my pronunciation evaluated?'
+	String get question => 'How is my pronunciation evaluated?';
+
+	/// en: 'The app analyzes your voice and uses AI-powered speech recognition to score your accent and pronunciation. Words you need to improve are highlighted.'
+	String get answer => 'The app analyzes your voice and uses AI-powered speech recognition to score your accent and pronunciation. Words you need to improve are highlighted.';
+}
+
+// Path: profilePage.faqItems.dailyPractice
+class Translations$profilePage$faqItems$dailyPractice$en {
+	Translations$profilePage$faqItems$dailyPractice$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Do I need to practice daily?'
+	String get question => 'Do I need to practice daily?';
+
+	/// en: 'Yes. The system tracks your progress every day. Just 10–15 minutes of speaking practice per day can noticeably speed up your language learning.'
+	String get answer => 'Yes. The system tracks your progress every day. Just 10–15 minutes of speaking practice per day can noticeably speed up your language learning.';
+}
+
+// Path: profilePage.faqItems.levelDetermination
+class Translations$profilePage$faqItems$levelDetermination$en {
+	Translations$profilePage$faqItems$levelDetermination$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How is my learning level determined?'
+	String get question => 'How is my learning level determined?';
+
+	/// en: 'A short level check when you first sign in analyzes your current knowledge. After that, the AI automatically recommends lessons suited to your level.'
+	String get answer => 'A short level check when you first sign in analyzes your current knowledge. After that, the AI automatically recommends lessons suited to your level.';
+}
+
+// Path: profilePage.faqItems.realPeopleChat
+class Translations$profilePage$faqItems$realPeopleChat$en {
+	Translations$profilePage$faqItems$realPeopleChat$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Can I talk with real people?'
+	String get question => 'Can I talk with real people?';
+
+	/// en: 'Yes. Premium users can schedule short practice sessions with real tutors.'
+	String get answer => 'Yes. Premium users can schedule short practice sessions with real tutors.';
+}
+
+// Path: profilePage.faqItems.dataSecurity
+class Translations$profilePage$faqItems$dataSecurity$en {
+	Translations$profilePage$faqItems$dataSecurity$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Is my data safe?'
+	String get question => 'Is my data safe?';
+
+	/// en: 'Absolutely. All conversations and user data are stored encrypted. Your personal information is never shared with third parties.'
+	String get answer => 'Absolutely. All conversations and user data are stored encrypted. Your personal information is never shared with third parties.';
+}
+
+// Path: profilePage.faqItems.disableReminders
+class Translations$profilePage$faqItems$disableReminders$en {
+	Translations$profilePage$faqItems$disableReminders$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'How do I turn off daily reminders?'
+	String get question => 'How do I turn off daily reminders?';
+
+	/// en: 'Go to Profile settings, open Notifications, and change the reminder frequency or turn notifications off completely.'
+	String get answer => 'Go to Profile settings, open Notifications, and change the reminder frequency or turn notifications off completely.';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -2281,6 +2456,9 @@ extension on Translations {
 			'previewChat.incoming2Rest' => ', Emrah! I\'m glad you\'re feeling ready. A morning coffee is always a great start to building a connection. What would you like to talk about?',
 			'previewChat.holdToSpeak' => 'Hold to speak',
 			'previewChat.recording' => 'Recording… release to send',
+			'previewChat.slideUpToLock' => 'Slide up to lock',
+			'previewChat.slideLeftToCancel' => 'Slide left to cancel',
+			'previewChat.recordingLockedHint' => 'Tap send when finished',
 			'paywall.title' => 'Start Speaking Today — Free',
 			'paywall.subtitle' => 'Unlimited learning opportunities',
 			'paywall.noCommitment' => 'No commitment',
@@ -2312,6 +2490,10 @@ extension on Translations {
 			'home.greeting' => 'Good Morning, Jhon',
 			'home.todayPractice' => 'Today’s Practice',
 			'home.continueConversation' => 'Continue Conversation',
+			'home.continueWithTutor' => ({required Object name}) => 'Continue with ${name}, or choose another tutor?',
+			'home.continueSameTutor' => ({required Object name}) => 'Continue with ${name}',
+			'home.chooseOtherTutor' => 'Choose another tutor',
+			'home.minutesLeft' => ({required Object value}) => '${value} min left',
 			'home.lessonProgress' => 'Lesson 2 — Greetings',
 			'home.timeCurrent' => '0min',
 			'home.timeTotal' => '/ 15min',
@@ -2690,6 +2872,8 @@ extension on Translations {
 			'lessonPage.levels.c1.lessons.6' => 'Possessions',
 			'lessonPage.levels.c1.lessons.7' => 'Job skills',
 			'lessonPage.levels.c1.lessons.8' => 'Historical changes',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.9' => 'Review writing',
 			'lessonPage.levels.c1.lessons.10' => 'Mysteries',
 			'lessonPage.levels.c1.lessons.11' => 'Strange theories',
@@ -2697,8 +2881,6 @@ extension on Translations {
 			'lessonPage.levels.c1.lessons.13' => 'Global politics',
 			'lessonPage.levels.c1.lessons.14' => 'Product boom',
 			'lessonPage.levels.c1.lessons.15' => 'Will be happy?',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.16' => 'Maybe later...',
 			'lessonPage.levels.c1.lessons.17' => 'New solutions',
 			'lessonPage.levels.c1.lessons.18' => 'Contextual influence',
@@ -2764,6 +2946,27 @@ extension on Translations {
 			'rolePlayPage.interview.chat.incoming2Highlight' => 'Wonderful',
 			'rolePlayPage.interview.chat.incoming2Rest' => '. Tell me about a recent project you\'re proud of.',
 			'rolePlayPage.interview.chat.botReply' => 'That\'s impressive. What questions do you have about the role?',
+			'pushNotifications.title' => 'Lingola',
+			'pushNotifications.h2.0' => 'Looks like you took a short break.',
+			'pushNotifications.h2.1' => 'Got a moment for one word?',
+			'pushNotifications.h2.2' => 'We\'re here — no rush.',
+			'pushNotifications.h2.3' => 'Your learning rhythm paused for a bit.',
+			'pushNotifications.h2.4' => 'A mini review might feel good.',
+			'pushNotifications.h4.0' => 'A new word might be waiting for you today 👀',
+			'pushNotifications.h4.1' => 'You might be missing a quick practice.',
+			'pushNotifications.h4.2' => 'You might have skipped a useful phrase.',
+			'pushNotifications.h4.3' => 'Today\'s progress is still open.',
+			'pushNotifications.h4.4' => 'One word, one sentence… maybe both.',
+			'pushNotifications.h8.0' => 'You don\'t have to progress every day.',
+			'pushNotifications.h8.1' => 'Even a little review counts.',
+			'pushNotifications.h8.2' => 'You didn\'t lose anything by not studying today.',
+			'pushNotifications.h8.3' => 'We\'re ready when you are.',
+			'pushNotifications.h8.4' => 'Language learning is a marathon, not a sprint.',
+			'pushNotifications.h24.0' => 'A day passed. Your words are still here.',
+			'pushNotifications.h24.1' => 'Taking a break is normal.',
+			'pushNotifications.h24.2' => 'Your place is right where you left it.',
+			'pushNotifications.h24.3' => 'Continue whenever you want.',
+			'pushNotifications.h24.4' => 'Language won\'t run away — neither will we.',
 			'notificationsPage.title' => 'Notifications',
 			'notificationsPage.translation.title' => 'New Translation Ready',
 			'notificationsPage.translation.body' => 'Your audio translation file has been successfully converted to text and translated.',
@@ -2826,13 +3029,27 @@ extension on Translations {
 			'profilePage.shareWithFriendTitle' => 'Share with Friend',
 			'profilePage.shareInviteBody' => 'Invite your friends and enjoy translate together',
 			'profilePage.rateUs' => 'Rate Us',
-			'profilePage.faq' => 'F.A.Q.',
-			'profilePage.faqItems.howItWorks.question' => 'How does this app work?',
-			'profilePage.faqItems.howItWorks.answer' => 'Our app uses artificial intelligence to analyze your emotional state through your written or spoken inputs. It provides personalized insights, mood tracking, and mental-wellness exercises designed to help you better understand and manage your emotions.',
-			'profilePage.faqItems.replacePsychologist.question' => 'Can this app replace a real psychologist?',
-			'profilePage.faqItems.replacePsychologist.answer' => 'No. This app is designed to support your wellbeing and learning journey, but it does not replace professional mental health care. If you need clinical support, please consult a licensed specialist.',
-			'profilePage.faqItems.dataPrivate.question' => 'Are my conversations and data private?',
-			'profilePage.faqItems.dataPrivate.answer' => 'Yes. Your conversations and personal data are kept private and handled according to our privacy policy. We do not sell your data to third parties.',
+			'profilePage.faq' => 'Lingola FAQ',
+			'profilePage.faqItems.supportedLanguages.question' => 'Which languages does the app support?',
+			'profilePage.faqItems.supportedLanguages.answer' => 'The app currently supports English, Turkish, and German. New languages are added regularly.',
+			'profilePage.faqItems.howAiWorks.question' => 'How does the AI work?',
+			'profilePage.faqItems.howAiWorks.answer' => 'The AI interacts with you like a real tutor. It analyzes your conversations, detects mistakes, and offers personalized feedback based on your progress.',
+			'profilePage.faqItems.offlineUse.question' => 'Can I use the app offline?',
+			'profilePage.faqItems.offlineUse.answer' => 'Yes. You can download certain lessons and conversation scenarios in advance and use them offline. However, live chat requires an internet connection.',
+			'profilePage.faqItems.isFree.question' => 'Is the app free?',
+			'profilePage.faqItems.isFree.answer' => 'The basic version is free. With Premium, you get advanced chat scenarios, pronunciation analysis, and personal tutor mode.',
+			'profilePage.faqItems.pronunciationEval.question' => 'How is my pronunciation evaluated?',
+			'profilePage.faqItems.pronunciationEval.answer' => 'The app analyzes your voice and uses AI-powered speech recognition to score your accent and pronunciation. Words you need to improve are highlighted.',
+			'profilePage.faqItems.dailyPractice.question' => 'Do I need to practice daily?',
+			'profilePage.faqItems.dailyPractice.answer' => 'Yes. The system tracks your progress every day. Just 10–15 minutes of speaking practice per day can noticeably speed up your language learning.',
+			'profilePage.faqItems.levelDetermination.question' => 'How is my learning level determined?',
+			'profilePage.faqItems.levelDetermination.answer' => 'A short level check when you first sign in analyzes your current knowledge. After that, the AI automatically recommends lessons suited to your level.',
+			'profilePage.faqItems.realPeopleChat.question' => 'Can I talk with real people?',
+			'profilePage.faqItems.realPeopleChat.answer' => 'Yes. Premium users can schedule short practice sessions with real tutors.',
+			'profilePage.faqItems.dataSecurity.question' => 'Is my data safe?',
+			'profilePage.faqItems.dataSecurity.answer' => 'Absolutely. All conversations and user data are stored encrypted. Your personal information is never shared with third parties.',
+			'profilePage.faqItems.disableReminders.question' => 'How do I turn off daily reminders?',
+			'profilePage.faqItems.disableReminders.answer' => 'Go to Profile settings, open Notifications, and change the reminder frequency or turn notifications off completely.',
 			'profilePage.support' => 'Support',
 			'profilePage.feedback' => 'Feedback',
 			'profilePage.progression' => 'Progression',

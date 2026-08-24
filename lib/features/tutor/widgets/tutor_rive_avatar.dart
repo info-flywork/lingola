@@ -47,8 +47,7 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
   static const _visemeCycle = <double>[0, 6, 14, 6, 10, 2];
   static const _openBlendMs = 80.0;
-  static const _closeBlendMs = 60.0;
-  static const _visemeBlendMs = 70.0;
+  static const _visemeBlendMs = 55.0;
 
   @override
   void initState() {
@@ -69,6 +68,10 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
         widget.lipsyncViseme != null &&
         oldWidget.lipsyncViseme != widget.lipsyncViseme) {
       _applyLipsyncViseme(widget.lipsyncViseme!);
+    } else if (!widget.talking &&
+        oldWidget.lipsyncViseme != null &&
+        (widget.lipsyncViseme ?? 0) == 0) {
+      _forceMouthClosed();
     }
   }
 
@@ -231,12 +234,16 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
         _startVisemeLoop();
       }
     } else {
-      _visemeTimer?.cancel();
-      _visemeTimer = null;
-      _setNumber('duration', _closeBlendMs);
-      _setBool('talk', false);
-      _setNumber('visemeNum', 0);
+      _forceMouthClosed();
     }
+  }
+
+  void _forceMouthClosed() {
+    _visemeTimer?.cancel();
+    _visemeTimer = null;
+    _setNumber('visemeNum', 0);
+    _setNumber('duration', 0);
+    _setBool('talk', false);
   }
 
   void _applyLipsyncViseme(double id) {

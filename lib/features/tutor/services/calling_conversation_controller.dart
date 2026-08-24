@@ -41,11 +41,8 @@ class CallingConversationController extends ChangeNotifier {
         _recorder = recorder ?? AudioRecorder(),
         _player = player ?? AudioPlayer() {
     _playerCompleteSub = _player.onPlayerComplete.listen((_) {
-      _speaking = false;
-      _currentViseme = 0;
-      _visemeTrack = const [];
-      notifyListeners();
-      _scheduleIdleNudge();
+      if (_suppressPlayerComplete) return;
+      _finishSpeaking();
     });
     _playerPositionSub = _player.onPositionChanged.listen(_onAudioPosition);
   }
@@ -72,11 +69,13 @@ class CallingConversationController extends ChangeNotifier {
   String? _recordingPath;
   List<VisemeCue> _visemeTrack = const [];
   double _currentViseme = 0;
+  double? _speechEndSec;
   Timer? _idleNudgeTimer;
   Timer? _extensionSilenceTimer;
   var _userHasSpoken = false;
   var _nudgeCount = 0;
   var _disposed = false;
+  var _suppressPlayerComplete = false;
   double _playbackRate = 1.0;
 
   /// none → askedOnce → askedTwice → ended
@@ -128,10 +127,43 @@ class CallingConversationController extends ChangeNotifier {
 
   void _onAudioPosition(Duration pos) {
     if (!_speaking || _visemeTrack.isEmpty) return;
-    final next = visemeAt(_visemeTrack, pos.inMilliseconds / 1000.0);
+    final t = pos.inMilliseconds / 1000.0;
+    final end = _speechEndSec;
+    if (end != null && end > 0 && t >= end) {
+      _finishSpeaking();
+      return;
+    }
+    final next = visemeAt(_visemeTrack, t, cutOffSec: end);
     if (next == _currentViseme) return;
     _currentViseme = next;
     notifyListeners();
+  }
+
+  void _finishSpeaking() {
+    if (!_speaking) return;
+    _speaking = false;
+    _currentViseme = 0;
+    _visemeTrack = const [];
+    _speechEndSec = null;
+    notifyListeners();
+    _scheduleIdleNudge();
+  }
+
+  Future<void> _resolveSpeechEnd(TutorSpeechAudio speech) async {
+    Duration? duration;
+    for (var i = 0; i < 12; i++) {
+      duration = await _player.getDuration();
+      if (duration != null && duration.inMilliseconds > 0) break;
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+    }
+    if (_disposed || !_speaking) return;
+    final audioSec = duration != null && duration.inMilliseconds > 0
+        ? duration.inMilliseconds / 1000.0
+        : null;
+    _speechEndSec = effectiveSpeechEndSec(
+      visemes: speech.visemes,
+      audioDurationSec: audioSec,
+    );
   }
 
   Future<void> start() async {
@@ -244,9 +276,10 @@ class CallingConversationController extends ChangeNotifier {
     _cancelIdleNudge();
 
     await _player.stop();
-    _speaking = false;
-    _currentViseme = 0;
+    _finishSpeaking();
     _visemeTrack = const [];
+    _currentViseme = 0;
+    _speechEndSec = null;
     notifyListeners();
     await Future<void>.delayed(const Duration(milliseconds: 150));
 
@@ -304,6 +337,7 @@ class CallingConversationController extends ChangeNotifier {
     _busy = true;
     notifyListeners();
 
+    String? transcribed;
     try {
       final started = _recordStartedAt;
       if (started != null) {
@@ -315,7 +349,9 @@ class CallingConversationController extends ChangeNotifier {
         }
       }
 
-      final path = await _recorder.stop();
+      final path = await _recorder
+          .stop()
+          .timeout(const Duration(seconds: 5), onTimeout: () => _recordingPath);
       final filePath = path ?? _recordingPath;
       if (filePath == null || !File(filePath).existsSync()) {
         _error = 'Kayıt alınamadı — mikrofona basılı tutup konuş.';
@@ -331,7 +367,9 @@ class CallingConversationController extends ChangeNotifier {
         return;
       }
 
-      final text = (await _chat.transcribe(file)).trim();
+      final text = (await _chat.transcribe(file).timeout(
+        const Duration(seconds: 45),
+      )).trim();
       try {
         await file.delete();
       } catch (_) {}
@@ -342,7 +380,7 @@ class CallingConversationController extends ChangeNotifier {
       }
 
       _error = null;
-      await _onUserSpeech(text);
+      transcribed = text;
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -351,7 +389,12 @@ class CallingConversationController extends ChangeNotifier {
       _busy = false;
       _listening = false;
       notifyListeners();
-      if (!_userHasSpoken) _scheduleIdleNudge();
+    }
+
+    if (transcribed != null) {
+      unawaited(_onUserSpeech(transcribed));
+    } else if (!_userHasSpoken) {
+      _scheduleIdleNudge();
     }
   }
 
@@ -506,19 +549,39 @@ class CallingConversationController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final speech = await _tts.synthesizeForLipsync(text, voiceId: voiceId);
+      final speech = await _tts
+          .synthesizeForLipsync(text, voiceId: voiceId)
+          .timeout(const Duration(seconds: 45));
+      _suppressPlayerComplete = true;
       await _player.stop();
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      await _preparePlaybackSession();
       _visemeTrack = speech.visemes;
+      _speechEndSec = null;
       _currentViseme =
           speech.visemes.isEmpty ? 0 : speech.visemes.first.visemeNum;
       _speaking = true;
       notifyListeners();
       await _player.setPlaybackRate(_playbackRate);
-      await _player.play(DeviceFileSource(speech.file.path));
-    } catch (e) {
+      await _player
+          .play(DeviceFileSource(speech.file.path))
+          .timeout(const Duration(seconds: 8));
+      _suppressPlayerComplete = false;
+      unawaited(_resolveSpeechEnd(speech));
+    } on TimeoutException {
+      _suppressPlayerComplete = false;
       _speaking = false;
       _visemeTrack = const [];
       _currentViseme = 0;
+      _speechEndSec = null;
+      _error = 'Tutor speech timed out. Please try again.';
+      notifyListeners();
+    } catch (e) {
+      _suppressPlayerComplete = false;
+      _speaking = false;
+      _visemeTrack = const [];
+      _currentViseme = 0;
+      _speechEndSec = null;
       _error = e.toString();
       notifyListeners();
     }

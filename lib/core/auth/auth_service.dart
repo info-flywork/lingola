@@ -1,6 +1,7 @@
 import '../../features/onboarding/onboarding_draft.dart';
 import '../../features/onboarding/services/onboarding_preview_chat_store.dart';
 import '../../features/tutor/services/tutor_chat_api_service.dart';
+import '../i18n/app_locale_sync.dart';
 import 'dart:convert';
 
 import 'api_client.dart';
@@ -70,6 +71,7 @@ abstract final class AuthService {
       expiresAt: expiresAt,
     );
     await _claimOnboardingPreviewIfAny();
+    await AppLocaleSync.applyFromUser(user.appLocale);
     return user;
   }
 
@@ -129,6 +131,7 @@ abstract final class AuthService {
       final json = await ApiClient.get('/auth/me', auth: true);
       final userJson = json['user'];
       if (userJson is! Map<String, dynamic>) {
+        await AppLocaleSync.applyFromUser(cached?.appLocale);
         return cached;
       }
       final user = AppUser.fromJson(userJson);
@@ -137,6 +140,7 @@ abstract final class AuthService {
         user: user,
         expiresAt: SessionStore.expiresAt,
       );
+      await AppLocaleSync.applyFromUser(user.appLocale);
       return user;
     } on ApiException catch (err) {
       if (err.statusCode == 401) {
@@ -145,9 +149,10 @@ abstract final class AuthService {
         await SessionStore.clear();
         return null;
       }
-      // Offline / API down: keep local session so UX doesn't bounce to onboarding.
+      await AppLocaleSync.applyFromUser(cached?.appLocale);
       return cached;
     } catch (_) {
+      await AppLocaleSync.applyFromUser(cached?.appLocale);
       return cached;
     }
   }
@@ -218,7 +223,7 @@ abstract final class AuthService {
       auth: true,
       body: {
         'reasonCode': reasonCode,
-        if (reasonLabel != null) 'reasonLabel': reasonLabel,
+        'reasonLabel': ?reasonLabel,
         if (message != null && message.trim().isNotEmpty)
           'message': message.trim(),
       },
@@ -251,6 +256,7 @@ abstract final class AuthService {
     } else {
       await SessionStore.updateUser(user);
     }
+    await AppLocaleSync.applyFromUser(user.appLocale);
     return user;
   }
 
@@ -260,6 +266,7 @@ abstract final class AuthService {
     } catch (_) {}
     await FirebaseAuthGateway.signOut();
     await SessionStore.clear();
+    await AppLocaleSync.applyCode('en');
   }
 
   static String displayNameOf(AppUser? user) {

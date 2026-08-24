@@ -6,6 +6,7 @@ import '../../core/auth/api_client.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
+import '../lesson/lesson_session_result.dart';
 import 'services/tutor_chat_api_service.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class ChatScreen extends StatefulWidget {
     this.finishOnPop = false,
     this.lessonSegmentMode = false,
     this.segmentDuration = const Duration(minutes: 15),
+    this.initialElapsed = Duration.zero,
     super.key,
   });
 
@@ -41,6 +43,7 @@ class ChatScreen extends StatefulWidget {
   /// Ders: 15 dk sonra uzatma / bitirme sorusu.
   final bool lessonSegmentMode;
   final Duration segmentDuration;
+  final Duration initialElapsed;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -58,10 +61,12 @@ class _ChatScreenState extends State<ChatScreen> {
   Timer? _segmentTimer;
   DateTime _segmentStartedAt = DateTime.now();
   var _checkpointOpen = false;
+  late final Stopwatch _watch;
 
   @override
   void initState() {
     super.initState();
+    _watch = Stopwatch()..start();
     _segmentStartedAt = DateTime.now();
     if (widget.lessonSegmentMode || widget.finishOnPop) {
       _segmentTimer = Timer.periodic(const Duration(seconds: 5), (_) {
@@ -69,6 +74,23 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     }
     _bootstrap();
+  }
+
+  int get _sessionElapsedSeconds =>
+      (widget.initialElapsed + _watch.elapsed).inSeconds;
+
+  void _popSession({required bool finish}) {
+    if (widget.lessonSegmentMode) {
+      Navigator.of(context).pop(
+        LessonSessionResult(
+          finish: finish,
+          elapsedSeconds: _sessionElapsedSeconds,
+          chatMessages: List<TutorChatMessageDto>.of(_messages),
+        ),
+      );
+      return;
+    }
+    Navigator.of(context).pop(widget.finishOnPop ? _messages : null);
   }
 
   @override
@@ -126,7 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }
     if (continuePractice == false) {
-      Navigator.of(context).pop(widget.finishOnPop ? _messages : null);
+      _popSession(finish: true);
       return;
     }
     // Dialog dismissed unexpectedly — ask once more, then end on silence.
@@ -137,7 +159,7 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }
     if (!mounted) return;
-    Navigator.of(context).pop(widget.finishOnPop ? _messages : null);
+    _popSession(finish: true);
   }
 
   Future<void> _bootstrap() async {
@@ -255,9 +277,7 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         leading: IconButton(
           tooltip: AppText.current.common.back,
-          onPressed: () => Navigator.of(context).pop(
-            widget.finishOnPop ? _messages : null,
-          ),
+          onPressed: () => _popSession(finish: false),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
         titleSpacing: 0,
@@ -290,7 +310,7 @@ class _ChatScreenState extends State<ChatScreen> {
         actions: [
           if (widget.finishOnPop)
             TextButton(
-              onPressed: () => Navigator.of(context).pop(_messages),
+              onPressed: () => _popSession(finish: true),
               child: Text(
                 AppText.current.lessonPage.finishLesson,
                 style: const TextStyle(

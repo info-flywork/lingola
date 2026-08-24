@@ -16,27 +16,37 @@ class FaqScreen extends StatefulWidget {
 class _FaqScreenState extends State<FaqScreen> {
   int? _expandedIndex = 0;
 
+  List<({String q, String a})> _faqItems(dynamic page) {
+    final items = page.faqItems;
+    return [
+      (q: items.supportedLanguages.question as String, a: items.supportedLanguages.answer as String),
+      (q: items.howAiWorks.question as String, a: items.howAiWorks.answer as String),
+      (q: items.offlineUse.question as String, a: items.offlineUse.answer as String),
+      (q: items.isFree.question as String, a: items.isFree.answer as String),
+      (q: items.pronunciationEval.question as String, a: items.pronunciationEval.answer as String),
+      (q: items.dailyPractice.question as String, a: items.dailyPractice.answer as String),
+      (q: items.levelDetermination.question as String, a: items.levelDetermination.answer as String),
+      (q: items.realPeopleChat.question as String, a: items.realPeopleChat.answer as String),
+      (q: items.dataSecurity.question as String, a: items.dataSecurity.answer as String),
+      (q: items.disableReminders.question as String, a: items.disableReminders.answer as String),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.profilePage;
-    final items = [
-      (q: text.faqItems.howItWorks.question, a: text.faqItems.howItWorks.answer),
-      (
-        q: text.faqItems.replacePsychologist.question,
-        a: text.faqItems.replacePsychologist.answer,
-      ),
-      (q: text.faqItems.dataPrivate.question, a: text.faqItems.dataPrivate.answer),
-    ];
+    final items = _faqItems(text);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: AppColors.surface,
+        systemNavigationBarColor: Colors.white,
       ),
       child: Scaffold(
         backgroundColor: AppColors.surface,
         body: SafeArea(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
@@ -51,14 +61,16 @@ class _FaqScreenState extends State<FaqScreen> {
                       ),
                       tooltip: AppText.current.common.back,
                     ),
-                    Text(
-                      text.faq,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        height: 24 / 16,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.ink,
+                    Expanded(
+                      child: Text(
+                        text.faq,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          height: 24 / 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.ink,
+                        ),
                       ),
                     ),
                   ],
@@ -124,31 +136,29 @@ class _FaqCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                height: 20,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        question,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          height: 16 / 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.ink,
-                        ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      question,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        height: 16 / 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
                       ),
                     ),
-                    HomeAsset(
-                      expanded
-                          ? AppAssets.profileTopArrow
-                          : AppAssets.profileBottomArrow,
-                      width: 18,
-                      height: 18,
-                    ),
-                  ],
-                ),
+                  ),
+                  HomeAsset(
+                    expanded
+                        ? AppAssets.profileTopArrow
+                        : AppAssets.profileBottomArrow,
+                    width: 18,
+                    height: 18,
+                  ),
+                ],
               ),
               if (expanded) ...[
                 const SizedBox(height: 8),

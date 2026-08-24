@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/i18n/app_locale_sync.dart';
+import '../../core/notifications/lingola_notification_service.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/auth/session_store.dart';
 import '../../core/config/app_env.dart';
@@ -150,6 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _notificationsOn = user.notificationsEnabled;
         _notificationsBusy = false;
       });
+      await LingolaNotificationService.syncEnabled(user.notificationsEnabled);
     } catch (err) {
       if (!mounted) return;
       setState(() {
@@ -317,7 +320,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       );
                       if (selected == null || !mounted) return;
+                      await AppLocaleSync.applyCode(selected);
+                      if (!mounted) return;
                       setState(() => _appLocale = selected);
+                      if (_notificationsOn) {
+                        await LingolaNotificationService.rescheduleFromNow();
+                      }
                       try {
                         await AuthService.updateProfile(appLocale: selected);
                       } catch (_) {}
