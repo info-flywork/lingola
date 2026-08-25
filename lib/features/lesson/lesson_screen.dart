@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/auth/api_client.dart';
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../i18n/strings.g.dart';
@@ -200,7 +201,7 @@ class _LessonScreenState extends State<LessonScreen> {
       if (!mounted) return;
 
       final tutorName = _tutorName(choice.tutor);
-      final image = choice.tutor.imagePath ?? start.tutorImage ?? '';
+      final image = _resolveTutorImage(choice.tutor, start.tutorImage);
       final priorElapsed = Duration(seconds: start.lessonElapsedSeconds);
       final remaining = Duration(
         seconds: start.remainingSeconds.clamp(60, 15 * 60),
@@ -449,6 +450,12 @@ class _LessonScreenState extends State<LessonScreen> {
         SnackBar(content: Text(err.toString())),
       );
     }
+  }
+
+  static String _resolveTutorImage(TutorDto tutor, String? fromStart) {
+    final local = tutor.imagePath ?? fromStart;
+    if (local != null && local.trim().isNotEmpty) return local.trim();
+    return AppAssets.tutorRobot;
   }
 
   static String _tutorName(TutorDto tutor) {

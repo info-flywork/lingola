@@ -366,11 +366,13 @@ class _CallingScreenState extends State<CallingScreen> {
       child: widget.riveAsset != null
           ? TutorRiveAvatar(
               assetPath: widget.riveAsset!,
-              talking: _conversation.speaking,
+              talking: _conversation.avatarTalking,
               fallbackImage: widget.imagePath,
               fit: Fit.contain,
               alignment: alignment,
-              lipsyncViseme: _conversation.hasLipsyncTrack
+              // 0 dahil gönder — widget sessizlikte talk'u kapatır.
+              lipsyncViseme: _conversation.avatarTalking &&
+                      _conversation.hasLipsyncTrack
                   ? _conversation.currentViseme
                   : null,
               loadingBackgroundColor:

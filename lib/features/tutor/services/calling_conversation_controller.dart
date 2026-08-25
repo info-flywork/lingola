@@ -45,6 +45,12 @@ class CallingConversationController extends ChangeNotifier {
       if (_suppressPlayerComplete) return;
       _finishSpeaking();
     });
+    _playerStateSub = _player.onPlayerStateChanged.listen((state) {
+      if (_suppressPlayerComplete) return;
+      if (state == PlayerState.completed || state == PlayerState.stopped) {
+        _finishSpeaking();
+      }
+    });
     _playerPositionSub = _player.onPositionChanged.listen(_onAudioPosition);
   }
 
@@ -61,6 +67,7 @@ class CallingConversationController extends ChangeNotifier {
 
   StreamSubscription<void>? _playerCompleteSub;
   StreamSubscription<Duration>? _playerPositionSub;
+  StreamSubscription<PlayerState>? _playerStateSub;
 
   final List<CallMessage> messages = [];
   final List<ChatTurn> _history = [];
@@ -74,6 +81,10 @@ class CallingConversationController extends ChangeNotifier {
   List<VisemeCue> _visemeTrack = const [];
   double _currentViseme = 0;
   double? _speechEndSec;
+  double? _audioDurationSec;
+  Timer? _lipsyncPollTimer;
+  Timer? _speechEndFallbackTimer;
+  var _lipsActive = false;
   Timer? _idleNudgeTimer;
   Timer? _extensionSilenceTimer;
   var _userHasSpoken = false;
@@ -110,6 +121,16 @@ class CallingConversationController extends ChangeNotifier {
   double get currentViseme => _currentViseme;
   bool get hasLipsyncTrack => _visemeTrack.isNotEmpty;
 
+  /// Rive `talk` — konuşma aktifken true.
+  /// Sessizlikte (viseme 0) widget `talk=false` yazar ama talking prop kalır
+  /// ki kelime arası lockout olmasın.
+  bool get avatarTalking => _speaking && _lipsActive;
+
+  void _notify() {
+    if (_disposed) return;
+    notifyListeners();
+  }
+
   Future<void> cyclePlaybackRate() async {
     final i = playbackRates.indexOf(_playbackRate);
     final next = playbackRates[(i < 0 ? 0 : i + 1) % playbackRates.length];
@@ -129,27 +150,120 @@ class CallingConversationController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Duration? _lastPolledPos;
+  DateTime? _lastPosChangeAt;
+  Timer? _silenceCloseTimer;
+  var _hadOpenMouth = false;
+
   void _onAudioPosition(Duration pos) {
-    if (!_speaking || _visemeTrack.isEmpty) return;
+    if (!_speaking) return;
     final t = pos.inMilliseconds / 1000.0;
-    final end = _speechEndSec;
-    if (end != null && end > 0 && t >= end) {
+
+    if (_lastPolledPos != pos) {
+      _lastPolledPos = pos;
+      _lastPosChangeAt = DateTime.now();
+    } else {
+      final stuckFor = _lastPosChangeAt == null
+          ? 0
+          : DateTime.now().difference(_lastPosChangeAt!).inMilliseconds;
+      if (stuckFor >= 120 && t > 0.15) {
+        _finishSpeaking();
+        return;
+      }
+    }
+
+    final audioEnd = _audioDurationSec;
+    if (audioEnd != null && audioEnd > 0 && t >= audioEnd - 0.12) {
       _finishSpeaking();
       return;
     }
-    final next = visemeAt(_visemeTrack, t, cutOffSec: end);
-    if (next == _currentViseme) return;
-    _currentViseme = next;
-    notifyListeners();
+
+    final lipEnd = _speechEndSec;
+    if (lipEnd != null && lipEnd > 0 && t >= lipEnd) {
+      _finishSpeaking();
+      return;
+    }
+
+    if (!_lipsActive || _visemeTrack.isEmpty) return;
+
+    final next = visemeAt(
+      _visemeTrack,
+      t,
+      cutOffSec: lipEnd,
+      latencySec: kVisemeLatencySec,
+    );
+
+    if (next != 0) {
+      _hadOpenMouth = true;
+      _silenceCloseTimer?.cancel();
+      _silenceCloseTimer = null;
+    } else if (_hadOpenMouth && !hasUpcomingMouth(_visemeTrack, t)) {
+      // Son hece bitti, önde ağız yok → hemen kapat (TTS kuyruk sessizliği).
+      _silenceCloseTimer?.cancel();
+      _silenceCloseTimer = Timer(const Duration(milliseconds: 50), () {
+        if (_speaking && !_disposed) _finishSpeaking();
+      });
+    }
+
+    if (next != _currentViseme) {
+      _currentViseme = next;
+      _notify();
+    }
   }
 
-  void _finishSpeaking() {
-    if (!_speaking) return;
+  void _scheduleSpeechEndFallback(double? audioSec) {
+    _speechEndFallbackTimer?.cancel();
+    final lip = _speechEndSec;
+    // Dudak bitişini duvar saatiyle de kes — position gecikirse ağız açık kalmasın.
+    final end = lip ?? audioSec;
+    if (end == null || end <= 0) return;
+    final rate = _playbackRate <= 0 ? 1.0 : _playbackRate;
+    final ms = ((end / rate) * 1000).round().clamp(120, 120000);
+    _speechEndFallbackTimer = Timer(Duration(milliseconds: ms), () {
+      if (_speaking && !_disposed) _finishSpeaking();
+    });
+  }
+
+  void _startLipsyncPoll() {
+    _lipsyncPollTimer?.cancel();
+    _lipsyncPollTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
+      if (!_speaking || _disposed) {
+        _stopLipsyncPoll();
+        return;
+      }
+      _player.getCurrentPosition().then((pos) {
+        if (pos != null && _speaking && !_disposed) {
+          _onAudioPosition(pos);
+        }
+      });
+    });
+  }
+
+  void _stopLipsyncPoll() {
+    _lipsyncPollTimer?.cancel();
+    _lipsyncPollTimer = null;
+  }
+
+  void _finishSpeaking({bool stopPlayer = false}) {
+    if (!_speaking && !_lipsActive) return;
     _speaking = false;
+    _lipsActive = false;
     _currentViseme = 0;
     _visemeTrack = const [];
     _speechEndSec = null;
-    notifyListeners();
+    _audioDurationSec = null;
+    _lastPolledPos = null;
+    _lastPosChangeAt = null;
+    _hadOpenMouth = false;
+    _silenceCloseTimer?.cancel();
+    _silenceCloseTimer = null;
+    _stopLipsyncPoll();
+    _speechEndFallbackTimer?.cancel();
+    _speechEndFallbackTimer = null;
+    if (stopPlayer) {
+      unawaited(_player.stop());
+    }
+    _notify();
     _scheduleIdleNudge();
   }
 
@@ -164,10 +278,12 @@ class CallingConversationController extends ChangeNotifier {
     final audioSec = duration != null && duration.inMilliseconds > 0
         ? duration.inMilliseconds / 1000.0
         : null;
+    _audioDurationSec = audioSec;
     _speechEndSec = effectiveSpeechEndSec(
       visemes: speech.visemes,
       audioDurationSec: audioSec,
     );
+    _scheduleSpeechEndFallback(audioSec);
   }
 
   Future<void> start() async {
@@ -280,11 +396,13 @@ class CallingConversationController extends ChangeNotifier {
     _cancelIdleNudge();
 
     await _player.stop();
-    _finishSpeaking();
+    _finishSpeaking(stopPlayer: false);
+    _lipsActive = false;
     _visemeTrack = const [];
     _currentViseme = 0;
     _speechEndSec = null;
-    notifyListeners();
+    _audioDurationSec = null;
+    _notify();
     await Future<void>.delayed(const Duration(milliseconds: 150));
 
     final hasPermission = await _recorder.hasPermission();
@@ -689,33 +807,43 @@ class CallingConversationController extends ChangeNotifier {
       await Future<void>.delayed(const Duration(milliseconds: 40));
       await _preparePlaybackSession();
       _visemeTrack = speech.visemes;
-      _speechEndSec = null;
-      _currentViseme =
-          speech.visemes.isEmpty ? 0 : speech.visemes.first.visemeNum;
-      _speaking = true;
-      notifyListeners();
+      _speechEndSec = effectiveSpeechEndSec(
+        visemes: speech.visemes,
+        audioDurationSec: null,
+      );
+      _audioDurationSec = null;
+      _currentViseme = 0;
+      _lipsActive = true;
+      _hadOpenMouth = false;
       await _player.setPlaybackRate(_playbackRate);
       await _player
           .play(DeviceFileSource(speech.file.path))
           .timeout(const Duration(seconds: 8));
       _suppressPlayerComplete = false;
+      _speaking = true;
+      _notify();
       unawaited(_resolveSpeechEnd(speech));
+      _startLipsyncPoll();
+      // Wall-clock: position gecikse bile dudaklar lipEnd'de kapanır.
+      _scheduleSpeechEndFallback(_speechEndSec);
     } on TimeoutException {
       _suppressPlayerComplete = false;
       _speaking = false;
       _visemeTrack = const [];
       _currentViseme = 0;
       _speechEndSec = null;
+      _audioDurationSec = null;
       _error = 'Tutor speech timed out. Please try again.';
-      notifyListeners();
+      _notify();
     } catch (e) {
       _suppressPlayerComplete = false;
       _speaking = false;
       _visemeTrack = const [];
       _currentViseme = 0;
       _speechEndSec = null;
+      _audioDurationSec = null;
       _error = e.toString();
-      notifyListeners();
+      _notify();
     }
   }
 
@@ -763,6 +891,10 @@ class CallingConversationController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _stopLipsyncPoll();
+    _speechEndFallbackTimer?.cancel();
+    _silenceCloseTimer?.cancel();
+    unawaited(_playerStateSub?.cancel());
     _cancelIdleNudge();
     _clearExtensionWatch();
     unawaited(_playerCompleteSub?.cancel());

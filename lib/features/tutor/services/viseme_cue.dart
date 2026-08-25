@@ -1,5 +1,8 @@
 import 'dart:io';
 
+/// Dudaklar sesten hafif önde bitsin (kuyrukta ağız açık kalmasın).
+const kVisemeLatencySec = -0.02;
+
 /// Ses zamanına hizalı Rive `visemeNum` değeri.
 class VisemeCue {
   const VisemeCue({
@@ -87,16 +90,18 @@ double visemeAt(
   List<VisemeCue> cues,
   double tSec, {
   double? cutOffSec,
+  double latencySec = kVisemeLatencySec,
 }) {
-  if (cutOffSec != null && tSec >= cutOffSec) return 0;
+  final t = (tSec - latencySec).clamp(0.0, double.infinity);
+  if (cutOffSec != null && t >= cutOffSec) return 0;
   if (cues.isEmpty) return 0;
   for (final cue in cues) {
-    if (tSec >= cue.startSec && tSec < cue.endSec) return cue.visemeNum;
+    if (t >= cue.startSec && t < cue.endSec) return cue.visemeNum;
   }
   return 0;
 }
 
-/// Dudak hareketinin ses bitmeden hemen önce durması için efektif bitiş.
+/// Dudaklar ses bitmeden ~0.35–0.45 sn önce dursun (TTS kuyruk sessizliği).
 double effectiveSpeechEndSec({
   required List<VisemeCue> visemes,
   double? audioDurationSec,
@@ -106,12 +111,24 @@ double effectiveSpeechEndSec({
     if (cue.visemeNum != 0) lastMouth = cue.endSec;
   }
 
+  var end = lastMouth;
   if (audioDurationSec != null && audioDurationSec > 0) {
     final lipStop =
-        (audioDurationSec - 0.08).clamp(0.0, audioDurationSec).toDouble();
-    if (lastMouth > 0) return lastMouth < lipStop ? lastMouth : lipStop;
-    return lipStop;
+        (audioDurationSec - 0.45).clamp(0.0, audioDurationSec).toDouble();
+    end = lastMouth > 0 ? (lastMouth < lipStop ? lastMouth : lipStop) : lipStop;
   }
+  if (end > 0) {
+    // Son heceden hemen sonra kapat — ~1 sn “takılı ağız”ı önler.
+    end = (end - 0.35).clamp(0.0, end).toDouble();
+  }
+  return end;
+}
 
-  return lastMouth;
+/// Bu andan sonra açılacak ağız var mı?
+bool hasUpcomingMouth(List<VisemeCue> cues, double tSec) {
+  for (final cue in cues) {
+    if (cue.visemeNum == 0) continue;
+    if (cue.endSec > tSec + 0.04) return true;
+  }
+  return false;
 }

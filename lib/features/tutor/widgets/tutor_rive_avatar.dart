@@ -6,8 +6,11 @@ import 'package:rive/rive.dart';
 import '../../../core/cdn/cdn_file_cache.dart';
 import '../../../widgets/home_asset.dart';
 
-/// Mindcoach ile aynı model: `talk` + `visemeNum` + `duration`.
-/// Sadece talk yetmez; bu riv ağız şeklini viseme ile sürüyor.
+/// Mindcoach `video_call_realtime_screen` ile aynı model:
+/// `talk` + `visemeNum` + `duration` (ms).
+///
+/// Kritik: `talk=true` iken Rive baked-in ağız idle animasyonu çalışır.
+/// Ses bitince mutlaka `talk=false` + `visemeNum=0` (sadece viseme yetmez).
 class TutorRiveAvatar extends StatefulWidget {
   const TutorRiveAvatar({
     required this.assetPath,
@@ -15,7 +18,7 @@ class TutorRiveAvatar extends StatefulWidget {
     this.fallbackImage,
     this.fit = Fit.contain,
     this.alignment = Alignment.bottomCenter,
-    /// Ses zamanına hizalı viseme (null → yavaş fake cycle).
+    /// Ses zamanına hizalı viseme (null → fake cycle yok; ağız kapalı kalır).
     this.lipsyncViseme,
     this.loadingBackgroundColor,
     super.key,
@@ -27,7 +30,6 @@ class TutorRiveAvatar extends StatefulWidget {
   final Fit fit;
   final Alignment alignment;
   final double? lipsyncViseme;
-  /// Riv yüklenirken arka plan (özel karakter teması).
   final Color? loadingBackgroundColor;
 
   @override
@@ -41,14 +43,18 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   NumberInput? _smViseme;
   NumberInput? _smDuration;
   Timer? _visemeTimer;
+  Timer? _closeLockTimer;
   var _failed = false;
   var _resolving = true;
   var _loadGen = 0;
-  var _visemePhase = 0;
+  /// Mindcoach `_forceCloseLockedUntil` — kapanış sonrası kısa süre tekrar açma.
+  DateTime? _forceCloseLockedUntil;
 
-  static const _visemeCycle = <double>[0, 6, 14, 6, 10, 2];
-  static const _openBlendMs = 80.0;
-  static const _visemeBlendMs = 55.0;
+  /// Mindcoach sabitleri (ms).
+  static const _talkOpenBlendMs = 45.0;
+  static const _visemeBlendMs = 38.0;
+  static const _talkCloseBlendMs = 40.0;
+  static const _forceCloseLockoutMs = 220;
 
   @override
   void initState() {
@@ -63,23 +69,49 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       _loadFile();
       return;
     }
+
     if (oldWidget.talking != widget.talking) {
-      _syncTalk(widget.talking);
-    } else if (widget.talking &&
-        widget.lipsyncViseme != null &&
-        oldWidget.lipsyncViseme != widget.lipsyncViseme) {
-      _applyLipsyncViseme(widget.lipsyncViseme!);
-    } else if (!widget.talking &&
-        oldWidget.lipsyncViseme != null &&
-        (widget.lipsyncViseme ?? 0) == 0) {
-      _forceMouthClosed();
+      if (widget.talking) {
+        if (_isCloseLocked) return;
+        _syncTalk(true);
+      } else {
+        _forceMouthClosed(lock: true);
+      }
+      return;
     }
+
+    final oldV = oldWidget.lipsyncViseme;
+    final newV = widget.lipsyncViseme;
+    if (!widget.talking) {
+      if (oldWidget.talking || (oldV ?? 0) != 0 || (newV ?? 0) != 0) {
+        _forceMouthClosed(lock: true);
+      }
+      return;
+    }
+
+    if (_isCloseLocked) return;
+
+    if (newV != null && oldV != newV) {
+      if (newV == 0) {
+        // Kelime arası sessizlik: talk kapat, lockout yok (hemen devam edebilsin).
+        _forceMouthClosed(lock: false);
+      } else {
+        _setRiveBool('talk', true);
+        _applyLipsyncViseme(newV);
+      }
+    }
+  }
+
+  bool get _isCloseLocked {
+    final until = _forceCloseLockedUntil;
+    return until != null && DateTime.now().isBefore(until);
   }
 
   @override
   void dispose() {
     _loadGen++;
     _visemeTimer?.cancel();
+    _closeLockTimer?.cancel();
     _smTalk?.dispose();
     _smViseme?.dispose();
     _smDuration?.dispose();
@@ -93,6 +125,9 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     _fileLoader?.dispose();
     _fileLoader = null;
     _viewModel = null;
+    _smTalk = null;
+    _smViseme = null;
+    _smDuration = null;
     _failed = false;
     _resolving = true;
     if (mounted) setState(() {});
@@ -170,18 +205,13 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   void _onLoaded(RiveLoaded loaded) {
     final controller = loaded.controller;
 
-    // 1) DataBind ViewModel (Mindcoach primary path)
     try {
       _viewModel = controller.dataBind(DataBind.auto());
-      debugPrint(
-        'Rive ViewModel bağlandı, props=${_viewModel?.properties.length}',
-      );
     } catch (e) {
       _viewModel = null;
       debugPrint('Rive ViewModel yok: $e');
     }
 
-    // 2) StateMachine inputs (fallback) — isimleri listele, case-insensitive bul
     try {
       final sm = controller.stateMachine;
       // ignore: deprecated_member_use
@@ -199,7 +229,6 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
           _smDuration = input;
         }
       }
-      // API ile bir kez daha dene
       // ignore: deprecated_member_use
       _smTalk ??= sm.boolean('talk');
       // ignore: deprecated_member_use
@@ -216,7 +245,11 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       'vm=${_viewModel != null}',
     );
 
-    _syncTalk(widget.talking);
+    if (widget.talking) {
+      _syncTalk(true);
+    } else {
+      _forceMouthClosed(lock: true);
+    }
   }
 
   void _onFailed(Object error, StackTrace stack) {
@@ -226,98 +259,111 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
   void _syncTalk(bool talking) {
     if (talking) {
-      _setBool('talk', true);
-      _setNumber('duration', _openBlendMs);
-      if (widget.lipsyncViseme != null) {
-        _visemeTimer?.cancel();
-        _visemeTimer = null;
-        _applyLipsyncViseme(widget.lipsyncViseme!);
+      _visemeTimer?.cancel();
+      _visemeTimer = null;
+      _forceCloseLockedUntil = null;
+      _closeLockTimer?.cancel();
+      _setRiveBool('talk', true);
+      _setRiveNumber('duration', _talkOpenBlendMs);
+      final v = widget.lipsyncViseme;
+      if (v != null) {
+        if (v == 0) {
+          _forceMouthClosed(lock: false);
+        } else {
+          _applyLipsyncViseme(v);
+        }
       } else {
-        _startVisemeLoop();
+        _setVisemeValues(0);
       }
     } else {
-      _forceMouthClosed();
+      _forceMouthClosed(lock: true);
     }
   }
 
-  void _forceMouthClosed() {
+  /// Mindcoach `_forceCloseMouthForSilence`.
+  /// [lock] true → cümle bitti; kısa süre tekrar açılmasın.
+  void _forceMouthClosed({required bool lock}) {
     _visemeTimer?.cancel();
     _visemeTimer = null;
-    _setNumber('visemeNum', 0);
-    _setNumber('duration', 0);
-    _setBool('talk', false);
-  }
+    // Anında kapat — uzun blend son 1 sn ağız açık bırakıyordu.
+    _setRiveNumber('duration', lock ? 0 : _talkCloseBlendMs);
+    _setVisemeValues(0);
+    _setRiveBool('talk', false);
+    if (!lock) return;
 
-  void _applyLipsyncViseme(double id) {
-    _setNumber('visemeNum', id);
-    _setNumber('duration', _visemeBlendMs);
-  }
-
-  void _startVisemeLoop() {
-    _visemeTimer?.cancel();
-    _visemePhase = 0;
-    // Fallback (timestamp yok): yavaş cycle — önceki 90ms çok hızlıydı.
-    _visemeTimer = Timer.periodic(const Duration(milliseconds: 160), (_) {
-      if (!widget.talking || widget.lipsyncViseme != null) return;
-      final id = _visemeCycle[_visemePhase % _visemeCycle.length];
-      _visemePhase++;
-      _applyLipsyncViseme(id);
+    _forceCloseLockedUntil = DateTime.now().add(
+      const Duration(milliseconds: _forceCloseLockoutMs),
+    );
+    _closeLockTimer?.cancel();
+    // İkinci ve üçüncü vuruş — Rive idle animasyonu direnmesin.
+    _closeLockTimer = Timer(const Duration(milliseconds: 40), () {
+      if (!mounted || widget.talking) return;
+      _setRiveNumber('duration', 0);
+      _setVisemeValues(0);
+      _setRiveBool('talk', false);
+    });
+    Timer(const Duration(milliseconds: 120), () {
+      if (!mounted || widget.talking) return;
+      _setRiveNumber('duration', 0);
+      _setVisemeValues(0);
+      _setRiveBool('talk', false);
     });
   }
 
-  void _setBool(String key, bool value) {
-    var applied = false;
+  void _applyLipsyncViseme(double id) {
+    _setVisemeValues(id);
+    _setRiveNumber('duration', _visemeBlendMs);
+  }
+
+  void _setVisemeValues(double id) {
+    _setRiveNumber('visemeNum', id);
+    _setRiveNumber('viseme', id);
+  }
+
+  /// Mindcoach: VM + SM ikisine birden yaz (kapanışta SM kaçmasın).
+  void _setRiveNumber(String key, double value) {
+    final vm = _viewModel;
+    if (vm != null) {
+      try {
+        final n = vm.number(key);
+        if (n != null) n.value = value;
+      } catch (_) {}
+      try {
+        final lower = key.toLowerCase();
+        for (final prop in vm.properties) {
+          if (prop.name.toLowerCase() == lower) {
+            (prop as dynamic).value = value;
+            break;
+          }
+        }
+      } catch (_) {}
+    }
+    if (key == 'visemeNum' || key == 'viseme') {
+      _smViseme?.value = value;
+    } else if (key == 'duration') {
+      _smDuration?.value = value;
+    }
+  }
+
+  void _setRiveBool(String key, bool value) {
     final vm = _viewModel;
     if (vm != null) {
       try {
         final b = vm.boolean(key);
-        if (b != null) {
-          b.value = value;
-          applied = true;
-        }
+        if (b != null) b.value = value;
       } catch (_) {}
       try {
+        final lower = key.toLowerCase();
         for (final prop in vm.properties) {
-          if (prop.name == key) {
+          if (prop.name.toLowerCase() == lower) {
             (prop as dynamic).value = value;
-            applied = true;
             break;
           }
         }
       } catch (_) {}
     }
     if (key == 'talk') {
-      if (_smTalk != null) {
-        _smTalk!.value = value;
-        applied = true;
-      }
-    }
-    debugPrint('Rive setBool $key=$value applied=$applied');
-  }
-
-  void _setNumber(String key, double value) {
-    final vm = _viewModel;
-    if (vm != null) {
-      try {
-        final n = vm.number(key);
-        if (n != null) {
-          n.value = value;
-          return;
-        }
-      } catch (_) {}
-      try {
-        for (final prop in vm.properties) {
-          if (prop.name == key) {
-            (prop as dynamic).value = value;
-            return;
-          }
-        }
-      } catch (_) {}
-    }
-    if (key == 'visemeNum') {
-      _smViseme?.value = value;
-    } else if (key == 'duration') {
-      _smDuration?.value = value;
+      _smTalk?.value = value;
     }
   }
 
@@ -329,6 +375,13 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
     final loader = _fileLoader;
     if (_resolving || loader == null) {
+      if (widget.fallbackImage != null &&
+          widget.fallbackImage!.trim().isNotEmpty) {
+        return _Fallback(
+          imagePath: widget.fallbackImage,
+          alignment: widget.alignment,
+        );
+      }
       return ColoredBox(
         color: widget.loadingBackgroundColor ?? const Color(0xFF2D46FF),
         child: const Center(
@@ -344,12 +397,19 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       onFailed: _onFailed,
       builder: (context, state) {
         return switch (state) {
-          RiveLoading() => ColoredBox(
-              color: widget.loadingBackgroundColor ?? const Color(0xFF2D46FF),
-              child: const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-            ),
+          RiveLoading() => widget.fallbackImage != null &&
+                  widget.fallbackImage!.trim().isNotEmpty
+              ? _Fallback(
+                  imagePath: widget.fallbackImage,
+                  alignment: widget.alignment,
+                )
+              : ColoredBox(
+                  color: widget.loadingBackgroundColor ??
+                      const Color(0xFF2D46FF),
+                  child: const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                ),
           RiveFailed() => _Fallback(
                 imagePath: widget.fallbackImage,
                 alignment: widget.alignment,
@@ -378,7 +438,6 @@ class _Fallback extends StatelessWidget {
         child: Icon(Icons.person_rounded, color: Colors.white54, size: 72),
       );
     }
-    // CDN URL veya asset — HomeAsset ikisini de destekler.
     return HomeAsset(
       imagePath!,
       fit: BoxFit.contain,

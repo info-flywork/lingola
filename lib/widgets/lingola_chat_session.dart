@@ -119,6 +119,11 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   List<VisemeCue> _visemeTrack = const [];
   double _currentViseme = 0;
+  double? _speechEndSec;
+  Timer? _lipsyncPollTimer;
+  var _lipsActive = false;
+
+  bool get _avatarTalking => _speaking && _lipsActive;
 
   Timer? _ticker;
   Timer? _sessionTimer;
@@ -143,18 +148,18 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     _messages = List<LingolaChatMessage>.of(widget.initialMessages);
     _playerCompleteSub = _player.onPlayerComplete.listen((_) {
       if (!mounted) return;
+      _stopLipsyncPoll();
       setState(() {
         _speaking = false;
+        _lipsActive = false;
         _currentViseme = 0;
         _visemeTrack = const [];
+        _speechEndSec = null;
       });
     });
     _playerPositionSub = _player.onPositionChanged.listen((pos) {
       if (!_speaking || _visemeTrack.isEmpty) return;
-      final t = pos.inMilliseconds / 1000.0;
-      final next = visemeAt(_visemeTrack, t);
-      if (next == _currentViseme) return;
-      setState(() => _currentViseme = next);
+      _applyVisemeAt(pos);
     });
 
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -193,11 +198,51 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     }
   }
 
+  void _applyVisemeAt(Duration pos) {
+    if (!_speaking) return;
+    final t = pos.inMilliseconds / 1000.0;
+    final lipEnd = _speechEndSec;
+    if (lipEnd != null && lipEnd > 0 && t >= lipEnd) {
+      if (_lipsActive) {
+        setState(() {
+          _lipsActive = false;
+          _currentViseme = 0;
+        });
+      }
+      return;
+    }
+    if (!_lipsActive || _visemeTrack.isEmpty) return;
+    final next = visemeAt(_visemeTrack, t);
+    if (next == _currentViseme) return;
+    setState(() => _currentViseme = next);
+  }
+
+  void _startLipsyncPoll() {
+    _lipsyncPollTimer?.cancel();
+    _lipsyncPollTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
+      if (!_speaking || !mounted) {
+        _stopLipsyncPoll();
+        return;
+      }
+      _player.getCurrentPosition().then((pos) {
+        if (pos != null && mounted && _speaking) {
+          _applyVisemeAt(pos);
+        }
+      });
+    });
+  }
+
+  void _stopLipsyncPoll() {
+    _lipsyncPollTimer?.cancel();
+    _lipsyncPollTimer = null;
+  }
+
   @override
   void dispose() {
     _ticker?.cancel();
     _sessionTimer?.cancel();
     _recordingTicker?.cancel();
+    _stopLipsyncPoll();
     _controller.dispose();
     _scrollController.dispose();
     unawaited(_playerCompleteSub?.cancel());
@@ -337,13 +382,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     if (!widget.enableTts || text.trim().isEmpty) return;
     try {
       await _player.stop();
-      if (mounted) {
-        setState(() {
-          _speaking = true;
-          _visemeTrack = const [];
-          _currentViseme = 0;
-        });
-      }
+      _stopLipsyncPoll();
       final speech = await _tts.synthesizeForLipsync(
         text,
         voiceId: widget.ttsVoiceId,
@@ -352,16 +391,37 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       if (!mounted) return;
       setState(() {
         _visemeTrack = speech.visemes;
-        _currentViseme =
-            speech.visemes.isEmpty ? 0 : speech.visemes.first.visemeNum;
+        _speechEndSec = effectiveSpeechEndSec(
+          visemes: speech.visemes,
+          audioDurationSec: null,
+        );
+        _currentViseme = 0;
+        _lipsActive = true;
+        _speaking = false;
       });
       await _player.play(DeviceFileSource(speech.file.path));
+      if (!mounted) return;
+      final duration = await _player.getDuration();
+      if (duration != null && duration.inMilliseconds > 0 && mounted) {
+        setState(() {
+          _speechEndSec = effectiveSpeechEndSec(
+            visemes: speech.visemes,
+            audioDurationSec: duration.inMilliseconds / 1000.0,
+          );
+        });
+      }
+      if (!mounted) return;
+      setState(() => _speaking = true);
+      _startLipsyncPoll();
     } catch (e) {
       if (!mounted) return;
+      _stopLipsyncPoll();
       setState(() {
         _speaking = false;
+        _lipsActive = false;
         _currentViseme = 0;
         _visemeTrack = const [];
+        _speechEndSec = null;
         _localError = e.toString();
       });
     }
@@ -383,7 +443,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       String? reply;
       final asyncSend = widget.onSendAsync;
       if (asyncSend != null) {
-        reply = await asyncSend(value);
+        reply = await asyncSend(value).timeout(const Duration(seconds: 45));
       } else if (widget.botReply != null) {
         reply = widget.botReply;
       } else {
@@ -398,7 +458,11 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _localError = e is ApiException ? e.message : e.toString();
+        _localError = e is TimeoutException
+            ? 'Sunucu yanıt vermedi. Tekrar dene.'
+            : e is ApiException
+                ? e.message
+                : e.toString();
       });
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -473,7 +537,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     final hint = widget.typeMessageHint ?? preview.typeMessage;
     final topInset = MediaQuery.paddingOf(context).top;
     final error = widget.errorText ?? _localError;
-    final blocked = _sending || widget.busy;
+    final blocked = _sending || (widget.busy && _messages.isEmpty);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
@@ -588,8 +652,9 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                             children: [
                               _ChatRobotHero(
                                 riveAsset: widget.riveAsset,
-                                talking: _speaking,
-                                lipsyncViseme: _visemeTrack.isNotEmpty
+                                talking: _avatarTalking,
+                                lipsyncViseme: _avatarTalking &&
+                                        _visemeTrack.isNotEmpty
                                     ? _currentViseme
                                     : null,
                                 fallbackImage:
@@ -785,30 +850,30 @@ class _ChatRobotHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final image = fallbackImage ?? AppAssets.tutorRobot;
-    if (riveAsset == null || riveAsset!.isEmpty) {
-      return Align(
-        alignment: Alignment.bottomCenter,
-        child: HomeAsset(
-          image,
-          height: 280,
-          fit: BoxFit.contain,
-        ),
-      );
-    }
+    final rive = riveAsset?.trim();
+    final hasRive = rive != null && rive.isNotEmpty;
 
     return Align(
       alignment: Alignment.bottomCenter,
       child: SizedBox(
         height: 300,
         width: double.infinity,
-        child: TutorRiveAvatar(
-          assetPath: riveAsset!,
-          talking: talking,
-          lipsyncViseme: lipsyncViseme,
-          fallbackImage: image,
-          fit: Fit.contain,
-          alignment: Alignment.bottomCenter,
-        ),
+        child: hasRive
+            ? TutorRiveAvatar(
+                assetPath: rive,
+                talking: talking,
+                lipsyncViseme: lipsyncViseme,
+                fallbackImage: image,
+                fit: Fit.contain,
+                alignment: Alignment.bottomCenter,
+                loadingBackgroundColor: Colors.transparent,
+              )
+            : HomeAsset(
+                image,
+                height: 280,
+                fit: BoxFit.contain,
+                alignment: Alignment.bottomCenter,
+              ),
       ),
     );
   }
