@@ -47,6 +47,69 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
     }
   }
 
+  Future<bool> _confirmAndDelete(TutorChatSessionDto session) async {
+    final name = _displayName(session);
+    final confirmed = await _confirmDelete(name);
+    if (!confirmed || !mounted) return false;
+
+    try {
+      await TutorChatApiService.deleteSession(session.id);
+      if (!mounted) return true;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sohbet silindi')),
+      );
+      return true;
+    } catch (e) {
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e is ApiException ? e.message : 'Silinemedi: $e',
+          ),
+        ),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> _confirmDelete(String name) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Sohbeti sil',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          '"$name" sohbetini silmek istediğinize emin misiniz?',
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFE53935),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+    return ok == true;
+  }
+
   String _displayName(TutorChatSessionDto session) {
     final key = session.tutor?.nameKey ?? session.title ?? '';
     final tutors = AppText.current.tutorPage.tutors;
@@ -168,8 +231,8 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                   ),
                   const SizedBox(height: 12),
                   if (_sessions.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 40),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 40),
                       child: Text(
                         'Henüz sohbet yok. Bir tutor seçip konuşmaya başla.',
                         textAlign: TextAlign.center,
@@ -182,28 +245,53 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                     )
                   else
                     for (final session in _sessions) ...[
-                      _HistoryTile(
-                        name: _displayName(session),
-                        imagePath: _imagePath(session),
-                        preview: session.preview.isEmpty
-                            ? 'Konuşmaya başla'
-                            : session.preview,
-                        time: _formatTime(
-                          session.lastMessageAt ?? session.createdAt,
-                        ),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => ChatScreen(
-                                tutorName: _displayName(session),
-                                imagePath: _imagePath(session),
-                                tutorId: session.tutorId,
-                                tutorSlug: session.tutor?.slug,
-                                sessionId: session.id,
-                              ),
-                            ),
-                          );
+                      Dismissible(
+                        key: ValueKey(session.id),
+                        direction: DismissDirection.endToStart,
+                        confirmDismiss: (_) => _confirmAndDelete(session),
+                        onDismissed: (_) {
+                          setState(() {
+                            _sessions = _sessions
+                                .where((s) => s.id != session.id)
+                                .toList();
+                          });
                         },
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE53935),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(
+                            Icons.delete_rounded,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                        child: _HistoryTile(
+                          name: _displayName(session),
+                          imagePath: _imagePath(session),
+                          preview: session.preview.isEmpty
+                              ? 'Konuşmaya başla'
+                              : session.preview,
+                          time: _formatTime(
+                            session.lastMessageAt ?? session.createdAt,
+                          ),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => ChatScreen(
+                                  tutorName: _displayName(session),
+                                  imagePath: _imagePath(session),
+                                  tutorId: session.tutorId,
+                                  tutorSlug: session.tutor?.slug,
+                                  sessionId: session.id,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                       const SizedBox(height: 10),
                     ],
@@ -242,15 +330,15 @@ class _HistoryTile extends StatelessWidget {
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 child: HomeAsset(
                   imagePath,
-                  width: 52,
-                  height: 52,
+                  width: 72,
+                  height: 72,
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,7 +352,7 @@ class _HistoryTile extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 14,
+                              fontSize: 15,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -280,7 +368,7 @@ class _HistoryTile extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
                       preview,
                       maxLines: 2,

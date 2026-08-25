@@ -243,4 +243,8 @@ abstract final class TutorChatApiService {
       assistantMessage: TutorChatMessageDto.fromJson(assistant),
     );
   }
+
+  static Future<void> deleteSession(String sessionId) async {
+    await ApiClient.delete('/chat/sessions/$sessionId', auth: true);
+  }
 }

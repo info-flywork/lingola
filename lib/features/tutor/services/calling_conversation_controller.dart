@@ -12,6 +12,19 @@ import 'viseme_cue.dart';
 
 enum CallMessageRole { tutor, user }
 
+class CallHintSuggestion {
+  const CallHintSuggestion({
+    required this.english,
+    required this.turkish,
+    required this.basedOn,
+  });
+
+  final String english;
+  final String turkish;
+  /// Hocanın son cümlesi (bağlam).
+  final String basedOn;
+}
+
 class CallMessage {
   const CallMessage({
     required this.role,
@@ -859,6 +872,33 @@ class CallingConversationController extends ChangeNotifier {
       _translationCache[key] = result;
     }
     return result;
+  }
+
+  /// Hoca son cümlesine göre öğrenciye İngilizce + Türkçe cevap önerisi.
+  Future<CallHintSuggestion?> suggestHint({String? lessonLabel}) async {
+    CallMessage? lastTutor;
+    for (var i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role == CallMessageRole.tutor) {
+        lastTutor = messages[i];
+        break;
+      }
+    }
+    if (lastTutor == null || lastTutor.text.trim().isEmpty) return null;
+
+    final english = await _chat.suggestStudentReply(
+      tutorLastMessage: lastTutor.text,
+      lessonContext: lessonLabel,
+    );
+    if (english.isEmpty) return null;
+
+    var turkish = await _chat.translateToTurkish(english);
+    if (turkish.isEmpty) turkish = english;
+
+    return CallHintSuggestion(
+      english: english,
+      turkish: turkish,
+      basedOn: lastTutor.text.trim(),
+    );
   }
 
   /// Tutor balonunda cümle çevirisini aç/kapat.

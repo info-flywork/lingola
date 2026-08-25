@@ -78,5 +78,40 @@ Rules:
     return (json['text'] as String?)?.trim() ?? '';
   }
 
+  /// Hoca cümlesine uygun, öğrencinin söyleyebileceği kısa İngilizce cevap.
+  Future<String> suggestStudentReply({
+    required String tutorLastMessage,
+    String? lessonContext,
+  }) async {
+    final tutor = tutorLastMessage.trim();
+    if (tutor.isEmpty) return '';
+
+    final json = await ApiClient.post(
+      '/ai/chat',
+      body: {
+        'messages': [
+          {
+            'role': 'system',
+            'content':
+                'You help English learners reply in a spoken conversation. '
+                'Given the tutor\'s last message, suggest ONE short natural English reply '
+                'the student can say aloud (A1–A2, max 12 words). '
+                'Stay on the same topic as the tutor. No quotes, no translation, no explanation — only the reply sentence.',
+          },
+          {
+            'role': 'user',
+            'content':
+                '${lessonContext != null && lessonContext.trim().isNotEmpty ? 'Lesson: $lessonContext\n' : ''}'
+                'Tutor said: "$tutor"\n'
+                'Suggest the student reply:',
+          },
+        ],
+        'temperature': 0.5,
+        'maxTokens': 40,
+      },
+    );
+    return (json['text'] as String?)?.trim() ?? '';
+  }
+
   void dispose() {}
 }

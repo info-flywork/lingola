@@ -68,6 +68,8 @@ class _CallingScreenState extends State<CallingScreen> {
 
   /// İpucu (ampul).
   var _hintsOn = false;
+  var _hintLoading = false;
+  CallHintSuggestion? _hintSuggestion;
 
   /// false = yarım ekran (sohbet altta), true = tam ekran calling.
   var _expanded = false;
@@ -368,9 +370,9 @@ class _CallingScreenState extends State<CallingScreen> {
               assetPath: widget.riveAsset!,
               talking: _conversation.avatarTalking,
               fallbackImage: widget.imagePath,
-              fit: Fit.contain,
+              // Tasarım: hoca ekranı doldursun (cover), boş mavi alan kalmasın.
+              fit: Fit.cover,
               alignment: alignment,
-              // 0 dahil gönder — widget sessizlikte talk'u kapatır.
               lipsyncViseme: _conversation.avatarTalking &&
                       _conversation.hasLipsyncTrack
                   ? _conversation.currentViseme
@@ -380,7 +382,7 @@ class _CallingScreenState extends State<CallingScreen> {
             )
           : Image.asset(
               widget.imagePath,
-              fit: BoxFit.contain,
+              fit: BoxFit.cover,
               alignment: alignment,
               width: double.infinity,
               height: double.infinity,
@@ -424,29 +426,156 @@ class _CallingScreenState extends State<CallingScreen> {
         _ControlCircle(
           size: 56,
           light: !darkChrome,
-          onTap: () {
-            final next = !_hintsOn;
-            setState(() => _hintsOn = next);
-            if (!next) return;
-            final calling = AppText.current.tutorPage.calling;
-            ScaffoldMessenger.of(context).clearSnackBars();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${calling.nativeLine}\n${calling.englishLine}',
+          onTap: () => unawaited(_toggleHint()),
+          child: _hintLoading
+              ? SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: darkChrome ? Colors.white : AppColors.primary,
+                  ),
+                )
+              : HomeAsset(
+                  _hintsOn ? AppAssets.lightbulb : AppAssets.hint,
+                  width: 22,
+                  height: 22,
+                  color: darkChrome ? Colors.white : AppColors.primary,
                 ),
-                duration: const Duration(seconds: 5),
-              ),
-            );
-          },
-          child: HomeAsset(
-            _hintsOn ? AppAssets.lightbulb : AppAssets.hint,
-            width: 22,
-            height: 22,
-            color: darkChrome ? Colors.white : AppColors.primary,
-          ),
         ),
       ],
+    );
+  }
+
+  Future<void> _toggleHint() async {
+    if (_hintLoading) return;
+    if (_hintsOn) {
+      setState(() {
+        _hintsOn = false;
+        _hintSuggestion = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _hintsOn = true;
+      _hintLoading = true;
+      _hintSuggestion = null;
+    });
+
+    try {
+      final hint = await _conversation.suggestHint(
+        lessonLabel: AppText.current.tutorPage.calling.lessonBadge,
+      );
+      if (!mounted) return;
+      if (hint == null) {
+        setState(() {
+          _hintsOn = false;
+          _hintLoading = false;
+        });
+        return;
+      }
+      setState(() {
+        _hintSuggestion = hint;
+        _hintLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _hintsOn = false;
+        _hintLoading = false;
+        _hintSuggestion = null;
+      });
+    }
+  }
+
+  Widget? _buildHintCard({required bool onDark}) {
+    final hint = _hintSuggestion;
+    if (!_hintsOn || hint == null) return null;
+
+    final bg = onDark ? Colors.white.withValues(alpha: 0.94) : Colors.white;
+    final titleColor = onDark ? const Color(0xFF1A2A4A) : AppColors.ink;
+    final muted = onDark
+        ? const Color(0xFF1A2A4A).withValues(alpha: 0.65)
+        : AppColors.secondary;
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.lightbulb_rounded, color: AppColors.primary, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Hocanın son cümlesine göre şöyle diyebilirsin:',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: muted,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    hint.turkish,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: titleColor,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    hint.english,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      fontStyle: FontStyle.italic,
+                      color: muted,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              onPressed: () {
+                setState(() {
+                  _hintsOn = false;
+                  _hintSuggestion = null;
+                });
+              },
+              icon: Icon(Icons.close_rounded, size: 18, color: muted),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -454,7 +583,7 @@ class _CallingScreenState extends State<CallingScreen> {
   Widget _buildCompact(BuildContext context) {
     final text = AppText.current.tutorPage.calling;
     final topInset = MediaQuery.paddingOf(context).top;
-    const heroHeight = 340.0;
+    const heroHeight = 400.0;
     final listening = _conversation.listening;
 
     return Scaffold(
@@ -491,7 +620,8 @@ class _CallingScreenState extends State<CallingScreen> {
                           alignment: Alignment.bottomCenter,
                           children: [
                             _buildAvatar(
-                              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                              padding: EdgeInsets.zero,
+                              alignment: const Alignment(0, -0.2),
                             ),
                             Positioned(
                               right: 16,
@@ -569,6 +699,10 @@ class _CallingScreenState extends State<CallingScreen> {
                     ),
                     const SizedBox(height: 8),
                   ],
+                  if (_buildHintCard(onDark: false) case final hint?) ...[
+                    hint,
+                    const SizedBox(height: 10),
+                  ],
                   _buildMicRow(darkChrome: false),
                 ],
               ),
@@ -604,7 +738,8 @@ class _CallingScreenState extends State<CallingScreen> {
           ),
           Positioned.fill(
             child: _buildAvatar(
-              padding: const EdgeInsets.fromLTRB(12, 72, 12, 160),
+              padding: const EdgeInsets.fromLTRB(0, 36, 0, 100),
+              alignment: const Alignment(0, -0.15),
             ),
           ),
           Positioned(
@@ -706,6 +841,10 @@ class _CallingScreenState extends State<CallingScreen> {
                 ),
                 const SizedBox(height: 10),
                 _buildSpeedChip(),
+                if (_buildHintCard(onDark: true) case final hint?) ...[
+                  const SizedBox(height: 12),
+                  hint,
+                ],
                 const SizedBox(height: 18),
                 _buildMicRow(darkChrome: true),
               ],
