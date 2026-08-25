@@ -6,6 +6,7 @@ import '../../core/auth/api_client.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../i18n/strings.g.dart';
 import '../../widgets/lingola_chat_session.dart';
 import '../tutor/services/tutor_api_service.dart';
 import '../tutor/services/tutor_chat_api_service.dart';
@@ -28,29 +29,42 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
   List<LingolaChatMessage> _messages = const [];
   TutorDto? _tutor;
 
-  ({String title, String opening, String heroImage}) get _scenario {
+  /// UI rozeti — kullanıcının dilinde olabilir.
+  String get _lessonBadge {
     final page = AppText.current.rolePlayPage;
     return switch (widget.scenarioId) {
+      RolePlayScenarioId.coffee => page.coffee.title,
+      RolePlayScenarioId.directions => page.directions.title,
+      RolePlayScenarioId.interview => page.interview.title,
+    };
+  }
+
+  /// Konuşma içeriği her zaman İngilizce (UI dili ne olursa olsun).
+  ({String titleEn, String openingEn}) get _scenarioEnglish {
+    final page = AppLocale.en.buildSync().rolePlayPage;
+    return switch (widget.scenarioId) {
       RolePlayScenarioId.coffee => (
-          title: page.coffee.title,
-          opening: page.coffee.chat.briefing,
-          heroImage: AppAssets.rolePlayCoffee,
+          titleEn: page.coffee.title,
+          openingEn: page.coffee.chat.briefing,
         ),
       RolePlayScenarioId.directions => (
-          title: page.directions.title,
-          opening: page.directions.chat.briefing,
-          heroImage: AppAssets.rolePlayDirections,
+          titleEn: page.directions.title,
+          openingEn: page.directions.chat.briefing,
         ),
       RolePlayScenarioId.interview => (
-          title: page.interview.title,
-          opening: page.interview.chat.briefing,
-          heroImage: AppAssets.rolePlayInterview,
+          titleEn: page.interview.title,
+          openingEn: page.interview.chat.briefing,
         ),
     };
   }
 
   String get _heroImage =>
-      _tutor?.imagePath ?? _scenario.heroImage;
+      _tutor?.imagePath ??
+      switch (widget.scenarioId) {
+        RolePlayScenarioId.coffee => AppAssets.rolePlayCoffee,
+        RolePlayScenarioId.directions => AppAssets.rolePlayDirections,
+        RolePlayScenarioId.interview => AppAssets.rolePlayInterview,
+      };
 
   String? get _riveAsset =>
       _tutor?.rivePath ?? AppAssets.tutorLingolaRiv;
@@ -60,8 +74,8 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
   @override
   void initState() {
     super.initState();
-    final scenario = _scenario;
-    _messages = [LingolaChatMessage.bot(scenario.opening)];
+    final en = _scenarioEnglish;
+    _messages = [LingolaChatMessage.bot(en.openingEn)];
     unawaited(_loadTutor());
     unawaited(_bootstrap());
   }
@@ -88,12 +102,12 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
       _error = null;
     });
     try {
-      final scenario = _scenario;
+      final en = _scenarioEnglish;
       final session = await TutorChatApiService.openSession(
         tutorSlug: 'lingola',
         forceNew: true,
-        title: 'Role Play: ${scenario.title}',
-        openingMessage: scenario.opening,
+        title: 'Role Play: ${en.titleEn}',
+        openingMessage: en.openingEn,
       );
       final messages = await TutorChatApiService.listMessages(session.id);
       if (!mounted) return;
@@ -134,14 +148,14 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
   @override
   Widget build(BuildContext context) {
     final preview = AppText.current.previewChat;
-    final scenario = _scenario;
     final sessionReady = _sessionId != null;
 
     return LingolaChatSession(
-      key: ValueKey(_sessionId ?? 'roleplay-local'),
+      // Stabil key — session gelince remount TTS/lipsync'i öldürmesin.
+      key: ValueKey('roleplay-${widget.scenarioId.name}'),
       brand: preview.brand,
       speedLabel: preview.speed,
-      lessonBadge: scenario.title,
+      lessonBadge: _lessonBadge,
       typeMessageHint: preview.typeMessage,
       busy: _syncingSession && _messages.isEmpty,
       errorText: _error,

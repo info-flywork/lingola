@@ -188,14 +188,24 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   @override
   void didUpdateWidget(covariant LingolaChatSession oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialMessages != widget.initialMessages &&
-        widget.initialMessages.length > _messages.length) {
-      setState(() {
-        _messages
-          ..clear()
-          ..addAll(widget.initialMessages);
-      });
-    }
+    if (identical(oldWidget.initialMessages, widget.initialMessages)) return;
+
+    final oldFirst = oldWidget.initialMessages.isEmpty
+        ? null
+        : oldWidget.initialMessages.first.text;
+    final newFirst =
+        widget.initialMessages.isEmpty ? null : widget.initialMessages.first.text;
+    final grew = widget.initialMessages.length > _messages.length;
+    final replaced = widget.initialMessages.length != _messages.length ||
+        oldFirst != newFirst;
+
+    if (!grew && !replaced) return;
+
+    setState(() {
+      _messages
+        ..clear()
+        ..addAll(widget.initialMessages);
+    });
   }
 
   void _applyVisemeAt(Duration pos) {
