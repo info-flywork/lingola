@@ -1,41 +1,9 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// Local `.env` — gitignore’da. Key’leri asla kaynak koda yazma.
+/// Canlı Lingola API + RevenueCat public keys (.env).
 abstract final class AppEnv {
-  /// `.env` / dart-define yoksa fallback (iOS Simulator).
-  static const _devLanApi = 'http://127.0.0.1:3001';
-
-  static String get openAiApiKey =>
-      dotenv.isInitialized ? (dotenv.env['OPENAI_API_KEY']?.trim() ?? '') : '';
-
-  static String get elevenLabsApiKey =>
-      dotenv.isInitialized ? (dotenv.env['ELEVENLABS_API_KEY']?.trim() ?? '') : '';
-
-  static String get elevenLabsVoiceId {
-    if (!dotenv.isInitialized) return 'WZlYpi1yf6zJhNWXih74';
-    final id = dotenv.env['ELEVENLABS_VOICE_ID']?.trim();
-    return (id != null && id.isNotEmpty) ? id : 'WZlYpi1yf6zJhNWXih74';
-  }
-
-  /// Öncelik: `--dart-define` → `.env` → fallback.
-  /// Profil bazlı adres geçişi için launch.json'daki define her zaman kazanır.
-  static String get apiBaseUrl {
-    const fromDefine = String.fromEnvironment('API_BASE_URL');
-    if (fromDefine.trim().isNotEmpty) {
-      return fromDefine.trim().replaceAll(RegExp(r'/+$'), '');
-    }
-
-    if (dotenv.isInitialized) {
-      final fromEnv = dotenv.env['API_BASE_URL']?.trim();
-      if (fromEnv != null && fromEnv.isNotEmpty) {
-        return fromEnv.replaceAll(RegExp(r'/+$'), '');
-      }
-    }
-    return _devLanApi;
-  }
-
-  static bool get hasOpenAi => openAiApiKey.isNotEmpty;
-  static bool get hasElevenLabs => elevenLabsApiKey.isNotEmpty;
+  /// Canlı Lingola API (Xcode / TestFlight / debug hepsi aynı).
+  static const apiBaseUrl = 'https://lingola.fly-work.com';
 
   static String get revenueCatIosPublicKey =>
       dotenv.isInitialized

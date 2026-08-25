@@ -337,11 +337,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 body: text.onboarding.slide1.body,
                 visual: const _SpeakerVisual(),
                 onContinue: _continue,
-                onSkipToHome: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute<void>(builder: (_) => const MainShell()),
-                  );
-                },
               ),
               _OnboardingPage(
                 pageIndex: 1,
@@ -374,7 +369,6 @@ class _OnboardingPage extends StatelessWidget {
     required this.body,
     required this.visual,
     required this.onContinue,
-    this.onSkipToHome,
     this.onBack,
   });
 
@@ -383,7 +377,6 @@ class _OnboardingPage extends StatelessWidget {
   final String body;
   final Widget visual;
   final VoidCallback onContinue;
-  final VoidCallback? onSkipToHome;
   final VoidCallback? onBack;
 
   @override
@@ -427,33 +420,6 @@ class _OnboardingPage extends StatelessWidget {
                 child: Text(
                   text.common.back,
                   style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          if (onSkipToHome != null)
-            Positioned(
-              top: MediaQuery.paddingOf(context).top + 8,
-              right: 16,
-              child: TextButton(
-                onPressed: onSkipToHome,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.black.withValues(alpha: .25),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                child: const Text(
-                  'Home',
-                  style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

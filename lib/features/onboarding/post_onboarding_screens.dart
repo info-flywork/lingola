@@ -17,7 +17,6 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../legal/legal_document_screen.dart';
 import '../shell/main_shell.dart';
-import 'language_flag.dart';
 import 'onboarding_draft.dart';
 import 'preview_chat_screen.dart';
 
@@ -442,186 +441,24 @@ class _AccountStepRow extends StatelessWidget {
   }
 }
 
-class PaywallScreen extends StatefulWidget {
-  const PaywallScreen({super.key, required this.draft});
-
-  final OnboardingDraft draft;
-
-  @override
-  State<PaywallScreen> createState() => _PaywallScreenState();
-}
-
-class _PaywallScreenState extends State<PaywallScreen> {
-  var _presentingRevenueCat = false;
-
-  void _openAuth() {
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => AuthScreen(draft: widget.draft),
-      ),
-    );
-  }
-
-  Future<void> _presentRevenueCatPaywall() async {
-    if (_presentingRevenueCat || !mounted) return;
-    final hasKey = AppEnv.revenueCatIosPublicKey.isNotEmpty ||
-        AppEnv.revenueCatAndroidPublicKey.isNotEmpty;
-    if (!hasKey) {
-      _openAuth();
-      return;
-    }
-
-    setState(() => _presentingRevenueCat = true);
+/// Preview chat sonrası doğrudan RevenueCat paywall, ardından login.
+Future<void> presentOnboardingPaywallThenAuth(
+  BuildContext context,
+  OnboardingDraft draft,
+) async {
+  final hasKey = AppEnv.revenueCatIosPublicKey.isNotEmpty ||
+      AppEnv.revenueCatAndroidPublicKey.isNotEmpty;
+  if (hasKey) {
     try {
       await RevenueCatUI.presentPaywall(displayCloseButton: true);
-    } catch (_) {
-      // Paywall açılamazsa Flutter premium ekranı kalsın.
-    }
-    if (!mounted) return;
-    setState(() => _presentingRevenueCat = false);
+    } catch (_) {}
   }
-
-  @override
-  Widget build(BuildContext context) {
-    final text = AppText.current;
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.white,
-      ),
-      child: Scaffold(
-        body: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.white, Color(0xFFE8F1FF), AppColors.primary],
-              stops: [0, .42, 1],
-            ),
-          ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    tooltip: text.common.close,
-                    onPressed: _openAuth,
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-                ),
-                const _PaywallHero(),
-                Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (_presentingRevenueCat)
-                            const CircularProgressIndicator(
-                              color: AppColors.primary,
-                            )
-                          else
-                            Text(
-                              text.paywall.title,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                color: AppColors.ink,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          const SizedBox(height: 10),
-                          Text(
-                            text.paywall.subtitle,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              color: AppColors.secondary,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          if (!_presentingRevenueCat)
-                            FilledButton(
-                              onPressed: _presentRevenueCatPaywall,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                minimumSize: const Size(double.infinity, 48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Text(text.common.getStarted),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PaywallHero extends StatelessWidget {
-  const _PaywallHero();
-
-  @override
-  Widget build(BuildContext context) {
-    const flags = ['en', 'fr', 'it', 'es', 'de'];
-    return SizedBox(
-      height: 168,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          for (var i = 0; i < flags.length; i++)
-            Transform.translate(
-              offset: Offset((i - 2) * 42.0, i.isEven ? -28.0 : 18.0),
-              child: Container(
-                width: 54,
-                height: 54,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: .08),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: LanguageFlag(flags[i], width: 38, height: 28),
-              ),
-            ),
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: const Color(0xFF7B61FF),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 3),
-            ),
-            child: const Icon(
-              Icons.emoji_people_rounded,
-              color: Colors.white,
-              size: 36,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  if (!context.mounted) return;
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute<void>(
+      builder: (_) => AuthScreen(draft: draft),
+    ),
+  );
 }
 
 class AuthScreen extends StatefulWidget {
@@ -824,33 +661,33 @@ class _AuthScreenState extends State<AuthScreen> {
                           const SizedBox(height: 28),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: _SocialAuthButton(
-                              label: text.auth.continueGoogle,
-                              background: Colors.white,
-                              foreground: AppColors.ink,
-                              iconAsset: 'assets/images/auth/google.svg',
-                              iconSize: 22,
-                              onPressed: _busy ? null : _continueWithGoogle,
+                            child: Column(
+                              children: [
+                                if (_showAppleSignIn) ...[
+                                  _SocialAuthButton(
+                                    label: text.auth.continueApple,
+                                    background:
+                                        Colors.white.withValues(alpha: .20),
+                                    foreground: Colors.white,
+                                    iconAsset: 'assets/images/auth/apple.svg',
+                                    iconSize: 28,
+                                    glassGradient: true,
+                                    onPressed:
+                                        _busy ? null : _continueWithApple,
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                                _SocialAuthButton(
+                                  label: text.auth.continueGoogle,
+                                  background: Colors.white,
+                                  foreground: AppColors.ink,
+                                  iconAsset: 'assets/images/auth/google.svg',
+                                  iconSize: 22,
+                                  onPressed: _busy ? null : _continueWithGoogle,
+                                ),
+                              ],
                             ),
                           ),
-                          if (_showAppleSignIn) ...[
-                            const SizedBox(height: 12),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: _SocialAuthButton(
-                                label: text.auth.continueApple,
-                                background:
-                                    Colors.white.withValues(alpha: .20),
-                                foreground: Colors.white,
-                                iconAsset: 'assets/images/auth/apple.svg',
-                                iconSize: 28,
-                                glassGradient: true,
-                                onPressed:
-                                    _busy ? null : _continueWithApple,
-                              ),
-                            ),
-                          ],
                           const SizedBox(height: 16),
                           Center(
                             child: TextButton(

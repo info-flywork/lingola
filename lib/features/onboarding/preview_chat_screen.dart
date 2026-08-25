@@ -97,13 +97,9 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
     return result.assistantMessage.content;
   }
 
-  void _goPaywall() {
+  Future<void> _goPaywall() async {
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => PaywallScreen(draft: widget.draft),
-      ),
-    );
+    await presentOnboardingPaywallThenAuth(context, widget.draft);
   }
 
   @override

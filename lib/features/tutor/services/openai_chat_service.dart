@@ -1,8 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
-
-import '../../../core/config/app_env.dart';
+import '../../../core/auth/api_client.dart';
 
 class ChatTurn {
   const ChatTurn({required this.role, required this.content});
@@ -14,24 +13,8 @@ class ChatTurn {
   Map<String, String> toJson() => {'role': role, 'content': content};
 }
 
-/// Basit İngilizce pratik — OpenAI Chat Completions + Whisper.
+/// İngilizce pratik — backend üzerinden OpenAI proxy.
 class OpenAiChatService {
-  OpenAiChatService({Dio? dio})
-      : _dio = dio ??
-            Dio(
-              BaseOptions(
-                connectTimeout: const Duration(seconds: 30),
-                receiveTimeout: const Duration(seconds: 60),
-                sendTimeout: const Duration(seconds: 60),
-              ),
-            );
-
-  final Dio _dio;
-
-  static const _chatUrl = 'https://api.openai.com/v1/chat/completions';
-  static const _transcribeUrl = 'https://api.openai.com/v1/audio/transcriptions';
-  static const _model = 'gpt-4o-mini';
-
   static const systemPrompt = '''
 You are a friendly English tutor for a language-learning app called Lingola.
 Lesson focus: A1 Greetings / simple conversation practice.
@@ -43,35 +26,16 @@ Rules:
 - Stay in character as a warm tutor.
 ''';
 
-  /// Mindcoach gibi bulut STT — Apple Speech yok, simülatörde de çalışır.
   Future<String> transcribe(File audioFile) async {
-    if (!AppEnv.hasOpenAi) {
-      throw StateError('OPENAI_API_KEY eksik (.env)');
-    }
-
-    final form = FormData.fromMap({
-      'model': 'whisper-1',
-      'language': 'en',
-      'file': await MultipartFile.fromFile(
-        audioFile.path,
-        filename: 'speech.m4a',
-      ),
-    });
-
-    try {
-      final res = await _dio.post<Map<String, dynamic>>(
-        _transcribeUrl,
-        data: form,
-        options: Options(
-          headers: {'Authorization': 'Bearer ${AppEnv.openAiApiKey}'},
-        ),
-      );
-      return (res.data?['text'] as String?)?.trim() ?? '';
-    } on DioException catch (err) {
-      throw StateError(
-        'Whisper ${err.response?.statusCode}: ${err.response?.data ?? err.message}',
-      );
-    }
+    final bytes = await audioFile.readAsBytes();
+    final json = await ApiClient.post(
+      '/ai/transcribe',
+      body: {
+        'audioBase64': base64Encode(bytes),
+        'contentType': 'audio/m4a',
+      },
+    );
+    return (json['text'] as String?)?.trim() ?? '';
   }
 
   Future<String> complete({
@@ -79,98 +43,40 @@ Rules:
     required String userMessage,
     String? systemPrompt,
   }) async {
-    if (!AppEnv.hasOpenAi) {
-      throw StateError('OPENAI_API_KEY eksik (.env)');
-    }
-
     final messages = <Map<String, String>>[
-      {'role': 'system', 'content': systemPrompt ?? OpenAiChatService.systemPrompt},
+      {
+        'role': 'system',
+        'content': systemPrompt ?? OpenAiChatService.systemPrompt,
+      },
       ...history.map((t) => t.toJson()),
       {'role': 'user', 'content': userMessage},
     ];
 
-    try {
-      final res = await _dio.post<Map<String, dynamic>>(
-        _chatUrl,
-        data: {
-          'model': _model,
-          'temperature': 0.7,
-          'max_tokens': 120,
-          'messages': messages,
-        },
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer ${AppEnv.openAiApiKey}',
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
-
-      final choices = res.data?['choices'] as List<dynamic>?;
-      if (choices == null || choices.isEmpty) {
-        throw StateError('OpenAI boş yanıt');
-      }
-      final content = choices.first as Map<String, dynamic>;
-      final message = content['message'] as Map<String, dynamic>?;
-      final text = (message?['content'] as String?)?.trim();
-      if (text == null || text.isEmpty) {
-        throw StateError('OpenAI boş yanıt');
-      }
-      return text;
-    } on DioException catch (err) {
-      throw StateError(
-        'OpenAI ${err.response?.statusCode}: ${err.response?.data ?? err.message}',
-      );
+    final json = await ApiClient.post(
+      '/ai/chat',
+      body: {
+        'messages': messages,
+        'temperature': 0.7,
+        'maxTokens': 120,
+      },
+    );
+    final text = (json['text'] as String?)?.trim();
+    if (text == null || text.isEmpty) {
+      throw StateError('OpenAI boş yanıt');
     }
+    return text;
   }
 
-  /// İngilizce → Türkçe (kelime veya cümle). Yanıtta sadece çeviri.
   Future<String> translateToTurkish(String text) async {
-    if (!AppEnv.hasOpenAi) {
-      throw StateError('OPENAI_API_KEY eksik (.env)');
-    }
     final trimmed = text.trim();
     if (trimmed.isEmpty) return '';
 
-    try {
-      final res = await _dio.post<Map<String, dynamic>>(
-        _chatUrl,
-        data: {
-          'model': _model,
-          'temperature': 0.2,
-          'max_tokens': 200,
-          'messages': [
-            {
-              'role': 'system',
-              'content':
-                  'You translate English to Turkish for language learners. '
-                  'Reply with only the Turkish translation, nothing else. '
-                  'Keep it natural and concise.',
-            },
-            {'role': 'user', 'content': trimmed},
-          ],
-        },
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer ${AppEnv.openAiApiKey}',
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
-
-      final choices = res.data?['choices'] as List<dynamic>?;
-      if (choices == null || choices.isEmpty) {
-        throw StateError('OpenAI boş çeviri');
-      }
-      final content = choices.first as Map<String, dynamic>;
-      final message = content['message'] as Map<String, dynamic>?;
-      return (message?['content'] as String?)?.trim() ?? '';
-    } on DioException catch (err) {
-      throw StateError(
-        'OpenAI translate ${err.response?.statusCode}: ${err.response?.data ?? err.message}',
-      );
-    }
+    final json = await ApiClient.post(
+      '/ai/translate',
+      body: {'text': trimmed},
+    );
+    return (json['text'] as String?)?.trim() ?? '';
   }
 
-  void dispose() => _dio.close(force: true);
+  void dispose() {}
 }

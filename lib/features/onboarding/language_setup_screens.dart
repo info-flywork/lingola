@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/constants/app_text.dart';
+import '../../core/i18n/app_locale_sync.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import 'language_flag.dart';
@@ -35,6 +37,17 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
     _nativeName = text.language.nativeName;
     _targetCode = _draft.targetLanguageCode;
     _targetName = text.language.targetName;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_syncAppLocaleFromNative());
+    });
+  }
+
+  String _appLocaleFromNative(String code) => code == 'jp' ? 'ja' : code;
+
+  Future<void> _syncAppLocaleFromNative() async {
+    final localeCode = _appLocaleFromNative(_nativeCode);
+    _draft.appLocale = localeCode;
+    await AppLocaleSync.applyCode(localeCode);
   }
 
   List<_SheetLanguage> _targetSheetLanguages() {
@@ -88,17 +101,21 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
       },
     );
     if (result == null || !mounted) return;
-    setState(() {
-      if (forNative) {
-        _nativeCode = result.code;
-        _nativeName = result.label;
-        _draft.nativeLanguageCode = result.code;
-      } else {
+    if (forNative) {
+      _nativeCode = result.code;
+      _nativeName = result.label;
+      _draft.nativeLanguageCode = result.code;
+      await _syncAppLocaleFromNative();
+    } else {
+      setState(() {
         _targetCode = result.code;
         _targetName = result.label;
         _draft.targetLanguageCode = result.code;
-      }
-    });
+      });
+      return;
+    }
+    if (!mounted) return;
+    setState(() {});
   }
 
   @override
@@ -167,7 +184,6 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                       ),
                       const SizedBox(height: 10),
                       _LanguageCard(
-                        fieldLabel: text.language.nativeField,
                         language: _nativeName,
                         flagCode: _nativeCode,
                         onOpen: () => _openSheet(forNative: true),
@@ -215,7 +231,6 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                       ),
                       const SizedBox(height: 10),
                       _LanguageCard(
-                        fieldLabel: text.language.targetField,
                         language: _targetName,
                         flagCode: _targetCode,
                         onOpen: () => _openSheet(forNative: false),
@@ -236,6 +251,7 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                     onPressed: () {
                       _draft.nativeLanguageCode = _nativeCode;
                       _draft.targetLanguageCode = _targetCode;
+                      _draft.appLocale = _appLocaleFromNative(_nativeCode);
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (_) => GoalSetupScreen(draft: _draft),
@@ -255,14 +271,14 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
 
 class _LanguageCard extends StatelessWidget {
   const _LanguageCard({
-    required this.fieldLabel,
     required this.language,
     required this.flagCode,
     required this.onOpen,
+    this.fieldLabel,
     this.highlighted = false,
   });
 
-  final String fieldLabel;
+  final String? fieldLabel;
   final String language;
   final String flagCode;
   final VoidCallback onOpen;
@@ -317,16 +333,18 @@ class _LanguageCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        fieldLabel,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          color: AppColors.ink,
-                          fontSize: 12,
-                          height: 16 / 12,
-                          fontWeight: FontWeight.w600,
+                      if (fieldLabel != null && fieldLabel!.isNotEmpty) ...[
+                        Text(
+                          fieldLabel!,
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            color: AppColors.ink,
+                            fontSize: 12,
+                            height: 16 / 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
+                      ],
                       Text(
                         language,
                         style: const TextStyle(
