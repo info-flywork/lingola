@@ -1,16 +1,19 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/quiz/quiz_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
+import '../tutor/services/tutor_tts_service.dart';
 
 class SpeakingTestScreen extends StatefulWidget {
   const SpeakingTestScreen({super.key});
@@ -63,6 +66,8 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
   var _prompts = _defaultPrompts;
 
   final _speech = SpeechToText();
+  final _tts = TutorTtsService();
+  final _player = AudioPlayer();
 
   late final AnimationController _waveController;
   Timer? _ticker;
@@ -72,6 +77,8 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
   var _isRecording = false;
   var _hasRecording = false;
   var _showTranslation = false;
+  var _showHint = false;
+  var _speakingPrompt = false;
   var _level = 0.2;
   var _elapsed = Duration.zero;
   var _recordedDuration = Duration.zero;
@@ -123,6 +130,8 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
     _ticker?.cancel();
     _waveController.dispose();
     _speech.stop();
+    _tts.dispose();
+    _player.dispose();
     super.dispose();
   }
 
@@ -154,6 +163,53 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
     _elapsed = Duration.zero;
     _recordedDuration = Duration.zero;
     _showTranslation = false;
+    _showHint = false;
+  }
+
+  String get _promptDisplay {
+    if (_showTranslation) return _current.tr;
+    if (_showHint && _current.tr.isNotEmpty) {
+      return '${_current.en}\n\n${_current.tr}';
+    }
+    return _current.en;
+  }
+
+  Future<void> _speakPrompt() async {
+    if (_speakingPrompt) return;
+    final text = _current.en.trim();
+    if (text.isEmpty) return;
+
+    setState(() => _speakingPrompt = true);
+    try {
+      final file = await _tts.synthesizeToFile(
+        text,
+        voiceId: TutorVoiceIds.female,
+        modelId: TutorTtsService.flashModel,
+      );
+      await _player.stop();
+      await _player.play(DeviceFileSource(file.path));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppText.current.common.genericError)),
+      );
+    } finally {
+      if (mounted) setState(() => _speakingPrompt = false);
+    }
+  }
+
+  void _toggleHint() {
+    setState(() {
+      _showHint = !_showHint;
+      if (_showHint) _showTranslation = false;
+    });
+  }
+
+  void _toggleTranslation() {
+    setState(() {
+      _showTranslation = !_showTranslation;
+      if (_showTranslation) _showHint = false;
+    });
   }
 
   Future<void> _goPrevious() async {
@@ -379,7 +435,7 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
   Widget build(BuildContext context) {
     final text = AppText.current.quizPage;
     final practice = AppText.current.wordPracticePage;
-    final prompt = _showTranslation ? _current.tr : _current.en;
+    final prompt = _promptDisplay;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -440,11 +496,12 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
                       hasRecording: _hasRecording,
                       level: _level,
                       wave: _waveController,
-                      onTranslate: () => setState(
-                        () => _showTranslation = !_showTranslation,
-                      ),
-                      onSpeak: () {},
-                      onHint: () {},
+                      translationActive: _showTranslation,
+                      hintActive: _showHint,
+                      speakingPrompt: _speakingPrompt,
+                      onTranslate: _toggleTranslation,
+                      onSpeak: _speakPrompt,
+                      onHint: _toggleHint,
                       onSpeakUp: _toggleSpeakUp,
                       onSubmit: _submit,
                     ),
@@ -521,6 +578,9 @@ class _SpeakingCard extends StatelessWidget {
     required this.onHint,
     required this.onSpeakUp,
     required this.onSubmit,
+    this.translationActive = false,
+    this.hintActive = false,
+    this.speakingPrompt = false,
   });
 
   final String questionLabel;
@@ -541,6 +601,9 @@ class _SpeakingCard extends StatelessWidget {
   final VoidCallback onHint;
   final VoidCallback onSpeakUp;
   final VoidCallback onSubmit;
+  final bool translationActive;
+  final bool hintActive;
+  final bool speakingPrompt;
 
   @override
   Widget build(BuildContext context) {
@@ -632,31 +695,38 @@ class _SpeakingCard extends StatelessWidget {
           const SizedBox(height: 20),
           Row(
             children: [
-              _IconTap(
+              _QuizIconButton(
                 onTap: onTranslate,
-                child: const HomeAsset(
+                active: translationActive,
+                child: HomeAsset(
                   AppAssets.writingTranslate,
                   width: 24,
                   height: 24,
+                  color: translationActive ? AppColors.primary : null,
                 ),
               ),
-              const SizedBox(width: 12),
-              _IconTap(
-                onTap: onSpeak,
-                child: const HomeAsset(
-                  AppAssets.speaker,
-                  width: 24,
-                  height: 24,
-                  color: AppColors.secondary,
+              const SizedBox(width: 4),
+              _QuizIconButton(
+                onTap: speakingPrompt ? null : onSpeak,
+                child: Opacity(
+                  opacity: speakingPrompt ? 0.45 : 1,
+                  child: const HomeAsset(
+                    AppAssets.speaker,
+                    width: 24,
+                    height: 24,
+                    color: AppColors.secondary,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
-              _IconTap(
+              const SizedBox(width: 4),
+              _QuizIconButton(
                 onTap: onHint,
-                child: const HomeAsset(
+                active: hintActive,
+                child: HomeAsset(
                   AppAssets.hint,
                   width: 22,
                   height: 22,
+                  color: hintActive ? AppColors.primary : null,
                 ),
               ),
               const Spacer(),
@@ -886,23 +956,30 @@ class _RecordingPanel extends StatelessWidget {
   }
 }
 
-class _IconTap extends StatelessWidget {
-  const _IconTap({
-    required this.onTap,
+class _QuizIconButton extends StatelessWidget {
+  const _QuizIconButton({
     required this.child,
+    this.onTap,
+    this.active = false,
   });
 
-  final VoidCallback onTap;
   final Widget child;
+  final VoidCallback? onTap;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: child,
+    return Material(
+      color: active ? AppColors.primary.withValues(alpha: .08) : Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Center(child: child),
+        ),
       ),
     );
   }

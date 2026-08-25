@@ -10,6 +10,7 @@ import '../core/notifications/notification_lifecycle.dart';
 import '../core/theme/app_theme.dart';
 import '../features/onboarding/onboarding_flow.dart';
 import '../i18n/strings.g.dart';
+import '../widgets/keyboard_dismiss_scope.dart';
 
 class LingolaApp extends StatefulWidget {
   const LingolaApp({super.key});
@@ -53,6 +54,10 @@ class _LingolaAppState extends State<LingolaApp> {
           locale: TranslationProvider.of(context).flutterLocale,
           supportedLocales: AppLocaleUtils.supportedLocales,
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          builder: (context, child) {
+            if (child == null) return const SizedBox.shrink();
+            return KeyboardDismissScope(child: child);
+          },
           home: const SplashScreen(),
         ),
       ),

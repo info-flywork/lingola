@@ -36,6 +36,7 @@ class CallingConversationController extends ChangeNotifier {
     this.openingLine,
     this.systemPrompt,
     this.tutorSlug,
+    this.lessonMode = false,
   })  : _chat = chat ?? OpenAiChatService(),
         _tts = tts ?? TutorTtsService(),
         _recorder = recorder ?? AudioRecorder(),
@@ -55,6 +56,9 @@ class CallingConversationController extends ChangeNotifier {
   final String? openingLine;
   final String? systemPrompt;
   final String? tutorSlug;
+  /// Ders oturumu: kullanıcı/hoca bitirmek istediğinde özet ekranına git.
+  final bool lessonMode;
+
   StreamSubscription<void>? _playerCompleteSub;
   StreamSubscription<Duration>? _playerPositionSub;
 
@@ -417,13 +421,18 @@ class CallingConversationController extends ChangeNotifier {
       if (decision == _ExtensionDecision.finish) {
         _clearExtensionWatch();
         _awaitingExtensionReply = false;
-        await _tutorSay(
+        await _tutorSayAndWait(
           "Nice work today. Let's finish here — see you in the next lesson.",
         );
-        onRequestEndLesson?.call();
+        if (!_disposed) onRequestEndLesson?.call();
         return;
       }
       // Belirsiz cevap → normal ders cevabı + kısa hatırlatma
+    }
+
+    if (lessonMode && _parseLessonFinishIntent(text)) {
+      await _finishLessonAfterReply(userMessage: text);
+      return;
     }
 
     try {
@@ -438,6 +447,13 @@ class CallingConversationController extends ChangeNotifier {
         _history.removeAt(0);
       }
       await _tutorSay(reply, alreadyInHistory: true);
+      if (lessonMode &&
+          _parseSoftLessonAgreement(text) &&
+          _replySuggestsLessonEnd(reply)) {
+        await _waitUntilSpeechDone();
+        if (!_disposed) onRequestEndLesson?.call();
+        return;
+      }
       if (_awaitingExtensionReply && decisionWasUnclear(text)) {
         await Future<void>.delayed(const Duration(milliseconds: 400));
         if (!_disposed && _awaitingExtensionReply) {
@@ -535,10 +551,126 @@ class CallingConversationController extends ChangeNotifier {
     }
     _awaitingExtensionReply = false;
     _clearExtensionWatch();
-    await _tutorSay(
+    await _tutorSayAndWait(
       "I can tell you may be tired from the quiet. Let's end the lesson here.",
     );
-    onRequestEndLesson?.call();
+    if (!_disposed) onRequestEndLesson?.call();
+  }
+
+  Future<void> _finishLessonAfterReply({required String userMessage}) async {
+    _clearExtensionWatch();
+    _awaitingExtensionReply = false;
+    try {
+      final reply = await _chat.complete(
+        history: _history,
+        userMessage: userMessage,
+        systemPrompt: systemPrompt,
+      );
+      _history.add(ChatTurn(role: 'user', content: userMessage));
+      _history.add(ChatTurn(role: 'assistant', content: reply));
+      while (_history.length > 16) {
+        _history.removeAt(0);
+      }
+      await _tutorSayAndWait(reply, alreadyInHistory: true);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      await _tutorSayAndWait(
+        "Nice work today. Let's finish here — see you in the next lesson.",
+      );
+    }
+    if (!_disposed) onRequestEndLesson?.call();
+  }
+
+  bool _parseLessonFinishIntent(String raw) {
+    final t = raw.toLowerCase().trim();
+    if (t.isEmpty) return false;
+    const keys = [
+      'finish',
+      'finish the lesson',
+      'end the lesson',
+      'end lesson',
+      'stop the lesson',
+      'done for today',
+      "we're done",
+      'we are done',
+      'that is enough',
+      "that's enough",
+      'enough for today',
+      'bitir',
+      'bitirelim',
+      'dersi bitir',
+      'ders bitti',
+      'dersi bitirelim',
+      'yeter',
+      'tamam yeter',
+      'kapat',
+      'sonlandır',
+      'sonlandıralım',
+    ];
+    return keys.any(t.contains);
+  }
+
+  bool _parseSoftLessonAgreement(String raw) {
+    final t = raw.toLowerCase().trim();
+    if (t.isEmpty) return false;
+    const keys = [
+      'ok',
+      'okay',
+      'yes',
+      'yeah',
+      'yep',
+      'sure',
+      'tamam',
+      'evet',
+      'olur',
+      'peki',
+      'hadi',
+      'good',
+      'great',
+      'thanks',
+      'thank you',
+      'teşekkür',
+      'tesekkur',
+    ];
+    return keys.any((k) => t == k || t.startsWith('$k '));
+  }
+
+  bool _replySuggestsLessonEnd(String reply) {
+    final t = reply.toLowerCase();
+    const keys = [
+      'see you in the next lesson',
+      'see you next lesson',
+      "let's finish here",
+      'let us finish here',
+      'finish here',
+      'finish the lesson',
+      'end the lesson',
+      'end here',
+      'wrap up',
+      'that wraps up',
+      'great work today',
+      'nice work today',
+      'good work today',
+      'sonraki derste görüş',
+      'sonraki derste',
+      'dersi bitir',
+      'ders bitti',
+    ];
+    return keys.any(t.contains);
+  }
+
+  Future<void> _tutorSayAndWait(String text, {bool alreadyInHistory = false}) async {
+    await _tutorSay(text, alreadyInHistory: alreadyInHistory);
+    await _waitUntilSpeechDone();
+  }
+
+  Future<void> _waitUntilSpeechDone() async {
+    if (!_speaking) return;
+    final deadline = DateTime.now().add(const Duration(seconds: 90));
+    while (_speaking && !_disposed && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+    }
   }
 
   Future<void> _tutorSay(String text, {bool alreadyInHistory = false}) async {

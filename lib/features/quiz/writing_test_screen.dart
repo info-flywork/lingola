@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:record/record.dart';
 
 import '../../core/auth/api_client.dart';
 import '../../core/config/app_env.dart';
@@ -15,6 +12,7 @@ import '../../core/quiz/quiz_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
+import '../tutor/services/hold_to_speak_service.dart';
 import '../tutor/services/tutor_tts_service.dart';
 
 class WritingTestScreen extends StatefulWidget {
@@ -29,7 +27,7 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
   final _focusNode = FocusNode();
   final _tts = TutorTtsService();
   final _player = AudioPlayer();
-  final _recorder = AudioRecorder();
+  final _mic = HoldToSpeakService();
 
   final _seenIds = <String>[];
 
@@ -42,7 +40,6 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
   var _showHint = false;
   var _answerText = '';
   String? _error;
-  String? _recordingPath;
 
   bool get _canSubmit =>
       !_busy && !_loading && _prompt != null && _answerText.trim().isNotEmpty;
@@ -54,6 +51,7 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
       setState(() => _answerText = _answerController.text);
     });
     _loadPrompt();
+    unawaited(_mic.warmUp());
   }
 
   @override
@@ -62,7 +60,7 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
     _focusNode.dispose();
     _tts.dispose();
     _player.dispose();
-    _recorder.dispose();
+    unawaited(_mic.dispose());
     super.dispose();
   }
 
@@ -110,10 +108,33 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
     return AppText.current.common.genericError;
   }
 
-  Future<void> _copyAnswer() async {
-    final value = _answerText.trim();
-    if (value.isEmpty) return;
-    await Clipboard.setData(ClipboardData(text: value));
+  Future<void> _copyOrPasteAnswer() async {
+    final answer = _answerText.trim();
+    if (answer.isNotEmpty) {
+      await Clipboard.setData(ClipboardData(text: answer));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cevap panoya kopyalandı')),
+      );
+      return;
+    }
+
+    final clip = await Clipboard.getData(Clipboard.kTextPlain);
+    final pasted = clip?.text?.trim();
+    if (pasted != null && pasted.isNotEmpty) {
+      _answerController.text = pasted;
+      setState(() => _answerText = pasted);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Panodan yapıştırıldı')),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Kopyalanacak veya yapıştırılacak metin yok')),
+    );
   }
 
   Future<void> _speakSource() async {
@@ -145,64 +166,45 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
   Future<void> _toggleMic() async {
     if (_busy) return;
     if (_recording) {
-      await _stopAndEvaluateRecording();
+      await _stopRecordingToField();
       return;
     }
-    await _startRecording();
+    await _startMic();
   }
 
-  Future<void> _startRecording() async {
+  Future<void> _startMic() async {
     final quiz = AppText.current.quizPage;
-    final hasMic = await _recorder.hasPermission();
-    if (!hasMic) {
+    try {
+      await _player.stop();
+      await _mic.start();
+      if (!mounted) return;
+      setState(() => _recording = true);
+    } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(quiz.micPermissionDenied)),
       );
-      return;
     }
-
-    final dir = await getTemporaryDirectory();
-    final path =
-        '${dir.path}/lingola_writing_${DateTime.now().millisecondsSinceEpoch}.m4a';
-
-    await _player.stop();
-    await _recorder.start(
-      const RecordConfig(encoder: AudioEncoder.aacLc),
-      path: path,
-    );
-
-    if (!mounted) return;
-    setState(() {
-      _recording = true;
-      _recordingPath = path;
-    });
   }
 
-  Future<void> _stopAndEvaluateRecording() async {
-    final prompt = _prompt;
-    final path = await _recorder.stop() ?? _recordingPath;
-    if (!mounted) return;
-    setState(() => _recording = false);
+  Future<void> _stopRecordingToField() async {
+    if (!_recording) return;
+    setState(() {
+      _recording = false;
+      _busy = true;
+    });
 
-    if (prompt == null || path == null || !File(path).existsSync()) {
-      return;
-    }
-
-    setState(() => _busy = true);
     try {
-      final bytes = await File(path).readAsBytes();
-      final result = await QuizService.evaluateWritingAudio(
-        wordId: prompt.id,
-        bytes: bytes,
-        contentType: 'audio/m4a',
-      );
+      final text = await _mic.stopAndGetText();
       if (!mounted) return;
-      if (result.transcript.isNotEmpty) {
-        _answerController.text = result.transcript;
-        _answerText = result.transcript;
+      if (text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ses anlaşılamadı — tekrar dene')),
+        );
+        return;
       }
-      await _showEvalResult(matched: result.matched);
+      _answerController.text = text.trim();
+      setState(() => _answerText = text.trim());
     } catch (err) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -331,12 +333,9 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
   String get _sourceText {
     final prompt = _prompt;
     if (prompt == null) return '';
-    // Default: native sentence (translate into English).
-    // Translate toggle / hint reveals the English model sentence.
     if (_showHint || _showTranslation) return prompt.sentenceEn;
-    return prompt.sentenceNative.isNotEmpty
-        ? prompt.sentenceNative
-        : prompt.sentenceEn;
+    if (prompt.sentenceNative.trim().isNotEmpty) return prompt.sentenceNative;
+    return prompt.sentenceEn;
   }
 
   @override
@@ -419,9 +418,10 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
                                 label: text.sourceLanguage,
                                 prompt: _sourceText,
                                 speaking: _speaking,
+                                translationActive: _showTranslation,
                                 onTranslate: () => setState(() {
                                   _showTranslation = !_showTranslation;
-                                  _showHint = false;
+                                  if (_showTranslation) _showHint = false;
                                 }),
                                 onSpeak: _speakSource,
                               ),
@@ -434,16 +434,25 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
                                 canSubmit: _canSubmit,
                                 submitLabel: _busy
                                     ? '...'
-                                    : (_recording ? 'Stop' : text.submit),
+                                    : (_recording
+                                        ? text.recording
+                                        : text.submit),
                                 recording: _recording,
                                 busy: _busy,
-                                onCopy: _copyAnswer,
+                                hintActive: _showHint,
+                                onCopy: _copyOrPasteAnswer,
                                 onMic: _toggleMic,
                                 onHint: () => setState(() {
                                   _showHint = !_showHint;
                                   if (_showHint) _showTranslation = false;
                                 }),
-                                onSubmit: _recording ? _toggleMic : _submit,
+                                onSubmit: () {
+                                  if (_recording) {
+                                    unawaited(_stopRecordingToField());
+                                  } else {
+                                    unawaited(_submit());
+                                  }
+                                },
                               ),
                             ],
                           ),
@@ -463,6 +472,7 @@ class _SourceCard extends StatelessWidget {
     required this.onTranslate,
     required this.onSpeak,
     this.speaking = false,
+    this.translationActive = false,
   });
 
   final String label;
@@ -470,6 +480,7 @@ class _SourceCard extends StatelessWidget {
   final VoidCallback onTranslate;
   final VoidCallback onSpeak;
   final bool speaking;
+  final bool translationActive;
 
   @override
   Widget build(BuildContext context) {
@@ -510,16 +521,18 @@ class _SourceCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              _IconTap(
+              _QuizIconButton(
                 onTap: onTranslate,
-                child: const HomeAsset(
+                active: translationActive,
+                child: HomeAsset(
                   AppAssets.writingTranslate,
                   width: 24,
                   height: 24,
+                  color: translationActive ? AppColors.primary : null,
                 ),
               ),
-              const SizedBox(width: 12),
-              _IconTap(
+              const SizedBox(width: 4),
+              _QuizIconButton(
                 onTap: speaking ? null : onSpeak,
                 child: Opacity(
                   opacity: speaking ? 0.45 : 1,
@@ -553,6 +566,7 @@ class _AnswerCard extends StatelessWidget {
     required this.onSubmit,
     this.recording = false,
     this.busy = false,
+    this.hintActive = false,
   });
 
   final String label;
@@ -567,6 +581,7 @@ class _AnswerCard extends StatelessWidget {
   final VoidCallback onSubmit;
   final bool recording;
   final bool busy;
+  final bool hintActive;
 
   @override
   Widget build(BuildContext context) {
@@ -623,7 +638,7 @@ class _AnswerCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              _IconTap(
+              _QuizIconButton(
                 onTap: busy ? null : onCopy,
                 child: const HomeAsset(
                   AppAssets.writingCopy,
@@ -631,9 +646,10 @@ class _AnswerCard extends StatelessWidget {
                   height: 24,
                 ),
               ),
-              const SizedBox(width: 12),
-              _IconTap(
+              const SizedBox(width: 4),
+              _QuizIconButton(
                 onTap: busy ? null : onMic,
+                active: recording,
                 child: HomeAsset(
                   AppAssets.microphone,
                   width: 22,
@@ -641,13 +657,15 @@ class _AnswerCard extends StatelessWidget {
                   color: recording ? AppColors.primary : AppColors.secondary,
                 ),
               ),
-              const SizedBox(width: 12),
-              _IconTap(
+              const SizedBox(width: 4),
+              _QuizIconButton(
                 onTap: busy ? null : onHint,
-                child: const HomeAsset(
+                active: hintActive,
+                child: HomeAsset(
                   AppAssets.hint,
                   width: 22,
                   height: 22,
+                  color: hintActive ? AppColors.primary : null,
                 ),
               ),
               const Spacer(),
@@ -716,23 +734,30 @@ class _SubmitButton extends StatelessWidget {
   }
 }
 
-class _IconTap extends StatelessWidget {
-  const _IconTap({
-    required this.onTap,
+class _QuizIconButton extends StatelessWidget {
+  const _QuizIconButton({
     required this.child,
+    this.onTap,
+    this.active = false,
   });
 
-  final VoidCallback? onTap;
   final Widget child;
+  final VoidCallback? onTap;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.all(2),
-        child: child,
+    return Material(
+      color: active ? AppColors.primary.withValues(alpha: .08) : Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Center(child: child),
+        ),
       ),
     );
   }

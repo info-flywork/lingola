@@ -165,13 +165,13 @@ class LessonStartDto {
       tutorId: tutorMap['id'] as String?,
       tutorSlug: tutorMap['slug'] as String?,
       tutorNameKey: tutorMap['nameKey'] as String?,
-      tutorImage: (tutorMap['imageCdnUrl'] as String?)?.isNotEmpty == true
-          ? tutorMap['imageCdnUrl'] as String
-          : tutorMap['localImagePath'] as String?,
+      tutorImage: (tutorMap['localImagePath'] as String?)?.isNotEmpty == true
+          ? tutorMap['localImagePath'] as String
+          : tutorMap['imageCdnUrl'] as String?,
       tutorVoiceId: tutorMap['voiceId'] as String?,
-      tutorRive: (tutorMap['riveCdnUrl'] as String?)?.isNotEmpty == true
-          ? tutorMap['riveCdnUrl'] as String
-          : tutorMap['localRivePath'] as String?,
+      tutorRive: (tutorMap['localRivePath'] as String?)?.isNotEmpty == true
+          ? tutorMap['localRivePath'] as String
+          : tutorMap['riveCdnUrl'] as String?,
       lessonElapsedSeconds: elapsed.clamp(0, 15 * 60),
       remainingSeconds: remaining.clamp(0, 15 * 60),
     );

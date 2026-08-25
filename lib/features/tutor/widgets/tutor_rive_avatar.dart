@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
 import '../../../core/cdn/cdn_file_cache.dart';
+import '../../../widgets/home_asset.dart';
 
 /// Mindcoach ile aynı model: `talk` + `visemeNum` + `duration`.
 /// Sadece talk yetmez; bu riv ağız şeklini viseme ile sürüyor.
@@ -124,7 +125,8 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     }
 
     try {
-      final localPath = await CdnFileCache.resolve(source, kind: 'rive');
+      final localPath = await CdnFileCache.resolve(source, kind: 'rive')
+          .timeout(const Duration(seconds: 25));
       final decoded = await File.path(localPath, riveFactory: Factory.rive);
       if (decoded != null) {
         return FileLoader.fromFile(decoded, riveFactory: Factory.rive);
@@ -371,12 +373,13 @@ class _Fallback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (imagePath == null) {
+    if (imagePath == null || imagePath!.trim().isEmpty) {
       return const Center(
-        child: CircularProgressIndicator(color: Colors.white),
+        child: Icon(Icons.person_rounded, color: Colors.white54, size: 72),
       );
     }
-    return Image.asset(
+    // CDN URL veya asset — HomeAsset ikisini de destekler.
+    return HomeAsset(
       imagePath!,
       fit: BoxFit.contain,
       alignment: alignment,

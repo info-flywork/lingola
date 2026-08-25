@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:record/record.dart';
 import 'package:rive/rive.dart' show Fit;
 
 import '../core/auth/api_client.dart';
@@ -13,6 +10,7 @@ import '../core/constants/app_assets.dart';
 import '../core/constants/app_text.dart';
 import '../core/theme/app_theme.dart';
 import '../i18n/strings.g.dart';
+import '../features/tutor/services/hold_to_speak_service.dart';
 import '../features/tutor/services/openai_chat_service.dart';
 import '../features/tutor/services/tutor_tts_service.dart';
 import '../features/tutor/widgets/tutor_rive_avatar.dart';
@@ -114,8 +112,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   late final List<LingolaChatMessage> _messages;
   final _tts = TutorTtsService();
   final _player = AudioPlayer();
-  final _recorder = AudioRecorder();
-  final _stt = OpenAiChatService();
+  final _mic = HoldToSpeakService();
   StreamSubscription<void>? _playerCompleteSub;
 
   Timer? _ticker;
@@ -130,7 +127,6 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   bool _cancelRecordingPending = false;
   bool _speaking = false;
   String? _localError;
-  String? _recordingPath;
   Offset? _micDownGlobal;
 
   static const _lockSlideThreshold = 72.0;
@@ -164,6 +160,8 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
         unawaited(_speak(firstBot.text));
       }
     }
+
+    unawaited(_mic.warmUp());
   }
 
   @override
@@ -188,17 +186,9 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     _scrollController.dispose();
     unawaited(_playerCompleteSub?.cancel());
     unawaited(_player.dispose());
-    unawaited(_disposeRecorder());
+    unawaited(_mic.dispose());
     _tts.dispose();
-    _stt.dispose();
     super.dispose();
-  }
-
-  Future<void> _disposeRecorder() async {
-    try {
-      if (await _recorder.isRecording()) await _recorder.stop();
-    } catch (_) {}
-    await _recorder.dispose();
   }
 
   String get _timerLabel {
@@ -280,16 +270,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     if (!_recording && !_recordingLocked) return;
     _stopRecordingTimer();
     _micDownGlobal = null;
-    try {
-      if (await _recorder.isRecording()) await _recorder.stop();
-    } catch (_) {}
-    final path = _recordingPath;
-    _recordingPath = null;
-    if (path != null) {
-      try {
-        await File(path).delete();
-      } catch (_) {}
-    }
+    await _mic.cancel();
     if (!mounted) return;
     setState(() {
       _recording = false;
@@ -313,12 +294,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     _sessionTimer?.cancel();
     _recordingTicker?.cancel();
     unawaited(_player.stop());
-    try {
-      if (_recording || await _recorder.isRecording()) {
-        await _recorder.stop();
-      }
-    } catch (_) {}
-    _recordingPath = null;
+    unawaited(_mic.cancel());
     if (!mounted) return;
     setState(() {
       _recording = false;
@@ -401,25 +377,8 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     if (!widget.enableMic || _recording || _sending || _finished) return;
     await _player.stop();
 
-    final ok = await _recorder.hasPermission();
-    if (!ok) {
-      setState(() => _localError = 'Mikrofon izni gerekli');
-      return;
-    }
-
     try {
-      final dir = await getTemporaryDirectory();
-      _recordingPath =
-          '${dir.path}/roleplay_${DateTime.now().millisecondsSinceEpoch}.m4a';
-      await _recorder.start(
-        const RecordConfig(
-          encoder: AudioEncoder.aacLc,
-          sampleRate: 44100,
-          numChannels: 1,
-          bitRate: 128000,
-        ),
-        path: _recordingPath!,
-      );
+      await _mic.start();
       if (!mounted) return;
       HapticFeedback.mediumImpact();
       setState(() {
@@ -428,7 +387,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _localError = 'Kayıt başlatılamadı: $e');
+      setState(() => _localError = e.toString());
     }
   }
 
@@ -438,35 +397,28 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       _recording = false;
       _recordingLocked = false;
       _cancelRecordingPending = false;
+      _sending = true;
+      _localError = null;
     });
     HapticFeedback.lightImpact();
 
     try {
-      final path = await _recorder.stop();
-      final filePath = path ?? _recordingPath;
-      if (filePath == null || !File(filePath).existsSync()) {
-        setState(() => _localError = 'Kayıt alınamadı — basılı tutup konuş');
-        return;
-      }
-      final file = File(filePath);
-      if (await file.length() < 200) {
-        setState(() => _localError = 'Ses çok kısa — basılı tut (1–2 sn)');
-        return;
-      }
-      final text = (await _stt.transcribe(file)).trim();
-      try {
-        await file.delete();
-      } catch (_) {}
+      final text = await _mic.stopAndGetText();
       if (text.isEmpty) {
-        setState(() => _localError = 'Ses anlaşılamadı — tekrar dene');
+        if (!mounted) return;
+        setState(() {
+          _localError = 'Ses anlaşılamadı — tekrar dene';
+          _sending = false;
+        });
         return;
       }
       await _sendMessage(text);
     } catch (e) {
       if (!mounted) return;
-      setState(() => _localError = e.toString());
-    } finally {
-      _recordingPath = null;
+      setState(() {
+        _localError = e.toString();
+        _sending = false;
+      });
     }
   }
 

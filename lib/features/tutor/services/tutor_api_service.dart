@@ -51,16 +51,31 @@ class TutorDto {
     );
   }
 
-  /// Prefer CDN; fall back to bundled asset path.
+  /// Prefer bundled asset (instant, reliable in TestFlight). CDN when local missing.
   String? get imagePath {
-    if (imageCdnUrl != null && imageCdnUrl!.isNotEmpty) return imageCdnUrl;
-    return localImagePath;
+    if (localImagePath != null && localImagePath!.trim().isNotEmpty) {
+      return localImagePath;
+    }
+    if (imageCdnUrl != null && imageCdnUrl!.trim().isNotEmpty) {
+      return imageCdnUrl;
+    }
+    return null;
   }
 
+  /// Prefer bundled .riv; fall back to Bunny CDN URL from DB.
   String? get rivePath {
-    if (riveCdnUrl != null && riveCdnUrl!.isNotEmpty) return riveCdnUrl;
-    return localRivePath;
+    if (localRivePath != null && localRivePath!.trim().isNotEmpty) {
+      return localRivePath;
+    }
+    if (riveCdnUrl != null && riveCdnUrl!.trim().isNotEmpty) {
+      return riveCdnUrl;
+    }
+    return null;
   }
+
+  /// CDN URL when available (prefetch / remote-only tutors).
+  String? get remoteRiveUrl =>
+      (riveCdnUrl != null && riveCdnUrl!.trim().isNotEmpty) ? riveCdnUrl : null;
 }
 
 class TutorThemeDto {

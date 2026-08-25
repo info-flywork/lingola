@@ -61,6 +61,7 @@ class _CallingScreenState extends State<CallingScreen> {
   late final CallingConversationController _conversation;
   Timer? _ticker;
   var _elapsed = Duration.zero;
+  var _lessonEnding = false;
 
   /// Altyazı paneli (göz) — konuşma balonları her zaman görünür.
   var _captionsOn = true;
@@ -90,11 +91,12 @@ class _CallingScreenState extends State<CallingScreen> {
       openingLine: widget.openingLine,
       systemPrompt: widget.systemPrompt,
       tutorSlug: widget.tutorSlug,
+      lessonMode: widget.lessonSegmentMode,
     );
     _conversation
       ..addListener(_onConvo)
       ..onRequestEndLesson = () {
-        _popSession(finish: true);
+        unawaited(_endLessonAndPop());
       }
       ..onSegmentContinued = _resetSegmentClock;
     unawaited(_conversation.start());
@@ -134,6 +136,22 @@ class _CallingScreenState extends State<CallingScreen> {
     Navigator.of(context).pop(
       widget.returnTranscript ? _conversation.messages : null,
     );
+  }
+
+  Future<void> _endLessonAndPop() async {
+    if (_lessonEnding || !mounted || !widget.lessonSegmentMode) return;
+    _lessonEnding = true;
+    while (_conversation.speaking && mounted) {
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+    }
+    if (!mounted) return;
+    _popSession(finish: true);
+  }
+
+  void _finishLessonManually() {
+    if (_lessonEnding) return;
+    _lessonEnding = true;
+    _popSession(finish: true);
   }
 
   void _onConvo() {
@@ -240,6 +258,26 @@ class _CallingScreenState extends State<CallingScreen> {
             ),
           ),
           const Spacer(),
+          if (widget.lessonSegmentMode) ...[
+            TextButton(
+              onPressed: _lessonEnding ? null : _finishLessonManually,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                AppText.current.lessonPage.finishLesson,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+          ],
           // Kırmızı kayıt pill’i: tıklayınca hız 0.5 → 1 → 1.5 → 2
           Material(
             color: Colors.transparent,
