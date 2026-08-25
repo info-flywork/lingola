@@ -1,4 +1,5 @@
 import '../../../core/auth/api_client.dart';
+import '../../../core/rive/tutor_rive_paths.dart';
 
 class TutorDto {
   const TutorDto({
@@ -62,13 +63,12 @@ class TutorDto {
     return null;
   }
 
-  /// Prefer bundled .riv; fall back to Bunny CDN URL from DB.
+  /// Prefer bundled .riv (lipsync SM garantili); CDN yedek.
   String? get rivePath {
-    if (localRivePath != null && localRivePath!.trim().isNotEmpty) {
-      return localRivePath;
-    }
+    final local = TutorRivePaths.normalize(localRivePath);
+    if (local != null) return local;
     if (riveCdnUrl != null && riveCdnUrl!.trim().isNotEmpty) {
-      return riveCdnUrl;
+      return riveCdnUrl!.trim();
     }
     return null;
   }

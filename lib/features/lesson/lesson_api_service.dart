@@ -1,4 +1,5 @@
 import '../../core/auth/api_client.dart';
+import '../../core/rive/tutor_rive_paths.dart';
 
 class LessonPathDto {
   const LessonPathDto({
@@ -169,9 +170,15 @@ class LessonStartDto {
           ? tutorMap['localImagePath'] as String
           : tutorMap['imageCdnUrl'] as String?,
       tutorVoiceId: tutorMap['voiceId'] as String?,
-      tutorRive: (tutorMap['localRivePath'] as String?)?.isNotEmpty == true
-          ? tutorMap['localRivePath'] as String
-          : tutorMap['riveCdnUrl'] as String?,
+      tutorRive: () {
+        final local = TutorRivePaths.normalize(
+          tutorMap['localRivePath'] as String?,
+        );
+        if (local != null) return local;
+        final cdn = tutorMap['riveCdnUrl'] as String?;
+        if (cdn != null && cdn.trim().isNotEmpty) return cdn.trim();
+        return null;
+      }(),
       lessonElapsedSeconds: elapsed.clamp(0, 15 * 60),
       remainingSeconds: remaining.clamp(0, 15 * 60),
     );

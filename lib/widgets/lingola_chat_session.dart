@@ -13,6 +13,7 @@ import '../i18n/strings.g.dart';
 import '../features/tutor/services/hold_to_speak_service.dart';
 import '../features/tutor/services/openai_chat_service.dart';
 import '../features/tutor/services/tutor_tts_service.dart';
+import '../features/tutor/services/viseme_cue.dart';
 import '../features/tutor/widgets/tutor_rive_avatar.dart';
 import 'home_asset.dart';
 
@@ -114,6 +115,10 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   final _player = AudioPlayer();
   final _mic = HoldToSpeakService();
   StreamSubscription<void>? _playerCompleteSub;
+  StreamSubscription<Duration>? _playerPositionSub;
+
+  List<VisemeCue> _visemeTrack = const [];
+  double _currentViseme = 0;
 
   Timer? _ticker;
   Timer? _sessionTimer;
@@ -138,7 +143,18 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     _messages = List<LingolaChatMessage>.of(widget.initialMessages);
     _playerCompleteSub = _player.onPlayerComplete.listen((_) {
       if (!mounted) return;
-      setState(() => _speaking = false);
+      setState(() {
+        _speaking = false;
+        _currentViseme = 0;
+        _visemeTrack = const [];
+      });
+    });
+    _playerPositionSub = _player.onPositionChanged.listen((pos) {
+      if (!_speaking || _visemeTrack.isEmpty) return;
+      final t = pos.inMilliseconds / 1000.0;
+      final next = visemeAt(_visemeTrack, t);
+      if (next == _currentViseme) return;
+      setState(() => _currentViseme = next);
     });
 
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -185,6 +201,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     _controller.dispose();
     _scrollController.dispose();
     unawaited(_playerCompleteSub?.cancel());
+    unawaited(_playerPositionSub?.cancel());
     unawaited(_player.dispose());
     unawaited(_mic.dispose());
     _tts.dispose();
@@ -320,16 +337,31 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     if (!widget.enableTts || text.trim().isEmpty) return;
     try {
       await _player.stop();
-      if (mounted) setState(() => _speaking = true);
-      final file = await _tts.synthesizeToFile(
+      if (mounted) {
+        setState(() {
+          _speaking = true;
+          _visemeTrack = const [];
+          _currentViseme = 0;
+        });
+      }
+      final speech = await _tts.synthesizeForLipsync(
         text,
         voiceId: widget.ttsVoiceId,
+        modelId: TutorTtsService.flashModel,
       );
-      await _player.play(DeviceFileSource(file.path));
+      if (!mounted) return;
+      setState(() {
+        _visemeTrack = speech.visemes;
+        _currentViseme =
+            speech.visemes.isEmpty ? 0 : speech.visemes.first.visemeNum;
+      });
+      await _player.play(DeviceFileSource(speech.file.path));
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _speaking = false;
+        _currentViseme = 0;
+        _visemeTrack = const [];
         _localError = e.toString();
       });
     }
@@ -557,6 +589,9 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                               _ChatRobotHero(
                                 riveAsset: widget.riveAsset,
                                 talking: _speaking,
+                                lipsyncViseme: _visemeTrack.isNotEmpty
+                                    ? _currentViseme
+                                    : null,
                                 fallbackImage:
                                     widget.fallbackImage ?? AppAssets.tutorRobot,
                               ),
@@ -739,11 +774,13 @@ class _ChatRobotHero extends StatelessWidget {
     required this.talking,
     this.riveAsset,
     this.fallbackImage,
+    this.lipsyncViseme,
   });
 
   final String? riveAsset;
   final bool talking;
   final String? fallbackImage;
+  final double? lipsyncViseme;
 
   @override
   Widget build(BuildContext context) {
@@ -767,6 +804,7 @@ class _ChatRobotHero extends StatelessWidget {
         child: TutorRiveAvatar(
           assetPath: riveAsset!,
           talking: talking,
+          lipsyncViseme: lipsyncViseme,
           fallbackImage: image,
           fit: Fit.contain,
           alignment: Alignment.bottomCenter,

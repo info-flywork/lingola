@@ -80,13 +80,7 @@ class TutorTtsService {
         if (raw is List) {
           final cues = raw
               .whereType<Map>()
-              .map(
-                (m) => VisemeCue(
-                  startSec: (m['s'] as num).toDouble(),
-                  endSec: (m['e'] as num).toDouble(),
-                  visemeNum: (m['v'] as num).toDouble(),
-                ),
-              )
+              .map(_parseVisemeCue)
               .toList(growable: false);
           return TutorSpeechAudio(file: audioFile, visemes: cues);
         }
@@ -115,13 +109,7 @@ class TutorTtsService {
     if (visemeRaw is List) {
       cues = visemeRaw
           .whereType<Map>()
-          .map(
-            (m) => VisemeCue(
-              startSec: (m['s'] as num).toDouble(),
-              endSec: (m['e'] as num).toDouble(),
-              visemeNum: (m['v'] as num).toDouble(),
-            ),
-          )
+          .map(_parseVisemeCue)
           .toList(growable: false);
     }
 
@@ -139,6 +127,32 @@ class TutorTtsService {
   String _resolveVoiceId(String? voiceId) {
     if (voiceId != null && voiceId.trim().isNotEmpty) return voiceId.trim();
     return TutorVoiceIds.female;
+  }
+
+  double _normalizeVisemeNum(num raw) {
+    final v = raw.toDouble();
+    if ({0.0, 2.0, 6.0, 10.0, 14.0}.contains(v)) return v;
+    const legacy = <int, double>{
+      1: 6,
+      2: 10,
+      3: 14,
+      4: 14,
+      5: 14,
+      6: 2,
+      7: 10,
+      8: 6,
+      9: 6,
+      10: 10,
+    };
+    return legacy[v.round()] ?? 6;
+  }
+
+  VisemeCue _parseVisemeCue(Map<dynamic, dynamic> m) {
+    return VisemeCue(
+      startSec: (m['s'] as num).toDouble(),
+      endSec: (m['e'] as num).toDouble(),
+      visemeNum: _normalizeVisemeNum(m['v'] as num),
+    );
   }
 
   String _cacheKey(String text, {String? voiceId, required String modelId}) {
