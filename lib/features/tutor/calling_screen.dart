@@ -379,20 +379,22 @@ class _CallingScreenState extends State<CallingScreen> {
     required EdgeInsets padding,
     Alignment alignment = Alignment.bottomCenter,
   }) {
-    final local = widget.riveAsset?.trim();
     final cdn = widget.riveCdnUrl?.trim();
-    final hasRive = (local != null && local.isNotEmpty) ||
-        (cdn != null && cdn.isNotEmpty);
-    final primary = (local != null && local.isNotEmpty) ? local : cdn!;
-    final rivFallback = (cdn != null &&
-            cdn.isNotEmpty &&
-            cdn != primary)
+    final local = widget.riveAsset?.trim();
+    // Production: CDN riv birincil; local bundle sadece yedek.
+    final primary = (cdn != null && cdn.isNotEmpty)
         ? cdn
+        : (local != null && local.isNotEmpty ? local : null);
+    final rivFallback = (primary != null &&
+            local != null &&
+            local.isNotEmpty &&
+            local != primary)
+        ? local
         : null;
 
     return Padding(
       padding: padding,
-      child: hasRive
+      child: primary != null
           ? TutorRiveAvatar(
               assetPath: primary,
               talking: _conversation.avatarTalking,

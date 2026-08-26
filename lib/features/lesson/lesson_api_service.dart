@@ -171,12 +171,12 @@ class LessonStartDto {
           : tutorMap['imageCdnUrl'] as String?,
       tutorVoiceId: tutorMap['voiceId'] as String?,
       tutorRive: () {
+        final cdn = tutorMap['riveCdnUrl'] as String?;
+        if (cdn != null && cdn.trim().isNotEmpty) return cdn.trim();
         final local = TutorRivePaths.normalize(
           tutorMap['localRivePath'] as String?,
         );
         if (local != null) return local;
-        final cdn = tutorMap['riveCdnUrl'] as String?;
-        if (cdn != null && cdn.trim().isNotEmpty) return cdn.trim();
         return null;
       }(),
       lessonElapsedSeconds: elapsed.clamp(0, 15 * 60),

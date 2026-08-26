@@ -122,7 +122,7 @@ class _TutorScreenState extends State<TutorScreen> {
       slug: dto.slug,
       name: _tutorDisplayName(text.tutors, dto.nameKey, dto.slug),
       image: image,
-      riveAsset: dto.rivePath,
+      riveAsset: dto.bundledRivePath,
       riveCdnUrl: dto.remoteRiveUrl,
       voiceId: dto.voiceId,
       flagAsset: dto.flagAssetPath?.trim().isNotEmpty == true

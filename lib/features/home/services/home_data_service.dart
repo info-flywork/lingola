@@ -253,7 +253,7 @@ abstract final class HomeDataService {
           : AppAssets.flagForTutorSlug(dto.slug),
       tags: tagLabels,
       slug: dto.slug,
-      riveAsset: dto.rivePath,
+      riveAsset: dto.bundledRivePath,
       riveCdnUrl: dto.remoteRiveUrl,
       voiceId: dto.voiceId,
     );

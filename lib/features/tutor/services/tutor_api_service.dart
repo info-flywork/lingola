@@ -63,19 +63,22 @@ class TutorDto {
     return null;
   }
 
-  /// Prefer bundled .riv (lipsync SM garantili); CDN yedek.
+  /// Prefer CDN .riv (production); local bundle yedek.
   String? get rivePath {
-    final local = TutorRivePaths.normalize(localRivePath);
-    if (local != null) return local;
     if (riveCdnUrl != null && riveCdnUrl!.trim().isNotEmpty) {
       return riveCdnUrl!.trim();
     }
+    final local = TutorRivePaths.normalize(localRivePath);
+    if (local != null) return local;
     return null;
   }
 
+  /// Bundle path — CDN fail olursa client yedek olarak kullanır.
+  String? get bundledRivePath => TutorRivePaths.normalize(localRivePath);
+
   /// CDN URL when available (prefetch / remote-only tutors).
   String? get remoteRiveUrl =>
-      (riveCdnUrl != null && riveCdnUrl!.trim().isNotEmpty) ? riveCdnUrl : null;
+      (riveCdnUrl != null && riveCdnUrl!.trim().isNotEmpty) ? riveCdnUrl!.trim() : null;
 }
 
 class TutorThemeDto {
