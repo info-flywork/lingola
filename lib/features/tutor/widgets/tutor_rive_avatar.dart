@@ -16,6 +16,8 @@ class TutorRiveAvatar extends StatefulWidget {
     required this.assetPath,
     required this.talking,
     this.fallbackImage,
+    /// Asıl .riv yüklenemezse bu yerel .riv denensin (PNG yerine).
+    this.fallbackRivePath,
     this.fit = Fit.contain,
     this.alignment = Alignment.bottomCenter,
     /// Ses zamanına hizalı viseme (null → fake cycle yok; ağız kapalı kalır).
@@ -27,6 +29,7 @@ class TutorRiveAvatar extends StatefulWidget {
   final String assetPath;
   final bool talking;
   final String? fallbackImage;
+  final String? fallbackRivePath;
   final Fit fit;
   final Alignment alignment;
   final double? lipsyncViseme;
@@ -47,6 +50,8 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   var _failed = false;
   var _resolving = true;
   var _loadGen = 0;
+  var _triedFallbackRive = false;
+  String? _activeAssetPath;
   /// Mindcoach `_forceCloseLockedUntil` — kapanış sonrası kısa süre tekrar açma.
   DateTime? _forceCloseLockedUntil;
 
@@ -65,7 +70,9 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   @override
   void didUpdateWidget(covariant TutorRiveAvatar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.assetPath != widget.assetPath) {
+    if (oldWidget.assetPath != widget.assetPath ||
+        oldWidget.fallbackRivePath != widget.fallbackRivePath) {
+      _triedFallbackRive = false;
       _loadFile();
       return;
     }
@@ -119,9 +126,10 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     super.dispose();
   }
 
-  Future<void> _loadFile() async {
+  Future<void> _loadFile({String? overridePath}) async {
     final gen = ++_loadGen;
-    final source = widget.assetPath.trim();
+    final source = (overridePath ?? widget.assetPath).trim();
+    _activeAssetPath = source;
     _fileLoader?.dispose();
     _fileLoader = null;
     _viewModel = null;
@@ -145,6 +153,16 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     } catch (err) {
       if (!mounted || gen != _loadGen) return;
       debugPrint('Rive cache/load hatası ($source): $err');
+      final fb = widget.fallbackRivePath?.trim();
+      if (fb != null &&
+          fb.isNotEmpty &&
+          !_triedFallbackRive &&
+          fb != source) {
+        _triedFallbackRive = true;
+        debugPrint('Rive PNG yerine yerel fallback .riv: $fb');
+        await _loadFile(overridePath: fb);
+        return;
+      }
       setState(() {
         _failed = true;
         _resolving = false;
@@ -253,7 +271,18 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   }
 
   void _onFailed(Object error, StackTrace stack) {
-    debugPrint('Rive yükleme hatası (${widget.assetPath}): $error');
+    debugPrint('Rive yükleme hatası (${_activeAssetPath ?? widget.assetPath}): $error');
+    final fb = widget.fallbackRivePath?.trim();
+    final current = (_activeAssetPath ?? widget.assetPath).trim();
+    if (fb != null &&
+        fb.isNotEmpty &&
+        !_triedFallbackRive &&
+        fb != current) {
+      _triedFallbackRive = true;
+      debugPrint('Rive onFailed → yerel fallback .riv: $fb');
+      unawaited(_loadFile(overridePath: fb));
+      return;
+    }
     if (mounted) setState(() => _failed = true);
   }
 
@@ -369,13 +398,13 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
   @override
   Widget build(BuildContext context) {
-    if (_failed) {
-      return _Fallback(imagePath: widget.fallbackImage);
-    }
+    // PNG yalnızca hiç .riv fallback yoksa ve açıkça verilmişse.
+    final allowPngFallback = widget.fallbackRivePath == null ||
+        widget.fallbackRivePath!.trim().isEmpty;
 
-    final loader = _fileLoader;
-    if (_resolving || loader == null) {
-      if (widget.fallbackImage != null &&
+    Widget loadingPlaceholder() {
+      if (allowPngFallback &&
+          widget.fallbackImage != null &&
           widget.fallbackImage!.trim().isNotEmpty) {
         return _Fallback(
           imagePath: widget.fallbackImage,
@@ -383,11 +412,21 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
         );
       }
       return ColoredBox(
-        color: widget.loadingBackgroundColor ?? const Color(0xFF2D46FF),
-        child: const Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
+        color: widget.loadingBackgroundColor ?? Colors.transparent,
+        child: const SizedBox.expand(),
       );
+    }
+
+    if (_failed) {
+      if (allowPngFallback) {
+        return _Fallback(imagePath: widget.fallbackImage);
+      }
+      return loadingPlaceholder();
+    }
+
+    final loader = _fileLoader;
+    if (_resolving || loader == null) {
+      return loadingPlaceholder();
     }
 
     return RiveWidgetBuilder(
@@ -397,23 +436,13 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       onFailed: _onFailed,
       builder: (context, state) {
         return switch (state) {
-          RiveLoading() => widget.fallbackImage != null &&
-                  widget.fallbackImage!.trim().isNotEmpty
+          RiveLoading() => loadingPlaceholder(),
+          RiveFailed() => allowPngFallback
               ? _Fallback(
                   imagePath: widget.fallbackImage,
                   alignment: widget.alignment,
                 )
-              : ColoredBox(
-                  color: widget.loadingBackgroundColor ??
-                      const Color(0xFF2D46FF),
-                  child: const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
-                ),
-          RiveFailed() => _Fallback(
-                imagePath: widget.fallbackImage,
-                alignment: widget.alignment,
-              ),
+              : loadingPlaceholder(),
           RiveLoaded(:final controller) => RiveWidget(
               controller: controller,
               fit: widget.fit,

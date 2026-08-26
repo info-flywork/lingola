@@ -58,16 +58,8 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
     };
   }
 
-  String get _heroImage =>
-      _tutor?.imagePath ??
-      switch (widget.scenarioId) {
-        RolePlayScenarioId.coffee => AppAssets.rolePlayCoffee,
-        RolePlayScenarioId.directions => AppAssets.rolePlayDirections,
-        RolePlayScenarioId.interview => AppAssets.rolePlayInterview,
-      };
-
-  String? get _riveAsset =>
-      _tutor?.rivePath ?? AppAssets.tutorLingolaRiv;
+  /// Role play avatar: yalnızca yerel robot .riv (PNG yok).
+  static const _riveAsset = AppAssets.tutorLingolaRiv;
 
   String? get _ttsVoiceId => _tutor?.voiceId;
 
@@ -167,7 +159,8 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
           : 'Great — keep going! What would you like to say next?',
       ttsVoiceId: _ttsVoiceId ?? TutorVoiceIds.male,
       riveAsset: _riveAsset,
-      fallbackImage: _heroImage,
+      // PNG kullanma — yükleme/hata fallback’i de aynı .riv.
+      fallbackImage: null,
       onClose: () => Navigator.of(context).pop(),
     );
   }

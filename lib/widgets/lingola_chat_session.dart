@@ -439,7 +439,9 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   Future<void> _sendMessage([String? override]) async {
     final value = (override ?? _controller.text).trim();
-    if (value.isEmpty || _finished || _sending || widget.busy) return;
+    if (value.isEmpty || _finished || widget.busy) return;
+    // Mic yolu STT için _sending açmış olabilir; override varken erken return yapma.
+    if (_sending && override == null) return;
 
     setState(() {
       _sending = true;
@@ -503,26 +505,31 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       _recording = false;
       _recordingLocked = false;
       _cancelRecordingPending = false;
+      // STT sırasında spinner; gönderim _sendMessage içinde yönetilir.
       _sending = true;
       _localError = null;
     });
     HapticFeedback.lightImpact();
 
     try {
-      final text = await _mic.stopAndGetText();
-      if (text.isEmpty) {
-        if (!mounted) return;
+      final text = await _mic
+          .stopAndGetText()
+          .timeout(const Duration(seconds: 35));
+      if (!mounted) return;
+      if (text.trim().isEmpty) {
         setState(() {
           _localError = 'Ses anlaşılamadı — tekrar dene';
           _sending = false;
         });
         return;
       }
-      await _sendMessage(text);
+      await _sendMessage(text.trim());
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _localError = e.toString();
+        _localError = e is TimeoutException
+            ? 'Ses tanıma zaman aşımı — tekrar dene'
+            : e.toString();
         _sending = false;
       });
     }
@@ -667,8 +674,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                                         _visemeTrack.isNotEmpty
                                     ? _currentViseme
                                     : null,
-                                fallbackImage:
-                                    widget.fallbackImage ?? AppAssets.tutorRobot,
+                                fallbackImage: widget.fallbackImage,
                               ),
                               Positioned(
                                 left: 16,
@@ -859,7 +865,6 @@ class _ChatRobotHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final image = fallbackImage ?? AppAssets.tutorRobot;
     final rive = riveAsset?.trim();
     final hasRive = rive != null && rive.isNotEmpty;
 
@@ -873,13 +878,15 @@ class _ChatRobotHero extends StatelessWidget {
                 assetPath: rive,
                 talking: talking,
                 lipsyncViseme: lipsyncViseme,
-                fallbackImage: image,
+                // PNG yok — asıl path patlarsa yerel robot .riv.
+                fallbackRivePath: AppAssets.tutorLingolaRiv,
+                fallbackImage: null,
                 fit: Fit.contain,
                 alignment: Alignment.bottomCenter,
                 loadingBackgroundColor: Colors.transparent,
               )
             : HomeAsset(
-                image,
+                fallbackImage ?? AppAssets.tutorRobot,
                 height: 280,
                 fit: BoxFit.contain,
                 alignment: Alignment.bottomCenter,
