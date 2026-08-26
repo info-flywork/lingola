@@ -419,16 +419,14 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
   @override
   Widget build(BuildContext context) {
-    // PNG yalnızca hiç .riv fallback yoksa ve açıkça verilmişse.
-    final allowPngFallback = widget.fallbackRivePath == null ||
-        widget.fallbackRivePath!.trim().isEmpty;
+    final image = widget.fallbackImage?.trim() ?? '';
+    final hasImage = image.isNotEmpty;
 
-    Widget loadingPlaceholder() {
-      if (allowPngFallback &&
-          widget.fallbackImage != null &&
-          widget.fallbackImage!.trim().isNotEmpty) {
+    // Yüklenirken / fail'de foto göster — boş mavi ekran olmasın.
+    Widget imageOrColor() {
+      if (hasImage) {
         return _Fallback(
-          imagePath: widget.fallbackImage,
+          imagePath: image,
           alignment: widget.alignment,
         );
       }
@@ -439,15 +437,12 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     }
 
     if (_failed) {
-      if (allowPngFallback) {
-        return _Fallback(imagePath: widget.fallbackImage);
-      }
-      return loadingPlaceholder();
+      return imageOrColor();
     }
 
     final loader = _fileLoader;
     if (_resolving || loader == null) {
-      return loadingPlaceholder();
+      return imageOrColor();
     }
 
     return RiveWidgetBuilder(
@@ -457,13 +452,8 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       onFailed: _onFailed,
       builder: (context, state) {
         return switch (state) {
-          RiveLoading() => loadingPlaceholder(),
-          RiveFailed() => allowPngFallback
-              ? _Fallback(
-                  imagePath: widget.fallbackImage,
-                  alignment: widget.alignment,
-                )
-              : loadingPlaceholder(),
+          RiveLoading() => imageOrColor(),
+          RiveFailed() => imageOrColor(),
           RiveLoaded(:final controller) => RiveWidget(
               controller: controller,
               fit: widget.fit,

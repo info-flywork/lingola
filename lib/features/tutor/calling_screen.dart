@@ -19,6 +19,7 @@ class CallingScreen extends StatefulWidget {
     required this.tutorName,
     required this.imagePath,
     this.riveAsset,
+    this.riveCdnUrl,
     this.voiceId,
     this.backgroundGradientStart,
     this.backgroundGradientEnd,
@@ -36,6 +37,8 @@ class CallingScreen extends StatefulWidget {
   final String imagePath;
   /// Varsa Rive avatar (dudak senkronu); yoksa [imagePath].
   final String? riveAsset;
+  /// Local .riv patlarsa CDN yedek.
+  final String? riveCdnUrl;
   /// ElevenLabs voice ID (hoca özel sesi).
   final String? voiceId;
   /// Özel karakter kartı renkleri (Santa / uzaylı / cadı / ork / elf).
@@ -376,16 +379,25 @@ class _CallingScreenState extends State<CallingScreen> {
     required EdgeInsets padding,
     Alignment alignment = Alignment.bottomCenter,
   }) {
+    final local = widget.riveAsset?.trim();
+    final cdn = widget.riveCdnUrl?.trim();
+    final hasRive = (local != null && local.isNotEmpty) ||
+        (cdn != null && cdn.isNotEmpty);
+    final primary = (local != null && local.isNotEmpty) ? local : cdn!;
+    final rivFallback = (cdn != null &&
+            cdn.isNotEmpty &&
+            cdn != primary)
+        ? cdn
+        : null;
+
     return Padding(
       padding: padding,
-      child: widget.riveAsset != null
+      child: hasRive
           ? TutorRiveAvatar(
-              assetPath: widget.riveAsset!,
+              assetPath: primary,
               talking: _conversation.avatarTalking,
               fallbackImage: widget.imagePath,
-              fallbackRivePath: widget.riveAsset!.startsWith('assets/')
-                  ? widget.riveAsset
-                  : null,
+              fallbackRivePath: rivFallback,
               // Tasarım: hoca ekranı doldursun (cover), boş mavi alan kalmasın.
               fit: Fit.cover,
               alignment: alignment,

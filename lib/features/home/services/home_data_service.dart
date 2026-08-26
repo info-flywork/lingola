@@ -50,6 +50,7 @@ class HomeTutorCarouselItem {
     this.flagAsset,
     this.slug,
     this.riveAsset,
+    this.riveCdnUrl,
     this.voiceId,
   });
 
@@ -59,6 +60,7 @@ class HomeTutorCarouselItem {
   final String? flagAsset;
   final String? slug;
   final String? riveAsset;
+  final String? riveCdnUrl;
   final String? voiceId;
 }
 
@@ -252,6 +254,7 @@ abstract final class HomeDataService {
       tags: tagLabels,
       slug: dto.slug,
       riveAsset: dto.rivePath,
+      riveCdnUrl: dto.remoteRiveUrl,
       voiceId: dto.voiceId,
     );
   }

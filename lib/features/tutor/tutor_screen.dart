@@ -80,6 +80,7 @@ class _TutorScreenState extends State<TutorScreen> {
           tutorName: tutor.name,
           imagePath: tutor.image,
           riveAsset: tutor.riveAsset,
+          riveCdnUrl: tutor.riveCdnUrl,
           voiceId: tutor.voiceId,
           backgroundGradientStart: tutor.theme?.gradientStart,
           backgroundGradientEnd: tutor.theme?.gradientEnd,
@@ -122,6 +123,7 @@ class _TutorScreenState extends State<TutorScreen> {
       name: _tutorDisplayName(text.tutors, dto.nameKey, dto.slug),
       image: image,
       riveAsset: dto.rivePath,
+      riveCdnUrl: dto.remoteRiveUrl,
       voiceId: dto.voiceId,
       flagAsset: dto.flagAssetPath?.trim().isNotEmpty == true
           ? dto.flagAssetPath
@@ -640,6 +642,7 @@ class _TutorData {
     this.theme,
     this.flagAsset,
     this.riveAsset,
+    this.riveCdnUrl,
     this.voiceId,
   });
 
@@ -651,6 +654,7 @@ class _TutorData {
   final TutorCardTheme? theme;
   final String? flagAsset;
   final String? riveAsset;
+  final String? riveCdnUrl;
   final String? voiceId;
 
   String get identity => id ?? slug ?? name;

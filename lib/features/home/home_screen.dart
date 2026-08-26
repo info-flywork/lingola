@@ -1120,6 +1120,7 @@ class _LiveTutorCarousel extends StatelessWidget {
                     tutorName: tutor.name,
                     imagePath: tutor.image,
                     riveAsset: tutor.riveAsset,
+                    riveCdnUrl: tutor.riveCdnUrl,
                     voiceId: tutor.voiceId ?? TutorVoiceIds.male,
                     tutorSlug: tutor.slug,
                   ),

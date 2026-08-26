@@ -232,6 +232,7 @@ class _LessonScreenState extends State<LessonScreen> {
               tutorName: tutorName,
               imagePath: image,
               riveAsset: choice!.tutor.rivePath ?? start.tutorRive,
+              riveCdnUrl: choice.tutor.remoteRiveUrl,
               voiceId: choice.tutor.voiceId ?? start.tutorVoiceId,
               backgroundGradientStart: _parseHex(theme?.gradientStart),
               backgroundGradientEnd: _parseHex(theme?.gradientEnd),
