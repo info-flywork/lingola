@@ -106,6 +106,7 @@ class LingolaChatSession extends StatefulWidget {
 
 class _LingolaChatSessionState extends State<LingolaChatSession> {
   static const _heroHeight = 340.0;
+  static const _heroHeightExpanded = 460.0;
   static const _pillBg = Color(0x80000000);
 
   final _controller = TextEditingController();
@@ -127,6 +128,9 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   Timer? _ticker;
   Timer? _sessionTimer;
+  var _hintLoading = false;
+  String? _hintSuggestion;
+  var _heroExpanded = false;
   Timer? _recordingTicker;
   Duration _elapsed = Duration.zero;
   Duration _recordingElapsed = Duration.zero;
@@ -379,13 +383,62 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   void _handleClose() {
     if (_finished) return;
-    _finished = true;
     _ticker?.cancel();
     _sessionTimer?.cancel();
     _recordingTicker?.cancel();
     unawaited(_player.stop());
     unawaited(_cancelRecording());
-    widget.onClose();
+    // Navigasyon takılırsa tekrar denenebilsin diye _finished'ı erken kilitleme.
+    try {
+      widget.onClose();
+      _finished = true;
+    } catch (_) {
+      _finished = false;
+    }
+  }
+
+  Future<void> _requestHint() async {
+    if (_hintLoading || _finished) return;
+    String? lastBot;
+    for (var i = _messages.length - 1; i >= 0; i--) {
+      if (!_messages[i].isUser) {
+        lastBot = _messages[i].text;
+        break;
+      }
+    }
+    if (lastBot == null || lastBot.trim().isEmpty) return;
+
+    setState(() {
+      _hintLoading = true;
+      _hintSuggestion = null;
+    });
+    try {
+      final hint = await OpenAiChatService().suggestStudentReply(
+        tutorLastMessage: lastBot,
+        lessonContext: widget.lessonBadge ?? 'English practice',
+      );
+      if (!mounted) return;
+      final cleaned = hint.trim();
+      setState(() {
+        _hintLoading = false;
+        _hintSuggestion = cleaned.isEmpty ? null : cleaned;
+        if (cleaned.isNotEmpty) {
+          _controller
+            ..text = cleaned
+            ..selection = TextSelection.collapsed(offset: cleaned.length);
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _hintLoading = false;
+        _localError = e.toString();
+      });
+    }
+  }
+
+  void _toggleHeroExpanded() {
+    setState(() => _heroExpanded = !_heroExpanded);
   }
 
   Future<void> _speak(String text) async {
@@ -555,6 +608,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     final topInset = MediaQuery.paddingOf(context).top;
     final error = widget.errorText ?? _localError;
     final blocked = _sending || (widget.busy && _messages.isEmpty);
+    final heroH = _heroExpanded ? _heroHeightExpanded : _heroHeight;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
@@ -574,7 +628,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: topInset + _heroHeight,
+                    height: topInset + heroH,
                     child: const _ChatHeroBackdrop(),
                   ),
                   SafeArea(
@@ -587,7 +641,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                             children: [
                               _GlassCircleButton(
                                 size: 30,
-                                onTap: widget.showBack ? _handleClose : () {},
+                                onTap: _toggleHeroExpanded,
                                 child: const HomeAsset(
                                   AppAssets.rolePlayResize,
                                   width: 14,
@@ -662,19 +716,20 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                           ),
                         ),
                         SizedBox(
-                          height: _heroHeight - 48,
+                          height: heroH - 48,
                           child: Stack(
-                            alignment: Alignment.bottomCenter,
+                            alignment: Alignment.topCenter,
                             clipBehavior: Clip.none,
                             children: [
                               _ChatRobotHero(
                                 riveAsset: widget.riveAsset,
                                 talking: _avatarTalking,
-                                lipsyncViseme: _avatarTalking &&
-                                        _visemeTrack.isNotEmpty
-                                    ? _currentViseme
+                                lipsyncViseme: _avatarTalking
+                                    ? (_visemeTrack.isNotEmpty
+                                        ? _currentViseme
+                                        : null)
                                     : null,
-                                fallbackImage: widget.fallbackImage,
+                                fallbackImage: null,
                               ),
                               Positioned(
                                 left: 16,
@@ -803,6 +858,8 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                 recordingTimer: _recordingTimerLabel,
                 chatLabels: AppText.current.previewChat,
                 onSend: () => unawaited(_sendMessage()),
+                onHint: () => unawaited(_requestHint()),
+                hintLoading: _hintLoading,
                 onMicPointerDown: _onMicPointerDown,
                 onMicPointerCancel: (e) => unawaited(_onMicPointerCancel(e)),
                 onCancelRecording: () => unawaited(_cancelRecording()),
@@ -941,6 +998,8 @@ class _WhatsAppChatComposer extends StatelessWidget {
     required this.onMicPointerCancel,
     required this.onCancelRecording,
     required this.onFinishLockedRecording,
+    this.onHint,
+    this.hintLoading = false,
   });
 
   final TextEditingController controller;
@@ -957,6 +1016,8 @@ class _WhatsAppChatComposer extends StatelessWidget {
   final void Function(PointerCancelEvent) onMicPointerCancel;
   final VoidCallback onCancelRecording;
   final VoidCallback onFinishLockedRecording;
+  final VoidCallback? onHint;
+  final bool hintLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -1156,10 +1217,28 @@ class _WhatsAppChatComposer extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const HomeAsset(
-                        AppAssets.lightbulb,
-                        width: 18,
-                        height: 22,
+                      InkWell(
+                        onTap: (!enabled || hintLoading)
+                            ? null
+                            : onHint,
+                        borderRadius: BorderRadius.circular(99),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: hintLoading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                )
+                              : const HomeAsset(
+                                  AppAssets.lightbulb,
+                                  width: 18,
+                                  height: 22,
+                                ),
+                        ),
                       ),
                     ],
                   ),

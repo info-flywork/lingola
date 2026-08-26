@@ -79,7 +79,9 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
     if (oldWidget.talking != widget.talking) {
       if (widget.talking) {
-        if (_isCloseLocked) return;
+        // Konuşma başında lockout'u kaldır — aksi halde ağız hiç açılmaz.
+        _forceCloseLockedUntil = null;
+        _closeLockTimer?.cancel();
         _syncTalk(true);
       } else {
         _forceMouthClosed(lock: true);
@@ -96,16 +98,16 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       return;
     }
 
-    if (_isCloseLocked) return;
+    if (_isCloseLocked) {
+      _forceCloseLockedUntil = null;
+    }
 
     if (newV != null && oldV != newV) {
-      if (newV == 0) {
-        // Kelime arası sessizlik: talk kapat, lockout yok (hemen devam edebilsin).
-        _forceMouthClosed(lock: false);
-      } else {
-        _setRiveBool('talk', true);
-        _applyLipsyncViseme(newV);
-      }
+      // Kelime arası 0: talk açık kalsın, sadece şekil kapalı.
+      _setRiveBool('talk', true);
+      _applyLipsyncViseme(newV);
+    } else if (newV == null && oldV != null) {
+      _startTalkIdleCycle();
     }
   }
 
@@ -296,17 +298,36 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       _setRiveNumber('duration', _talkOpenBlendMs);
       final v = widget.lipsyncViseme;
       if (v != null) {
-        if (v == 0) {
-          _forceMouthClosed(lock: false);
-        } else {
-          _applyLipsyncViseme(v);
-        }
+        _applyLipsyncViseme(v);
       } else {
-        _setVisemeValues(0);
+        _startTalkIdleCycle();
       }
     } else {
       _forceMouthClosed(lock: true);
     }
+  }
+
+  /// Viseme track yokken basit ağız döngüsü — sessiz PNG görünümünü önler.
+  void _startTalkIdleCycle() {
+    _visemeTimer?.cancel();
+    const cycle = <double>[6, 10, 14, 2, 10, 6];
+    var i = 0;
+    _applyLipsyncViseme(cycle[0]);
+    _visemeTimer = Timer.periodic(const Duration(milliseconds: 110), (_) {
+      if (!mounted || !widget.talking) {
+        _visemeTimer?.cancel();
+        _visemeTimer = null;
+        return;
+      }
+      if (widget.lipsyncViseme != null) {
+        _visemeTimer?.cancel();
+        _visemeTimer = null;
+        return;
+      }
+      i = (i + 1) % cycle.length;
+      _setRiveBool('talk', true);
+      _applyLipsyncViseme(cycle[i]);
+    });
   }
 
   /// Mindcoach `_forceCloseMouthForSilence`.

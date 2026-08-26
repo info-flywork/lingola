@@ -124,7 +124,7 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
       initialMessages: _messages,
       ttsVoiceId: TutorVoiceIds.male,
       riveAsset: AppAssets.tutorLingolaRiv,
-      fallbackImage: AppAssets.tutorLingola,
+      fallbackImage: null,
     );
   }
 }

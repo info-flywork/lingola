@@ -66,6 +66,10 @@ class _CallingScreenState extends State<CallingScreen> {
   /// Altyazı paneli (göz) — konuşma balonları her zaman görünür.
   var _captionsOn = true;
 
+  /// Mesaj yazma modu (chat ikonu) — boş beyaz ekran yerine composer.
+  var _textComposeOn = false;
+  final _textController = TextEditingController();
+
   /// İpucu (ampul).
   var _hintsOn = false;
   var _hintLoading = false;
@@ -163,10 +167,19 @@ class _CallingScreenState extends State<CallingScreen> {
   @override
   void dispose() {
     _ticker?.cancel();
+    _textController.dispose();
     _conversation
       ..removeListener(_onConvo)
       ..dispose();
     super.dispose();
+  }
+
+  Future<void> _submitTypedMessage() async {
+    final text = _textController.text.trim();
+    if (text.isEmpty) return;
+    _textController.clear();
+    setState(() => _textComposeOn = false);
+    await _conversation.sendTypedMessage(text);
   }
 
   String get _timerLabel {
@@ -370,12 +383,16 @@ class _CallingScreenState extends State<CallingScreen> {
               assetPath: widget.riveAsset!,
               talking: _conversation.avatarTalking,
               fallbackImage: widget.imagePath,
+              fallbackRivePath: widget.riveAsset!.startsWith('assets/')
+                  ? widget.riveAsset
+                  : null,
               // Tasarım: hoca ekranı doldursun (cover), boş mavi alan kalmasın.
               fit: Fit.cover,
               alignment: alignment,
-              lipsyncViseme: _conversation.avatarTalking &&
-                      _conversation.hasLipsyncTrack
-                  ? _conversation.currentViseme
+              lipsyncViseme: _conversation.avatarTalking
+                  ? (_conversation.hasLipsyncTrack
+                      ? _conversation.currentViseme
+                      : null)
                   : null,
               loadingBackgroundColor:
                   widget.backgroundGradientStart ?? widget.backgroundGradientEnd,
@@ -399,7 +416,16 @@ class _CallingScreenState extends State<CallingScreen> {
         _ControlCircle(
           size: 56,
           light: !darkChrome,
-          onTap: () => setState(() => _captionsOn = !_captionsOn),
+          onTap: () {
+            if (darkChrome) {
+              setState(() => _captionsOn = !_captionsOn);
+            } else {
+              setState(() {
+                _textComposeOn = !_textComposeOn;
+                if (_textComposeOn) _captionsOn = true;
+              });
+            }
+          },
           child: darkChrome
               ? HomeAsset(
                   _captionsOn
@@ -409,7 +435,9 @@ class _CallingScreenState extends State<CallingScreen> {
                   height: 24,
                 )
               : Icon(
-                  Icons.chat_bubble_rounded,
+                  _textComposeOn
+                      ? Icons.keyboard_hide_rounded
+                      : Icons.chat_bubble_rounded,
                   color: AppColors.primary,
                   size: 22,
                 ),
@@ -703,6 +731,51 @@ class _CallingScreenState extends State<CallingScreen> {
                     hint,
                     const SizedBox(height: 10),
                   ],
+                  if (_textComposeOn) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _textController,
+                            textInputAction: TextInputAction.send,
+                            onSubmitted: (_) => unawaited(_submitTypedMessage()),
+                            decoration: InputDecoration(
+                              hintText: AppText.current.tutorPage.typeMessage,
+                              filled: true,
+                              fillColor: AppColors.surface,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(999),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Material(
+                          color: AppColors.primary,
+                          shape: const CircleBorder(),
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: () => unawaited(_submitTypedMessage()),
+                            child: const SizedBox(
+                              width: 44,
+                              height: 44,
+                              child: Icon(
+                                Icons.send_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                  ],
                   _buildMicRow(darkChrome: false),
                 ],
               ),
@@ -738,8 +811,8 @@ class _CallingScreenState extends State<CallingScreen> {
           ),
           Positioned.fill(
             child: _buildAvatar(
-              padding: const EdgeInsets.fromLTRB(0, 36, 0, 100),
-              alignment: const Alignment(0, -0.15),
+              padding: const EdgeInsets.fromLTRB(0, 8, 0, 40),
+              alignment: const Alignment(0, -0.05),
             ),
           ),
           Positioned(

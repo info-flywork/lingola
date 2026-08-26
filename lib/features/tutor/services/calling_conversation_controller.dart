@@ -533,6 +533,12 @@ class CallingConversationController extends ChangeNotifier {
     }
   }
 
+  Future<void> sendTypedMessage(String text) async {
+    final cleaned = text.trim();
+    if (cleaned.isEmpty || _disposed) return;
+    await _onUserSpeech(cleaned);
+  }
+
   Future<void> _onUserSpeech(String text) async {
     _userHasSpoken = true;
     _cancelIdleNudge();

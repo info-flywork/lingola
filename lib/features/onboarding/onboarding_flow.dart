@@ -400,33 +400,6 @@ class _OnboardingPage extends StatelessWidget {
               ),
             ),
           ),
-          if (onBack != null)
-            Positioned(
-              top: MediaQuery.paddingOf(context).top + 8,
-              left: 16,
-              child: TextButton(
-                onPressed: onBack,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.black.withValues(alpha: .25),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                child: Text(
-                  text.common.back,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
           Positioned(
             left: 16,
             right: 16,
@@ -466,6 +439,34 @@ class _OnboardingPage extends StatelessWidget {
               ),
             ),
           ),
+          // Geri butonu kartın ÜSTÜNDE çizilsin (kart örtmesin).
+          if (onBack != null)
+            Positioned(
+              top: MediaQuery.paddingOf(context).top + 8,
+              left: 16,
+              child: TextButton(
+                onPressed: onBack,
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.black.withValues(alpha: .25),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                child: Text(
+                  text.common.back,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -113,7 +113,7 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen> {
                     ),
                     // Figma: kart üstünden robota doğru ince blurlu beyaz ışınlar
                     Positioned(
-                      top: robotHeight - 72 - 88,
+                      top: robotHeight - 72 - 40,
                       left: 0,
                       right: 0,
                       height: 96,
@@ -122,7 +122,7 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen> {
                       ),
                     ),
                     Positioned(
-                      top: robotHeight - 72,
+                      top: robotHeight - 24,
                       left: 16,
                       right: 16,
                       bottom: 16,
@@ -450,7 +450,8 @@ Future<void> presentOnboardingPaywallThenAuth(
       AppEnv.revenueCatAndroidPublicKey.isNotEmpty;
   if (hasKey) {
     try {
-      await RevenueCatUI.presentPaywall(displayCloseButton: true);
+      await RevenueCatUI.presentPaywall(displayCloseButton: true)
+          .timeout(const Duration(seconds: 20));
     } catch (_) {}
   }
   if (!context.mounted) return;

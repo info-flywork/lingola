@@ -77,13 +77,19 @@ class TutorTtsService {
         visemeFile.existsSync()) {
       try {
         final raw = jsonDecode(await visemeFile.readAsString());
-        if (raw is List) {
+        if (raw is List && raw.isNotEmpty) {
           final cues = raw
               .whereType<Map>()
               .map(_parseVisemeCue)
               .toList(growable: false);
-          return TutorSpeechAudio(file: audioFile, visemes: cues);
+          if (cues.isNotEmpty) {
+            return TutorSpeechAudio(file: audioFile, visemes: cues);
+          }
         }
+      } catch (_) {}
+      // Boş/bozuk viseme cache — yeniden üret.
+      try {
+        await visemeFile.delete();
       } catch (_) {}
     }
 
@@ -112,14 +118,20 @@ class TutorTtsService {
           .map(_parseVisemeCue)
           .toList(growable: false);
     }
+    if (cues.isEmpty) {
+      cues = heuristicVisemesFromText(text.trim());
+    }
 
-    await visemeFile.writeAsString(
-      jsonEncode([
-        for (final c in cues)
-          {'s': c.startSec, 'e': c.endSec, 'v': c.visemeNum},
-      ]),
-      flush: true,
-    );
+    // Boş track cache'leme — bir sonraki sefer heuristic/API denensin.
+    if (cues.isNotEmpty) {
+      await visemeFile.writeAsString(
+        jsonEncode([
+          for (final c in cues)
+            {'s': c.startSec, 'e': c.endSec, 'v': c.visemeNum},
+        ]),
+        flush: true,
+      );
+    }
 
     return TutorSpeechAudio(file: audioFile, visemes: cues);
   }

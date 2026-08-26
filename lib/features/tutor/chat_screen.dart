@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/auth/api_client.dart';
@@ -7,7 +8,9 @@ import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
 import '../lesson/lesson_session_result.dart';
+import 'services/openai_chat_service.dart';
 import 'services/tutor_chat_api_service.dart';
+import 'services/tutor_tts_service.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
@@ -471,11 +474,56 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-class _IncomingBubble extends StatelessWidget {
+class _IncomingBubble extends StatefulWidget {
   const _IncomingBubble({required this.message, required this.imagePath});
 
   final String message;
   final String imagePath;
+
+  @override
+  State<_IncomingBubble> createState() => _IncomingBubbleState();
+}
+
+class _IncomingBubbleState extends State<_IncomingBubble> {
+  String? _translation;
+  var _busy = false;
+  final _tts = TutorTtsService();
+  final _player = AudioPlayer();
+
+  @override
+  void dispose() {
+    unawaited(_player.dispose());
+    _tts.dispose();
+    super.dispose();
+  }
+
+  Future<void> _translate() async {
+    if (_busy) return;
+    if (_translation != null) {
+      setState(() => _translation = null);
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      final tr =
+          await OpenAiChatService().translateToTurkish(widget.message);
+      if (!mounted) return;
+      setState(() {
+        _translation = tr.trim().isEmpty ? null : tr.trim();
+        _busy = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _speak() async {
+    try {
+      final file = await _tts.synthesizeToFile(widget.message);
+      await _player.play(DeviceFileSource(file.path));
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -484,7 +532,7 @@ class _IncomingBubble extends StatelessWidget {
       children: [
         ClipOval(
           child: HomeAsset(
-            imagePath,
+            widget.imagePath,
             width: 28,
             height: 28,
             fit: BoxFit.cover,
@@ -492,21 +540,61 @@ class _IncomingBubble extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Flexible(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              message,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 13,
-                height: 1.4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  widget.message,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              if (_translation != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  _translation!,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 12,
+                    color: AppColors.ink.withValues(alpha: .65),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(width: 6),
+        Column(
+          children: [
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: _busy ? null : _translate,
+              icon: Icon(
+                Icons.translate_rounded,
+                size: 20,
+                color: AppColors.primary.withValues(alpha: .9),
               ),
             ),
-          ),
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: _speak,
+              icon: Icon(
+                Icons.volume_up_rounded,
+                size: 20,
+                color: AppColors.primary.withValues(alpha: .9),
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -114,12 +114,12 @@ double effectiveSpeechEndSec({
   var end = lastMouth;
   if (audioDurationSec != null && audioDurationSec > 0) {
     final lipStop =
-        (audioDurationSec - 0.45).clamp(0.0, audioDurationSec).toDouble();
+        (audioDurationSec - 0.2).clamp(0.0, audioDurationSec).toDouble();
     end = lastMouth > 0 ? (lastMouth < lipStop ? lastMouth : lipStop) : lipStop;
   }
   if (end > 0) {
-    // Son heceden hemen sonra kapat — ~1 sn “takılı ağız”ı önler.
-    end = (end - 0.35).clamp(0.0, end).toDouble();
+    // Son heceden kısa süre sonra kapat (çok agresif kesme ağızı hiç oynatmaz).
+    end = (end - 0.12).clamp(0.0, end).toDouble();
   }
   return end;
 }
@@ -131,4 +131,46 @@ bool hasUpcomingMouth(List<VisemeCue> cues, double tSec) {
     if (cue.endSec > tSec + 0.04) return true;
   }
   return false;
+}
+
+/// Alignment yokken metinden yaklaşık viseme timeline (Rive: 0/2/6/10/14).
+List<VisemeCue> heuristicVisemesFromText(
+  String text, {
+  double? durationSec,
+}) {
+  final chars = text.replaceAll('\r', '').split('');
+  if (chars.isEmpty) return const [];
+
+  final estimated =
+      (durationSec != null && durationSec > 0.2)
+          ? durationSec
+          : (chars.length * 0.055).clamp(0.8, 60.0);
+  final step = estimated / chars.length;
+  final cues = <VisemeCue>[];
+  VisemeCue? pending;
+
+  void flush() {
+    final p = pending;
+    if (p != null) cues.add(p);
+    pending = null;
+  }
+
+  for (var i = 0; i < chars.length; i++) {
+    final start = i * step;
+    final end = (i + 1) * step;
+    final v = visemeForChar(chars[i]);
+    final p = pending;
+    if (p != null && p.visemeNum == v && start - p.endSec < 0.08) {
+      pending = VisemeCue(
+        startSec: p.startSec,
+        endSec: end,
+        visemeNum: v,
+      );
+    } else {
+      flush();
+      pending = VisemeCue(startSec: start, endSec: end, visemeNum: v);
+    }
+  }
+  flush();
+  return cues;
 }
