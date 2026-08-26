@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/auth/auth_service.dart';
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
+import '../../widgets/home_asset.dart';
 import '../shell/main_shell.dart';
 import 'language_setup_screens.dart';
 import 'onboarding_draft.dart';
@@ -439,30 +441,28 @@ class _OnboardingPage extends StatelessWidget {
               ),
             ),
           ),
-          // Geri butonu kartın ÜSTÜNDE çizilsin (kart örtmesin).
+          // Sol üst geri ikonu (yazı "Back" değil).
           if (onBack != null)
             Positioned(
               top: MediaQuery.paddingOf(context).top + 8,
-              left: 16,
-              child: TextButton(
-                onPressed: onBack,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.black.withValues(alpha: .25),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                child: Text(
-                  text.common.back,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+              left: 12,
+              child: Material(
+                color: Colors.black.withValues(alpha: .28),
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: onBack,
+                  child: const SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Center(
+                      child: HomeAsset(
+                        AppAssets.backArrow,
+                        width: 18,
+                        height: 18,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ),
