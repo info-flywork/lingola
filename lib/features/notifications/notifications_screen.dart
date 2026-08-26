@@ -16,7 +16,7 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   static const _offerTitle = Color(0xFFFF8A00);
 
-  List<_NotificationItem>? _remoteItems;
+  List<_NotificationItem>? _items;
 
   @override
   void initState() {
@@ -34,19 +34,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           .whereType<_NotificationItem>()
           .toList();
       if (mapped.isEmpty) return;
-      setState(() => _remoteItems = mapped);
+      setState(() => _items = mapped);
     } catch (_) {
       // Yerel kartlar korunur.
     }
   }
 
   List<_NotificationItem> _itemsFor(dynamic text) {
-    return _remoteItems ?? _fallbackItems(text);
+    return _items ?? _fallbackItems(text);
+  }
+
+  void _deleteItem(String id) {
+    setState(() {
+      final current = List<_NotificationItem>.from(
+        _items ?? _fallbackItems(AppText.current.notificationsPage),
+      );
+      current.removeWhere((item) => item.id == id);
+      _items = current;
+    });
   }
 
   static List<_NotificationItem> _fallbackItems(dynamic text) {
     return [
       _NotificationItem(
+        id: 'fallback-translation',
         icon: 'assets/images/notifications/icon_translation.svg',
         iconBg: const Color(0x1A2D46FF),
         title: text.translation.title,
@@ -54,6 +65,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         titleColor: AppColors.ink,
       ),
       _NotificationItem(
+        id: 'fallback-offer',
         icon: 'assets/images/notifications/icon_offer.svg',
         iconBg: const Color(0x1AFF8A00),
         title: text.offer.title,
@@ -61,6 +73,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         titleColor: _offerTitle,
       ),
       _NotificationItem(
+        id: 'fallback-stories',
         icon: 'assets/images/notifications/icon_stories.svg',
         iconBg: const Color(0x1A34C759),
         title: text.stories.title,
@@ -77,6 +90,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final resolved = _resolveCopy(text, dto.titleKey, dto.bodyKey);
     if (resolved == null) return null;
     return _NotificationItem(
+      id: dto.id.isNotEmpty ? dto.id : '${dto.titleKey}-${dto.bodyKey}',
       icon: dto.iconAsset,
       iconBg: _parseColor(dto.iconBg) ?? const Color(0x1A2D46FF),
       title: resolved.$1,
@@ -163,14 +177,34 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
               ),
               Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    return _NotificationCard(item: items[index]);
-                  },
-                ),
+                child: items.isEmpty
+                    ? const SizedBox.shrink()
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        itemCount: items.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          final item = items[index];
+                          return Dismissible(
+                            key: ValueKey(item.id),
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (_) => _deleteItem(item.id),
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 16),
+                              decoration: BoxDecoration(
+                                color: const Color(0x1AFF383C),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.delete_outline_rounded,
+                                color: Color(0xFFF44336),
+                              ),
+                            ),
+                            child: _NotificationCard(item: item),
+                          );
+                        },
+                      ),
               ),
             ],
           ),
@@ -182,6 +216,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
 class _NotificationItem {
   const _NotificationItem({
+    required this.id,
     required this.icon,
     required this.iconBg,
     required this.title,
@@ -189,6 +224,7 @@ class _NotificationItem {
     required this.titleColor,
   });
 
+  final String id;
   final String icon;
   final Color iconBg;
   final String title;

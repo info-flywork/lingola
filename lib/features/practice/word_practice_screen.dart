@@ -33,7 +33,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   PracticeSession? _session;
   var _index = 0;
   var _saved = false;
-  var _hintVisible = true;
+  var _hintVisible = false;
   var _listening = false;
 
   PracticeCard? get _current {
@@ -81,13 +81,13 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
           if (fresh.isNotEmpty) {
             _index = _session!.cards.length - fresh.length;
             _saved = _session!.cards[_index].saved;
-            _hintVisible = true;
+            _hintVisible = false;
           }
         } else {
           _session = session;
           _index = 0;
           _saved = _current?.saved ?? false;
-          _hintVisible = true;
+          _hintVisible = false;
         }
         _loading = false;
         _error = null;
@@ -129,7 +129,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     setState(() {
       _index -= 1;
       _saved = _current?.saved ?? false;
-      _hintVisible = true;
+      _hintVisible = false;
     });
     _warmAudio();
   }
@@ -141,7 +141,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       setState(() {
         _index = nextIndex;
         _saved = cards[nextIndex].saved;
-        _hintVisible = true;
+        _hintVisible = false;
       });
       _warmAudio();
       return;
@@ -484,11 +484,13 @@ class _WordCard extends StatelessWidget {
                   label: saveLabel,
                   background: saved ? const Color(0x33FF383C) : saveBg,
                   foreground: saveRed,
-                  icon: const HomeAsset(
-                    'assets/images/heart.svg',
-                    width: 20,
-                    height: 20,
-                  ),
+                  icon: saved
+                      ? Icon(Icons.favorite, size: 20, color: saveRed)
+                      : const HomeAsset(
+                          'assets/images/heart.svg',
+                          width: 20,
+                          height: 20,
+                        ),
                   onTap: onSave,
                 ),
               ),

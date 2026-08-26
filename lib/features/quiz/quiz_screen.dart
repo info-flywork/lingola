@@ -87,24 +87,13 @@ class QuizScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     _QuizOptionCard(
                       iconAsset: AppAssets.quizBook,
-                      // Figma: icon bg white %20
-                      iconBg: Colors.white.withValues(alpha: .20),
+                      iconBg: const Color(0x1A2D46FF),
                       title: text.readingTitle,
                       description: text.readingBody,
-                      titleColor: Colors.white,
-                      descriptionColor: Colors.white,
-                      arrowBg: Colors.white,
-                      arrowColor: AppColors.primary,
-                      // Figma: solid #2D46FF + üstte linear gradient %20
-                      baseColor: AppColors.primary,
-                      overlayGradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          Colors.white.withValues(alpha: 0),
-                          Colors.white.withValues(alpha: .20),
-                        ],
-                      ),
+                      titleColor: AppColors.ink,
+                      descriptionColor: AppColors.secondary,
+                      arrowBg: AppColors.primary,
+                      arrowColor: Colors.white,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
@@ -171,8 +160,6 @@ class _QuizOptionCard extends StatelessWidget {
     required this.arrowBg,
     required this.arrowColor,
     required this.onTap,
-    this.baseColor,
-    this.overlayGradient,
   });
 
   final String iconAsset;
@@ -184,8 +171,6 @@ class _QuizOptionCard extends StatelessWidget {
   final Color arrowBg;
   final Color arrowColor;
   final VoidCallback onTap;
-  final Color? baseColor;
-  final Gradient? overlayGradient;
 
   @override
   Widget build(BuildContext context) {
@@ -197,85 +182,76 @@ class _QuizOptionCard extends StatelessWidget {
         child: Ink(
           height: 100,
           decoration: BoxDecoration(
-            color: baseColor ?? Colors.white,
+            color: Colors.white,
             border: Border.all(color: AppColors.border10),
             borderRadius: BorderRadius.circular(20),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                if (overlayGradient != null)
-                  DecoratedBox(
-                    decoration: BoxDecoration(gradient: overlayGradient),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: iconBg,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: HomeAsset(iconAsset, width: 32, height: 32),
                   ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: iconBg,
-                          borderRadius: BorderRadius.circular(10),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
+                            height: 20 / 16,
+                            fontWeight: FontWeight.w700,
+                            color: titleColor,
+                          ),
                         ),
-                        child: HomeAsset(iconAsset, width: 32, height: 32),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 16,
-                                height: 20 / 16,
-                                fontWeight: FontWeight.w700,
-                                color: titleColor,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              description,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 12,
-                                height: 16 / 12,
-                                fontWeight: FontWeight.w500,
-                                color: descriptionColor,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 4),
+                        Text(
+                          description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            height: 16 / 12,
+                            fontWeight: FontWeight.w500,
+                            color: descriptionColor,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 28,
-                        height: 28,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: arrowBg,
-                          shape: BoxShape.circle,
-                        ),
-                        child: HomeAsset(
-                          AppAssets.quizArrow,
-                          width: 6,
-                          height: 12,
-                          color: arrowColor,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: arrowBg,
+                      shape: BoxShape.circle,
+                    ),
+                    child: HomeAsset(
+                      AppAssets.quizArrow,
+                      width: 6,
+                      height: 12,
+                      color: arrowColor,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
