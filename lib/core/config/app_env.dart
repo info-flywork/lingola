@@ -46,10 +46,13 @@ abstract final class TutorVoiceIds {
     'vaelen',
   };
 
-  /// Slug’a göre doğru ses. DB NULL/yanlış olsa bile Rive hocaları ayrışır.
+  /// Önce DB/API `voice_id`; yoksa slug fallback.
   static String resolve(String? slug, {String? preferred}) {
+    final fromDb = preferred?.trim();
+    if (fromDb != null && fromDb.isNotEmpty) return fromDb;
+
     final key = (slug ?? '').trim().toLowerCase();
-    final bySlug = switch (key) {
+    return switch (key) {
       'santa' => santa,
       'zephyrion' => zephyrion,
       'ukrath' => ukrath,
@@ -57,11 +60,7 @@ abstract final class TutorVoiceIds {
       'lingola' || 'elrion' => male,
       _ when _femaleSlugs.contains(key) => female,
       _ when key.isNotEmpty => male,
-      _ => null,
+      _ => female,
     };
-    if (bySlug != null) return bySlug;
-    final fromApi = preferred?.trim();
-    if (fromApi != null && fromApi.isNotEmpty) return fromApi;
-    return female;
   }
 }

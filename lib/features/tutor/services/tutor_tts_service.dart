@@ -172,7 +172,7 @@ class TutorTtsService {
   /// Cache’i ses/model değişince invalid et.
   String _cacheKey(String text, {String? voiceId, required String modelId}) {
     final voice = _resolveVoiceId(voiceId);
-    final raw = 'lipsync|v5|$voice|$modelId|${text.trim()}';
+    final raw = 'lipsync|v6|$voice|$modelId|${text.trim()}';
     return sha1.convert(utf8.encode(raw)).toString();
   }
 

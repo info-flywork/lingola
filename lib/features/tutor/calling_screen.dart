@@ -117,6 +117,9 @@ class _CallingScreenState extends State<CallingScreen> {
       tutorSlug: widget.tutorSlug,
       lessonMode: widget.lessonSegmentMode,
     );
+    debugPrint(
+      '[calling] slug=${widget.tutorSlug} voiceId=${_conversation.voiceId}',
+    );
     _conversation
       ..addListener(_onConvo)
       ..onRequestEndLesson = () {
