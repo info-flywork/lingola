@@ -782,6 +782,7 @@ class _SpeakingCard extends StatelessWidget {
             _RecordingPanel(
               isRecording: isRecording,
               durationLabel: durationLabel,
+              recordingLabel: AppText.current.quizPage.recording,
               level: level,
               wave: wave,
             ),
@@ -927,12 +928,14 @@ class _RecordingPanel extends StatelessWidget {
   const _RecordingPanel({
     required this.isRecording,
     required this.durationLabel,
+    required this.recordingLabel,
     required this.level,
     required this.wave,
   });
 
   final bool isRecording;
   final String durationLabel;
+  final String recordingLabel;
   final double level;
   final Animation<double> wave;
 
@@ -940,7 +943,7 @@ class _RecordingPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: AppColors.border10),
@@ -949,15 +952,15 @@ class _RecordingPanel extends StatelessWidget {
       child: Column(
         children: [
           SizedBox(
-            height: 90,
+            height: 56,
             width: double.infinity,
             child: AnimatedBuilder(
               animation: wave,
               builder: (context, _) {
                 return CustomPaint(
-                  painter: _LayeredPulseWavePainter(
-                    progress: isRecording ? wave.value : 0.12,
-                    amplitude: isRecording ? level : 0.6,
+                  painter: _NestedArcWavePainter(
+                    progress: isRecording ? wave.value : 0.08,
+                    amplitude: isRecording ? level.clamp(0.15, 1.0) : 0.55,
                     color: AppColors.primary,
                     animate: isRecording,
                   ),
@@ -966,22 +969,15 @@ class _RecordingPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: .10),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              durationLabel,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                height: 18 / 14,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.28,
-                color: AppColors.primary,
-              ),
+          Text(
+            isRecording ? recordingLabel : durationLabel,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 16,
+              height: 20 / 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
             ),
           ),
         ],
@@ -1019,9 +1015,9 @@ class _QuizIconButton extends StatelessWidget {
   }
 }
 
-/// Figma’daki katmanlı pulse dalga göstergesi (4 tepe + iç içe çizgiler).
-class _LayeredPulseWavePainter extends CustomPainter {
-  _LayeredPulseWavePainter({
+/// Figma: tabandan yükselen iç içe tepe dalgaları (4 pulse + katmanlı yaylar).
+class _NestedArcWavePainter extends CustomPainter {
+  _NestedArcWavePainter({
     required this.progress,
     required this.amplitude,
     required this.color,
@@ -1033,64 +1029,72 @@ class _LayeredPulseWavePainter extends CustomPainter {
   final Color color;
   final bool animate;
 
-  static const _pulseCenters = [0.11, 0.34, 0.57, 0.80];
-  static const _pulseAmps = [0.30, 1.0, 0.54, 0.26];
-  static const _pulseSigmas = [0.042, 0.088, 0.060, 0.038];
-  static const _layerCount = 6;
-
-  double _pulseEnvelope(double x, double phase) {
-    var sum = 0.0;
-    for (var i = 0; i < _pulseCenters.length; i++) {
-      final center = _pulseCenters[i];
-      final sigma = _pulseSigmas[i];
-      var amp = _pulseAmps[i];
-      if (animate) {
-        amp *= 0.72 + amplitude * 0.28;
-        amp *= 1 + 0.07 * math.sin(phase + i * 1.15);
-      }
-      final d = (x - center) / sigma;
-      sum += amp * math.exp(-0.5 * d * d);
-    }
-    return sum;
-  }
+  /// [centerX, relativeHeight, halfWidth]
+  static const _peaks = <List<double>>[
+    [0.14, 0.42, 0.10],
+    [0.40, 1.00, 0.18],
+    [0.66, 0.62, 0.13],
+    [0.88, 0.36, 0.09],
+  ];
+  static const _layers = 9;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final midY = size.height * 0.52;
-    final maxAmp = size.height * 0.38;
+    final baseY = size.height * 0.92;
+    final maxH = size.height * 0.86;
     final phase = progress * math.pi * 2;
 
-    for (var layer = 0; layer < _layerCount; layer++) {
-      final layerScale = 1 - layer * 0.13;
-      final path = Path();
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-      for (var xi = 0.0; xi <= size.width; xi += 1.2) {
-        final x = xi / size.width;
-        final envelope = _pulseEnvelope(x, phase + layer * 0.22);
-        final ripple = math.sin(
-          (x * math.pi * 5.6) + phase * 1.4 + layer * 0.55,
-        );
-        final y = midY - envelope * maxAmp * layerScale * (0.82 + ripple * 0.18);
+    for (var p = 0; p < _peaks.length; p++) {
+      final cx = size.width * _peaks[p][0];
+      final peakH = _peaks[p][1];
+      final halfW = size.width * _peaks[p][2];
 
-        if (xi == 0) {
-          path.moveTo(xi, y);
-        } else {
-          path.lineTo(xi, y);
-        }
+      var live = peakH;
+      if (animate) {
+        live *= 0.55 + amplitude * 0.45;
+        live *= 1 + 0.12 * math.sin(phase * 1.6 + p * 1.1);
       }
 
-      final paint = Paint()
-        ..color = color.withValues(alpha: (1 - layer * 0.11).clamp(0.35, 1.0))
-        ..strokeWidth = 1.15 - layer * 0.08
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round;
-      canvas.drawPath(path, paint);
+      for (var layer = 0; layer < _layers; layer++) {
+        final t = (layer + 1) / _layers;
+        final h = maxH * live * t;
+        final w = halfW * (0.35 + 0.65 * t);
+        final alpha = (0.28 + 0.72 * t).clamp(0.28, 1.0);
+
+        final path = Path()
+          ..moveTo(cx - w, baseY)
+          ..cubicTo(
+            cx - w * 0.55,
+            baseY,
+            cx - w * 0.35,
+            baseY - h,
+            cx,
+            baseY - h,
+          )
+          ..cubicTo(
+            cx + w * 0.35,
+            baseY - h,
+            cx + w * 0.55,
+            baseY,
+            cx + w,
+            baseY,
+          );
+
+        paint
+          ..color = color.withValues(alpha: alpha)
+          ..strokeWidth = 1.05;
+        canvas.drawPath(path, paint);
+      }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _LayeredPulseWavePainter oldDelegate) {
+  bool shouldRepaint(covariant _NestedArcWavePainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.amplitude != amplitude ||
         oldDelegate.color != color ||

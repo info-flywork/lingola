@@ -7,11 +7,13 @@ import 'package:flutter/services.dart';
 import '../../core/auth/api_client.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/config/app_env.dart';
 import '../../core/rive/rive_preload_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
 import '../lesson/lesson_session_result.dart';
 import 'services/calling_conversation_controller.dart';
+import 'tutor_scene_theme.dart';
 import 'widgets/tutor_rive_avatar.dart';
 
 /// Start Talk Now → sesli görüşme (Figma calling) ekranı.
@@ -73,6 +75,7 @@ class _CallingScreenState extends State<CallingScreen> {
   /// Mesaj yazma modu (chat ikonu) — boş beyaz ekran yerine composer.
   var _textComposeOn = false;
   final _textController = TextEditingController();
+  final _textFocus = FocusNode();
 
   /// İpucu (ampul).
   var _hintsOn = false;
@@ -108,7 +111,7 @@ class _CallingScreenState extends State<CallingScreen> {
       _maybeOfferSegmentCheckpoint();
     });
     _conversation = CallingConversationController(
-      voiceId: widget.voiceId,
+      voiceId: TutorVoiceIds.resolve(widget.tutorSlug, preferred: widget.voiceId),
       openingLine: widget.openingLine,
       systemPrompt: widget.systemPrompt,
       tutorSlug: widget.tutorSlug,
@@ -221,6 +224,7 @@ class _CallingScreenState extends State<CallingScreen> {
   void dispose() {
     _ticker?.cancel();
     _textController.dispose();
+    _textFocus.dispose();
     _conversation
       ..removeListener(_onConvo)
       ..dispose();
@@ -231,8 +235,25 @@ class _CallingScreenState extends State<CallingScreen> {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
     _textController.clear();
-    setState(() => _textComposeOn = false);
+    // Klavye/composer açık kalsın — arka arkaya mesaj yazılabilsin.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _textComposeOn) _textFocus.requestFocus();
+    });
     await _conversation.sendTypedMessage(text);
+  }
+
+  void _toggleTextCompose() {
+    setState(() {
+      _textComposeOn = !_textComposeOn;
+      if (_textComposeOn) _captionsOn = true;
+    });
+    if (_textComposeOn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _textFocus.requestFocus();
+      });
+    } else {
+      _textFocus.unfocus();
+    }
   }
 
   String get _timerLabel {
@@ -242,24 +263,19 @@ class _CallingScreenState extends State<CallingScreen> {
     return '$h:$m:$s';
   }
 
-  /// Kart teması varsa o renkler; yoksa varsayılan mavi calling gradient.
-  List<Color> get _callingBackgroundColors {
-    final start = widget.backgroundGradientStart;
-    final end = widget.backgroundGradientEnd;
-    if (start == null || end == null) {
-      return const [
-        Color(0xFF2D46FF),
-        Color(0xFF5B9FFF),
-        Color(0xFFB8D4F0),
-      ];
-    }
-    final mid = Color.lerp(start, end, 0.5) ?? end;
-    final bottom = Color.lerp(end, Colors.black, 0.15) ?? end;
-    return [start, mid, bottom];
-  }
+  /// Kart teması varsa o renkler; yoksa slug fallback / Figma default.
+  Color? get _sceneStart => TutorSceneTheme.resolveStart(
+        start: widget.backgroundGradientStart,
+        slug: widget.tutorSlug,
+      );
+
+  Color? get _sceneEnd => TutorSceneTheme.resolveEnd(
+        end: widget.backgroundGradientEnd,
+        slug: widget.tutorSlug,
+      );
 
   Color get _topScrimColor =>
-      widget.backgroundGradientStart ?? const Color(0xFF2D46FF);
+      _sceneStart ?? const Color(0xFF2D46FF);
 
   void _toggleExpanded() {
     setState(() => _expanded = !_expanded);
@@ -453,8 +469,7 @@ class _CallingScreenState extends State<CallingScreen> {
                 ? _conversation.currentViseme
                 : null)
             : null,
-        loadingBackgroundColor:
-            widget.backgroundGradientStart ?? widget.backgroundGradientEnd,
+        loadingBackgroundColor: Colors.transparent,
       ),
     );
   }
@@ -472,10 +487,7 @@ class _CallingScreenState extends State<CallingScreen> {
             if (darkChrome) {
               setState(() => _captionsOn = !_captionsOn);
             } else {
-              setState(() {
-                _textComposeOn = !_textComposeOn;
-                if (_textComposeOn) _captionsOn = true;
-              });
+              _toggleTextCompose();
             }
           },
           child: darkChrome
@@ -678,15 +690,10 @@ class _CallingScreenState extends State<CallingScreen> {
                   left: 0,
                   right: 0,
                   height: topInset + heroHeight,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: _callingBackgroundColors,
-                        stops: const [0, 0.55, 1],
-                      ),
-                    ),
+                  child: TutorSceneBackdrop(
+                    gradientStart: _sceneStart,
+                    gradientEnd: _sceneEnd,
+                    fadeToWhite: true,
                   ),
                 ),
                 SafeArea(
@@ -789,8 +796,11 @@ class _CallingScreenState extends State<CallingScreen> {
                         Expanded(
                           child: TextField(
                             controller: _textController,
+                            focusNode: _textFocus,
+                            autofocus: true,
                             textInputAction: TextInputAction.send,
                             onSubmitted: (_) => unawaited(_submitTypedMessage()),
+                            onTapOutside: (_) => _textFocus.unfocus(),
                             decoration: InputDecoration(
                               hintText: AppText.current.tutorPage.typeMessage,
                               filled: true,
@@ -846,20 +856,13 @@ class _CallingScreenState extends State<CallingScreen> {
     final listening = _conversation.listening;
 
     return Scaffold(
-      backgroundColor:
-          widget.backgroundGradientStart ?? const Color(0xFF1A2A4A),
+      backgroundColor: _sceneStart ?? const Color(0xFF1A2A4A),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: _callingBackgroundColors,
-                stops: const [0, 0.45, 1],
-              ),
-            ),
+          TutorSceneBackdrop(
+            gradientStart: _sceneStart,
+            gradientEnd: _sceneEnd,
           ),
           Positioned.fill(
             child: _buildAvatar(

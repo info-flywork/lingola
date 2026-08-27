@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/auth/api_client.dart';
+import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/premium/premium_service.dart';
@@ -12,6 +13,7 @@ import '../../i18n/strings.g.dart';
 import '../tutor/calling_screen.dart';
 import '../tutor/chat_screen.dart';
 import '../tutor/services/tutor_api_service.dart';
+import '../tutor/tutor_scene_theme.dart';
 import 'lesson_api_service.dart';
 import 'lesson_curriculum.dart';
 import 'lesson_notes_screen.dart';
@@ -256,9 +258,16 @@ class _LessonScreenState extends State<LessonScreen> {
                           start.tutorRive!.startsWith('http'))
                       ? start.tutorRive
                       : AppAssets.tutorRiveCdn(choice.tutor.slug)),
-              voiceId: choice.tutor.voiceId ?? start.tutorVoiceId,
-              backgroundGradientStart: _parseHex(theme?.gradientStart),
-              backgroundGradientEnd: _parseHex(theme?.gradientEnd),
+              voiceId: TutorVoiceIds.resolve(
+                choice.tutor.slug.isNotEmpty
+                    ? choice.tutor.slug
+                    : start.tutorSlug,
+                preferred: choice.tutor.voiceId ?? start.tutorVoiceId,
+              ),
+              backgroundGradientStart: _parseHex(theme?.gradientStart) ??
+                  TutorSceneTheme.gradientForSlug(choice.tutor.slug)?.$1,
+              backgroundGradientEnd: _parseHex(theme?.gradientEnd) ??
+                  TutorSceneTheme.gradientForSlug(choice.tutor.slug)?.$2,
               openingLine: start.openingMessage,
               systemPrompt: start.systemPrompt,
               returnTranscript: true,

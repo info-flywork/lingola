@@ -1645,6 +1645,60 @@ class _BotBubbleState extends State<_BotBubble> {
     }
   }
 
+  Widget _messageBody(LingolaChatMessage message) {
+    if (message.highlight == null || message.rest == null) {
+      return Text(
+        message.text,
+        style: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 14,
+          height: 18 / 14,
+          fontWeight: FontWeight.w400,
+          color: AppColors.ink,
+        ),
+      );
+    }
+    return Text.rich(
+      TextSpan(
+        children: [
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                message.highlight!,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  height: 18 / 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          TextSpan(
+            text: message.rest,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              height: 18 / 14,
+              fontWeight: FontWeight.w400,
+              color: AppColors.ink,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final message = widget.message;
@@ -1652,100 +1706,61 @@ class _BotBubbleState extends State<_BotBubble> {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.sizeOf(context).width * 0.72,
-                ),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border:
-                      Border.all(color: Colors.black.withValues(alpha: .06)),
-                ),
-                child: message.highlight == null || message.rest == null
-                    ? Text(
-                        message.text,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14,
-                          height: 18 / 14,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.ink,
-                        ),
-                      )
-                    : Text.rich(
-                        TextSpan(
-                          children: [
-                            WidgetSpan(
-                              alignment: PlaceholderAlignment.middle,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  message.highlight!,
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    height: 18 / 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            TextSpan(
-                              text: message.rest,
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                                height: 18 / 14,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.ink,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-              ),
-              if (_translation != null) ...[
-                const SizedBox(height: 6),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Text(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.sizeOf(context).width * 0.72,
+            ),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.black.withValues(alpha: .06)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _messageBody(message),
+                if (_translating) ...[
+                  const SizedBox(height: 8),
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ] else if (_translation != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
                     _translation!,
                     style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: 12,
-                      height: 16 / 12,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.ink.withValues(alpha: .65),
+                      fontSize: 13,
+                      height: 18 / 13,
+                      fontWeight: FontWeight.w500,
+                      fontStyle: FontStyle.italic,
+                      color: AppColors.ink.withValues(alpha: .78),
                     ),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         const SizedBox(width: 8),
-        Column(
+        Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             _RoundIconButton(
-              asset: AppAssets.translate,
+              asset: AppAssets.writingTranslate,
+              color: AppColors.primary,
               onTap: _translating ? null : _translate,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(width: 6),
             _RoundIconButton(
               asset: AppAssets.speaker,
+              color: AppColors.secondary,
               onTap: widget.onSpeak,
             ),
           ],
@@ -1789,24 +1804,34 @@ class _UserBubble extends StatelessWidget {
 }
 
 class _RoundIconButton extends StatelessWidget {
-  const _RoundIconButton({required this.asset, this.onTap});
+  const _RoundIconButton({
+    required this.asset,
+    required this.color,
+    this.onTap,
+  });
 
   final String asset;
+  final Color color;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFF3F4F6),
-      shape: const CircleBorder(),
+      color: Colors.transparent,
+      shape: CircleBorder(side: BorderSide(color: color, width: 1.4)),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: SizedBox(
-          width: 32,
-          height: 32,
+          width: 34,
+          height: 34,
           child: Center(
-            child: HomeAsset(asset, width: 16, height: 16),
+            child: HomeAsset(
+              asset,
+              width: 16,
+              height: 16,
+              color: color,
+            ),
           ),
         ),
       ),

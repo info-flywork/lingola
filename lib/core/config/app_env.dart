@@ -27,9 +27,41 @@ abstract final class TutorVoiceIds {
   /// Zephyrion (uzaylı)
   static const zephyrion = 'TsHrPyMlNFuIYnbODF01';
 
+  /// Diego (özel erkek ses)
+  static const diego = 'PIGsltMj3gFMR34aFDI3';
+
   /// Kalan erkek hocalar (varsayılan)
   static const male = 'sJ8GED3d0sN1d0bmD6mH';
 
   /// Kadın hocalar / Word Practice Listen
   static const female = 'WZlYpi1yf6zJhNWXih74';
+
+  static const _femaleSlugs = {
+    'elena',
+    'freya',
+    'camila',
+    'ines',
+    'amara',
+    'katie',
+    'vaelen',
+  };
+
+  /// Slug’a göre doğru ses. DB NULL/yanlış olsa bile Rive hocaları ayrışır.
+  static String resolve(String? slug, {String? preferred}) {
+    final key = (slug ?? '').trim().toLowerCase();
+    final bySlug = switch (key) {
+      'santa' => santa,
+      'zephyrion' => zephyrion,
+      'ukrath' => ukrath,
+      'diego' => diego,
+      'lingola' || 'elrion' => male,
+      _ when _femaleSlugs.contains(key) => female,
+      _ when key.isNotEmpty => male,
+      _ => null,
+    };
+    if (bySlug != null) return bySlug;
+    final fromApi = preferred?.trim();
+    if (fromApi != null && fromApi.isNotEmpty) return fromApi;
+    return female;
+  }
 }

@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/auth/api_client.dart';
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
@@ -540,17 +541,16 @@ class _IncomingBubbleState extends State<_IncomingBubble> {
         ),
         const SizedBox(width: 8),
         Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   widget.message,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
@@ -558,45 +558,88 @@ class _IncomingBubbleState extends State<_IncomingBubble> {
                     height: 1.4,
                   ),
                 ),
-              ),
-              if (_translation != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  _translation!,
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 12,
-                    color: AppColors.ink.withValues(alpha: .65),
+                if (_busy) ...[
+                  const SizedBox(height: 8),
+                  const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
                   ),
-                ),
+                ] else if (_translation != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    _translation!,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                      fontStyle: FontStyle.italic,
+                      color: AppColors.ink.withValues(alpha: .78),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         const SizedBox(width: 6),
-        Column(
+        Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            IconButton(
-              visualDensity: VisualDensity.compact,
-              onPressed: _busy ? null : _translate,
-              icon: Icon(
-                Icons.translate_rounded,
-                size: 20,
-                color: AppColors.primary.withValues(alpha: .9),
-              ),
+            _ChatRoundIcon(
+              asset: AppAssets.writingTranslate,
+              color: AppColors.primary,
+              onTap: _busy ? null : _translate,
             ),
-            IconButton(
-              visualDensity: VisualDensity.compact,
-              onPressed: _speak,
-              icon: Icon(
-                Icons.volume_up_rounded,
-                size: 20,
-                color: AppColors.primary.withValues(alpha: .9),
-              ),
+            const SizedBox(width: 6),
+            _ChatRoundIcon(
+              asset: AppAssets.speaker,
+              color: AppColors.secondary,
+              onTap: _speak,
             ),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _ChatRoundIcon extends StatelessWidget {
+  const _ChatRoundIcon({
+    required this.asset,
+    required this.color,
+    this.onTap,
+  });
+
+  final String asset;
+  final Color color;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      shape: CircleBorder(side: BorderSide(color: color, width: 1.4)),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 34,
+          height: 34,
+          child: Center(
+            child: HomeAsset(
+              asset,
+              width: 16,
+              height: 16,
+              color: color,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

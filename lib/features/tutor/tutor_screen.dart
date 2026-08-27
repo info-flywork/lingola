@@ -17,6 +17,7 @@ import 'calling_screen.dart';
 import 'services/tutor_api_service.dart';
 import 'services/tutor_tts_service.dart';
 import 'tutor_filter_sheet.dart';
+import 'tutor_scene_theme.dart';
 
 class TutorScreen extends StatefulWidget {
   const TutorScreen({super.key});
@@ -87,9 +88,11 @@ class _TutorScreenState extends State<TutorScreen> {
           imagePath: tutor.image,
           riveAsset: tutor.riveAsset,
           riveCdnUrl: tutor.riveCdnUrl,
-          voiceId: tutor.voiceId,
-          backgroundGradientStart: tutor.theme?.gradientStart,
-          backgroundGradientEnd: tutor.theme?.gradientEnd,
+        voiceId: TutorVoiceIds.resolve(tutor.slug, preferred: tutor.voiceId),
+          backgroundGradientStart: tutor.theme?.gradientStart ??
+              TutorSceneTheme.gradientForSlug(tutor.slug)?.$1,
+          backgroundGradientEnd: tutor.theme?.gradientEnd ??
+              TutorSceneTheme.gradientForSlug(tutor.slug)?.$2,
           tutorSlug: tutor.slug,
         ),
       ),
@@ -134,14 +137,14 @@ class _TutorScreenState extends State<TutorScreen> {
       image: image,
       riveAsset: dto.remoteRiveUrl ?? AppAssets.tutorRiveCdn(dto.slug),
       riveCdnUrl: dto.remoteRiveUrl ?? AppAssets.tutorRiveCdn(dto.slug),
-      voiceId: dto.voiceId,
+      voiceId: TutorVoiceIds.resolve(dto.slug, preferred: dto.voiceId),
       flagAsset: dto.flagAssetPath?.trim().isNotEmpty == true
           ? dto.flagAssetPath
           : AppAssets.flagForTutorSlug(dto.slug),
       tags: dto.tagKeys
           .map((key) => _tagDisplayName(tags, key))
           .toList(growable: false),
-      theme: _themeFromDto(dto.theme),
+      theme: _themeFromDto(dto.theme, slug: dto.slug),
     );
   }
 
@@ -233,20 +236,28 @@ class _TutorScreenState extends State<TutorScreen> {
     }
   }
 
-  static TutorCardTheme? _themeFromDto(TutorThemeDto? theme) {
-    if (theme == null) return null;
-    final start = _parseHex(theme.gradientStart);
-    final end = _parseHex(theme.gradientEnd);
-    final button = _parseHex(theme.buttonColor);
-    final fg = _parseHex(theme.buttonForeground);
-    if (start == null || end == null || button == null || fg == null) {
-      return null;
+  static TutorCardTheme? _themeFromDto(TutorThemeDto? theme, {String? slug}) {
+    if (theme != null) {
+      final start = _parseHex(theme.gradientStart);
+      final end = _parseHex(theme.gradientEnd);
+      final button = _parseHex(theme.buttonColor);
+      final fg = _parseHex(theme.buttonForeground);
+      if (start != null && end != null && button != null && fg != null) {
+        return TutorCardTheme(
+          gradientStart: start,
+          gradientEnd: end,
+          buttonColor: button,
+          buttonForeground: fg,
+        );
+      }
     }
+    final fallback = TutorSceneTheme.gradientForSlug(slug);
+    if (fallback == null) return null;
     return TutorCardTheme(
-      gradientStart: start,
-      gradientEnd: end,
-      buttonColor: button,
-      buttonForeground: fg,
+      gradientStart: fallback.$1,
+      gradientEnd: fallback.$2,
+      buttonColor: fallback.$1,
+      buttonForeground: Colors.white,
     );
   }
 
@@ -447,6 +458,7 @@ class _TutorScreenState extends State<TutorScreen> {
       _TutorData(
         name: text.tutors.elena,
         slug: 'elena',
+        voiceId: TutorVoiceIds.female,
         image: AppAssets.tutorElena,
         riveAsset: AppAssets.tutorElenaRiv,
         flagAsset: AppAssets.flagEn,
@@ -464,6 +476,7 @@ class _TutorScreenState extends State<TutorScreen> {
       _TutorData(
         name: text.tutors.freya,
         slug: 'freya',
+        voiceId: TutorVoiceIds.female,
         image: AppAssets.tutorFreya,
         riveAsset: AppAssets.tutorFreyaRiv,
         flagAsset: AppAssets.flagDe,
@@ -472,6 +485,7 @@ class _TutorScreenState extends State<TutorScreen> {
       _TutorData(
         name: text.tutors.camila,
         slug: 'camila',
+        voiceId: TutorVoiceIds.female,
         image: AppAssets.tutorCamila,
         riveAsset: AppAssets.tutorCamilaRiv,
         flagAsset: AppAssets.flagEs,
@@ -498,6 +512,7 @@ class _TutorScreenState extends State<TutorScreen> {
       _TutorData(
         name: text.tutors.ines,
         slug: 'ines',
+        voiceId: TutorVoiceIds.female,
         image: AppAssets.tutorInes,
         riveAsset: AppAssets.tutorInesRiv,
         flagAsset: AppAssets.flagPt,
@@ -524,6 +539,7 @@ class _TutorScreenState extends State<TutorScreen> {
       _TutorData(
         name: text.tutors.amara,
         slug: 'amara',
+        voiceId: TutorVoiceIds.female,
         image: AppAssets.tutorAmara,
         riveAsset: AppAssets.tutorAmaraRiv,
         flagAsset: AppAssets.flagHi,
@@ -541,6 +557,7 @@ class _TutorScreenState extends State<TutorScreen> {
       _TutorData(
         name: text.tutors.katie,
         slug: 'katie',
+        voiceId: TutorVoiceIds.female,
         image: AppAssets.tutorKatie,
         riveAsset: AppAssets.tutorKatieRiv,
         flagAsset: AppAssets.flagEn,
@@ -586,6 +603,7 @@ class _TutorScreenState extends State<TutorScreen> {
       _TutorData(
         name: text.tutors.vaelen,
         slug: 'vaelen',
+        voiceId: TutorVoiceIds.female,
         image: AppAssets.tutorVaelen,
         riveAsset: AppAssets.tutorVaelenRiv,
         tags: [tags.calm, tags.ancientKnowledge],
@@ -717,7 +735,10 @@ class _TutorHeroState extends State<_TutorHero> {
     try {
       final file = await _tts.synthesizeToFile(
         "Hi, I'm ${widget.tutor.name}. Let's practice English together.",
-        voiceId: widget.tutor.voiceId ?? TutorVoiceIds.male,
+        voiceId: TutorVoiceIds.resolve(
+          widget.tutor.slug,
+          preferred: widget.tutor.voiceId,
+        ),
       );
       await _player.setPlaybackRate(_playbackRate);
       await _player.play(DeviceFileSource(file.path));
