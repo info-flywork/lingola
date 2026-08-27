@@ -10,12 +10,14 @@ class UserAvatar extends StatelessWidget {
     required this.size,
     this.avatarUrl,
     this.displayName,
+    this.showPremiumBadge = false,
     super.key,
   });
 
   final double size;
   final String? avatarUrl;
   final String? displayName;
+  final bool showPremiumBadge;
 
   static const _networkHeaders = {
     // Google / CDN fotoğrafları User-Agent olmadan 403 verebiliyor.
@@ -38,7 +40,7 @@ class UserAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final url = avatarUrl?.trim() ?? '';
-    return ClipOval(
+    final avatar = ClipOval(
       child: SizedBox(
         width: size,
         height: size,
@@ -57,6 +59,38 @@ class UserAvatar extends StatelessWidget {
                 },
               )
             : _fallback(),
+      ),
+    );
+
+    if (!showPremiumBadge) return avatar;
+
+    final badge = (size * 0.38).clamp(14.0, 22.0);
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          avatar,
+          Positioned(
+            right: -2,
+            bottom: -2,
+            child: Container(
+              width: badge,
+              height: badge,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 1.5),
+              ),
+              padding: EdgeInsets.all(badge * 0.18),
+              child: const HomeAsset(
+                AppAssets.homePremiumCrown,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

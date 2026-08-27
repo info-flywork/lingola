@@ -662,10 +662,9 @@ class _AnswerCard extends StatelessWidget {
                 onTap: busy ? null : onHint,
                 active: hintActive,
                 child: HomeAsset(
-                  AppAssets.hint,
+                  hintActive ? AppAssets.hintOn : AppAssets.hint,
                   width: 22,
                   height: 22,
-                  color: hintActive ? AppColors.primary : null,
                 ),
               ),
               const Spacer(),

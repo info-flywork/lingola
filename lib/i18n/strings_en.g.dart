@@ -666,6 +666,9 @@ class Translations$wordPracticePage$en {
 	/// en: 'Save'
 	String get save => 'Save';
 
+	/// en: 'Saved'
+	String get saved => 'Saved';
+
 	/// en: 'Listen'
 	String get listen => 'Listen';
 
@@ -1070,6 +1073,18 @@ class Translations$notificationsPage$en {
 	/// en: 'Notifications'
 	String get title => 'Notifications';
 
+	/// en: 'Are you sure?'
+	String get deleteConfirmTitle => 'Are you sure?';
+
+	/// en: 'This notification will be deleted.'
+	String get deleteConfirmBody => 'This notification will be deleted.';
+
+	/// en: 'Delete'
+	String get delete => 'Delete';
+
+	/// en: 'Cancel'
+	String get cancel => 'Cancel';
+
 	late final Translations$notificationsPage$translation$en translation = Translations$notificationsPage$translation$en._(_root);
 	late final Translations$notificationsPage$offer$en offer = Translations$notificationsPage$offer$en._(_root);
 	late final Translations$notificationsPage$stories$en stories = Translations$notificationsPage$stories$en._(_root);
@@ -1219,6 +1234,12 @@ class Translations$profilePage$en {
 
 	/// en: 'Passive'
 	String get passive => 'Passive';
+
+	/// en: 'Active'
+	String get active => 'Active';
+
+	/// en: 'Premium'
+	String get premiumVersion => 'Premium';
 
 	/// en: 'Share Friend'
 	String get shareFriend => 'Share Friend';
@@ -1440,8 +1461,8 @@ class Translations$home$premium$en {
 	/// en: '40% off with annual purchase'
 	String get discount => '40% off with annual purchase';
 
-	/// en: 'Start'
-	String get cta => 'Start';
+	/// en: 'Get Started'
+	String get cta => 'Get Started';
 }
 
 // Path: tutorPage.tutors
@@ -2542,7 +2563,7 @@ extension on Translations {
 			'home.premium.priceAmount' => '1.99\$',
 			'home.premium.pricePeriod' => '/mo',
 			'home.premium.discount' => '40% off with annual purchase',
-			'home.premium.cta' => 'Start',
+			'home.premium.cta' => 'Get Started',
 			'libraryPage.title' => 'Library',
 			'libraryPage.searchWord' => 'Search Word',
 			'libraryPage.savedWordCount' => ({required Object count}) => '${count} Saved Word',
@@ -2552,6 +2573,7 @@ extension on Translations {
 			'wordPracticePage.title' => 'Word Practice',
 			'wordPracticePage.turkish' => 'TURKISH',
 			'wordPracticePage.save' => 'Save',
+			'wordPracticePage.saved' => 'Saved',
 			'wordPracticePage.listen' => 'Listen',
 			'wordPracticePage.hint' => 'Hint',
 			'wordPracticePage.previous' => 'PREVIOUS',
@@ -2871,9 +2893,9 @@ extension on Translations {
 			'lessonPage.levels.c1.lessons.5' => 'Time travel',
 			'lessonPage.levels.c1.lessons.6' => 'Possessions',
 			'lessonPage.levels.c1.lessons.7' => 'Job skills',
-			'lessonPage.levels.c1.lessons.8' => 'Historical changes',
 			_ => null,
 		} ?? switch (path) {
+			'lessonPage.levels.c1.lessons.8' => 'Historical changes',
 			'lessonPage.levels.c1.lessons.9' => 'Review writing',
 			'lessonPage.levels.c1.lessons.10' => 'Mysteries',
 			'lessonPage.levels.c1.lessons.11' => 'Strange theories',
@@ -2968,6 +2990,10 @@ extension on Translations {
 			'pushNotifications.h24.3' => 'Continue whenever you want.',
 			'pushNotifications.h24.4' => 'Language won\'t run away — neither will we.',
 			'notificationsPage.title' => 'Notifications',
+			'notificationsPage.deleteConfirmTitle' => 'Are you sure?',
+			'notificationsPage.deleteConfirmBody' => 'This notification will be deleted.',
+			'notificationsPage.delete' => 'Delete',
+			'notificationsPage.cancel' => 'Cancel',
 			'notificationsPage.translation.title' => 'New Translation Ready',
 			'notificationsPage.translation.body' => 'Your audio translation file has been successfully converted to text and translated.',
 			'notificationsPage.offer.title' => 'A Special Offer Awaits You',
@@ -3025,6 +3051,8 @@ extension on Translations {
 			'profilePage.selectLanguageTitle' => 'Select Language',
 			'profilePage.premium' => 'Premium',
 			'profilePage.passive' => 'Passive',
+			'profilePage.active' => 'Active',
+			'profilePage.premiumVersion' => 'Premium',
 			'profilePage.shareFriend' => 'Share Friend',
 			'profilePage.shareWithFriendTitle' => 'Share with Friend',
 			'profilePage.shareInviteBody' => 'Invite your friends and enjoy translate together',

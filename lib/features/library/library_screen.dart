@@ -185,6 +185,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
     setState(() {
       _savedWords = _savedWords.where((item) => item.id != word.id).toList();
       _savedCount = (_savedCount - 1).clamp(0, 1 << 30);
+      _dictWords = [
+        for (final w in _dictWords)
+          if (w.id == word.id) w.copyWith(saved: false) else w,
+      ];
     });
     try {
       await PracticeService.unsaveWord(word.id);
@@ -196,6 +200,46 @@ class _LibraryScreenState extends State<LibraryScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not remove: $err')),
+      );
+    }
+  }
+
+  Future<void> _toggleDictFavorite(DictionaryWord word) async {
+    final next = !word.saved;
+    setState(() {
+      _dictWords = [
+        for (final w in _dictWords)
+          if (w.id == word.id) w.copyWith(saved: next) else w,
+      ];
+      if (next) {
+        _savedCount += 1;
+      } else {
+        _savedCount = (_savedCount - 1).clamp(0, 1 << 30);
+        _savedWords =
+            _savedWords.where((item) => item.id != word.id).toList();
+      }
+    });
+    try {
+      if (next) {
+        await PracticeService.saveWord(word.id);
+      } else {
+        await PracticeService.unsaveWord(word.id);
+      }
+    } catch (err) {
+      if (!mounted) return;
+      setState(() {
+        _dictWords = [
+          for (final w in _dictWords)
+            if (w.id == word.id) w.copyWith(saved: word.saved) else w,
+        ];
+        if (next) {
+          _savedCount = (_savedCount - 1).clamp(0, 1 << 30);
+        } else {
+          _savedCount += 1;
+        }
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not update favorite: $err')),
       );
     }
   }
@@ -434,10 +478,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
         }
         final item = _dictWords[index];
         return _LibraryWordCard(
-          key: ValueKey('dict-${item.id}'),
+          key: ValueKey('dict-${item.id}-${item.saved}'),
           word: item.word,
           translation: item.translation,
           allowDelete: false,
+          showFavorite: true,
+          isFavorite: item.saved,
+          onFavorite: () => unawaited(_toggleDictFavorite(item)),
           onDelete: () {},
         );
       },
@@ -535,12 +582,18 @@ class _LibraryWordCard extends StatefulWidget {
     required this.translation,
     required this.onDelete,
     this.allowDelete = true,
+    this.showFavorite = false,
+    this.isFavorite = false,
+    this.onFavorite,
   });
 
   final String word;
   final String translation;
   final VoidCallback onDelete;
   final bool allowDelete;
+  final bool showFavorite;
+  final bool isFavorite;
+  final VoidCallback? onFavorite;
 
   @override
   State<_LibraryWordCard> createState() => _LibraryWordCardState();
@@ -632,6 +685,9 @@ class _LibraryWordCardState extends State<_LibraryWordCard>
                 child: _WordCardBody(
                   word: widget.word,
                   translation: widget.translation,
+                  showFavorite: widget.showFavorite,
+                  isFavorite: widget.isFavorite,
+                  onFavorite: widget.onFavorite,
                 ),
               ),
             ),
@@ -684,10 +740,18 @@ class _WordCardBody extends StatelessWidget {
   const _WordCardBody({
     required this.word,
     required this.translation,
+    this.showFavorite = false,
+    this.isFavorite = false,
+    this.onFavorite,
   });
 
   final String word;
   final String translation;
+  final bool showFavorite;
+  final bool isFavorite;
+  final VoidCallback? onFavorite;
+
+  static const _heartRed = Color(0xFFFF383C);
 
   @override
   Widget build(BuildContext context) {
@@ -699,30 +763,61 @@ class _WordCardBody extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.black.withValues(alpha: .10)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            word,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 14,
-              height: 18 / 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.ink,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  word,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    height: 18 / 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.ink,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  translation,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 12,
+                    height: 16 / 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.secondary,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            translation,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12,
-              height: 16 / 12,
-              fontWeight: FontWeight.w500,
-              color: AppColors.secondary,
+          if (showFavorite) ...[
+            const SizedBox(width: 8),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onFavorite,
+                borderRadius: BorderRadius.circular(99),
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: isFavorite
+                      ? const Icon(
+                          Icons.favorite_rounded,
+                          size: 22,
+                          color: _heartRed,
+                        )
+                      : const HomeAsset(
+                          AppAssets.heart,
+                          width: 22,
+                          height: 22,
+                        ),
+                ),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

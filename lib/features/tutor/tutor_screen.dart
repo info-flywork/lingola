@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/premium/premium_service.dart';
 import '../../core/rive/rive_preload_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
@@ -74,7 +75,11 @@ class _TutorScreenState extends State<TutorScreen> {
     );
   }
 
-  void _openCalling(_TutorData tutor) {
+  void _openCalling(_TutorData tutor) async {
+    if (!await PremiumService.requireTutorOrPaywall(context, tutor.slug)) {
+      return;
+    }
+    if (!mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => CallingScreen(

@@ -117,7 +117,11 @@ class _CallingScreenState extends State<CallingScreen> {
     _conversation
       ..addListener(_onConvo)
       ..onRequestEndLesson = () {
-        unawaited(_endLessonAndPop());
+        if (widget.lessonSegmentMode) {
+          unawaited(_endLessonAndPop());
+        } else {
+          _popSession(finish: false);
+        }
       }
       ..onSegmentContinued = _resetSegmentClock;
     unawaited(_conversation.start());
@@ -186,13 +190,21 @@ class _CallingScreenState extends State<CallingScreen> {
   }
 
   Future<void> _endLessonAndPop() async {
-    if (_lessonEnding || !mounted || !widget.lessonSegmentMode) return;
-    _lessonEnding = true;
+    if (_lessonEnding || !mounted) return;
+    if (widget.lessonSegmentMode) {
+      _lessonEnding = true;
+      while (_conversation.speaking && mounted) {
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+      }
+      if (!mounted) return;
+      _popSession(finish: true);
+      return;
+    }
     while (_conversation.speaking && mounted) {
       await Future<void>.delayed(const Duration(milliseconds: 80));
     }
     if (!mounted) return;
-    _popSession(finish: true);
+    _popSession(finish: false);
   }
 
   void _finishLessonManually() {

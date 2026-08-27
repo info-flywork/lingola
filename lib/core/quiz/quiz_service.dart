@@ -91,12 +91,14 @@ class QuizSpeakingPrompt {
     required this.id,
     required this.promptEn,
     required this.promptNative,
+    required this.exampleAnswerEn,
     required this.keywords,
   });
 
   final String id;
   final String promptEn;
   final String promptNative;
+  final String exampleAnswerEn;
   final List<String> keywords;
 
   factory QuizSpeakingPrompt.fromJson(Map<String, dynamic> json) {
@@ -105,6 +107,7 @@ class QuizSpeakingPrompt {
       id: json['id'] as String? ?? '',
       promptEn: json['promptEn'] as String? ?? '',
       promptNative: json['promptNative'] as String? ?? '',
+      exampleAnswerEn: json['exampleAnswerEn'] as String? ?? '',
       keywords: keywords is List
           ? keywords.map((e) => e.toString()).toList()
           : const [],

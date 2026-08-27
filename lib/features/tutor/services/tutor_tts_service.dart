@@ -120,6 +120,8 @@ class TutorTtsService {
     }
     if (cues.isEmpty) {
       cues = heuristicVisemesFromText(text.trim());
+    } else {
+      cues = coalesceVisemes(cues);
     }
 
     // Boş track cache'leme — bir sonraki sefer heuristic/API denensin.
@@ -169,7 +171,7 @@ class TutorTtsService {
 
   String _cacheKey(String text, {String? voiceId, required String modelId}) {
     final voice = _resolveVoiceId(voiceId);
-    final raw = 'lipsync|$voice|$modelId|${text.trim()}';
+    final raw = 'lipsync|v4|$voice|$modelId|${text.trim()}';
     return sha1.convert(utf8.encode(raw)).toString();
   }
 

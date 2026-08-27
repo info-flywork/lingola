@@ -346,6 +346,7 @@ class _Translations$wordPracticePage$tr implements Translations$wordPracticePage
 	@override String get title => 'Kelime Pratiği';
 	@override String get turkish => 'TÜRKÇE';
 	@override String get save => 'Kaydet';
+	@override String get saved => 'Kaydedildi';
 	@override String get listen => 'Dinle';
 	@override String get hint => 'İpucu';
 	@override String get previous => 'ÖNCEKİ';
@@ -545,6 +546,10 @@ class _Translations$notificationsPage$tr implements Translations$notificationsPa
 
 	// Translations
 	@override String get title => 'Bildirimler';
+	@override String get deleteConfirmTitle => 'Emin misiniz?';
+	@override String get deleteConfirmBody => 'Bu bildirim silinecek.';
+	@override String get delete => 'Sil';
+	@override String get cancel => 'İptal';
 	@override late final _Translations$notificationsPage$translation$tr translation = _Translations$notificationsPage$translation$tr._(_root);
 	@override late final _Translations$notificationsPage$offer$tr offer = _Translations$notificationsPage$offer$tr._(_root);
 	@override late final _Translations$notificationsPage$stories$tr stories = _Translations$notificationsPage$stories$tr._(_root);
@@ -603,6 +608,8 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get selectLanguageTitle => 'Dil Seç';
 	@override String get premium => 'Premium';
 	@override String get passive => 'Pasif';
+	@override String get active => 'Aktif';
+	@override String get premiumVersion => 'Premium';
 	@override String get shareFriend => 'Arkadaşla Paylaş';
 	@override String get shareWithFriendTitle => 'Arkadaşla Paylaş';
 	@override String get shareInviteBody => 'Arkadaşlarını davet et ve birlikte çeviri yapmanın tadını çıkar.';
@@ -701,7 +708,7 @@ class _Translations$home$premium$tr implements Translations$home$premium$en {
 	@override String get priceAmount => '1.99\$';
 	@override String get pricePeriod => '/ay';
 	@override String get discount => 'Yıllık satın alımlarda %40 indirim';
-	@override String get cta => 'Başla';
+	@override String get cta => 'Başlayın';
 }
 
 // Path: tutorPage.tutors
@@ -1555,7 +1562,7 @@ extension on TranslationsTr {
 			'home.premium.priceAmount' => '1.99\$',
 			'home.premium.pricePeriod' => '/ay',
 			'home.premium.discount' => 'Yıllık satın alımlarda %40 indirim',
-			'home.premium.cta' => 'Başla',
+			'home.premium.cta' => 'Başlayın',
 			'libraryPage.title' => 'Kütüphane',
 			'libraryPage.searchWord' => 'Kelime Ara',
 			'libraryPage.savedWordCount' => ({required Object count}) => '${count} Kaydedilmiş Kelime',
@@ -1565,6 +1572,7 @@ extension on TranslationsTr {
 			'wordPracticePage.title' => 'Kelime Pratiği',
 			'wordPracticePage.turkish' => 'TÜRKÇE',
 			'wordPracticePage.save' => 'Kaydet',
+			'wordPracticePage.saved' => 'Kaydedildi',
 			'wordPracticePage.listen' => 'Dinle',
 			'wordPracticePage.hint' => 'İpucu',
 			'wordPracticePage.previous' => 'ÖNCEKİ',
@@ -1884,9 +1892,9 @@ extension on TranslationsTr {
 			'lessonPage.levels.c1.lessons.5' => 'Zaman yolculuğu',
 			'lessonPage.levels.c1.lessons.6' => 'Mülkler',
 			'lessonPage.levels.c1.lessons.7' => 'İş becerileri',
-			'lessonPage.levels.c1.lessons.8' => 'Tarihsel değişimler',
 			_ => null,
 		} ?? switch (path) {
+			'lessonPage.levels.c1.lessons.8' => 'Tarihsel değişimler',
 			'lessonPage.levels.c1.lessons.9' => 'Gözden geçirme yazımı',
 			'lessonPage.levels.c1.lessons.10' => 'Gizemler',
 			'lessonPage.levels.c1.lessons.11' => 'Garip teoriler',
@@ -1981,6 +1989,10 @@ extension on TranslationsTr {
 			'pushNotifications.h24.3' => 'Ne zaman istersen devam edebilirsin.',
 			'pushNotifications.h24.4' => 'Dil kaçmaz, biz de.',
 			'notificationsPage.title' => 'Bildirimler',
+			'notificationsPage.deleteConfirmTitle' => 'Emin misiniz?',
+			'notificationsPage.deleteConfirmBody' => 'Bu bildirim silinecek.',
+			'notificationsPage.delete' => 'Sil',
+			'notificationsPage.cancel' => 'İptal',
 			'notificationsPage.translation.title' => 'Yeni Çeviri Hazır',
 			'notificationsPage.translation.body' => 'Sesli çeviri dosyanız başarıyla metne dönüştürüldü ve çevrildi.',
 			'notificationsPage.offer.title' => 'Sizi Bekleyen Özel Bir Teklif Var',
@@ -2038,6 +2050,8 @@ extension on TranslationsTr {
 			'profilePage.selectLanguageTitle' => 'Dil Seç',
 			'profilePage.premium' => 'Premium',
 			'profilePage.passive' => 'Pasif',
+			'profilePage.active' => 'Aktif',
+			'profilePage.premiumVersion' => 'Premium',
 			'profilePage.shareFriend' => 'Arkadaşla Paylaş',
 			'profilePage.shareWithFriendTitle' => 'Arkadaşla Paylaş',
 			'profilePage.shareInviteBody' => 'Arkadaşlarını davet et ve birlikte çeviri yapmanın tadını çıkar.',

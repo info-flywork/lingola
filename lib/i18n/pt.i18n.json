@@ -226,6 +226,7 @@
     "title": "Prática de Palavras",
     "turkish": "TURCO",
     "save": "Salvar",
+    "saved": "Salvo",
     "listen": "Ouvir",
     "hint": "Dica",
     "previous": "ANTERIOR",
@@ -677,6 +678,10 @@
   },
   "notificationsPage": {
     "title": "Notificações",
+    "deleteConfirmTitle": "Tem certeza?",
+    "deleteConfirmBody": "Esta notificação será excluída.",
+    "delete": "Excluir",
+    "cancel": "Cancelar",
     "translation": {
       "title": "Nova Tradução Pronta",
       "body": "Seu arquivo de tradução de áudio foi convertido com sucesso em texto e traduzido."
@@ -744,6 +749,8 @@
     "selectLanguageTitle": "Selecionar Idioma",
     "premium": "Premium",
     "passive": "Passivo",
+    "active": "Ativo",
+    "premiumVersion": "Premium",
     "shareFriend": "Compartilhar com Amigo",
     "shareWithFriendTitle": "Compartilhar com Amigo",
     "shareInviteBody": "Convide seus amigos e aproveitem a tradução juntos",

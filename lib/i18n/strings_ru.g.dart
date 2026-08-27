@@ -346,6 +346,7 @@ class _Translations$wordPracticePage$ru implements Translations$wordPracticePage
 	@override String get title => 'Практика слов';
 	@override String get turkish => 'ТУРЕЦКИЙ';
 	@override String get save => 'Сохранить';
+	@override String get saved => 'Сохранено';
 	@override String get listen => 'Слушать';
 	@override String get hint => 'Подсказка';
 	@override String get previous => 'ПРЕДЫДУЩИЙ';
@@ -507,6 +508,10 @@ class _Translations$notificationsPage$ru implements Translations$notificationsPa
 
 	// Translations
 	@override String get title => 'Уведомления';
+	@override String get deleteConfirmTitle => 'Вы уверены?';
+	@override String get deleteConfirmBody => 'Это уведомление будет удалено.';
+	@override String get delete => 'Удалить';
+	@override String get cancel => 'Отмена';
 	@override late final _Translations$notificationsPage$translation$ru translation = _Translations$notificationsPage$translation$ru._(_root);
 	@override late final _Translations$notificationsPage$offer$ru offer = _Translations$notificationsPage$offer$ru._(_root);
 	@override late final _Translations$notificationsPage$stories$ru stories = _Translations$notificationsPage$stories$ru._(_root);
@@ -565,6 +570,8 @@ class _Translations$profilePage$ru implements Translations$profilePage$en {
 	@override String get selectLanguageTitle => 'Выбрать язык';
 	@override String get premium => 'Премиум';
 	@override String get passive => 'Пассивный';
+	@override String get active => 'Активен';
+	@override String get premiumVersion => 'Premium';
 	@override String get shareFriend => 'Поделиться с другом';
 	@override String get shareWithFriendTitle => 'Поделиться с другом';
 	@override String get shareInviteBody => 'Пригласи своих друзей и наслаждайтесь переводом вместе';
@@ -1565,6 +1572,7 @@ extension on TranslationsRu {
 			'wordPracticePage.title' => 'Практика слов',
 			'wordPracticePage.turkish' => 'ТУРЕЦКИЙ',
 			'wordPracticePage.save' => 'Сохранить',
+			'wordPracticePage.saved' => 'Сохранено',
 			'wordPracticePage.listen' => 'Слушать',
 			'wordPracticePage.hint' => 'Подсказка',
 			'wordPracticePage.previous' => 'ПРЕДЫДУЩИЙ',
@@ -1884,9 +1892,9 @@ extension on TranslationsRu {
 			'lessonPage.levels.c1.lessons.5' => 'Путешествия во времени',
 			'lessonPage.levels.c1.lessons.6' => 'Имущество',
 			'lessonPage.levels.c1.lessons.7' => 'Навыки работы',
-			'lessonPage.levels.c1.lessons.8' => 'Исторические изменения',
 			_ => null,
 		} ?? switch (path) {
+			'lessonPage.levels.c1.lessons.8' => 'Исторические изменения',
 			'lessonPage.levels.c1.lessons.9' => 'Написание отзывов',
 			'lessonPage.levels.c1.lessons.10' => 'Тайны',
 			'lessonPage.levels.c1.lessons.11' => 'Странные теории',
@@ -1960,6 +1968,10 @@ extension on TranslationsRu {
 			'rolePlayPage.interview.chat.incoming2Rest' => '. Расскажите о недавнем проекте, которым вы гордитесь.',
 			'rolePlayPage.interview.chat.botReply' => 'Это впечатляет. Какие у вас есть вопросы о роли?',
 			'notificationsPage.title' => 'Уведомления',
+			'notificationsPage.deleteConfirmTitle' => 'Вы уверены?',
+			'notificationsPage.deleteConfirmBody' => 'Это уведомление будет удалено.',
+			'notificationsPage.delete' => 'Удалить',
+			'notificationsPage.cancel' => 'Отмена',
 			'notificationsPage.translation.title' => 'Новая перевод готова',
 			'notificationsPage.translation.body' => 'Ваш аудиофайл перевода успешно преобразован в текст и переведен.',
 			'notificationsPage.offer.title' => 'Вас ждет специальное предложение',
@@ -2017,6 +2029,8 @@ extension on TranslationsRu {
 			'profilePage.selectLanguageTitle' => 'Выбрать язык',
 			'profilePage.premium' => 'Премиум',
 			'profilePage.passive' => 'Пассивный',
+			'profilePage.active' => 'Активен',
+			'profilePage.premiumVersion' => 'Premium',
 			'profilePage.shareFriend' => 'Поделиться с другом',
 			'profilePage.shareWithFriendTitle' => 'Поделиться с другом',
 			'profilePage.shareInviteBody' => 'Пригласи своих друзей и наслаждайтесь переводом вместе',

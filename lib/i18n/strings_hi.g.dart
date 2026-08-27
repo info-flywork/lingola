@@ -346,6 +346,7 @@ class _Translations$wordPracticePage$hi implements Translations$wordPracticePage
 	@override String get title => 'शब्द अभ्यास';
 	@override String get turkish => 'तुर्की';
 	@override String get save => 'सहेजें';
+	@override String get saved => 'सहेजा गया';
 	@override String get listen => 'सुनें';
 	@override String get hint => 'संकेत';
 	@override String get previous => 'पिछला';
@@ -507,6 +508,10 @@ class _Translations$notificationsPage$hi implements Translations$notificationsPa
 
 	// Translations
 	@override String get title => 'सूचनाएँ';
+	@override String get deleteConfirmTitle => 'क्या आप सुनिश्चित हैं?';
+	@override String get deleteConfirmBody => 'यह सूचना हटा दी जाएगी।';
+	@override String get delete => 'हटाएँ';
+	@override String get cancel => 'रद्द करें';
 	@override late final _Translations$notificationsPage$translation$hi translation = _Translations$notificationsPage$translation$hi._(_root);
 	@override late final _Translations$notificationsPage$offer$hi offer = _Translations$notificationsPage$offer$hi._(_root);
 	@override late final _Translations$notificationsPage$stories$hi stories = _Translations$notificationsPage$stories$hi._(_root);
@@ -565,6 +570,8 @@ class _Translations$profilePage$hi implements Translations$profilePage$en {
 	@override String get selectLanguageTitle => 'भाषा चुनें';
 	@override String get premium => 'प्रीमियम';
 	@override String get passive => 'निष्क्रिय';
+	@override String get active => 'सक्रिय';
+	@override String get premiumVersion => 'Premium';
 	@override String get shareFriend => 'मित्र को साझा करें';
 	@override String get shareWithFriendTitle => 'मित्र के साथ साझा करें';
 	@override String get shareInviteBody => 'अपने दोस्तों को आमंत्रित करें और एक साथ अनुवाद का आनंद लें';
@@ -1565,6 +1572,7 @@ extension on TranslationsHi {
 			'wordPracticePage.title' => 'शब्द अभ्यास',
 			'wordPracticePage.turkish' => 'तुर्की',
 			'wordPracticePage.save' => 'सहेजें',
+			'wordPracticePage.saved' => 'सहेजा गया',
 			'wordPracticePage.listen' => 'सुनें',
 			'wordPracticePage.hint' => 'संकेत',
 			'wordPracticePage.previous' => 'पिछला',
@@ -1884,9 +1892,9 @@ extension on TranslationsHi {
 			'lessonPage.levels.c1.lessons.5' => 'समय यात्रा',
 			'lessonPage.levels.c1.lessons.6' => 'संपत्ति',
 			'lessonPage.levels.c1.lessons.7' => 'नौकरी के कौशल',
-			'lessonPage.levels.c1.lessons.8' => 'ऐतिहासिक परिवर्तन',
 			_ => null,
 		} ?? switch (path) {
+			'lessonPage.levels.c1.lessons.8' => 'ऐतिहासिक परिवर्तन',
 			'lessonPage.levels.c1.lessons.9' => 'समीक्षा लेखन',
 			'lessonPage.levels.c1.lessons.10' => 'रहस्य',
 			'lessonPage.levels.c1.lessons.11' => 'अजीब सिद्धांत',
@@ -1960,6 +1968,10 @@ extension on TranslationsHi {
 			'rolePlayPage.interview.chat.incoming2Rest' => '. मुझे एक हालिया परियोजना के बारे में बताएं जिस पर आपको गर्व है।',
 			'rolePlayPage.interview.chat.botReply' => 'यह प्रभावशाली है। आपके पास भूमिका के बारे में क्या प्रश्न हैं?',
 			'notificationsPage.title' => 'सूचनाएँ',
+			'notificationsPage.deleteConfirmTitle' => 'क्या आप सुनिश्चित हैं?',
+			'notificationsPage.deleteConfirmBody' => 'यह सूचना हटा दी जाएगी।',
+			'notificationsPage.delete' => 'हटाएँ',
+			'notificationsPage.cancel' => 'रद्द करें',
 			'notificationsPage.translation.title' => 'नई अनुवाद तैयार है',
 			'notificationsPage.translation.body' => 'आपकी ऑडियो अनुवाद फ़ाइल को सफलतापूर्वक टेक्स्ट में परिवर्तित किया गया है और अनुवादित किया गया है।',
 			'notificationsPage.offer.title' => 'आपके लिए एक विशेष प्रस्ताव है',
@@ -2017,6 +2029,8 @@ extension on TranslationsHi {
 			'profilePage.selectLanguageTitle' => 'भाषा चुनें',
 			'profilePage.premium' => 'प्रीमियम',
 			'profilePage.passive' => 'निष्क्रिय',
+			'profilePage.active' => 'सक्रिय',
+			'profilePage.premiumVersion' => 'Premium',
 			'profilePage.shareFriend' => 'मित्र को साझा करें',
 			'profilePage.shareWithFriendTitle' => 'मित्र के साथ साझा करें',
 			'profilePage.shareInviteBody' => 'अपने दोस्तों को आमंत्रित करें और एक साथ अनुवाद का आनंद लें',

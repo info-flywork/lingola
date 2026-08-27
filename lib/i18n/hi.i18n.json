@@ -226,6 +226,7 @@
     "title": "शब्द अभ्यास",
     "turkish": "तुर्की",
     "save": "सहेजें",
+    "saved": "सहेजा गया",
     "listen": "सुनें",
     "hint": "संकेत",
     "previous": "पिछला",
@@ -677,6 +678,10 @@
   },
   "notificationsPage": {
     "title": "सूचनाएँ",
+    "deleteConfirmTitle": "क्या आप सुनिश्चित हैं?",
+    "deleteConfirmBody": "यह सूचना हटा दी जाएगी।",
+    "delete": "हटाएँ",
+    "cancel": "रद्द करें",
     "translation": {
       "title": "नई अनुवाद तैयार है",
       "body": "आपकी ऑडियो अनुवाद फ़ाइल को सफलतापूर्वक टेक्स्ट में परिवर्तित किया गया है और अनुवादित किया गया है।"
@@ -744,6 +749,8 @@
     "selectLanguageTitle": "भाषा चुनें",
     "premium": "प्रीमियम",
     "passive": "निष्क्रिय",
+    "active": "सक्रिय",
+    "premiumVersion": "Premium",
     "shareFriend": "मित्र को साझा करें",
     "shareWithFriendTitle": "मित्र के साथ साझा करें",
     "shareInviteBody": "अपने दोस्तों को आमंत्रित करें और एक साथ अनुवाद का आनंद लें",

@@ -10,12 +10,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/quiz/quiz_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
+import '../tutor/services/tutor_tts_service.dart';
 
 class ReadingTestScreen extends StatefulWidget {
   const ReadingTestScreen({super.key});
@@ -33,13 +35,15 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
   final _speech = SpeechToText();
   final _recorder = AudioRecorder();
   final _player = AudioPlayer();
+  final _tts = TutorTtsService();
 
   var _words = <_ReadingWord>[];
   var _loading = true;
   String? _error;
   var _index = 0;
   var _saved = false;
-  var _hintVisible = true;
+  var _hintActive = false;
+  var _hintPlaying = false;
   var _isRecording = false;
   var _isPlaying = false;
   var _showRecordingBar = false;
@@ -136,7 +140,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
           _index = 0;
         }
         _saved = false;
-        _hintVisible = true;
+        _hintActive = false;
         _loading = false;
         _error = mapped.isEmpty ? 'No words found' : null;
         _resetRecorderForWord();
@@ -165,6 +169,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
     _speech.stop();
     _recorder.dispose();
     _player.dispose();
+    _tts.dispose();
     super.dispose();
   }
 
@@ -195,7 +200,8 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
     _ticker = null;
     _playbackTicker = null;
     _amplitudeSub = null;
-    _player.stop();
+    unawaited(_player.stop());
+    final oldPath = _recordingPath;
     _isRecording = false;
     _isPlaying = false;
     _showRecordingBar = false;
@@ -206,6 +212,64 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
     _levels = List<double>.filled(48, 0.12);
     _heardText = '';
     _recordingPath = null;
+    if (oldPath != null) {
+      try {
+        final file = File(oldPath);
+        if (file.existsSync()) {
+          unawaited(file.delete());
+        }
+      } catch (_) {}
+    }
+  }
+
+  Future<void> _onTryAgain() async {
+    try {
+      if (await _recorder.isRecording()) {
+        await _recorder.stop();
+      }
+    } catch (_) {}
+    if (_speech.isListening) {
+      await _speech.stop();
+    }
+    if (!mounted) return;
+    setState(_resetRecorderForWord);
+  }
+
+  Future<void> _onToggleHint() async {
+    final next = !_hintActive;
+    setState(() => _hintActive = next);
+    if (!next) {
+      await _player.stop();
+      return;
+    }
+    await _playHintAudio();
+  }
+
+  Future<void> _playHintAudio() async {
+    final card = _current;
+    if (card == null || _hintPlaying) return;
+    final speakText =
+        card.word.trim().isNotEmpty ? card.word.trim() : card.exampleEn.trim();
+    if (speakText.isEmpty) return;
+
+    setState(() => _hintPlaying = true);
+    try {
+      final file = await _tts.synthesizeToFile(
+        speakText,
+        voiceId: TutorVoiceIds.female,
+        modelId: TutorTtsService.flashModel,
+      );
+      if (!mounted || !_hintActive) return;
+      await _player.stop();
+      await _player.play(DeviceFileSource(file.path));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppText.current.common.genericError)),
+      );
+    } finally {
+      if (mounted) setState(() => _hintPlaying = false);
+    }
   }
 
   Future<void> _goPrevious() async {
@@ -215,7 +279,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
     setState(() {
       _index -= 1;
       _saved = false;
-      _hintVisible = true;
+      _hintActive = false;
       _resetRecorderForWord();
     });
   }
@@ -232,7 +296,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
     setState(() {
       _index += 1;
       _saved = false;
-      _hintVisible = true;
+      _hintActive = false;
       _resetRecorderForWord();
     });
   }
@@ -525,7 +589,9 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
       title: text.failedTitle,
       body: text.failedBody,
       buttonLabel: text.tryAgain,
-      onPressed: _resetRecorderForWord,
+      onPressed: () {
+        unawaited(_onTryAgain());
+      },
     );
   }
 
@@ -697,15 +763,16 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
                       _ReadingCard(
                         word: _current!,
                         languageLabel: practice.turkish,
-                        hintVisible: _hintVisible,
+                        hintActive: _hintActive,
                         saved: _saved,
                         saveLabel: practice.save,
                         readLabel: quiz.read,
                         hintLabel: practice.hint,
                         onSave: () => setState(() => _saved = !_saved),
                         onRead: _toggleRead,
-                        onHint: () =>
-                            setState(() => _hintVisible = !_hintVisible),
+                        onHint: () {
+                          unawaited(_onToggleHint());
+                        },
                         saveRed: _saveRed,
                         saveBg: _saveBg,
                         chipText: _chipText,
@@ -790,7 +857,7 @@ class _ReadingCard extends StatelessWidget {
   const _ReadingCard({
     required this.word,
     required this.languageLabel,
-    required this.hintVisible,
+    required this.hintActive,
     required this.saved,
     required this.saveLabel,
     required this.readLabel,
@@ -807,7 +874,7 @@ class _ReadingCard extends StatelessWidget {
 
   final _ReadingWord word;
   final String languageLabel;
-  final bool hintVisible;
+  final bool hintActive;
   final bool saved;
   final String saveLabel;
   final String readLabel;
@@ -858,7 +925,7 @@ class _ReadingCard extends StatelessWidget {
           _TranslationBox(
             languageLabel: languageLabel,
             translations: word.translations,
-            hintVisible: hintVisible,
+            hintActive: hintActive,
             chipText: chipText,
           ),
           const SizedBox(height: 10),
@@ -906,8 +973,8 @@ class _ReadingCard extends StatelessWidget {
                   label: hintLabel,
                   background: hintBg,
                   foreground: AppColors.primary,
-                  icon: const HomeAsset(
-                    AppAssets.hint,
+                  icon: HomeAsset(
+                    hintActive ? AppAssets.hintOn : AppAssets.hint,
                     width: 20,
                     height: 20,
                   ),
@@ -1051,13 +1118,13 @@ class _TranslationBox extends StatelessWidget {
   const _TranslationBox({
     required this.languageLabel,
     required this.translations,
-    required this.hintVisible,
+    required this.hintActive,
     required this.chipText,
   });
 
   final String languageLabel;
   final List<String> translations;
-  final bool hintVisible;
+  final bool hintActive;
   final Color chipText;
 
   @override
@@ -1085,7 +1152,7 @@ class _TranslationBox extends StatelessWidget {
           const SizedBox(height: 10),
           ImageFiltered(
             imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            enabled: !hintVisible,
+            enabled: !hintActive,
             child: Wrap(
               spacing: 10,
               runSpacing: 10,

@@ -226,6 +226,7 @@
     "title": "Практика слов",
     "turkish": "ТУРЕЦКИЙ",
     "save": "Сохранить",
+    "saved": "Сохранено",
     "listen": "Слушать",
     "hint": "Подсказка",
     "previous": "ПРЕДЫДУЩИЙ",
@@ -677,6 +678,10 @@
   },
   "notificationsPage": {
     "title": "Уведомления",
+    "deleteConfirmTitle": "Вы уверены?",
+    "deleteConfirmBody": "Это уведомление будет удалено.",
+    "delete": "Удалить",
+    "cancel": "Отмена",
     "translation": {
       "title": "Новая перевод готова",
       "body": "Ваш аудиофайл перевода успешно преобразован в текст и переведен."
@@ -744,6 +749,8 @@
     "selectLanguageTitle": "Выбрать язык",
     "premium": "Премиум",
     "passive": "Пассивный",
+    "active": "Активен",
+    "premiumVersion": "Premium",
     "shareFriend": "Поделиться с другом",
     "shareWithFriendTitle": "Поделиться с другом",
     "shareInviteBody": "Пригласи своих друзей и наслаждайтесь переводом вместе",

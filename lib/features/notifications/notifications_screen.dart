@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
@@ -17,6 +18,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   static const _offerTitle = Color(0xFFFF8A00);
 
   List<_NotificationItem>? _items;
+  String? _openSwipeId;
 
   @override
   void initState() {
@@ -51,7 +53,32 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       );
       current.removeWhere((item) => item.id == id);
       _items = current;
+      if (_openSwipeId == id) _openSwipeId = null;
     });
+  }
+
+  Future<void> _confirmAndDelete(_NotificationItem item) async {
+    final text = AppText.current.notificationsPage;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(text.deleteConfirmTitle),
+        content: Text(text.deleteConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(text.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: const Color(0xFFFF0014)),
+            child: Text(text.delete),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    _deleteItem(item.id);
   }
 
   static List<_NotificationItem> _fallbackItems(dynamic text) {
@@ -185,23 +212,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         separatorBuilder: (_, _) => const SizedBox(height: 10),
                         itemBuilder: (context, index) {
                           final item = items[index];
-                          return Dismissible(
-                            key: ValueKey(item.id),
-                            direction: DismissDirection.endToStart,
-                            onDismissed: (_) => _deleteItem(item.id),
-                            background: Container(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.only(right: 16),
-                              decoration: BoxDecoration(
-                                color: const Color(0x1AFF383C),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(
-                                Icons.delete_outline_rounded,
-                                color: Color(0xFFF44336),
-                              ),
-                            ),
-                            child: _NotificationCard(item: item),
+                          return _NotificationSwipeRow(
+                            item: item,
+                            isOpen: _openSwipeId == item.id,
+                            onOpenChanged: (open) {
+                              setState(() {
+                                _openSwipeId = open ? item.id : null;
+                              });
+                            },
+                            onDeleteTap: () => _confirmAndDelete(item),
                           );
                         },
                       ),
@@ -230,6 +249,106 @@ class _NotificationItem {
   final String title;
   final String body;
   final Color titleColor;
+}
+
+/// Sola kaydır → Figma 44×44 çöp butonu; tık → onay diyalogu.
+class _NotificationSwipeRow extends StatefulWidget {
+  const _NotificationSwipeRow({
+    required this.item,
+    required this.isOpen,
+    required this.onOpenChanged,
+    required this.onDeleteTap,
+  });
+
+  final _NotificationItem item;
+  final bool isOpen;
+  final ValueChanged<bool> onOpenChanged;
+  final VoidCallback onDeleteTap;
+
+  @override
+  State<_NotificationSwipeRow> createState() => _NotificationSwipeRowState();
+}
+
+class _NotificationSwipeRowState extends State<_NotificationSwipeRow> {
+  static const _actionW = 44.0;
+  static const _gap = 8.0;
+  static const _reveal = _actionW + _gap;
+
+  double _dx = 0;
+
+  @override
+  void didUpdateWidget(covariant _NotificationSwipeRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isOpen && _dx > -_reveal + 0.5) {
+      setState(() => _dx = -_reveal);
+    } else if (!widget.isOpen && _dx < -0.5) {
+      setState(() => _dx = 0);
+    }
+  }
+
+  void _settle(double velocity) {
+    final shouldOpen = velocity < -200 || _dx < -_reveal / 2;
+    final next = shouldOpen ? -_reveal : 0.0;
+    setState(() => _dx = next);
+    widget.onOpenChanged(shouldOpen);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.centerRight,
+      children: [
+        // Çöp — kartın sağında (Figma: 44×44, radius 8, #FF0014 @ 20%)
+        Positioned(
+          right: 0,
+          top: 0,
+          bottom: 0,
+          child: Center(
+            child: Material(
+              color: const Color(0x33FF0014),
+              borderRadius: BorderRadius.circular(8),
+              child: InkWell(
+                onTap: widget.onDeleteTap,
+                borderRadius: BorderRadius.circular(8),
+                child: const SizedBox(
+                  width: _actionW,
+                  height: _actionW,
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: HomeAsset(
+                      AppAssets.notificationTrash,
+                      width: 24,
+                      height: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        GestureDetector(
+          onHorizontalDragUpdate: (details) {
+            setState(() {
+              _dx = (_dx + details.delta.dx).clamp(-_reveal, 0.0);
+            });
+          },
+          onHorizontalDragEnd: (details) {
+            _settle(details.primaryVelocity ?? 0);
+          },
+          onTap: () {
+            if (_dx < -1) {
+              setState(() => _dx = 0);
+              widget.onOpenChanged(false);
+            }
+          },
+          child: Transform.translate(
+            offset: Offset(_dx, 0),
+            child: _NotificationCard(item: widget.item),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _NotificationCard extends StatelessWidget {

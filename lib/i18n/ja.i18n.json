@@ -226,6 +226,7 @@
     "title": "単語練習",
     "turkish": "トルコ語",
     "save": "保存する",
+    "saved": "保存済み",
     "listen": "聞く",
     "hint": "ヒント",
     "previous": "前へ",
@@ -677,6 +678,10 @@
   },
   "notificationsPage": {
     "title": "通知",
+    "deleteConfirmTitle": "よろしいですか？",
+    "deleteConfirmBody": "この通知は削除されます。",
+    "delete": "削除",
+    "cancel": "キャンセル",
     "translation": {
       "title": "新しい翻訳が準備できました",
       "body": "あなたの音声翻訳ファイルはテキストに変換され、翻訳されました。"
@@ -744,6 +749,8 @@
     "selectLanguageTitle": "言語を選択",
     "premium": "プレミアム",
     "passive": "パッシブ",
+    "active": "有効",
+    "premiumVersion": "Premium",
     "shareFriend": "友達と共有",
     "shareWithFriendTitle": "友達と共有",
     "shareInviteBody": "友達を招待して、一緒に翻訳を楽しもう",

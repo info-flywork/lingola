@@ -226,6 +226,7 @@
     "title": "单词练习",
     "turkish": "土耳其语",
     "save": "保存",
+    "saved": "已保存",
     "listen": "听",
     "hint": "提示",
     "previous": "上一个",
@@ -677,6 +678,10 @@
   },
   "notificationsPage": {
     "title": "通知",
+    "deleteConfirmTitle": "确定吗？",
+    "deleteConfirmBody": "此通知将被删除。",
+    "delete": "删除",
+    "cancel": "取消",
     "translation": {
       "title": "新的翻译已准备好",
       "body": "您的音频翻译文件已成功转换为文本并翻译。"
@@ -744,6 +749,8 @@
     "selectLanguageTitle": "选择语言",
     "premium": "高级版",
     "passive": "被动",
+    "active": "已开通",
+    "premiumVersion": "Premium",
     "shareFriend": "分享给朋友",
     "shareWithFriendTitle": "与朋友分享",
     "shareInviteBody": "邀请你的朋友，一起享受翻译的乐趣",

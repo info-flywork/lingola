@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/auth/api_client.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../i18n/strings.g.dart';
 import '../tutor/calling_screen.dart';
@@ -116,6 +117,13 @@ class _LessonScreenState extends State<LessonScreen> {
       return;
     }
 
+    // Free: yalnızca müfredattaki ilk 2 ders (A1 #0–1).
+    final globalIndex = _globalLessonIndex(levelId, index);
+    if (!PremiumService.canAccessLessonIndex(globalIndex)) {
+      await PremiumService.presentPaywall(context);
+      return;
+    }
+
     if (state == _NodeState.completed && remote?.hasNotes == true) {
       await _openNotes(slug: slug, label: label, offerPractice: true);
       return;
@@ -126,6 +134,16 @@ class _LessonScreenState extends State<LessonScreen> {
       label: label,
       kind: 'lesson',
     );
+  }
+
+  int _globalLessonIndex(String levelId, int index) {
+    var offset = 0;
+    for (final level in LessonCurriculum.levels) {
+      if (level.id == levelId) return offset + index;
+      final list = _remote[level.id];
+      offset += list?.length ?? level.iconAssets.length;
+    }
+    return offset + index;
   }
 
   Future<void> _openNotes({

@@ -226,6 +226,7 @@
     "title": "Pratique des mots",
     "turkish": "Turc",
     "save": "Sauvegarder",
+    "saved": "Enregistré",
     "listen": "Écouter",
     "hint": "Indice",
     "previous": "PRÉCÉDENT",
@@ -677,6 +678,10 @@
   },
   "notificationsPage": {
     "title": "Notifications",
+    "deleteConfirmTitle": "Êtes-vous sûr ?",
+    "deleteConfirmBody": "Cette notification sera supprimée.",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
     "translation": {
       "title": "Nouvelle traduction prête",
       "body": "Votre fichier de traduction audio a été converti avec succès en texte et traduit."
@@ -744,6 +749,8 @@
     "selectLanguageTitle": "Sélectionner la Langue",
     "premium": "Premium",
     "passive": "Passif",
+    "active": "Actif",
+    "premiumVersion": "Premium",
     "shareFriend": "Partager avec un Ami",
     "shareWithFriendTitle": "Partager avec un Ami",
     "shareInviteBody": "Invite tes amis et profitez de la traduction ensemble",

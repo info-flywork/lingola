@@ -346,6 +346,7 @@ class _Translations$wordPracticePage$fr implements Translations$wordPracticePage
 	@override String get title => 'Pratique des mots';
 	@override String get turkish => 'Turc';
 	@override String get save => 'Sauvegarder';
+	@override String get saved => 'Enregistré';
 	@override String get listen => 'Écouter';
 	@override String get hint => 'Indice';
 	@override String get previous => 'PRÉCÉDENT';
@@ -507,6 +508,10 @@ class _Translations$notificationsPage$fr implements Translations$notificationsPa
 
 	// Translations
 	@override String get title => 'Notifications';
+	@override String get deleteConfirmTitle => 'Êtes-vous sûr ?';
+	@override String get deleteConfirmBody => 'Cette notification sera supprimée.';
+	@override String get delete => 'Supprimer';
+	@override String get cancel => 'Annuler';
 	@override late final _Translations$notificationsPage$translation$fr translation = _Translations$notificationsPage$translation$fr._(_root);
 	@override late final _Translations$notificationsPage$offer$fr offer = _Translations$notificationsPage$offer$fr._(_root);
 	@override late final _Translations$notificationsPage$stories$fr stories = _Translations$notificationsPage$stories$fr._(_root);
@@ -565,6 +570,8 @@ class _Translations$profilePage$fr implements Translations$profilePage$en {
 	@override String get selectLanguageTitle => 'Sélectionner la Langue';
 	@override String get premium => 'Premium';
 	@override String get passive => 'Passif';
+	@override String get active => 'Actif';
+	@override String get premiumVersion => 'Premium';
 	@override String get shareFriend => 'Partager avec un Ami';
 	@override String get shareWithFriendTitle => 'Partager avec un Ami';
 	@override String get shareInviteBody => 'Invite tes amis et profitez de la traduction ensemble';
@@ -1565,6 +1572,7 @@ extension on TranslationsFr {
 			'wordPracticePage.title' => 'Pratique des mots',
 			'wordPracticePage.turkish' => 'Turc',
 			'wordPracticePage.save' => 'Sauvegarder',
+			'wordPracticePage.saved' => 'Enregistré',
 			'wordPracticePage.listen' => 'Écouter',
 			'wordPracticePage.hint' => 'Indice',
 			'wordPracticePage.previous' => 'PRÉCÉDENT',
@@ -1884,9 +1892,9 @@ extension on TranslationsFr {
 			'lessonPage.levels.c1.lessons.5' => 'Voyage dans le temps',
 			'lessonPage.levels.c1.lessons.6' => 'Possessions',
 			'lessonPage.levels.c1.lessons.7' => 'Compétences professionnelles',
-			'lessonPage.levels.c1.lessons.8' => 'Changements historiques',
 			_ => null,
 		} ?? switch (path) {
+			'lessonPage.levels.c1.lessons.8' => 'Changements historiques',
 			'lessonPage.levels.c1.lessons.9' => 'Rédaction de critiques',
 			'lessonPage.levels.c1.lessons.10' => 'Mystères',
 			'lessonPage.levels.c1.lessons.11' => 'Théories étranges',
@@ -1960,6 +1968,10 @@ extension on TranslationsFr {
 			'rolePlayPage.interview.chat.incoming2Rest' => '. Parlez-moi d\'un projet récent dont vous êtes fier.',
 			'rolePlayPage.interview.chat.botReply' => 'C\'est impressionnant. Quelles questions avez-vous sur le poste ?',
 			'notificationsPage.title' => 'Notifications',
+			'notificationsPage.deleteConfirmTitle' => 'Êtes-vous sûr ?',
+			'notificationsPage.deleteConfirmBody' => 'Cette notification sera supprimée.',
+			'notificationsPage.delete' => 'Supprimer',
+			'notificationsPage.cancel' => 'Annuler',
 			'notificationsPage.translation.title' => 'Nouvelle traduction prête',
 			'notificationsPage.translation.body' => 'Votre fichier de traduction audio a été converti avec succès en texte et traduit.',
 			'notificationsPage.offer.title' => 'Une offre spéciale vous attend',
@@ -2017,6 +2029,8 @@ extension on TranslationsFr {
 			'profilePage.selectLanguageTitle' => 'Sélectionner la Langue',
 			'profilePage.premium' => 'Premium',
 			'profilePage.passive' => 'Passif',
+			'profilePage.active' => 'Actif',
+			'profilePage.premiumVersion' => 'Premium',
 			'profilePage.shareFriend' => 'Partager avec un Ami',
 			'profilePage.shareWithFriendTitle' => 'Partager avec un Ami',
 			'profilePage.shareInviteBody' => 'Invite tes amis et profitez de la traduction ensemble',

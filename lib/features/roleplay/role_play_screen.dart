@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
@@ -199,6 +200,8 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
     BuildContext context,
     _RolePlayScenario scenario,
   ) async {
+    if (!await PremiumService.requirePremium(context)) return;
+    if (!context.mounted) return;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

@@ -7,6 +7,7 @@ class DictionaryWord {
     required this.translation,
     this.level = '',
     this.phonetic = '',
+    this.saved = false,
   });
 
   final String id;
@@ -14,6 +15,7 @@ class DictionaryWord {
   final String translation;
   final String level;
   final String phonetic;
+  final bool saved;
 
   factory DictionaryWord.fromJson(Map<String, dynamic> json) {
     return DictionaryWord(
@@ -22,6 +24,18 @@ class DictionaryWord {
       translation: json['translation'] as String? ?? '',
       level: json['level'] as String? ?? '',
       phonetic: json['phonetic'] as String? ?? '',
+      saved: json['saved'] == true,
+    );
+  }
+
+  DictionaryWord copyWith({bool? saved}) {
+    return DictionaryWord(
+      id: id,
+      word: word,
+      translation: translation,
+      level: level,
+      phonetic: phonetic,
+      saved: saved ?? this.saved,
     );
   }
 }

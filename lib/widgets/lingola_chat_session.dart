@@ -104,9 +104,9 @@ class LingolaChatSession extends StatefulWidget {
 }
 
 class _LingolaChatSessionState extends State<LingolaChatSession> {
-  static const _heroHeight = 340.0;
-  static const _heroHeightExpanded = 460.0;
+  static const _heroHeight = 400.0;
   static const _pillBg = Color(0x80000000);
+  static const _expandedBg = Color(0xFF1A2A4A);
 
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
@@ -129,7 +129,8 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   Timer? _sessionTimer;
   var _hintLoading = false;
   String? _hintSuggestion;
-  var _heroExpanded = false;
+  var _expanded = false;
+  var _closing = false;
   Timer? _recordingTicker;
   Duration _elapsed = Duration.zero;
   Duration _recordingElapsed = Duration.zero;
@@ -252,10 +253,13 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   @override
   void dispose() {
+    _finished = true;
     _ticker?.cancel();
     _sessionTimer?.cancel();
     _recordingTicker?.cancel();
     _stopLipsyncPoll();
+    unawaited(_player.stop());
+    unawaited(_mic.cancel());
     _controller.dispose();
     _scrollController.dispose();
     unawaited(_playerCompleteSub?.cancel());
@@ -381,19 +385,31 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   }
 
   void _handleClose() {
-    if (_finished) return;
+    if (_finished || _closing) return;
+    _closing = true;
+    _finished = true;
     _ticker?.cancel();
     _sessionTimer?.cancel();
     _recordingTicker?.cancel();
+    _stopLipsyncPoll();
     unawaited(_player.stop());
     unawaited(_cancelRecording());
-    // Navigasyon takılırsa tekrar denenebilsin diye _finished'ı erken kilitleme.
     try {
       widget.onClose();
-      _finished = true;
     } catch (_) {
       _finished = false;
+      _closing = false;
+      return;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Future<void>.delayed(const Duration(milliseconds: 600), () {
+        if (mounted) {
+          _finished = false;
+          _closing = false;
+        }
+      });
+    });
   }
 
   Future<void> _requestHint() async {
@@ -436,12 +452,12 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     }
   }
 
-  void _toggleHeroExpanded() {
-    setState(() => _heroExpanded = !_heroExpanded);
+  void _toggleExpanded() {
+    setState(() => _expanded = !_expanded);
   }
 
   Future<void> _speak(String text) async {
-    if (!widget.enableTts || text.trim().isEmpty) return;
+    if (!widget.enableTts || text.trim().isEmpty || _finished) return;
     try {
       await _player.stop();
       _stopLipsyncPoll();
@@ -450,7 +466,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
         voiceId: widget.ttsVoiceId,
         modelId: TutorTtsService.flashModel,
       );
-      if (!mounted) return;
+      if (!mounted || _finished) return;
       setState(() {
         _visemeTrack = speech.visemes;
         _speechEndSec = effectiveSpeechEndSec(
@@ -461,8 +477,12 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
         _lipsActive = true;
         _speaking = false;
       });
+      if (!mounted || _finished) return;
       await _player.play(DeviceFileSource(speech.file.path));
-      if (!mounted) return;
+      if (!mounted || _finished) {
+        unawaited(_player.stop());
+        return;
+      }
       final duration = await _player.getDuration();
       if (duration != null && duration.inMilliseconds > 0 && mounted) {
         setState(() {
@@ -600,306 +620,505 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   @override
   Widget build(BuildContext context) {
-    final preview = AppText.current.previewChat;
-    final brand = widget.brand ?? preview.brand;
-    final speed = widget.speedLabel ?? preview.speed;
-    final hint = widget.typeMessageHint ?? preview.typeMessage;
-    final topInset = MediaQuery.paddingOf(context).top;
-    final error = widget.errorText ?? _localError;
-    final blocked = _sending || (widget.busy && _messages.isEmpty);
-    final heroH = _heroExpanded ? _heroHeightExpanded : _heroHeight;
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.white,
+        systemNavigationBarColor: _expanded ? Colors.black : Colors.white,
       ),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            Column(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 280),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        child: _expanded
+            ? KeyedSubtree(
+                key: const ValueKey('chat-expanded'),
+                child: _buildExpanded(context),
+              )
+            : KeyedSubtree(
+                key: const ValueKey('chat-compact'),
+                child: _buildCompact(context),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildTopBar() {
+    final preview = AppText.current.previewChat;
+    final brand = widget.brand ?? preview.brand;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      child: Row(
+        children: [
+          _GlassCircleButton(
+            size: 30,
+            onTap: _toggleExpanded,
+            child: const HomeAsset(
+              AppAssets.callingResize,
+              width: 14,
+              height: 14,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: _pillBg,
+              borderRadius: BorderRadius.circular(9999),
+            ),
+            child: Text(
+              brand,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                height: 21 / 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const Spacer(),
+          Container(
+            height: 29,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: _pillBg,
+              borderRadius: BorderRadius.circular(9999),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: Stack(
-                    children: [
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: topInset + heroH,
-                    child: const _ChatHeroBackdrop(),
+                const HomeAsset(
+                  AppAssets.rolePlayRecording,
+                  width: 15,
+                  height: 15,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  _timerLabel,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    height: 21 / 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
                   ),
-                  SafeArea(
-                    bottom: false,
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                          child: Row(
-                            children: [
-                              _GlassCircleButton(
-                                size: 30,
-                                onTap: _toggleHeroExpanded,
-                                child: const HomeAsset(
-                                  AppAssets.rolePlayResize,
-                                  width: 14,
-                                  height: 14,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _pillBg,
-                                  borderRadius: BorderRadius.circular(9999),
-                                ),
-                                child: Text(
-                                  brand,
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    height: 21 / 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              const Spacer(),
-                              Container(
-                                height: 29,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _pillBg,
-                                  borderRadius: BorderRadius.circular(9999),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const HomeAsset(
-                                      AppAssets.rolePlayRecording,
-                                      width: 15,
-                                      height: 15,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      _timerLabel,
-                                      style: const TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 14,
-                                        height: 21 / 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              _GlassCircleButton(
-                                size: 32,
-                                onTap: _handleClose,
-                                child: const Icon(
-                                  Icons.close_rounded,
-                                  size: 18,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: heroH - 48,
-                          child: Stack(
-                            alignment: Alignment.topCenter,
-                            clipBehavior: Clip.none,
-                            children: [
-                              _ChatRobotHero(
-                                riveAsset: widget.riveAsset,
-                                talking: _avatarTalking,
-                                lipsyncViseme: _avatarTalking
-                                    ? (_visemeTrack.isNotEmpty
-                                        ? _currentViseme
-                                        : null)
-                                    : null,
-                                fallbackImage: null,
-                              ),
-                              Positioned(
-                                left: 16,
-                                bottom: 24,
-                                child: Container(
-                                  width: 36,
-                                  height: 36,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: _pillBg,
-                                    borderRadius: BorderRadius.circular(99),
-                                  ),
-                                  child: Text(
-                                    speed,
-                                    style: const TextStyle(
-                                      fontFamily: 'Poppins',
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (error != null)
-                          Material(
-                            color: const Color(0xFFFFEBEE),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      error,
-                                      style: const TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 12,
-                                        color: Color(0xFFB71C1C),
-                                      ),
-                                    ),
-                                  ),
-                                  if (widget.onRetry != null)
-                                    TextButton(
-                                      onPressed: widget.onRetry,
-                                      child: Text(
-                                        AppText.current.common.tryAgain,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        Expanded(
-                          child: ColoredBox(
-                            color: Colors.white,
-                            child: widget.busy && _messages.isEmpty
-                                ? const Center(
-                                    child: CircularProgressIndicator(
-                                      color: AppColors.primary,
-                                    ),
-                                  )
-                                : ListView.separated(
-                                    controller: _scrollController,
-                                    padding: const EdgeInsets.fromLTRB(
-                                      16,
-                                      8,
-                                      16,
-                                      16,
-                                    ),
-                                    itemCount:
-                                        _messages.length + (blocked ? 1 : 0),
-                                    separatorBuilder: (_, _) =>
-                                        const SizedBox(height: 12),
-                                    itemBuilder: (context, index) {
-                                      if (index >= _messages.length) {
-                                        return const Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                            padding: EdgeInsets.only(left: 8),
-                                            child: SizedBox(
-                                              width: 22,
-                                              height: 22,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: AppColors.primary,
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                      final message = _messages[index];
-                                      if (message.isUser) {
-                                        return _UserBubble(message.text);
-                                      }
-                                      return _BotBubble(
-                                        message: message,
-                                        onSpeak: widget.enableTts
-                                            ? () => _speak(message.text)
-                                            : null,
-                                      );
-                                    },
-                                  ),
-                          ),
-                        ),
-                      ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          _GlassCircleButton(
+            size: 32,
+            onTap: _handleClose,
+            child: const Icon(
+              Icons.close_rounded,
+              size: 18,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvatarHero({required bool fill}) {
+    return _ChatRobotHero(
+      riveAsset: widget.riveAsset,
+      talking: _avatarTalking,
+      lipsyncViseme: _avatarTalking
+          ? (_visemeTrack.isNotEmpty ? _currentViseme : null)
+          : null,
+      fallbackImage: null,
+      fill: fill,
+    );
+  }
+
+  Widget _buildComposer() {
+    final hint = widget.typeMessageHint ?? AppText.current.previewChat.typeMessage;
+    final blocked = _sending || (widget.busy && _messages.isEmpty);
+    return _WhatsAppChatComposer(
+      controller: _controller,
+      hint: hint,
+      enabled: !blocked,
+      enableMic: widget.enableMic,
+      recording: _recording,
+      recordingLocked: _recordingLocked,
+      cancelPending: _cancelRecordingPending,
+      recordingTimer: _recordingTimerLabel,
+      chatLabels: AppText.current.previewChat,
+      onSend: () => unawaited(_sendMessage()),
+      onHint: () => unawaited(_requestHint()),
+      hintLoading: _hintLoading,
+      onMicPointerDown: _onMicPointerDown,
+      onMicPointerCancel: (e) => unawaited(_onMicPointerCancel(e)),
+      onCancelRecording: () => unawaited(_cancelRecording()),
+      onFinishLockedRecording: () => unawaited(_finishLockedRecording()),
+    );
+  }
+
+  Widget _buildMessageList({required bool darkChrome}) {
+    final blocked = _sending || (widget.busy && _messages.isEmpty);
+    final error = widget.errorText ?? _localError;
+
+    if (widget.busy && _messages.isEmpty) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: darkChrome ? Colors.white : AppColors.primary,
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        if (error != null && !darkChrome)
+          Material(
+            color: const Color(0xFFFFEBEE),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      error,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        color: Color(0xFFB71C1C),
+                      ),
                     ),
                   ),
+                  if (widget.onRetry != null)
+                    TextButton(
+                      onPressed: widget.onRetry,
+                      child: Text(AppText.current.common.tryAgain),
+                    ),
                 ],
               ),
             ),
-            SafeArea(
-              top: false,
-              child: _WhatsAppChatComposer(
-                controller: _controller,
-                hint: hint,
-                enabled: !blocked,
-                enableMic: widget.enableMic,
-                recording: _recording,
-                recordingLocked: _recordingLocked,
-                cancelPending: _cancelRecordingPending,
-                recordingTimer: _recordingTimerLabel,
-                chatLabels: AppText.current.previewChat,
-                onSend: () => unawaited(_sendMessage()),
-                onHint: () => unawaited(_requestHint()),
-                hintLoading: _hintLoading,
-                onMicPointerDown: _onMicPointerDown,
-                onMicPointerCancel: (e) => unawaited(_onMicPointerCancel(e)),
-                onCancelRecording: () => unawaited(_cancelRecording()),
-                onFinishLockedRecording: () =>
-                    unawaited(_finishLockedRecording()),
-              ),
-            ),
-              ],
-            ),
-            if (_recording && !_recordingLocked)
-              Positioned.fill(
-                child: Listener(
-                  behavior: HitTestBehavior.translucent,
-                  onPointerMove: _onMicPointerMove,
-                  onPointerUp: _onMicPointerUp,
-                  onPointerCancel: _onMicPointerCancel,
+          ),
+        Expanded(
+          child: ListView.separated(
+            controller: _scrollController,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            itemCount: _messages.length + (blocked ? 1 : 0),
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              if (index >= _messages.length) {
+                return Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: darkChrome ? Colors.white : AppColors.primary,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              final message = _messages[index];
+              if (message.isUser) {
+                return _UserBubble(message.text);
+              }
+              return _BotBubble(
+                message: message,
+                onSpeak: widget.enableTts ? () => _speak(message.text) : null,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Yarım ekran: üstte robot, altta sohbet + composer (mevcut deneme UI).
+  Widget _buildCompact(BuildContext context) {
+    final preview = AppText.current.previewChat;
+    final speed = widget.speedLabel ?? preview.speed;
+    final topInset = MediaQuery.paddingOf(context).top;
+    const heroH = _heroHeight;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: topInset + heroH,
+                      child: const _ChatHeroBackdrop(),
+                    ),
+                    SafeArea(
+                      bottom: false,
+                      child: Column(
+                        children: [
+                          _buildTopBar(),
+                          SizedBox(
+                            height: heroH - 48,
+                            child: Stack(
+                              alignment: Alignment.topCenter,
+                              clipBehavior: Clip.none,
+                              children: [
+                                _buildAvatarHero(fill: false),
+                                Positioned(
+                                  left: 16,
+                                  bottom: 24,
+                                  child: Container(
+                                    width: 36,
+                                    height: 36,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: _pillBg,
+                                      borderRadius: BorderRadius.circular(99),
+                                    ),
+                                    child: Text(
+                                      speed,
+                                      style: const TextStyle(
+                                        fontFamily: 'Poppins',
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                if (widget.lessonBadge != null)
+                                  Positioned(
+                                    right: 16,
+                                    bottom: 24,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: _pillBg,
+                                        borderRadius: BorderRadius.circular(999),
+                                      ),
+                                      child: Text(
+                                        widget.lessonBadge!,
+                                        style: const TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: ColoredBox(
+                              color: Colors.white,
+                              child: _buildMessageList(darkChrome: false),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-          ],
-        ),
+              SafeArea(top: false, child: _buildComposer()),
+            ],
+          ),
+          if (_recording && !_recordingLocked)
+            Positioned.fill(
+              child: Listener(
+                behavior: HitTestBehavior.translucent,
+                onPointerMove: _onMicPointerMove,
+                onPointerUp: _onMicPointerUp,
+                onPointerCancel: _onMicPointerCancel,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Tam ekran — tutor calling expanded ile aynı fikir.
+  Widget _buildExpanded(BuildContext context) {
+    final preview = AppText.current.previewChat;
+    final speed = widget.speedLabel ?? preview.speed;
+    final bottom = MediaQuery.paddingOf(context).bottom;
+    final error = widget.errorText ?? _localError;
+
+    return Scaffold(
+      backgroundColor: _expandedBg,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          const _ChatHeroBackdrop(fullBleed: true),
+          Positioned.fill(
+            child: _buildAvatarHero(fill: true),
+          ),
+          const Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            height: 160,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x8C2D46FF),
+                    Color(0x002D46FF),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 340,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0x00000000),
+                    Color(0x99000000),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            bottom: false,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: _buildTopBar(),
+            ),
+          ),
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: bottom + 8,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _ExpandedFloatingMessages(
+                  messages: _messages,
+                  sending: _sending,
+                  onSpeak: widget.enableTts
+                      ? (text) => unawaited(_speak(text))
+                      : null,
+                ),
+                if (error != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    error,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: .8),
+                    ),
+                  ),
+                ],
+                if (widget.lessonBadge != null) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _pillBg,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      widget.lessonBadge!,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 10),
+                Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: _pillBg,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                  child: Text(
+                    speed,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildComposer(),
+              ],
+            ),
+          ),
+          if (_recording && !_recordingLocked)
+            Positioned.fill(
+              child: Listener(
+                behavior: HitTestBehavior.translucent,
+                onPointerMove: _onMicPointerMove,
+                onPointerUp: _onMicPointerUp,
+                onPointerCancel: _onMicPointerCancel,
+              ),
+            ),
+        ],
       ),
     );
   }
 }
 
 class _ChatHeroBackdrop extends StatelessWidget {
-  const _ChatHeroBackdrop();
+  const _ChatHeroBackdrop({this.fullBleed = false});
+
+  final bool fullBleed;
 
   @override
   Widget build(BuildContext context) {
-    return const DecoratedBox(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF7EB6FF),
-            Color(0xFFB8D9FF),
-            Color(0xFFFFFFFF),
-          ],
-          stops: [0, 0.55, 1],
+          colors: fullBleed
+              ? const [
+                  Color(0xFF2D46FF),
+                  Color(0xFF5B9FFF),
+                  Color(0xFF1A2A4A),
+                ]
+              : const [
+                  Color(0xFF7EB6FF),
+                  Color(0xFFB8D9FF),
+                  Color(0xFFFFFFFF),
+                ],
+          stops: fullBleed ? const [0, 0.45, 1] : const [0, 0.55, 1],
         ),
       ),
     );
@@ -912,40 +1131,131 @@ class _ChatRobotHero extends StatelessWidget {
     this.riveAsset,
     this.fallbackImage,
     this.lipsyncViseme,
+    this.fill = false,
   });
 
   final String? riveAsset;
   final bool talking;
   final String? fallbackImage;
   final double? lipsyncViseme;
+  final bool fill;
 
   @override
   Widget build(BuildContext context) {
     final rive = riveAsset?.trim();
     final hasRive = rive != null && rive.isNotEmpty;
 
+    final avatar = hasRive
+        ? TutorRiveAvatar(
+            assetPath: rive.startsWith('http')
+                ? rive
+                : AppAssets.tutorLingolaRivCdn,
+            talking: talking,
+            lipsyncViseme: lipsyncViseme,
+            fallbackRivePath: AppAssets.tutorLingolaRivCdn,
+            fallbackImage: fallbackImage,
+            loadingBackgroundColor: Colors.transparent,
+          )
+        : HomeAsset(
+            fallbackImage ?? AppAssets.tutorRobot,
+            height: fill ? null : 280,
+            fit: BoxFit.contain,
+            alignment:
+                fill ? const Alignment(0, -0.05) : Alignment.bottomCenter,
+          );
+
+    if (fill) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 40),
+        child: Align(
+          alignment: const Alignment(0, -0.05),
+          child: avatar,
+        ),
+      );
+    }
+
     return Align(
       alignment: Alignment.bottomCenter,
       child: SizedBox(
         height: 300,
         width: double.infinity,
-        child: hasRive
-            ? TutorRiveAvatar(
-                assetPath: rive.startsWith('http')
-                    ? rive
-                    : AppAssets.tutorLingolaRivCdn,
-                talking: talking,
-                lipsyncViseme: lipsyncViseme,
-                fallbackRivePath: AppAssets.tutorLingolaRivCdn,
-                fallbackImage: fallbackImage,
-                loadingBackgroundColor: Colors.transparent,
-              )
-            : HomeAsset(
-                fallbackImage ?? AppAssets.tutorRobot,
-                height: 280,
-                fit: BoxFit.contain,
-                alignment: Alignment.bottomCenter,
-              ),
+        child: avatar,
+      ),
+    );
+  }
+}
+
+/// Tam ekranda altta yüzen son mesajlar (tutor calling `_ScrollingChat` gibi).
+class _ExpandedFloatingMessages extends StatelessWidget {
+  const _ExpandedFloatingMessages({
+    required this.messages,
+    required this.sending,
+    this.onSpeak,
+  });
+
+  final List<LingolaChatMessage> messages;
+  final bool sending;
+  final void Function(String text)? onSpeak;
+
+  @override
+  Widget build(BuildContext context) {
+    if (messages.isEmpty && !sending) {
+      return const SizedBox(height: 8);
+    }
+
+    return SizedBox(
+      height: 200,
+      child: ShaderMask(
+        shaderCallback: (rect) {
+          return const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              Colors.white,
+              Colors.white,
+            ],
+            stops: [0, 0.18, 1],
+          ).createShader(rect);
+        },
+        blendMode: BlendMode.dstIn,
+        child: ListView.builder(
+          reverse: true,
+          padding: EdgeInsets.zero,
+          itemCount: messages.length + (sending ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (sending && index == 0) {
+              return const Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 10, left: 4),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              );
+            }
+            final msgIndex =
+                messages.length - 1 - (sending ? index - 1 : index);
+            final message = messages[msgIndex];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: message.isUser
+                  ? _UserBubble(message.text)
+                  : _BotBubble(
+                      message: message,
+                      onSpeak: onSpeak == null
+                          ? null
+                          : () => onSpeak!(message.text),
+                    ),
+            );
+          },
+        ),
       ),
     );
   }

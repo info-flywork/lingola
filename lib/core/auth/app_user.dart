@@ -60,6 +60,7 @@ class AppUser {
     String? avatarUrl,
     bool? notificationsEnabled,
     String? appLocale,
+    String? subscriptionStatus,
     DateTime? deletionRequestedAt,
     DateTime? accessUntil,
     bool clearDeletion = false,
@@ -73,13 +74,15 @@ class AppUser {
       isGuest: isGuest,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       appLocale: appLocale ?? this.appLocale,
-      subscriptionStatus: subscriptionStatus,
+      subscriptionStatus: subscriptionStatus ?? this.subscriptionStatus,
       deletionRequestedAt:
           clearDeletion ? null : (deletionRequestedAt ?? this.deletionRequestedAt),
       accessUntil: clearDeletion ? null : (accessUntil ?? this.accessUntil),
       onboarding: onboarding,
     );
   }
+
+  bool get isPremium => subscriptionStatus.toLowerCase() == 'premium';
 }
 
 class UserOnboarding {

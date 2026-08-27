@@ -441,25 +441,30 @@ class _AccountStepRow extends StatelessWidget {
   }
 }
 
-/// Preview chat sonrası doğrudan RevenueCat paywall, ardından login.
+/// Preview chat X / süre bitimi → hemen Auth'a geç, paywall üstte açılsın.
+///
+/// Eski sıra: önce `presentPaywall` await → paywall takılırsa deneme sohbeti
+/// hiç kapanmıyordu (QA: "X close does nothing").
 Future<void> presentOnboardingPaywallThenAuth(
   BuildContext context,
   OnboardingDraft draft,
 ) async {
-  final hasKey = AppEnv.revenueCatIosPublicKey.isNotEmpty ||
-      AppEnv.revenueCatAndroidPublicKey.isNotEmpty;
-  if (hasKey) {
-    try {
-      await RevenueCatUI.presentPaywall(displayCloseButton: true)
-          .timeout(const Duration(seconds: 20));
-    } catch (_) {}
-  }
   if (!context.mounted) return;
-  Navigator.of(context).pushReplacement(
+
+  // Önce sohbeti kapat — X anında tepki versin (await yok).
+  Navigator.of(context, rootNavigator: true).pushReplacement(
     MaterialPageRoute<void>(
       builder: (_) => AuthScreen(draft: draft),
     ),
   );
+
+  final hasKey = AppEnv.revenueCatIosPublicKey.isNotEmpty ||
+      AppEnv.revenueCatAndroidPublicKey.isNotEmpty;
+  if (!hasKey) return;
+  try {
+    await RevenueCatUI.presentPaywall(displayCloseButton: true)
+        .timeout(const Duration(seconds: 20));
+  } catch (_) {}
 }
 
 class AuthScreen extends StatefulWidget {

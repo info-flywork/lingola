@@ -54,6 +54,7 @@ class HoldToSpeakService {
     _recordingPath = null;
     _recordStartedAt = null;
 
+    // Önce cihaz STT (anında metin). Başlamazsa dosya + Whisper.
     if (_speechReady) {
       try {
         await _speech.listen(

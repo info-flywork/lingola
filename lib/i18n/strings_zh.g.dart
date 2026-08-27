@@ -346,6 +346,7 @@ class _Translations$wordPracticePage$zh implements Translations$wordPracticePage
 	@override String get title => '单词练习';
 	@override String get turkish => '土耳其语';
 	@override String get save => '保存';
+	@override String get saved => '已保存';
 	@override String get listen => '听';
 	@override String get hint => '提示';
 	@override String get previous => '上一个';
@@ -507,6 +508,10 @@ class _Translations$notificationsPage$zh implements Translations$notificationsPa
 
 	// Translations
 	@override String get title => '通知';
+	@override String get deleteConfirmTitle => '确定吗？';
+	@override String get deleteConfirmBody => '此通知将被删除。';
+	@override String get delete => '删除';
+	@override String get cancel => '取消';
 	@override late final _Translations$notificationsPage$translation$zh translation = _Translations$notificationsPage$translation$zh._(_root);
 	@override late final _Translations$notificationsPage$offer$zh offer = _Translations$notificationsPage$offer$zh._(_root);
 	@override late final _Translations$notificationsPage$stories$zh stories = _Translations$notificationsPage$stories$zh._(_root);
@@ -565,6 +570,8 @@ class _Translations$profilePage$zh implements Translations$profilePage$en {
 	@override String get selectLanguageTitle => '选择语言';
 	@override String get premium => '高级版';
 	@override String get passive => '被动';
+	@override String get active => '已开通';
+	@override String get premiumVersion => 'Premium';
 	@override String get shareFriend => '分享给朋友';
 	@override String get shareWithFriendTitle => '与朋友分享';
 	@override String get shareInviteBody => '邀请你的朋友，一起享受翻译的乐趣';
@@ -1565,6 +1572,7 @@ extension on TranslationsZh {
 			'wordPracticePage.title' => '单词练习',
 			'wordPracticePage.turkish' => '土耳其语',
 			'wordPracticePage.save' => '保存',
+			'wordPracticePage.saved' => '已保存',
 			'wordPracticePage.listen' => '听',
 			'wordPracticePage.hint' => '提示',
 			'wordPracticePage.previous' => '上一个',
@@ -1884,9 +1892,9 @@ extension on TranslationsZh {
 			'lessonPage.levels.c1.lessons.5' => '时间旅行',
 			'lessonPage.levels.c1.lessons.6' => '财物',
 			'lessonPage.levels.c1.lessons.7' => '工作技能',
-			'lessonPage.levels.c1.lessons.8' => '历史变迁',
 			_ => null,
 		} ?? switch (path) {
+			'lessonPage.levels.c1.lessons.8' => '历史变迁',
 			'lessonPage.levels.c1.lessons.9' => '写作复习',
 			'lessonPage.levels.c1.lessons.10' => '神秘事件',
 			'lessonPage.levels.c1.lessons.11' => '奇怪的理论',
@@ -1960,6 +1968,10 @@ extension on TranslationsZh {
 			'rolePlayPage.interview.chat.incoming2Rest' => '。告诉我一个你引以为豪的最近项目。',
 			'rolePlayPage.interview.chat.botReply' => '那真令人印象深刻。你对这个职位有什么问题吗？',
 			'notificationsPage.title' => '通知',
+			'notificationsPage.deleteConfirmTitle' => '确定吗？',
+			'notificationsPage.deleteConfirmBody' => '此通知将被删除。',
+			'notificationsPage.delete' => '删除',
+			'notificationsPage.cancel' => '取消',
 			'notificationsPage.translation.title' => '新的翻译已准备好',
 			'notificationsPage.translation.body' => '您的音频翻译文件已成功转换为文本并翻译。',
 			'notificationsPage.offer.title' => '特别优惠等着你',
@@ -2017,6 +2029,8 @@ extension on TranslationsZh {
 			'profilePage.selectLanguageTitle' => '选择语言',
 			'profilePage.premium' => '高级版',
 			'profilePage.passive' => '被动',
+			'profilePage.active' => '已开通',
+			'profilePage.premiumVersion' => 'Premium',
 			'profilePage.shareFriend' => '分享给朋友',
 			'profilePage.shareWithFriendTitle' => '与朋友分享',
 			'profilePage.shareInviteBody' => '邀请你的朋友，一起享受翻译的乐趣',

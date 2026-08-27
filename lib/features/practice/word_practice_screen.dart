@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/config/app_env.dart';
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/practice/practice_service.dart';
 import '../../core/theme/app_theme.dart';
@@ -20,8 +21,9 @@ class WordPracticeScreen extends StatefulWidget {
 }
 
 class _WordPracticeScreenState extends State<WordPracticeScreen> {
-  static const _saveRed = Color(0xFFF44336);
-  static const _saveBg = Color(0x1AFF383C);
+  static const _saveIdle = Color(0xFFA1A4B7);
+  /// Quiz Reading ikon arka planı ile aynı (`#2D46FF` @ 10%).
+  static const _saveBg = Color(0x1A2D46FF);
   static const _chipText = Color(0xFF000088);
   static const _hintBg = Color(0x0D2D46FF);
 
@@ -161,18 +163,22 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       } else {
         await PracticeService.unsaveWord(card.id);
       }
+      if (!mounted) return;
       final session = _session;
       if (session == null) return;
       final cards = List<PracticeCard>.from(session.cards);
       final i = _index;
       if (i >= 0 && i < cards.length) {
         cards[i] = cards[i].copyWith(saved: next);
-        _session = PracticeSession(
-          nativeLang: session.nativeLang,
-          targetLang: session.targetLang,
-          level: session.level,
-          cards: cards,
-        );
+        setState(() {
+          _session = PracticeSession(
+            nativeLang: session.nativeLang,
+            targetLang: session.targetLang,
+            level: session.level,
+            cards: cards,
+          );
+          _saved = next;
+        });
       }
     } catch (err) {
       if (!mounted) return;
@@ -329,7 +335,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
                                   hintVisible: _hintVisible,
                                   saved: _saved,
                                   listening: _listening,
-                                  saveLabel: text.save,
+                                  saveLabel: _saved ? text.saved : text.save,
                                   listenLabel: text.listen,
                                   hintLabel: text.hint,
                                   onSave: _onToggleSave,
@@ -337,7 +343,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
                                   onHint: () => setState(
                                     () => _hintVisible = !_hintVisible,
                                   ),
-                                  saveRed: _saveRed,
+                                  saveIdle: _saveIdle,
                                   saveBg: _saveBg,
                                   chipText: _chipText,
                                   hintBg: _hintBg,
@@ -404,7 +410,7 @@ class _WordCard extends StatelessWidget {
     required this.onSave,
     required this.onListen,
     required this.onHint,
-    required this.saveRed,
+    required this.saveIdle,
     required this.saveBg,
     required this.chipText,
     required this.hintBg,
@@ -425,7 +431,7 @@ class _WordCard extends StatelessWidget {
   final VoidCallback onSave;
   final VoidCallback onListen;
   final VoidCallback onHint;
-  final Color saveRed;
+  final Color saveIdle;
   final Color saveBg;
   final Color chipText;
   final Color hintBg;
@@ -482,15 +488,15 @@ class _WordCard extends StatelessWidget {
               Expanded(
                 child: _ActionChipButton(
                   label: saveLabel,
-                  background: saved ? const Color(0x33FF383C) : saveBg,
-                  foreground: saveRed,
-                  icon: saved
-                      ? Icon(Icons.favorite, size: 20, color: saveRed)
-                      : const HomeAsset(
-                          'assets/images/heart.svg',
-                          width: 20,
-                          height: 20,
-                        ),
+                  background: saveBg,
+                  foreground:
+                      saved ? AppColors.primary : saveIdle,
+                  icon: HomeAsset(
+                    AppAssets.profileSaveButton,
+                    width: 20,
+                    height: 20,
+                    color: saved ? AppColors.primary : saveIdle,
+                  ),
                   onTap: onSave,
                 ),
               ),
@@ -514,8 +520,10 @@ class _WordCard extends StatelessWidget {
                   label: hintLabel,
                   background: hintBg,
                   foreground: AppColors.primary,
-                  icon: const HomeAsset(
-                    'assets/images/noHint.svg',
+                  icon: HomeAsset(
+                    hintVisible
+                        ? AppAssets.hintOn
+                        : AppAssets.hint,
                     width: 20,
                     height: 20,
                   ),

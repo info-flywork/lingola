@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:record/record.dart';
 
+import 'hold_to_speak_service.dart';
 import 'openai_chat_service.dart';
 import 'tutor_tts_service.dart';
 import 'viseme_cue.dart';
+import '../../../core/auth/auth_service.dart';
+import '../../../core/auth/session_store.dart';
 
 enum CallMessageRole { tutor, user }
 
@@ -37,13 +37,12 @@ class CallMessage {
   final String? translation;
 }
 
-/// Start Talk → kayıt (record) + OpenAI Whisper + Chat + ElevenLabs.
-/// Mindcoach gibi Apple Speech kullanmaz → simülatörde de çalışır.
+/// Start Talk → cihaz STT (anında) veya Whisper fallback + Chat + ElevenLabs flash.
 class CallingConversationController extends ChangeNotifier {
   CallingConversationController({
     OpenAiChatService? chat,
     TutorTtsService? tts,
-    AudioRecorder? recorder,
+    HoldToSpeakService? mic,
     AudioPlayer? player,
     this.voiceId,
     this.openingLine,
@@ -52,8 +51,8 @@ class CallingConversationController extends ChangeNotifier {
     this.lessonMode = false,
   })  : _chat = chat ?? OpenAiChatService(),
         _tts = tts ?? TutorTtsService(),
-        _recorder = recorder ?? AudioRecorder(),
         _player = player ?? AudioPlayer() {
+    _mic = mic ?? HoldToSpeakService(whisper: _chat);
     _playerCompleteSub = _player.onPlayerComplete.listen((_) {
       if (_suppressPlayerComplete) return;
       _finishSpeaking();
@@ -69,7 +68,7 @@ class CallingConversationController extends ChangeNotifier {
 
   final OpenAiChatService _chat;
   final TutorTtsService _tts;
-  final AudioRecorder _recorder;
+  late final HoldToSpeakService _mic;
   final AudioPlayer _player;
   final String? voiceId;
   final String? openingLine;
@@ -90,9 +89,9 @@ class CallingConversationController extends ChangeNotifier {
   var _listening = false;
   var _speaking = false;
   String? _error;
-  String? _recordingPath;
   List<VisemeCue> _visemeTrack = const [];
   double _currentViseme = 0;
+  DateTime? _lastVisemeAppliedAt;
   double? _speechEndSec;
   double? _audioDurationSec;
   Timer? _lipsyncPollTimer;
@@ -100,8 +99,13 @@ class CallingConversationController extends ChangeNotifier {
   var _lipsActive = false;
   Timer? _idleNudgeTimer;
   Timer? _extensionSilenceTimer;
+  Timer? _inactivityTimer;
+  Timer? _inactivityConfirmTimer;
   var _userHasSpoken = false;
   var _nudgeCount = 0;
+  var _awaitingInactivityConfirm = false;
+  DateTime? _lastUserSpeechAt;
+  late final DateTime _callStartedAt = DateTime.now();
   var _disposed = false;
   var _suppressPlayerComplete = false;
   double _playbackRate = 1.0;
@@ -118,6 +122,17 @@ class CallingConversationController extends ChangeNotifier {
 
   static const _maxNudges = 2;
   static const playbackRates = <double>[0.5, 1.0, 1.5, 2.0];
+  static const _userInactivityTimeout = Duration(minutes: 2);
+  static const _inactivityConfirmTimeout = Duration(seconds: 28);
+
+  /// Eğlenceli / alternatif hoca önerileri (sessizlikle bitişte).
+  static const _funTutorSuggestions = <(String slug, String label)>[
+    ('elrion', 'Elrion the elf'),
+    ('vaelen', 'Vaelen the witch'),
+    ('zephyrion', 'Zephyrion the alien'),
+    ('ukrath', 'Ukrath the orc'),
+    ('santa', 'Santa'),
+  ];
 
   bool get busy => _busy;
   bool get listening => _listening;
@@ -135,8 +150,8 @@ class CallingConversationController extends ChangeNotifier {
   bool get hasLipsyncTrack => _visemeTrack.isNotEmpty;
 
   /// Rive `talk` — konuşma aktifken true.
-  /// Sessizlikte (viseme 0) widget `talk=false` yazar ama talking prop kalır
-  /// ki kelime arası lockout olmasın.
+  /// Kelime arası sessizlikte de true kalır; ağız kapanması `visemeNum=0` ile yapılır
+  /// (prop false olursa lockout yüzünden sonraki hece gecikir).
   bool get avatarTalking => _speaking && _lipsActive;
 
   void _notify() {
@@ -151,6 +166,10 @@ class CallingConversationController extends ChangeNotifier {
     try {
       await _player.setPlaybackRate(next);
     } catch (_) {}
+    // Rate değişince konuşma bitiş timer'ını yeni hıza göre yeniden kur.
+    if (_speaking) {
+      _scheduleSpeechEndFallback(_audioDurationSec ?? _speechEndSec);
+    }
     notifyListeners();
   }
 
@@ -160,6 +179,9 @@ class CallingConversationController extends ChangeNotifier {
     try {
       await _player.setPlaybackRate(rate);
     } catch (_) {}
+    if (_speaking) {
+      _scheduleSpeechEndFallback(_audioDurationSec ?? _speechEndSec);
+    }
     notifyListeners();
   }
 
@@ -218,10 +240,23 @@ class CallingConversationController extends ChangeNotifier {
       });
     }
 
-    if (next != _currentViseme) {
-      _currentViseme = next;
-      _notify();
+    if (next == _currentViseme) return;
+
+    // Wall-clock gap'i playback rate'e göre ölçekle — 1.5x'te dudak sese yetişsin.
+    // Sessizliğe (0) geçiş her zaman anında olsun (kelime arası).
+    final rate = _playbackRate <= 0 ? 1.0 : _playbackRate;
+    final gapMs = (kMinVisemeGapMs / rate).round().clamp(40, kMinVisemeGapMs);
+    final now = DateTime.now();
+    final last = _lastVisemeAppliedAt;
+    if (next != 0 &&
+        last != null &&
+        now.difference(last).inMilliseconds < gapMs) {
+      return;
     }
+
+    _currentViseme = next;
+    _lastVisemeAppliedAt = now;
+    _notify();
   }
 
   void _scheduleSpeechEndFallback(double? audioSec) {
@@ -263,6 +298,7 @@ class CallingConversationController extends ChangeNotifier {
     _lipsActive = false;
     _currentViseme = 0;
     _visemeTrack = const [];
+    _lastVisemeAppliedAt = null;
     _speechEndSec = null;
     _audioDurationSec = null;
     _lastPolledPos = null;
@@ -278,6 +314,9 @@ class CallingConversationController extends ChangeNotifier {
     }
     _notify();
     _scheduleIdleNudge();
+    if (!_awaitingInactivityConfirm) {
+      _armUserInactivityWatch();
+    }
   }
 
   Future<void> _resolveSpeechEnd(TutorSpeechAudio speech) async {
@@ -292,14 +331,19 @@ class CallingConversationController extends ChangeNotifier {
         ? duration.inMilliseconds / 1000.0
         : null;
     _audioDurationSec = audioSec;
+    if (audioSec != null && speech.visemes.isNotEmpty) {
+      _visemeTrack = scaleVisemesToAudioDuration(speech.visemes, audioSec);
+    }
     _speechEndSec = effectiveSpeechEndSec(
-      visemes: speech.visemes,
+      visemes: _visemeTrack.isNotEmpty ? _visemeTrack : speech.visemes,
       audioDurationSec: audioSec,
     );
     _scheduleSpeechEndFallback(audioSec);
   }
 
   Future<void> start() async {
+    // Cihaz STT'yi açılışta ısıt — ilk mic bırakışında ağ Whisper'a düşmesin.
+    unawaited(_mic.warmUp());
     await _preparePlaybackSession();
     notifyListeners();
     await _tutorSay(
@@ -308,6 +352,7 @@ class CallingConversationController extends ChangeNotifier {
               'How are you today?',
     );
     if (!_speaking) _scheduleIdleNudge();
+    _armUserInactivityWatch();
   }
 
   void _cancelIdleNudge() {
@@ -401,9 +446,7 @@ class CallingConversationController extends ChangeNotifier {
     } catch (_) {}
   }
 
-  DateTime? _recordStartedAt;
-
-  /// Basılı tutunca kayıt; bırakınca Whisper.
+  /// Basılı tutunca dinle; bırakınca cihaz STT (anında) veya Whisper.
   Future<void> startListening() async {
     if (_busy || _listening) return;
     _cancelIdleNudge();
@@ -416,38 +459,20 @@ class CallingConversationController extends ChangeNotifier {
     _speechEndSec = null;
     _audioDurationSec = null;
     _notify();
-    await Future<void>.delayed(const Duration(milliseconds: 150));
-
-    final hasPermission = await _recorder.hasPermission();
-    if (!hasPermission) {
-      _error = 'Mikrofon izni gerekli. Ayarlardan izin ver.';
-      notifyListeners();
-      return;
-    }
+    await Future<void>.delayed(const Duration(milliseconds: 80));
 
     try {
-      final dir = await getTemporaryDirectory();
-      _recordingPath =
-          '${dir.path}/lingola_mic_${DateTime.now().millisecondsSinceEpoch}.m4a';
-
-      await _recorder.start(
-        const RecordConfig(
-          encoder: AudioEncoder.aacLc,
-          sampleRate: 44100,
-          numChannels: 1,
-          bitRate: 128000,
-        ),
-        path: _recordingPath!,
-      );
-
-      _recordStartedAt = DateTime.now();
+      // warmUp bitmemiş olabilir — ilk turda da dene.
+      await _mic.warmUp();
+      await _mic.start();
       _error = null;
       _listening = true;
       notifyListeners();
     } catch (e) {
       _listening = false;
-      _recordStartedAt = null;
-      _error = 'Kayıt başlatılamadı: $e';
+      _error = e.toString().contains('Mikrofon')
+          ? 'Mikrofon izni gerekli. Ayarlardan izin ver.'
+          : 'Kayıt başlatılamadı: $e';
       notifyListeners();
       _scheduleIdleNudge();
     }
@@ -474,53 +499,20 @@ class CallingConversationController extends ChangeNotifier {
 
     String? transcribed;
     try {
-      final started = _recordStartedAt;
-      if (started != null) {
-        final elapsed = DateTime.now().difference(started);
-        if (elapsed < const Duration(milliseconds: 600)) {
-          await Future<void>.delayed(
-            const Duration(milliseconds: 600) - elapsed,
-          );
-        }
-      }
-
-      final path = await _recorder
-          .stop()
-          .timeout(const Duration(seconds: 5), onTimeout: () => _recordingPath);
-      final filePath = path ?? _recordingPath;
-      if (filePath == null || !File(filePath).existsSync()) {
-        _error = 'Kayıt alınamadı — mikrofona basılı tutup konuş.';
-        return;
-      }
-
-      final file = File(filePath);
-      final bytes = await file.length();
-      debugPrint('Mic kayıt boyutu: $bytes byte, path=$filePath');
-
-      if (bytes < 200) {
-        _error = 'Ses alınamadı — basılı tut (1–2 sn) ve konuş.';
-        return;
-      }
-
-      final text = (await _chat.transcribe(file).timeout(
-        const Duration(seconds: 45),
-      )).trim();
-      try {
-        await file.delete();
-      } catch (_) {}
-
+      final text = (await _mic.stopAndGetText()).trim();
       if (text.isEmpty) {
         _error = 'Ses anlaşılamadı — daha net / yakından konuş.';
         return;
       }
-
+      debugPrint(
+        'Mic STT ok: ${text.length} chars'
+        ' (device=${_mic.deviceSttAvailable})',
+      );
       _error = null;
       transcribed = text;
     } catch (e) {
       _error = e.toString();
     } finally {
-      _recordingPath = null;
-      _recordStartedAt = null;
       _busy = false;
       _listening = false;
       notifyListeners();
@@ -541,9 +533,29 @@ class CallingConversationController extends ChangeNotifier {
 
   Future<void> _onUserSpeech(String text) async {
     _userHasSpoken = true;
+    _lastUserSpeechAt = DateTime.now();
     _cancelIdleNudge();
+    _clearInactivityConfirmWatch();
+    if (_awaitingInactivityConfirm) {
+      final decision = _parseInactivityDecision(text);
+      messages.add(CallMessage(role: CallMessageRole.user, text: text));
+      notifyListeners();
+      if (decision == _InactivityDecision.continuePractice) {
+        _awaitingInactivityConfirm = false;
+        _armUserInactivityWatch();
+        await _tutorSay(
+          "No problem — I'm here whenever you're ready. Let's keep going.",
+        );
+        return;
+      }
+      // Hayır / belirsiz → bitir (onay gelmezse de aynı).
+      _awaitingInactivityConfirm = false;
+      await _closeAfterInactivity(userSaidNo: decision == _InactivityDecision.end);
+      return;
+    }
     messages.add(CallMessage(role: CallMessageRole.user, text: text));
     notifyListeners();
+    _armUserInactivityWatch();
 
     if (_awaitingExtensionReply) {
       final decision = _parseExtensionDecision(text);
@@ -694,6 +706,149 @@ class CallingConversationController extends ChangeNotifier {
     if (!_disposed) onRequestEndLesson?.call();
   }
 
+  String get _learnerFirstName {
+    final raw = AuthService.displayNameOf(SessionStore.currentUser).trim();
+    if (raw.isEmpty || raw.toLowerCase() == 'guest') return 'there';
+    final first = raw.split(RegExp(r'\s+')).first.trim();
+    return first.isEmpty ? 'there' : first;
+  }
+
+  (String slug, String label) _randomFunTutorSuggestion() {
+    final current = (tutorSlug ?? '').toLowerCase();
+    final options = _funTutorSuggestions
+        .where((e) => e.$1 != current)
+        .toList(growable: false);
+    final pool = options.isEmpty ? _funTutorSuggestions : options;
+    return pool[DateTime.now().millisecondsSinceEpoch % pool.length];
+  }
+
+  void _armUserInactivityWatch() {
+    _inactivityTimer?.cancel();
+    if (_disposed || _awaitingInactivityConfirm || _awaitingExtensionReply) {
+      return;
+    }
+    final anchor = _lastUserSpeechAt ?? _callStartedAt;
+    final elapsed = DateTime.now().difference(anchor);
+    var remaining = _userInactivityTimeout - elapsed;
+    if (remaining.isNegative) remaining = Duration.zero;
+    _inactivityTimer = Timer(remaining, () {
+      unawaited(_onUserInactivityTimeout());
+    });
+  }
+
+  void _clearUserInactivityWatch() {
+    _inactivityTimer?.cancel();
+    _inactivityTimer = null;
+  }
+
+  void _clearInactivityConfirmWatch() {
+    _inactivityConfirmTimer?.cancel();
+    _inactivityConfirmTimer = null;
+  }
+
+  Future<void> _onUserInactivityTimeout() async {
+    if (_disposed || _awaitingInactivityConfirm || _awaitingExtensionReply) {
+      return;
+    }
+    if (_listening || _busy || _speaking) {
+      // Konuşma/kayıt bitince tekrar dene.
+      _inactivityTimer = Timer(const Duration(seconds: 4), () {
+        unawaited(_onUserInactivityTimeout());
+      });
+      return;
+    }
+    _cancelIdleNudge();
+    _clearUserInactivityWatch();
+    _awaitingInactivityConfirm = true;
+    final name = _learnerFirstName;
+    await _tutorSay(
+      '$name, I understand — this might not be a good time to talk. '
+      "If you don't speak, it won't be effective, so I think we should end the lesson. "
+      'Okay?',
+    );
+    _armInactivityConfirmWatch();
+  }
+
+  void _armInactivityConfirmWatch() {
+    _clearInactivityConfirmWatch();
+    _inactivityConfirmTimer = Timer(_inactivityConfirmTimeout, () {
+      unawaited(_onInactivityConfirmSilence());
+    });
+  }
+
+  Future<void> _onInactivityConfirmSilence() async {
+    if (_disposed || !_awaitingInactivityConfirm) return;
+    if (_listening || _busy || _speaking) {
+      _armInactivityConfirmWatch();
+      return;
+    }
+    _awaitingInactivityConfirm = false;
+    await _closeAfterInactivity(userSaidNo: false);
+  }
+
+  Future<void> _closeAfterInactivity({required bool userSaidNo}) async {
+    _clearInactivityConfirmWatch();
+    _clearUserInactivityWatch();
+    _cancelIdleNudge();
+    final tip = _randomFunTutorSuggestion();
+    await _tutorSayAndWait(
+      'Take care of yourself. '
+      "If practicing with me isn't working right now, next time try someone more fun — "
+      'maybe ${tip.$2}. Goodbye!',
+    );
+    if (!_disposed) onRequestEndLesson?.call();
+  }
+
+  _InactivityDecision? _parseInactivityDecision(String raw) {
+    final t = raw.toLowerCase().trim();
+    if (t.isEmpty) return null;
+    bool has(String key) =>
+        RegExp('\\b${RegExp.escape(key)}\\b').hasMatch(t);
+
+    const continueKeys = [
+      'continue',
+      'keep going',
+      'keep practicing',
+      'ready',
+      'yes',
+      'yeah',
+      'yep',
+      'ok',
+      'okay',
+      'evet',
+      'devam',
+      "i'm here",
+      'im here',
+      'still here',
+      'wait',
+      'not yet',
+      'one more',
+    ];
+    const endKeys = [
+      'no',
+      'hayır',
+      'hayir',
+      'finish',
+      'end',
+      'stop',
+      'done',
+      'bitir',
+      'enough',
+      'bye',
+      'close',
+      'goodbye',
+    ];
+    for (final k in endKeys) {
+      if (has(k)) return _InactivityDecision.end;
+    }
+    for (final k in continueKeys) {
+      if (t.contains(k) || has(k)) {
+        return _InactivityDecision.continuePractice;
+      }
+    }
+    return null;
+  }
+
   Future<void> _finishLessonAfterReply({required String userMessage}) async {
     _clearExtensionWatch();
     _awaitingExtensionReply = false;
@@ -819,19 +974,24 @@ class CallingConversationController extends ChangeNotifier {
 
     try {
       final speech = await _tts
-          .synthesizeForLipsync(text, voiceId: voiceId)
+          .synthesizeForLipsync(
+            text,
+            voiceId: voiceId,
+            modelId: TutorTtsService.flashModel,
+          )
           .timeout(const Duration(seconds: 45));
       _suppressPlayerComplete = true;
       await _player.stop();
       await Future<void>.delayed(const Duration(milliseconds: 40));
       await _preparePlaybackSession();
-      _visemeTrack = speech.visemes;
+      _visemeTrack = coalesceVisemes(speech.visemes);
       _speechEndSec = effectiveSpeechEndSec(
-        visemes: speech.visemes,
+        visemes: _visemeTrack,
         audioDurationSec: null,
       );
       _audioDurationSec = null;
       _currentViseme = 0;
+      _lastVisemeAppliedAt = null;
       _lipsActive = true;
       _hadOpenMouth = false;
       await _player.setPlaybackRate(_playbackRate);
@@ -943,23 +1103,18 @@ class CallingConversationController extends ChangeNotifier {
     unawaited(_playerStateSub?.cancel());
     _cancelIdleNudge();
     _clearExtensionWatch();
+    _clearUserInactivityWatch();
+    _clearInactivityConfirmWatch();
     unawaited(_playerCompleteSub?.cancel());
     unawaited(_playerPositionSub?.cancel());
-    unawaited(_disposeRecorder());
+    unawaited(_mic.dispose());
     unawaited(_player.dispose());
     _chat.dispose();
     _tts.dispose();
     super.dispose();
   }
-
-  Future<void> _disposeRecorder() async {
-    try {
-      if (await _recorder.isRecording()) {
-        await _recorder.stop();
-      }
-    } catch (_) {}
-    await _recorder.dispose();
-  }
 }
 
 enum _ExtensionDecision { continuePractice, finish }
+
+enum _InactivityDecision { continuePractice, end }

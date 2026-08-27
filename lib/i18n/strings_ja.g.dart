@@ -346,6 +346,7 @@ class _Translations$wordPracticePage$ja implements Translations$wordPracticePage
 	@override String get title => '単語練習';
 	@override String get turkish => 'トルコ語';
 	@override String get save => '保存する';
+	@override String get saved => '保存済み';
 	@override String get listen => '聞く';
 	@override String get hint => 'ヒント';
 	@override String get previous => '前へ';
@@ -507,6 +508,10 @@ class _Translations$notificationsPage$ja implements Translations$notificationsPa
 
 	// Translations
 	@override String get title => '通知';
+	@override String get deleteConfirmTitle => 'よろしいですか？';
+	@override String get deleteConfirmBody => 'この通知は削除されます。';
+	@override String get delete => '削除';
+	@override String get cancel => 'キャンセル';
 	@override late final _Translations$notificationsPage$translation$ja translation = _Translations$notificationsPage$translation$ja._(_root);
 	@override late final _Translations$notificationsPage$offer$ja offer = _Translations$notificationsPage$offer$ja._(_root);
 	@override late final _Translations$notificationsPage$stories$ja stories = _Translations$notificationsPage$stories$ja._(_root);
@@ -565,6 +570,8 @@ class _Translations$profilePage$ja implements Translations$profilePage$en {
 	@override String get selectLanguageTitle => '言語を選択';
 	@override String get premium => 'プレミアム';
 	@override String get passive => 'パッシブ';
+	@override String get active => '有効';
+	@override String get premiumVersion => 'Premium';
 	@override String get shareFriend => '友達と共有';
 	@override String get shareWithFriendTitle => '友達と共有';
 	@override String get shareInviteBody => '友達を招待して、一緒に翻訳を楽しもう';
@@ -1565,6 +1572,7 @@ extension on TranslationsJa {
 			'wordPracticePage.title' => '単語練習',
 			'wordPracticePage.turkish' => 'トルコ語',
 			'wordPracticePage.save' => '保存する',
+			'wordPracticePage.saved' => '保存済み',
 			'wordPracticePage.listen' => '聞く',
 			'wordPracticePage.hint' => 'ヒント',
 			'wordPracticePage.previous' => '前へ',
@@ -1884,9 +1892,9 @@ extension on TranslationsJa {
 			'lessonPage.levels.c1.lessons.5' => 'タイムトラベル',
 			'lessonPage.levels.c1.lessons.6' => '所有物',
 			'lessonPage.levels.c1.lessons.7' => '仕事のスキル',
-			'lessonPage.levels.c1.lessons.8' => '歴史的変化',
 			_ => null,
 		} ?? switch (path) {
+			'lessonPage.levels.c1.lessons.8' => '歴史的変化',
 			'lessonPage.levels.c1.lessons.9' => 'レビューライティング',
 			'lessonPage.levels.c1.lessons.10' => 'ミステリー',
 			'lessonPage.levels.c1.lessons.11' => '奇妙な理論',
@@ -1960,6 +1968,10 @@ extension on TranslationsJa {
 			'rolePlayPage.interview.chat.incoming2Rest' => 'ですね。最近誇りに思っているプロジェクトについて教えてください。',
 			'rolePlayPage.interview.chat.botReply' => 'それは素晴らしいですね。この役割について何か質問はありますか？',
 			'notificationsPage.title' => '通知',
+			'notificationsPage.deleteConfirmTitle' => 'よろしいですか？',
+			'notificationsPage.deleteConfirmBody' => 'この通知は削除されます。',
+			'notificationsPage.delete' => '削除',
+			'notificationsPage.cancel' => 'キャンセル',
 			'notificationsPage.translation.title' => '新しい翻訳が準備できました',
 			'notificationsPage.translation.body' => 'あなたの音声翻訳ファイルはテキストに変換され、翻訳されました。',
 			'notificationsPage.offer.title' => '特別オファーが待っています',
@@ -2017,6 +2029,8 @@ extension on TranslationsJa {
 			'profilePage.selectLanguageTitle' => '言語を選択',
 			'profilePage.premium' => 'プレミアム',
 			'profilePage.passive' => 'パッシブ',
+			'profilePage.active' => '有効',
+			'profilePage.premiumVersion' => 'Premium',
 			'profilePage.shareFriend' => '友達と共有',
 			'profilePage.shareWithFriendTitle' => '友達と共有',
 			'profilePage.shareInviteBody' => '友達を招待して、一緒に翻訳を楽しもう',

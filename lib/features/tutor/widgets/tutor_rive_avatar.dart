@@ -56,10 +56,12 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   String? _activeUrl;
   DateTime? _forceCloseLockedUntil;
 
-  static const _talkOpenBlendMs = 45.0;
-  static const _visemeBlendMs = 38.0;
-  static const _talkCloseBlendMs = 40.0;
+  static const _talkOpenBlendMs = 70.0;
+  /// Viseme geçiş blend'i — kısa olursa ağız titrer.
+  static const _visemeBlendMs = 110.0;
+  static const _talkCloseBlendMs = 55.0;
   static const _forceCloseLockoutMs = 220;
+  DateTime? _lastVisemePushAt;
 
   @override
   void initState() {
@@ -106,8 +108,7 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     }
 
     if (newV != null && oldV != newV) {
-      _setRiveBool('talk', true);
-      _applyLipsyncViseme(newV);
+      _pushLipsyncViseme(newV);
     } else if (newV == null && oldV != null) {
       _startTalkIdleCycle();
     }
@@ -281,7 +282,7 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       _setRiveNumber('duration', _talkOpenBlendMs);
       final v = widget.lipsyncViseme;
       if (v != null) {
-        _applyLipsyncViseme(v);
+        _pushLipsyncViseme(v, force: true);
       } else {
         _startTalkIdleCycle();
       }
@@ -292,10 +293,11 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
   void _startTalkIdleCycle() {
     _visemeTimer?.cancel();
-    const cycle = <double>[6, 10, 14, 2, 10, 6];
+    // Yavaş idle — gerçek lipsync yokken bile ağız koşmasın.
+    const cycle = <double>[6, 10, 14, 6, 2, 10];
     var i = 0;
-    _applyLipsyncViseme(cycle[0]);
-    _visemeTimer = Timer.periodic(const Duration(milliseconds: 110), (_) {
+    _pushLipsyncViseme(cycle[0], force: true);
+    _visemeTimer = Timer.periodic(const Duration(milliseconds: 240), (_) {
       if (!mounted || !widget.talking) {
         _visemeTimer?.cancel();
         _visemeTimer = null;
@@ -308,7 +310,7 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       }
       i = (i + 1) % cycle.length;
       _setRiveBool('talk', true);
-      _applyLipsyncViseme(cycle[i]);
+      _pushLipsyncViseme(cycle[i], force: true);
     });
   }
 
@@ -338,7 +340,30 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     });
   }
 
-  void _applyLipsyncViseme(double id) {
+  /// Rive'a viseme bas — min aralık + yumuşak blend.
+  /// id=0: kelime arası / sessizlik → ağız kapat (lockout YOK, hece gecikmesin).
+  void _pushLipsyncViseme(double id, {bool force = false}) {
+    final now = DateTime.now();
+    final last = _lastVisemePushAt;
+    if (!force &&
+        id != 0 &&
+        last != null &&
+        now.difference(last).inMilliseconds < 70) {
+      return;
+    }
+    _lastVisemePushAt = now;
+
+    if (id == 0) {
+      _forceCloseLockedUntil = null;
+      _closeLockTimer?.cancel();
+      _setRiveNumber('duration', _talkCloseBlendMs);
+      _setVisemeValues(0);
+      _setRiveBool('talk', false);
+      return;
+    }
+
+    _forceCloseLockedUntil = null;
+    _setRiveBool('talk', true);
     _setVisemeValues(id);
     _setRiveNumber('duration', _visemeBlendMs);
   }

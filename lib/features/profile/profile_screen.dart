@@ -3,16 +3,15 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/i18n/app_locale_sync.dart';
 import '../../core/notifications/lingola_notification_service.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/auth/session_store.dart';
-import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
@@ -201,10 +200,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 20),
               Center(
-                child: UserAvatar(
-                  size: 86,
-                  avatarUrl: _avatarUrl,
-                  displayName: _displayName,
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: PremiumService.isPremiumListenable,
+                  builder: (context, isPremium, _) {
+                    return UserAvatar(
+                      size: 86,
+                      avatarUrl: _avatarUrl,
+                      displayName: _displayName,
+                      showPremiumBadge: isPremium,
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 12),
@@ -222,25 +227,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 10),
               Center(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(999),
-                    gradient: const LinearGradient(
-                      colors: [_badgeStart, AppColors.primary],
-                    ),
-                  ),
-                  child: Text(
-                    text.freeVersion,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      height: 24 / 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: PremiumService.isPremiumListenable,
+                  builder: (context, isPremium, _) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        gradient: const LinearGradient(
+                          colors: [_badgeStart, AppColors.primary],
+                        ),
+                      ),
+                      child: Text(
+                        isPremium ? text.premiumVersion : text.freeVersion,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12,
+                          height: 24 / 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 24),
@@ -347,14 +359,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 10),
               _SettingsGroup(
                 children: [
-                  _SettingsTile(
-                    icon: AppAssets.profileCrown,
-                    iconBg: _premiumOrangeBg,
-                    label: text.premium,
-                    labelColor: _premiumOrange,
-                    valueLabel: text.passive,
-                    valueColor: _premiumOrange,
-                    onTap: () => unawaited(_presentProfilePaywall(context)),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: PremiumService.isPremiumListenable,
+                    builder: (context, isPremium, _) {
+                      return _SettingsTile(
+                        icon: AppAssets.profileCrown,
+                        iconBg: _premiumOrangeBg,
+                        label: text.premium,
+                        labelColor: _premiumOrange,
+                        valueLabel: isPremium ? text.active : text.passive,
+                        valueColor: _premiumOrange,
+                        onTap: isPremium
+                            ? null
+                            : () => unawaited(
+                                  PremiumService.presentPaywall(context),
+                                ),
+                      );
+                    },
                   ),
                   _SettingsTile(
                     icon: AppAssets.profileShareFriends,
@@ -422,26 +443,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _presentProfilePaywall(BuildContext context) async {
-    final hasKey = AppEnv.revenueCatIosPublicKey.isNotEmpty ||
-        AppEnv.revenueCatAndroidPublicKey.isNotEmpty;
-    if (!hasKey) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Paywall is not configured yet.')),
-      );
-      return;
-    }
-    try {
-      await RevenueCatUI.presentPaywall(displayCloseButton: true);
-    } catch (_) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppText.current.common.genericError)),
-      );
-    }
   }
 
   Future<void> _openRateUs() async {

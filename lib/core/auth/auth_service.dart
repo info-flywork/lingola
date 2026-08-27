@@ -2,6 +2,7 @@ import '../../features/onboarding/onboarding_draft.dart';
 import '../../features/onboarding/services/onboarding_preview_chat_store.dart';
 import '../../features/tutor/services/tutor_chat_api_service.dart';
 import '../i18n/app_locale_sync.dart';
+import '../premium/premium_service.dart';
 import 'dart:convert';
 
 import 'api_client.dart';
@@ -72,6 +73,7 @@ abstract final class AuthService {
     );
     await _claimOnboardingPreviewIfAny();
     await AppLocaleSync.applyFromUser(user.appLocale);
+    await PremiumService.syncIdentity(user);
     return user;
   }
 
@@ -141,6 +143,7 @@ abstract final class AuthService {
         expiresAt: SessionStore.expiresAt,
       );
       await AppLocaleSync.applyFromUser(user.appLocale);
+      await PremiumService.syncIdentity(user);
       return user;
     } on ApiException catch (err) {
       if (err.statusCode == 401) {
@@ -150,9 +153,11 @@ abstract final class AuthService {
         return null;
       }
       await AppLocaleSync.applyFromUser(cached?.appLocale);
+      if (cached != null) await PremiumService.syncIdentity(cached);
       return cached;
     } catch (_) {
       await AppLocaleSync.applyFromUser(cached?.appLocale);
+      if (cached != null) await PremiumService.syncIdentity(cached);
       return cached;
     }
   }
@@ -265,6 +270,7 @@ abstract final class AuthService {
       await ApiClient.post('/auth/logout', auth: true, allowRefresh: false);
     } catch (_) {}
     await FirebaseAuthGateway.signOut();
+    await PremiumService.logOut();
     await SessionStore.clear();
     await AppLocaleSync.applyCode('en');
   }

@@ -8,6 +8,8 @@ abstract final class AppAssets {
   static const whiteSpeaker = 'assets/images/whiteSpeaker.svg';
   static const translate = 'assets/images/translate.svg';
   static const hint = 'assets/images/noHint.svg';
+  /// İpucu açık (çizgisiz ampul).
+  static const hintOn = 'assets/images/hintOn.svg';
   static const lightbulb = 'assets/images/ampul.svg';
   static const send = 'assets/images/oksign.svg';
   static const success = 'assets/images/quizSection/succesfull.svg';
@@ -122,6 +124,8 @@ abstract final class AppAssets {
   static const profileLock = 'assets/images/profilIcons/lock.svg';
   static const profileNotification =
       'assets/images/home/notification_icon.svg';
+  static const notificationTrash =
+      'assets/images/notifications/trash.svg';
   static const profileStreakFlame = 'assets/images/home/streak_icon.svg';
   static const profileFireOrange =
       'assets/images/profilIcons/fireOrange.svg';

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 
 import '../../core/auth/auth_service.dart';
 import '../../core/auth/app_user.dart';
@@ -9,6 +8,7 @@ import '../../core/auth/session_store.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/i18n/app_locale_sync.dart';
+import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
 import '../../widgets/user_avatar.dart';
@@ -23,26 +23,6 @@ import '../quiz/quiz_screen.dart';
 import '../shell/main_shell.dart';
 import '../tutor/calling_screen.dart';
 import 'services/home_data_service.dart';
-
-Future<void> _presentHomePaywall(BuildContext context) async {
-  final hasKey = AppEnv.revenueCatIosPublicKey.isNotEmpty ||
-      AppEnv.revenueCatAndroidPublicKey.isNotEmpty;
-  if (!hasKey) {
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Paywall is not configured yet.')),
-    );
-    return;
-  }
-  try {
-    await RevenueCatUI.presentPaywall(displayCloseButton: true);
-  } catch (_) {
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppText.current.common.genericError)),
-    );
-  }
-}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -164,9 +144,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     tutors: _remoteData?.tutors,
                   ),
                   const SizedBox(height: 16),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: _PremiumCard(),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: PremiumService.isPremiumListenable,
+                    builder: (context, isPremium, _) {
+                      if (isPremium) return const SizedBox.shrink();
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: _PremiumCard(),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   _MoreFeaturesSection(title: text.home.moreFeatures),
@@ -292,7 +278,9 @@ class _MoreFeaturesSection extends StatelessWidget {
                   body: text.home.wordPracticeBody,
                   buttonColor: AppColors.primary,
                   buttonLabel: text.home.getStarted,
-                  onTap: () {
+                  onTap: () async {
+                    if (!await PremiumService.requirePremium(context)) return;
+                    if (!context.mounted) return;
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => const WordPracticeScreen(),
@@ -314,7 +302,9 @@ class _MoreFeaturesSection extends StatelessWidget {
                       '${text.home.quizBodyLine1}\n${text.home.quizBodyLine2}',
                   buttonColor: AppColors.quizOrange,
                   buttonLabel: text.home.getStarted,
-                  onTap: () {
+                  onTap: () async {
+                    if (!await PremiumService.requirePremium(context)) return;
+                    if (!context.mounted) return;
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => const QuizScreen(),
@@ -384,10 +374,16 @@ class _HomeHeaderState extends State<_HomeHeader> {
                     child: Semantics(
                       button: true,
                       label: text.app.profile,
-                      child: UserAvatar(
-                        size: 43,
-                        avatarUrl: avatarUrl,
-                        displayName: name,
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: PremiumService.isPremiumListenable,
+                        builder: (context, isPremium, _) {
+                          return UserAvatar(
+                            size: 43,
+                            avatarUrl: avatarUrl,
+                            displayName: name,
+                            showPremiumBadge: isPremium,
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -1113,7 +1109,14 @@ class _LiveTutorCarousel extends StatelessWidget {
             flagAsset: tutor.flagAsset,
             tags: tutor.tags,
             startTalkLabel: text.home.startTalkNow,
-            onStartTalk: () {
+            onStartTalk: () async {
+              if (!await PremiumService.requireTutorOrPaywall(
+                context,
+                tutor.slug,
+              )) {
+                return;
+              }
+              if (!context.mounted) return;
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => CallingScreen(
@@ -1445,7 +1448,8 @@ class _PremiumCard extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(10),
-                    onTap: () => unawaited(_presentHomePaywall(context)),
+                    onTap: () =>
+                        unawaited(PremiumService.presentPaywall(context)),
                     child: Container(
                       width: 179,
                       height: 44,
@@ -1656,7 +1660,9 @@ class _LibraryBanner extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
+        onTap: () async {
+          if (!await PremiumService.requirePremium(context)) return;
+          if (!context.mounted) return;
           Navigator.of(context).push(
             MaterialPageRoute<void>(builder: (_) => const LibraryScreen()),
           );

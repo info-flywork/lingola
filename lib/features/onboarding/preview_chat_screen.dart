@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -99,9 +101,12 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
     return result.assistantMessage.content;
   }
 
-  Future<void> _goPaywall() async {
+  void _closePreview() {
     if (!mounted) return;
-    await presentOnboardingPaywallThenAuth(context, widget.draft);
+    final draft = widget.draft;
+    // Navigasyon senkron — X basınca ekran anında kapansın.
+    // Paywall (varsa) Auth üstünde, ayrı async yol.
+    unawaited(presentOnboardingPaywallThenAuth(context, draft));
   }
 
   @override
@@ -121,8 +126,8 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
       errorText: _error,
       onRetry: _error != null ? _bootstrap : null,
       sessionLimit: canChat ? const Duration(minutes: 1) : null,
-      onClose: _goPaywall,
-      onSessionExpired: _goPaywall,
+      onClose: _closePreview,
+      onSessionExpired: _closePreview,
       initialMessages: _messages,
       ttsVoiceId: TutorVoiceIds.male,
       riveAsset: AppAssets.tutorLingolaRivCdn,

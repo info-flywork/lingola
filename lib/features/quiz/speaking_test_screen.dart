@@ -29,36 +29,48 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
       id: 'hobby',
       en: 'Describe your favorite hobby.',
       tr: 'En sevdiğin hobini anlat.',
+      exampleEn:
+          'My favorite hobby is reading. I usually read novels at night and also listen to music when I relax.',
       keywords: ['hobby', 'read', 'music', 'sport', 'movie', 'film'],
     ),
     _SpeakingPrompt(
       id: 'weekend',
       en: 'Talk about your last weekend.',
       tr: 'Geçen hafta sonunu anlat.',
+      exampleEn:
+          'Last weekend I stayed home on Saturday and met a friend on Sunday. We watched a movie together.',
       keywords: ['weekend', 'saturday', 'sunday', 'friend', 'home'],
     ),
     _SpeakingPrompt(
       id: 'happy',
       en: 'What makes you happy?',
       tr: 'Seni ne mutlu eder?',
+      exampleEn:
+          'Spending time with my family makes me happy. I also feel happy when I listen to music or travel.',
       keywords: ['happy', 'family', 'friend', 'music', 'travel'],
     ),
     _SpeakingPrompt(
       id: 'food',
       en: 'Describe your favorite food.',
       tr: 'En sevdiğin yemeği anlat.',
+      exampleEn:
+          'My favorite food is pizza. I also love pasta and a warm bowl of soup on cold days.',
       keywords: ['food', 'eat', 'pizza', 'pasta', 'rice', 'soup'],
     ),
     _SpeakingPrompt(
       id: 'travel',
       en: 'Where do you want to travel?',
       tr: 'Nereye seyahat etmek istersin?',
+      exampleEn:
+          'I want to travel to Italy and visit Rome. I also dream of a quiet beach city by the sea.',
       keywords: ['travel', 'visit', 'country', 'city', 'beach'],
     ),
     _SpeakingPrompt(
       id: 'friend',
       en: 'Tell me about your best friend.',
       tr: 'En iyi arkadaşını anlat.',
+      exampleEn:
+          'My best friend is kind and funny. We meet every week and always have a good time together.',
       keywords: ['friend', 'kind', 'funny', 'meet', 'together'],
     ),
   ];
@@ -115,6 +127,7 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
                 id: row.id,
                 en: row.promptEn,
                 tr: row.promptNative,
+                exampleEn: row.exampleAnswerEn,
                 keywords: row.keywords,
               ),
             )
@@ -168,10 +181,13 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
 
   String get _promptDisplay {
     if (_showTranslation) return _current.tr;
-    if (_showHint && _current.tr.isNotEmpty) {
-      return '${_current.en}\n\n${_current.tr}';
-    }
     return _current.en;
+  }
+
+  String? get _exampleHint {
+    if (!_showHint) return null;
+    final example = _current.exampleEn.trim();
+    return example.isEmpty ? null : example;
   }
 
   Future<void> _speakPrompt() async {
@@ -489,6 +505,7 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
                       title: text.speakingProficiency,
                       hint: text.speakClearlyHint,
                       prompt: '“$prompt”',
+                      exampleAnswer: _exampleHint,
                       speakUpLabel: text.speakUp,
                       submitLabel: text.submit,
                       durationLabel: _durationLabel,
@@ -549,12 +566,14 @@ class _SpeakingPrompt {
     required this.id,
     required this.en,
     required this.tr,
+    required this.exampleEn,
     required this.keywords,
   });
 
   final String id;
   final String en;
   final String tr;
+  final String exampleEn;
   final List<String> keywords;
 }
 
@@ -578,6 +597,7 @@ class _SpeakingCard extends StatelessWidget {
     required this.onHint,
     required this.onSpeakUp,
     required this.onSubmit,
+    this.exampleAnswer,
     this.translationActive = false,
     this.hintActive = false,
     this.speakingPrompt = false,
@@ -589,6 +609,7 @@ class _SpeakingCard extends StatelessWidget {
   final String title;
   final String hint;
   final String prompt;
+  final String? exampleAnswer;
   final String speakUpLabel;
   final String submitLabel;
   final String durationLabel;
@@ -692,6 +713,20 @@ class _SpeakingCard extends StatelessWidget {
               color: AppColors.primary,
             ),
           ),
+          if (exampleAnswer != null && exampleAnswer!.trim().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              exampleAnswer!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                height: 20 / 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.secondary,
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           Row(
             children: [
@@ -723,10 +758,9 @@ class _SpeakingCard extends StatelessWidget {
                 onTap: onHint,
                 active: hintActive,
                 child: HomeAsset(
-                  AppAssets.hint,
+                  hintActive ? AppAssets.hintOn : AppAssets.hint,
                   width: 22,
                   height: 22,
-                  color: hintActive ? AppColors.primary : null,
                 ),
               ),
               const Spacer(),

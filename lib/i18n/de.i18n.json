@@ -226,6 +226,7 @@
     "title": "Wortübung",
     "turkish": "TÜRKISCH",
     "save": "Speichern",
+    "saved": "Gespeichert",
     "listen": "Zuhören",
     "hint": "Hinweis",
     "previous": "VORHERIG",
@@ -677,6 +678,10 @@
   },
   "notificationsPage": {
     "title": "Benachrichtigungen",
+    "deleteConfirmTitle": "Sind Sie sicher?",
+    "deleteConfirmBody": "Diese Benachrichtigung wird gelöscht.",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
     "translation": {
       "title": "Neue Übersetzung Bereit",
       "body": "Ihre Audio-Übersetzungsdatei wurde erfolgreich in Text umgewandelt und übersetzt."
@@ -744,6 +749,8 @@
     "selectLanguageTitle": "Sprache auswählen",
     "premium": "Premium",
     "passive": "Passiv",
+    "active": "Aktiv",
+    "premiumVersion": "Premium",
     "shareFriend": "Freund teilen",
     "shareWithFriendTitle": "Mit Freund teilen",
     "shareInviteBody": "Lade deine Freunde ein und genießt das Übersetzen zusammen",
