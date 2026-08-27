@@ -143,6 +143,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     subtitle: text.home.liveLessonSubtitle,
                     action: text.home.moreTutor,
                     tutors: _remoteData?.tutors,
+                    continueData: _remoteData?.continueData,
+                    onResumeWithTutor: (slug) async {
+                      final data = _remoteData?.continueData;
+                      if (data == null || data.slug.isEmpty) return false;
+                      MainShell.goToLessons(context);
+                      await Future<void>.delayed(
+                        const Duration(milliseconds: 120),
+                      );
+                      if (!mounted) return true;
+                      await LessonScreen.resumeFromHome(
+                        slug: data.slug,
+                        label: data.lessonLabel,
+                        forceTutorSlug: slug,
+                      );
+                      if (!mounted) return true;
+                      await _loadRemoteData();
+                      return true;
+                    },
                   ),
                   const SizedBox(height: 16),
                   ValueListenableBuilder<bool>(
@@ -224,12 +242,16 @@ class _LiveLessonSection extends StatelessWidget {
     required this.subtitle,
     required this.action,
     this.tutors,
+    this.continueData,
+    this.onResumeWithTutor,
   });
 
   final String title;
   final String subtitle;
   final String action;
   final List<HomeTutorCarouselItem>? tutors;
+  final HomeContinueData? continueData;
+  final Future<bool> Function(String tutorSlug)? onResumeWithTutor;
 
   @override
   Widget build(BuildContext context) {
@@ -245,7 +267,11 @@ class _LiveLessonSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        _LiveTutorCarousel(tutors: tutors),
+        _LiveTutorCarousel(
+          tutors: tutors,
+          continueData: continueData,
+          onResumeWithTutor: onResumeWithTutor,
+        ),
       ],
     );
   }
@@ -1087,9 +1113,15 @@ class _ScrollPill extends StatelessWidget {
 }
 
 class _LiveTutorCarousel extends StatelessWidget {
-  const _LiveTutorCarousel({this.tutors});
+  const _LiveTutorCarousel({
+    this.tutors,
+    this.continueData,
+    this.onResumeWithTutor,
+  });
 
   final List<HomeTutorCarouselItem>? tutors;
+  final HomeContinueData? continueData;
+  final Future<bool> Function(String tutorSlug)? onResumeWithTutor;
 
   @override
   Widget build(BuildContext context) {
@@ -1120,6 +1152,16 @@ class _LiveTutorCarousel extends StatelessWidget {
                 tutor.slug,
               )) {
                 return;
+              }
+              if (!context.mounted) return;
+              final slug = tutor.slug;
+              if (slug != null &&
+                  slug.isNotEmpty &&
+                  continueData != null &&
+                  continueData!.slug.isNotEmpty &&
+                  onResumeWithTutor != null) {
+                final handled = await onResumeWithTutor!(slug);
+                if (handled) return;
               }
               if (!context.mounted) return;
               Navigator.of(context).push(

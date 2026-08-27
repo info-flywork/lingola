@@ -31,6 +31,7 @@ class LessonScreen extends StatefulWidget {
     required String label,
     String? tutorId,
     String? tutorSlug,
+    String? forceTutorSlug,
   }) async {
     final state = _state;
     if (state == null) return;
@@ -39,6 +40,7 @@ class LessonScreen extends StatefulWidget {
       label: label,
       tutorId: tutorId,
       tutorSlug: tutorSlug,
+      forceTutorSlug: forceTutorSlug,
     );
   }
 
@@ -375,28 +377,44 @@ class _LessonScreenState extends State<LessonScreen> {
   }
 
   /// Home "Continue" — aynı hoca veya yeni hoca seçimi.
+  /// [forceTutorSlug] verilirse sheet atlanır; o hoca ile derse devam edilir.
   Future<void> resumeFromHome({
     required String slug,
     required String label,
     String? tutorId,
     String? tutorSlug,
+    String? forceTutorSlug,
   }) async {
     final text = AppText.current;
     TutorDto? previous;
-    if (tutorId != null || (tutorSlug != null && tutorSlug.isNotEmpty)) {
-      try {
-        final tutors = await TutorApiService.fetchTutors();
-        for (final t in tutors) {
-          if ((tutorId != null && t.id == tutorId) ||
-              (tutorSlug != null && t.slug == tutorSlug)) {
-            previous = t;
-            break;
-          }
+    TutorDto? forced;
+    try {
+      final tutors = await TutorApiService.fetchTutors();
+      for (final t in tutors) {
+        if (forceTutorSlug != null &&
+            forceTutorSlug.isNotEmpty &&
+            t.slug == forceTutorSlug) {
+          forced = t;
         }
-      } catch (_) {}
-    }
+        if ((tutorId != null && t.id == tutorId) ||
+            (tutorSlug != null && t.slug == tutorSlug)) {
+          previous = t;
+        }
+      }
+    } catch (_) {}
 
     if (!mounted) return;
+
+    if (forced != null) {
+      await _startWithTutor(
+        slug: slug,
+        label: label,
+        kind: 'lesson',
+        preferredTutor: forced,
+        preferredMode: 'talk',
+      );
+      return;
+    }
 
     if (previous != null) {
       final action = await showModalBottomSheet<String>(

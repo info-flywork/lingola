@@ -119,27 +119,43 @@ abstract final class HomeDataService {
     LessonPathDto path,
     Translations text,
   ) {
-    final a1 = path.levels.where((l) => l.id == 'a1').firstOrNull;
-    if (a1 == null || a1.lessons.isEmpty) return null;
+    final allLessons = path.levels.expand((l) => l.lessons).toList();
+    if (allLessons.isEmpty) return null;
 
-    final currentSlug = path.currentLessonSlug;
     LessonNodeDto? current;
-    if (currentSlug != null) {
-      current = a1.lessons.where((l) => l.slug == currentSlug).firstOrNull;
+    final currentSlug = path.currentLessonSlug;
+    if (currentSlug != null && currentSlug.isNotEmpty) {
+      current = allLessons.where((l) => l.slug == currentSlug).firstOrNull;
     }
-    current ??= a1.lessons.where((l) => l.isAvailable).firstOrNull;
-    current ??= a1.lessons.where((l) => l.isUnlocked).firstOrNull;
-    current ??= a1.lessons.first;
 
-    final currentIndex = a1.lessons.indexOf(current);
-    final slotIndex = _previewSlots
-        .indexWhere((slot) => slot.a1Index == currentIndex)
-        .clamp(0, _previewSlots.length - 1);
-    final title = _lessonDisplayTitle(
-      current,
-      text,
-      _previewSlots[slotIndex].a1Index,
-    );
+    // En son etkileşim: elapsed > 0 veya startedAt olanlar
+    current ??= () {
+      final engaged = allLessons
+          .where(
+            (l) =>
+                !l.isCompleted &&
+                (l.elapsedSeconds > 0 ||
+                    (l.startedAt != null && l.startedAt!.isNotEmpty)),
+          )
+          .toList()
+        ..sort((a, b) {
+          final ta = DateTime.tryParse(a.startedAt ?? '')?.millisecondsSinceEpoch ?? 0;
+          final tb = DateTime.tryParse(b.startedAt ?? '')?.millisecondsSinceEpoch ?? 0;
+          if (tb != ta) return tb.compareTo(ta);
+          return b.elapsedSeconds.compareTo(a.elapsedSeconds);
+        });
+      return engaged.isEmpty ? null : engaged.first;
+    }();
+
+    current ??= allLessons.where((l) => l.isAvailable).firstOrNull;
+    current ??= allLessons.where((l) => l.isUnlocked).firstOrNull;
+    current ??= allLessons.first;
+
+    // Başlık için A1 index fallback (yalnızca A1 ise anlamlı)
+    final a1 = path.levels.where((l) => l.id == 'a1').firstOrNull;
+    final a1Index = a1 == null ? 0 : a1.lessons.indexOf(current);
+    final fallbackIndex = a1Index >= 0 ? a1Index : 0;
+    final title = _lessonDisplayTitle(current, text, fallbackIndex);
 
     final elapsedSeconds = current.elapsedSeconds;
     final elapsed = current.elapsedMinutes;
