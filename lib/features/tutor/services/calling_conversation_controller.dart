@@ -548,7 +548,7 @@ class CallingConversationController extends ChangeNotifier {
         );
         return;
       }
-      // Hayır / belirsiz → bitir (onay gelmezse de aynı).
+      // Evet/ok / belirsiz → bitir (sessizlikte de aynı).
       _awaitingInactivityConfirm = false;
       await _closeAfterInactivity(userSaidNo: decision == _InactivityDecision.end);
       return;
@@ -571,9 +571,9 @@ class CallingConversationController extends ChangeNotifier {
         _clearExtensionWatch();
         _awaitingExtensionReply = false;
         await _tutorSayAndWait(
-          "Nice work today. Let's finish here — see you in the next lesson.",
+          "Nice work today. Let's finish here — see you in the next lesson. Goodbye!",
         );
-        if (!_disposed) onRequestEndLesson?.call();
+        await _endLessonAfterGoodbye();
         return;
       }
       // Belirsiz cevap → normal ders cevabı + kısa hatırlatma
@@ -600,7 +600,7 @@ class CallingConversationController extends ChangeNotifier {
           _parseSoftLessonAgreement(text) &&
           _replySuggestsLessonEnd(reply)) {
         await _waitUntilSpeechDone();
-        if (!_disposed) onRequestEndLesson?.call();
+        await _endLessonAfterGoodbye();
         return;
       }
       if (_awaitingExtensionReply && decisionWasUnclear(text)) {
@@ -623,19 +623,6 @@ class CallingConversationController extends ChangeNotifier {
   _ExtensionDecision? _parseExtensionDecision(String raw) {
     final t = raw.toLowerCase().trim();
     if (t.isEmpty) return null;
-    const finishKeys = [
-      'finish',
-      'end',
-      'stop',
-      'done',
-      'enough',
-      'bitir',
-      'bitirelim',
-      'hayır',
-      'hayir',
-      'no',
-      'close',
-    ];
     const continueKeys = [
       'more',
       'again',
@@ -650,11 +637,25 @@ class CallingConversationController extends ChangeNotifier {
       'devam',
       'daha',
     ];
-    for (final k in finishKeys) {
-      if (t.contains(k)) return _ExtensionDecision.finish;
-    }
+    const finishKeys = [
+      'finish',
+      'end',
+      'stop',
+      'done',
+      'enough',
+      'bitir',
+      'bitirelim',
+      'hayır',
+      'hayir',
+      'no',
+      'close',
+    ];
+    // "no we can continue" → devam; continue önce bak.
     for (final k in continueKeys) {
       if (t.contains(k)) return _ExtensionDecision.continuePractice;
+    }
+    for (final k in finishKeys) {
+      if (t.contains(k)) return _ExtensionDecision.finish;
     }
     return null;
   }
@@ -701,9 +702,10 @@ class CallingConversationController extends ChangeNotifier {
     _awaitingExtensionReply = false;
     _clearExtensionWatch();
     await _tutorSayAndWait(
-      "I can tell you may be tired from the quiet. Let's end the lesson here.",
+      "I can tell you may be tired from the quiet. "
+      "Let's end the lesson here. Goodbye!",
     );
-    if (!_disposed) onRequestEndLesson?.call();
+    await _endLessonAfterGoodbye();
   }
 
   String get _learnerFirstName {
@@ -796,9 +798,18 @@ class CallingConversationController extends ChangeNotifier {
       "If practicing with me isn't working right now, next time try someone more fun — "
       'maybe ${tip.$2}. Goodbye!',
     );
+    await _endLessonAfterGoodbye();
+  }
+
+  /// Goodbye TTS bittikten ~2 sn sonra ekranı kapat.
+  Future<void> _endLessonAfterGoodbye() async {
+    if (_disposed) return;
+    await Future<void>.delayed(const Duration(seconds: 2));
     if (!_disposed) onRequestEndLesson?.call();
   }
 
+  /// Tutor "dersi bitirelim, Okay?" diye sorduğunda:
+  /// yes/ok → bitir; no / continue → devam.
   _InactivityDecision? _parseInactivityDecision(String raw) {
     final t = raw.toLowerCase().trim();
     if (t.isEmpty) return null;
@@ -809,13 +820,15 @@ class CallingConversationController extends ChangeNotifier {
       'continue',
       'keep going',
       'keep practicing',
+      'we can continue',
+      'lets continue',
+      "let's continue",
       'ready',
-      'yes',
-      'yeah',
-      'yep',
-      'ok',
-      'okay',
-      'evet',
+      'no',
+      'nope',
+      'nah',
+      'hayır',
+      'hayir',
       'devam',
       "i'm here",
       'im here',
@@ -823,11 +836,20 @@ class CallingConversationController extends ChangeNotifier {
       'wait',
       'not yet',
       'one more',
+      'dont end',
+      "don't end",
     ];
     const endKeys = [
-      'no',
-      'hayır',
-      'hayir',
+      'yes',
+      'yeah',
+      'yep',
+      'yup',
+      'ok',
+      'okay',
+      'sure',
+      'fine',
+      'evet',
+      'tamam',
       'finish',
       'end',
       'stop',
@@ -838,13 +860,14 @@ class CallingConversationController extends ChangeNotifier {
       'close',
       'goodbye',
     ];
-    for (final k in endKeys) {
-      if (has(k)) return _InactivityDecision.end;
-    }
+    // "no we can continue" gibi karışık cevaplarda devam kazanır.
     for (final k in continueKeys) {
       if (t.contains(k) || has(k)) {
         return _InactivityDecision.continuePractice;
       }
+    }
+    for (final k in endKeys) {
+      if (has(k) || t.contains(k)) return _InactivityDecision.end;
     }
     return null;
   }
@@ -868,10 +891,10 @@ class CallingConversationController extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
       await _tutorSayAndWait(
-        "Nice work today. Let's finish here — see you in the next lesson.",
+        "Nice work today. Let's finish here — see you in the next lesson. Goodbye!",
       );
     }
-    if (!_disposed) onRequestEndLesson?.call();
+    await _endLessonAfterGoodbye();
   }
 
   bool _parseLessonFinishIntent(String raw) {

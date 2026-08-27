@@ -132,6 +132,8 @@ abstract final class AppAssets {
   static const profileStreak = 'assets/images/profilIcons/streak.svg';
   static const premiumCheck = 'assets/images/home/premium_check.svg';
   static const homePremiumCrown = 'assets/images/home/premium_crown.svg';
+  /// Premium rozeti elmas (kırpılmış, fazla boşluksuz).
+  static const premiumDiamond = 'assets/images/home/premium_diamond.png';
   static const homeStar = 'assets/images/home/star_small.svg';
   static const homeArrowCircle = 'assets/images/home/arrow_circle.svg';
 

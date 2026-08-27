@@ -452,6 +452,9 @@ class _Translations$lessonPage$ru implements Translations$lessonPage$en {
 	@override String get startTalk => 'Начать урок';
 	@override String get chatInstead => 'Чат вместо этого';
 	@override String get lockedHint => 'Закончите предыдущий урок, чтобы разблокировать этот.';
+	@override String get levelLockedTitle => 'Уровень закрыт';
+	@override String levelLockedBody({required Object userLevel, required Object lessonLevel}) => 'Ваш уровень английского — ${userLevel}, поэтому уроки ${lessonLevel} недоступны без прохождения предыдущего пути.';
+	@override String get levelLockedOk => 'Понятно';
 	@override String get notesTitle => 'Заметки к уроку';
 	@override String get whatWeLearned => 'Что мы узнали сегодня';
 	@override String get deleteNotes => 'Удалить мои заметки к уроку';
@@ -1688,6 +1691,9 @@ extension on TranslationsRu {
 			'lessonPage.startTalk' => 'Начать урок',
 			'lessonPage.chatInstead' => 'Чат вместо этого',
 			'lessonPage.lockedHint' => 'Закончите предыдущий урок, чтобы разблокировать этот.',
+			'lessonPage.levelLockedTitle' => 'Уровень закрыт',
+			'lessonPage.levelLockedBody' => ({required Object userLevel, required Object lessonLevel}) => 'Ваш уровень английского — ${userLevel}, поэтому уроки ${lessonLevel} недоступны без прохождения предыдущего пути.',
+			'lessonPage.levelLockedOk' => 'Понятно',
 			'lessonPage.notesTitle' => 'Заметки к уроку',
 			'lessonPage.whatWeLearned' => 'Что мы узнали сегодня',
 			'lessonPage.deleteNotes' => 'Удалить мои заметки к уроку',
@@ -1889,11 +1895,11 @@ extension on TranslationsRu {
 			'lessonPage.levels.c1.lessons.2' => 'Выбор карьеры',
 			'lessonPage.levels.c1.lessons.3' => 'Ускорение производительности',
 			'lessonPage.levels.c1.lessons.4' => 'Изобретения',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.5' => 'Путешествия во времени',
 			'lessonPage.levels.c1.lessons.6' => 'Имущество',
 			'lessonPage.levels.c1.lessons.7' => 'Навыки работы',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.8' => 'Исторические изменения',
 			'lessonPage.levels.c1.lessons.9' => 'Написание отзывов',
 			'lessonPage.levels.c1.lessons.10' => 'Тайны',

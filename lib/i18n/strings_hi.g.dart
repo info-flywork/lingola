@@ -452,6 +452,9 @@ class _Translations$lessonPage$hi implements Translations$lessonPage$en {
 	@override String get startTalk => 'पाठ शुरू करें';
 	@override String get chatInstead => 'इसके बजाय चैट करें';
 	@override String get lockedHint => 'इस पाठ को अनलॉक करने के लिए पिछले पाठ को पूरा करें।';
+	@override String get levelLockedTitle => 'लेवल लॉक';
+	@override String levelLockedBody({required Object userLevel, required Object lessonLevel}) => 'आपका अंग्रेज़ी स्तर ${userLevel} है, इसलिए पहले का पथ पूरा किए बिना ${lessonLevel} पाठ नहीं खोल सकते।';
+	@override String get levelLockedOk => 'समझ गया';
 	@override String get notesTitle => 'पाठ नोट्स';
 	@override String get whatWeLearned => 'आज हमने क्या सीखा';
 	@override String get deleteNotes => 'मेरे पाठ नोट्स हटाएं';
@@ -1688,6 +1691,9 @@ extension on TranslationsHi {
 			'lessonPage.startTalk' => 'पाठ शुरू करें',
 			'lessonPage.chatInstead' => 'इसके बजाय चैट करें',
 			'lessonPage.lockedHint' => 'इस पाठ को अनलॉक करने के लिए पिछले पाठ को पूरा करें।',
+			'lessonPage.levelLockedTitle' => 'लेवल लॉक',
+			'lessonPage.levelLockedBody' => ({required Object userLevel, required Object lessonLevel}) => 'आपका अंग्रेज़ी स्तर ${userLevel} है, इसलिए पहले का पथ पूरा किए बिना ${lessonLevel} पाठ नहीं खोल सकते।',
+			'lessonPage.levelLockedOk' => 'समझ गया',
 			'lessonPage.notesTitle' => 'पाठ नोट्स',
 			'lessonPage.whatWeLearned' => 'आज हमने क्या सीखा',
 			'lessonPage.deleteNotes' => 'मेरे पाठ नोट्स हटाएं',
@@ -1889,11 +1895,11 @@ extension on TranslationsHi {
 			'lessonPage.levels.c1.lessons.2' => 'करियर के विकल्प',
 			'lessonPage.levels.c1.lessons.3' => 'प्रदर्शन को तेज करें',
 			'lessonPage.levels.c1.lessons.4' => 'आविष्कार',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.5' => 'समय यात्रा',
 			'lessonPage.levels.c1.lessons.6' => 'संपत्ति',
 			'lessonPage.levels.c1.lessons.7' => 'नौकरी के कौशल',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.8' => 'ऐतिहासिक परिवर्तन',
 			'lessonPage.levels.c1.lessons.9' => 'समीक्षा लेखन',
 			'lessonPage.levels.c1.lessons.10' => 'रहस्य',

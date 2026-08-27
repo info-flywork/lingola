@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/auth/api_client.dart';
@@ -57,6 +58,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   final _messages = <TutorChatMessageDto>[];
+  /// Boş alana tıklanınca kelime seçimini temizler.
+  final _wordSelectionEpoch = ValueNotifier<int>(0);
 
   String? _sessionId;
   var _loading = true;
@@ -102,6 +105,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _segmentTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
+    _wordSelectionEpoch.dispose();
     super.dispose();
   }
 
@@ -355,51 +359,34 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                    itemCount: _messages.length + (_sending ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (_sending && index == _messages.length) {
+                : GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _wordSelectionEpoch.value++,
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                      itemCount: _messages.length + (_sending ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (_sending && index == _messages.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: _TypingIndicator(imagePath: widget.imagePath),
+                          );
+                        }
+                        final message = _messages[index];
+                        final top = index == 0 ? 0.0 : 10.0;
                         return Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _Dot(),
-                                  SizedBox(width: 4),
-                                  _Dot(),
-                                  SizedBox(width: 4),
-                                  _Dot(),
-                                ],
-                              ),
-                            ),
-                          ),
+                          padding: EdgeInsets.only(top: top),
+                          child: message.isUser
+                              ? _OutgoingBubble(message: message.content)
+                              : _IncomingBubble(
+                                  message: message.content,
+                                  imagePath: widget.imagePath,
+                                  dismissEpoch: _wordSelectionEpoch,
+                                ),
                         );
-                      }
-                      final message = _messages[index];
-                      final top = index == 0 ? 0.0 : 8.0;
-                      return Padding(
-                        padding: EdgeInsets.only(top: top),
-                        child: message.isUser
-                            ? _OutgoingBubble(message: message.content)
-                            : _IncomingBubble(
-                                message: message.content,
-                                imagePath: widget.imagePath,
-                              ),
-                      );
-                    },
+                      },
+                    ),
                   ),
           ),
           SafeArea(
@@ -476,58 +463,194 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class _IncomingBubble extends StatefulWidget {
-  const _IncomingBubble({required this.message, required this.imagePath});
+  const _IncomingBubble({
+    required this.message,
+    required this.imagePath,
+    required this.dismissEpoch,
+  });
 
   final String message;
   final String imagePath;
+  final ValueNotifier<int> dismissEpoch;
 
   @override
   State<_IncomingBubble> createState() => _IncomingBubbleState();
 }
 
 class _IncomingBubbleState extends State<_IncomingBubble> {
-  String? _translation;
+  String? _selectedClean;
+  String? _translatedDisplay;
   var _busy = false;
+  /// true iken balonda çeviri yerine orijinal kelime gösterilir.
+  var _showOriginal = false;
   final _tts = TutorTtsService();
   final _player = AudioPlayer();
+  final List<TapGestureRecognizer> _recognizers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    widget.dismissEpoch.addListener(_onDismissEpoch);
+  }
+
+  @override
+  void didUpdateWidget(covariant _IncomingBubble oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.dismissEpoch != widget.dismissEpoch) {
+      oldWidget.dismissEpoch.removeListener(_onDismissEpoch);
+      widget.dismissEpoch.addListener(_onDismissEpoch);
+    }
+    if (oldWidget.message != widget.message) {
+      _clearSelection();
+    }
+  }
 
   @override
   void dispose() {
+    widget.dismissEpoch.removeListener(_onDismissEpoch);
+    for (final r in _recognizers) {
+      r.dispose();
+    }
     unawaited(_player.dispose());
     _tts.dispose();
     super.dispose();
   }
 
-  Future<void> _translate() async {
-    if (_busy) return;
-    if (_translation != null) {
-      setState(() => _translation = null);
+  void _onDismissEpoch() {
+    if (_selectedClean == null) return;
+    setState(_clearSelection);
+  }
+
+  void _clearSelection() {
+    _selectedClean = null;
+    _translatedDisplay = null;
+    _busy = false;
+    _showOriginal = false;
+  }
+
+  String _cleanWord(String raw) =>
+      raw.replaceAll(RegExp(r"[^\w'\-]+"), '');
+
+  String _withPunctuation(String original, String translated) {
+    final prefix = RegExp(r"^[^\w']+").firstMatch(original)?.group(0) ?? '';
+    final suffix = RegExp(r"[^\w']+$").firstMatch(original)?.group(0) ?? '';
+    return '$prefix$translated$suffix';
+  }
+
+  Future<void> _onWordTap(String raw) async {
+    final clean = _cleanWord(raw);
+    if (clean.isEmpty) return;
+
+    // Aynı kelimeye tekrar → kapat
+    if (_selectedClean == clean && _translatedDisplay != null && !_busy) {
+      setState(_clearSelection);
       return;
     }
-    setState(() => _busy = true);
+
+    setState(() {
+      _selectedClean = clean;
+      _translatedDisplay = null;
+      _busy = true;
+      _showOriginal = false;
+    });
+
     try {
-      final tr =
-          await OpenAiChatService().translateToTurkish(widget.message);
-      if (!mounted) return;
+      final tr = await OpenAiChatService().translateToTurkish(clean);
+      if (!mounted || _selectedClean != clean) return;
+      final trimmed = tr.trim();
       setState(() {
-        _translation = tr.trim().isEmpty ? null : tr.trim();
+        _translatedDisplay = trimmed.isEmpty
+            ? clean
+            : _withPunctuation(raw, trimmed);
         _busy = false;
       });
     } catch (_) {
-      if (!mounted) return;
-      setState(() => _busy = false);
+      if (!mounted || _selectedClean != clean) return;
+      setState(() {
+        _translatedDisplay = raw;
+        _busy = false;
+      });
     }
   }
 
-  Future<void> _speak() async {
+  Future<void> _onTranslateIcon() async {
+    if (_selectedClean == null) return;
+    if (_busy) return;
+    setState(() => _showOriginal = !_showOriginal);
+  }
+
+  Future<void> _onSpeakIcon() async {
+    final source = _selectedClean;
+    if (source == null || source.isEmpty) return;
     try {
-      final file = await _tts.synthesizeToFile(widget.message);
+      // Öğrenilen İngilizce kelimenin telaffuzu.
+      final file = await _tts.synthesizeToFile(source);
+      await _player.stop();
       await _player.play(DeviceFileSource(file.path));
     } catch (_) {}
   }
 
+  List<InlineSpan> _buildWordSpans() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
+
+    const baseStyle = TextStyle(
+      fontFamily: 'Poppins',
+      fontSize: 13,
+      height: 20 / 13,
+      fontWeight: FontWeight.w400,
+      color: Color(0xFF3D3D3D),
+    );
+
+    final words = widget.message
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
+    final spans = <InlineSpan>[];
+
+    for (var i = 0; i < words.length; i++) {
+      final word = words[i];
+      final space = i < words.length - 1 ? ' ' : '';
+      final clean = _cleanWord(word);
+      final selected = _selectedClean != null && _selectedClean == clean;
+
+      if (clean.isEmpty) {
+        spans.add(TextSpan(text: '$word$space', style: baseStyle));
+        continue;
+      }
+
+      final recognizer = TapGestureRecognizer()..onTap = () => _onWordTap(word);
+      _recognizers.add(recognizer);
+
+      String display = word;
+      if (selected && !_showOriginal && _translatedDisplay != null) {
+        display = _translatedDisplay!;
+      }
+
+      spans.add(
+        TextSpan(
+          text: '$display$space',
+          recognizer: recognizer,
+          style: selected
+              ? baseStyle.copyWith(
+                  color: Colors.white,
+                  backgroundColor: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                )
+              : baseStyle,
+        ),
+      );
+    }
+    return spans;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final showActions = _selectedClean != null;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -539,70 +662,39 @@ class _IncomingBubbleState extends State<_IncomingBubble> {
             fit: BoxFit.cover,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Flexible(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.message,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 13,
-                    height: 1.4,
-                  ),
-                ),
-                if (_busy) ...[
-                  const SizedBox(height: 8),
-                  const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ] else if (_translation != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _translation!,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      height: 1.4,
-                      fontWeight: FontWeight.w500,
-                      fontStyle: FontStyle.italic,
-                      color: AppColors.ink.withValues(alpha: .78),
-                    ),
-                  ),
-                ],
-              ],
+            child: Text.rich(
+              TextSpan(children: _buildWordSpans()),
             ),
           ),
         ),
-        const SizedBox(width: 6),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _ChatRoundIcon(
-              asset: AppAssets.writingTranslate,
-              color: AppColors.primary,
-              onTap: _busy ? null : _translate,
-            ),
-            const SizedBox(width: 6),
-            _ChatRoundIcon(
-              asset: AppAssets.speaker,
-              color: AppColors.secondary,
-              onTap: _speak,
-            ),
-          ],
-        ),
+        if (showActions) ...[
+          const SizedBox(width: 8),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _ChatRoundIcon(
+                asset: AppAssets.writingTranslate,
+                color: AppColors.primary,
+                onTap: _busy ? null : _onTranslateIcon,
+              ),
+              const SizedBox(width: 6),
+              _ChatRoundIcon(
+                asset: AppAssets.speaker,
+                color: AppColors.primary,
+                onTap: _busy ? null : _onSpeakIcon,
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -628,13 +720,13 @@ class _ChatRoundIcon extends StatelessWidget {
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: SizedBox(
-          width: 34,
-          height: 34,
+          width: 28,
+          height: 28,
           child: Center(
             child: HomeAsset(
               asset,
-              width: 16,
-              height: 16,
+              width: 14,
+              height: 14,
               color: color,
             ),
           ),
@@ -667,7 +759,7 @@ class _OutgoingBubble extends StatelessWidget {
           style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 13,
-            height: 1.4,
+            height: 20 / 13,
             color: Colors.white,
           ),
         ),
@@ -676,17 +768,97 @@ class _OutgoingBubble extends StatelessWidget {
   }
 }
 
-class _Dot extends StatelessWidget {
-  const _Dot();
+class _TypingIndicator extends StatefulWidget {
+  const _TypingIndicator({required this.imagePath});
+
+  final String imagePath;
+
+  @override
+  State<_TypingIndicator> createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<_TypingIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 6,
-      height: 6,
-      decoration: const BoxDecoration(
-        color: AppColors.secondary,
-        shape: BoxShape.circle,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        ClipOval(
+          child: HomeAsset(
+            widget.imagePath,
+            width: 28,
+            height: 28,
+            fit: BoxFit.cover,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
+          ),
+          child: AnimatedBuilder(
+            animation: _pulse,
+            builder: (context, _) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < 3; i++) ...[
+                    if (i > 0) const SizedBox(width: 4),
+                    _TypingDot(
+                      phase: (_pulse.value + i / 3) % 1.0,
+                    ),
+                  ],
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TypingDot extends StatelessWidget {
+  const _TypingDot({required this.phase});
+
+  final double phase;
+
+  @override
+  Widget build(BuildContext context) {
+    // 0→1 pulse opacity/scale
+    final t = phase < 0.5 ? phase * 2 : (1 - phase) * 2;
+    final opacity = 0.35 + 0.65 * t;
+    final size = 9.0 + 2.0 * t;
+    return Opacity(
+      opacity: opacity,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: const BoxDecoration(
+          color: AppColors.secondary,
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }

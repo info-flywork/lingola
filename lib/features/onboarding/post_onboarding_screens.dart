@@ -98,6 +98,8 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen> {
                   220.0,
                   320.0,
                 );
+                // Kartı biraz aşağı — robot blur geçişi bozulmasın, başlık nefes alsın.
+                final cardTop = robotHeight + 10;
                 return Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -113,7 +115,7 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen> {
                     ),
                     // Figma: kart üstünden robota doğru ince blurlu beyaz ışınlar
                     Positioned(
-                      top: robotHeight - 72 - 40,
+                      top: cardTop - 72,
                       left: 0,
                       right: 0,
                       height: 96,
@@ -122,7 +124,7 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen> {
                       ),
                     ),
                     Positioned(
-                      top: robotHeight - 24,
+                      top: cardTop,
                       left: 16,
                       right: 16,
                       bottom: 16,
@@ -146,7 +148,7 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen> {
                           ],
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+                          padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
                           child: LayoutBuilder(
                             builder: (context, cardConstraints) {
                               return SingleChildScrollView(

@@ -452,6 +452,9 @@ class _Translations$lessonPage$es implements Translations$lessonPage$en {
 	@override String get startTalk => 'Iniciar lección';
 	@override String get chatInstead => 'Chatear en su lugar';
 	@override String get lockedHint => 'Termina la lección anterior para desbloquear esta.';
+	@override String get levelLockedTitle => 'Nivel bloqueado';
+	@override String levelLockedBody({required Object userLevel, required Object lessonLevel}) => 'Tu nivel de inglés es ${userLevel}, por eso no puedes abrir lecciones de ${lessonLevel} sin completar el camino anterior.';
+	@override String get levelLockedOk => 'Entendido';
 	@override String get notesTitle => 'Notas de la lección';
 	@override String get whatWeLearned => 'Lo que aprendimos hoy';
 	@override String get deleteNotes => 'Eliminar mis notas de la lección';
@@ -1688,6 +1691,9 @@ extension on TranslationsEs {
 			'lessonPage.startTalk' => 'Iniciar lección',
 			'lessonPage.chatInstead' => 'Chatear en su lugar',
 			'lessonPage.lockedHint' => 'Termina la lección anterior para desbloquear esta.',
+			'lessonPage.levelLockedTitle' => 'Nivel bloqueado',
+			'lessonPage.levelLockedBody' => ({required Object userLevel, required Object lessonLevel}) => 'Tu nivel de inglés es ${userLevel}, por eso no puedes abrir lecciones de ${lessonLevel} sin completar el camino anterior.',
+			'lessonPage.levelLockedOk' => 'Entendido',
 			'lessonPage.notesTitle' => 'Notas de la lección',
 			'lessonPage.whatWeLearned' => 'Lo que aprendimos hoy',
 			'lessonPage.deleteNotes' => 'Eliminar mis notas de la lección',
@@ -1889,11 +1895,11 @@ extension on TranslationsEs {
 			'lessonPage.levels.c1.lessons.2' => 'Elecciones profesionales',
 			'lessonPage.levels.c1.lessons.3' => 'Acelerar el rendimiento',
 			'lessonPage.levels.c1.lessons.4' => 'Invenciones',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.5' => 'Viaje en el tiempo',
 			'lessonPage.levels.c1.lessons.6' => 'Pertenencias',
 			'lessonPage.levels.c1.lessons.7' => 'Habilidades laborales',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.8' => 'Cambios históricos',
 			'lessonPage.levels.c1.lessons.9' => 'Escritura de reseñas',
 			'lessonPage.levels.c1.lessons.10' => 'Misterios',

@@ -452,6 +452,9 @@ class _Translations$lessonPage$de implements Translations$lessonPage$en {
 	@override String get startTalk => 'Lektion starten';
 	@override String get chatInstead => 'Stattdessen chatten';
 	@override String get lockedHint => 'Beende die vorherige Lektion, um diese freizuschalten.';
+	@override String get levelLockedTitle => 'Stufe gesperrt';
+	@override String levelLockedBody({required Object userLevel, required Object lessonLevel}) => 'Dein Englischniveau ist ${userLevel} — ${lessonLevel}-Lektionen kannst du ohne den früheren Pfad nicht öffnen.';
+	@override String get levelLockedOk => 'Verstanden';
 	@override String get notesTitle => 'Lektionsnotizen';
 	@override String get whatWeLearned => 'Was wir heute gelernt haben';
 	@override String get deleteNotes => 'Meine Lektionsnotizen löschen';
@@ -1688,6 +1691,9 @@ extension on TranslationsDe {
 			'lessonPage.startTalk' => 'Lektion starten',
 			'lessonPage.chatInstead' => 'Stattdessen chatten',
 			'lessonPage.lockedHint' => 'Beende die vorherige Lektion, um diese freizuschalten.',
+			'lessonPage.levelLockedTitle' => 'Stufe gesperrt',
+			'lessonPage.levelLockedBody' => ({required Object userLevel, required Object lessonLevel}) => 'Dein Englischniveau ist ${userLevel} — ${lessonLevel}-Lektionen kannst du ohne den früheren Pfad nicht öffnen.',
+			'lessonPage.levelLockedOk' => 'Verstanden',
 			'lessonPage.notesTitle' => 'Lektionsnotizen',
 			'lessonPage.whatWeLearned' => 'Was wir heute gelernt haben',
 			'lessonPage.deleteNotes' => 'Meine Lektionsnotizen löschen',
@@ -1889,11 +1895,11 @@ extension on TranslationsDe {
 			'lessonPage.levels.c1.lessons.2' => 'Karriereentscheidungen',
 			'lessonPage.levels.c1.lessons.3' => 'Leistung steigern',
 			'lessonPage.levels.c1.lessons.4' => 'Erfindungen',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.5' => 'Zeitreise',
 			'lessonPage.levels.c1.lessons.6' => 'Besitz',
 			'lessonPage.levels.c1.lessons.7' => 'Berufliche Fähigkeiten',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.8' => 'Historische Veränderungen',
 			'lessonPage.levels.c1.lessons.9' => 'Überblick schreiben',
 			'lessonPage.levels.c1.lessons.10' => 'Geheimnisse',

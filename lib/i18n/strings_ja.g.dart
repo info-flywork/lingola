@@ -452,6 +452,9 @@ class _Translations$lessonPage$ja implements Translations$lessonPage$en {
 	@override String get startTalk => 'レッスンを始める';
 	@override String get chatInstead => '代わりにチャットする';
 	@override String get lockedHint => 'このレッスンを解除するには、前のレッスンを終わらせてください。';
+	@override String get levelLockedTitle => 'レベル制限';
+	@override String levelLockedBody({required Object userLevel, required Object lessonLevel}) => 'あなたの英語レベルは${userLevel}のため、前のパスを完了せずに${lessonLevel}のレッスンは開けません。';
+	@override String get levelLockedOk => 'わかりました';
 	@override String get notesTitle => 'レッスンノート';
 	@override String get whatWeLearned => '今日学んだこと';
 	@override String get deleteNotes => 'レッスンノートを削除する';
@@ -1688,6 +1691,9 @@ extension on TranslationsJa {
 			'lessonPage.startTalk' => 'レッスンを始める',
 			'lessonPage.chatInstead' => '代わりにチャットする',
 			'lessonPage.lockedHint' => 'このレッスンを解除するには、前のレッスンを終わらせてください。',
+			'lessonPage.levelLockedTitle' => 'レベル制限',
+			'lessonPage.levelLockedBody' => ({required Object userLevel, required Object lessonLevel}) => 'あなたの英語レベルは${userLevel}のため、前のパスを完了せずに${lessonLevel}のレッスンは開けません。',
+			'lessonPage.levelLockedOk' => 'わかりました',
 			'lessonPage.notesTitle' => 'レッスンノート',
 			'lessonPage.whatWeLearned' => '今日学んだこと',
 			'lessonPage.deleteNotes' => 'レッスンノートを削除する',
@@ -1889,11 +1895,11 @@ extension on TranslationsJa {
 			'lessonPage.levels.c1.lessons.2' => 'キャリアの選択',
 			'lessonPage.levels.c1.lessons.3' => 'パフォーマンスを加速する',
 			'lessonPage.levels.c1.lessons.4' => '発明',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.5' => 'タイムトラベル',
 			'lessonPage.levels.c1.lessons.6' => '所有物',
 			'lessonPage.levels.c1.lessons.7' => '仕事のスキル',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.8' => '歴史的変化',
 			'lessonPage.levels.c1.lessons.9' => 'レビューライティング',
 			'lessonPage.levels.c1.lessons.10' => 'ミステリー',

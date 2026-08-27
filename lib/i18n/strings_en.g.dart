@@ -906,6 +906,15 @@ class Translations$lessonPage$en {
 	/// en: 'Finish the previous lesson to unlock this one.'
 	String get lockedHint => 'Finish the previous lesson to unlock this one.';
 
+	/// en: 'Level locked'
+	String get levelLockedTitle => 'Level locked';
+
+	/// en: 'Your English level is $userLevel, so you can't open $lessonLevel lessons without completing the earlier path.'
+	String levelLockedBody({required Object userLevel, required Object lessonLevel}) => 'Your English level is ${userLevel}, so you can\'t open ${lessonLevel} lessons without completing the earlier path.';
+
+	/// en: 'Got it'
+	String get levelLockedOk => 'Got it';
+
 	/// en: 'Lesson notes'
 	String get notesTitle => 'Lesson notes';
 
@@ -2689,6 +2698,9 @@ extension on Translations {
 			'lessonPage.startTalk' => 'Start lesson',
 			'lessonPage.chatInstead' => 'Chat instead',
 			'lessonPage.lockedHint' => 'Finish the previous lesson to unlock this one.',
+			'lessonPage.levelLockedTitle' => 'Level locked',
+			'lessonPage.levelLockedBody' => ({required Object userLevel, required Object lessonLevel}) => 'Your English level is ${userLevel}, so you can\'t open ${lessonLevel} lessons without completing the earlier path.',
+			'lessonPage.levelLockedOk' => 'Got it',
 			'lessonPage.notesTitle' => 'Lesson notes',
 			'lessonPage.whatWeLearned' => 'What we learned today',
 			'lessonPage.deleteNotes' => 'Delete my lesson notes',
@@ -2890,11 +2902,11 @@ extension on Translations {
 			'lessonPage.levels.c1.lessons.2' => 'Career choices',
 			'lessonPage.levels.c1.lessons.3' => 'Accelerate performance',
 			'lessonPage.levels.c1.lessons.4' => 'Inventions',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.5' => 'Time travel',
 			'lessonPage.levels.c1.lessons.6' => 'Possessions',
 			'lessonPage.levels.c1.lessons.7' => 'Job skills',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.8' => 'Historical changes',
 			'lessonPage.levels.c1.lessons.9' => 'Review writing',
 			'lessonPage.levels.c1.lessons.10' => 'Mysteries',

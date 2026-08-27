@@ -452,6 +452,9 @@ class _Translations$lessonPage$tr implements Translations$lessonPage$en {
 	@override String get startTalk => 'Derse başla';
 	@override String get chatInstead => 'Bunun yerine sohbet et';
 	@override String get lockedHint => 'Bu dersi açmak için önceki dersi tamamlayın.';
+	@override String get levelLockedTitle => 'Seviye kilitli';
+	@override String levelLockedBody({required Object userLevel, required Object lessonLevel}) => 'İngilizce seviyeniz ${userLevel} olduğu için ${lessonLevel} derslerini önceki yolu tamamlamadan açamazsınız.';
+	@override String get levelLockedOk => 'Anladım';
 	@override String get notesTitle => 'Ders notları';
 	@override String get whatWeLearned => 'Bugün neler öğrendik';
 	@override String get deleteNotes => 'Ders notlarımı sil';
@@ -1688,6 +1691,9 @@ extension on TranslationsTr {
 			'lessonPage.startTalk' => 'Derse başla',
 			'lessonPage.chatInstead' => 'Bunun yerine sohbet et',
 			'lessonPage.lockedHint' => 'Bu dersi açmak için önceki dersi tamamlayın.',
+			'lessonPage.levelLockedTitle' => 'Seviye kilitli',
+			'lessonPage.levelLockedBody' => ({required Object userLevel, required Object lessonLevel}) => 'İngilizce seviyeniz ${userLevel} olduğu için ${lessonLevel} derslerini önceki yolu tamamlamadan açamazsınız.',
+			'lessonPage.levelLockedOk' => 'Anladım',
 			'lessonPage.notesTitle' => 'Ders notları',
 			'lessonPage.whatWeLearned' => 'Bugün neler öğrendik',
 			'lessonPage.deleteNotes' => 'Ders notlarımı sil',
@@ -1889,11 +1895,11 @@ extension on TranslationsTr {
 			'lessonPage.levels.c1.lessons.2' => 'Kariyer seçimleri',
 			'lessonPage.levels.c1.lessons.3' => 'Performansı hızlandırmak',
 			'lessonPage.levels.c1.lessons.4' => 'İcatlar',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.5' => 'Zaman yolculuğu',
 			'lessonPage.levels.c1.lessons.6' => 'Mülkler',
 			'lessonPage.levels.c1.lessons.7' => 'İş becerileri',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.8' => 'Tarihsel değişimler',
 			'lessonPage.levels.c1.lessons.9' => 'Gözden geçirme yazımı',
 			'lessonPage.levels.c1.lessons.10' => 'Gizemler',

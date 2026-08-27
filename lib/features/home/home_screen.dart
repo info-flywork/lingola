@@ -6,6 +6,7 @@ import '../../core/auth/auth_service.dart';
 import '../../core/auth/app_user.dart';
 import '../../core/auth/session_store.dart';
 import '../../core/config/app_env.dart';
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/i18n/app_locale_sync.dart';
 import '../../core/premium/premium_service.dart';
@@ -374,18 +375,22 @@ class _HomeHeaderState extends State<_HomeHeader> {
                     child: Semantics(
                       button: true,
                       label: text.app.profile,
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: PremiumService.isPremiumListenable,
-                        builder: (context, isPremium, _) {
-                          return UserAvatar(
-                            size: 43,
-                            avatarUrl: avatarUrl,
-                            displayName: name,
-                            showPremiumBadge: isPremium,
-                          );
-                        },
+                      child: UserAvatar(
+                        size: 43,
+                        avatarUrl: avatarUrl,
+                        displayName: name,
                       ),
                     ),
+                  ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: PremiumService.isPremiumListenable,
+                    builder: (context, isPremium, _) {
+                      if (!isPremium) return const SizedBox.shrink();
+                      return const Padding(
+                        padding: EdgeInsets.only(left: 8),
+                        child: _HomePremiumPill(),
+                      );
+                    },
                   ),
                   const Spacer(),
                   GestureDetector(
@@ -1282,6 +1287,52 @@ class _TutorCard extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomePremiumPill extends StatelessWidget {
+  const _HomePremiumPill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 32,
+      padding: const EdgeInsets.fromLTRB(8, 4, 10, 4),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(9999),
+        border: Border.all(
+          width: 1,
+          color: AppColors.primary.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 18,
+            height: 18,
+            child: HomeAsset(
+              AppAssets.premiumDiamond,
+              width: 18,
+              height: 18,
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            AppText.current.app.premium,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12,
+              height: 24 / 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
             ),
           ),
         ],

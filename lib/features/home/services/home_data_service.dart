@@ -5,7 +5,7 @@ import '../../../i18n/strings.g.dart';
 import '../../lesson/lesson_api_service.dart';
 import '../../tutor/services/tutor_api_service.dart';
 
-enum HomePathNodeStatus { locked, active, completed }
+enum HomePathNodeStatus { locked, active, completed, unlocked }
 
 class HomeContinueData {
   const HomeContinueData({
@@ -128,6 +128,7 @@ abstract final class HomeDataService {
       current = a1.lessons.where((l) => l.slug == currentSlug).firstOrNull;
     }
     current ??= a1.lessons.where((l) => l.isAvailable).firstOrNull;
+    current ??= a1.lessons.where((l) => l.isUnlocked).firstOrNull;
     current ??= a1.lessons.first;
 
     final currentIndex = a1.lessons.indexOf(current);
@@ -173,6 +174,7 @@ abstract final class HomeDataService {
       final labelColor = switch (status) {
         HomePathNodeStatus.completed => 0xFF2D46FF,
         HomePathNodeStatus.active => 0xFF2D46FF,
+        HomePathNodeStatus.unlocked => 0xFF8A8A8A,
         HomePathNodeStatus.locked => 0xFF8A8A8A,
       };
       return HomePathPreviewNode(
@@ -189,6 +191,7 @@ abstract final class HomeDataService {
     if (lesson == null) return HomePathNodeStatus.locked;
     if (lesson.isCompleted) return HomePathNodeStatus.completed;
     if (lesson.isAvailable) return HomePathNodeStatus.active;
+    if (lesson.isUnlocked) return HomePathNodeStatus.unlocked;
     return HomePathNodeStatus.locked;
   }
 

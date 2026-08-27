@@ -5,15 +5,21 @@ class LessonPathDto {
   const LessonPathDto({
     required this.levels,
     this.currentLessonSlug,
+    this.userCefrMax,
+    this.userAppLevel,
   });
 
   final List<LessonLevelDto> levels;
   final String? currentLessonSlug;
+  final String? userCefrMax;
+  final String? userAppLevel;
 
   factory LessonPathDto.fromJson(Map<String, dynamic> json) {
     final list = json['levels'];
     return LessonPathDto(
       currentLessonSlug: json['currentLessonSlug'] as String?,
+      userCefrMax: json['userCefrMax'] as String?,
+      userAppLevel: json['userAppLevel'] as String?,
       levels: list is List
           ? list
               .whereType<Map<String, dynamic>>()
@@ -56,6 +62,8 @@ class LessonNodeDto {
     required this.status,
     this.needsPractice = false,
     this.hasNotes = false,
+    this.lockReason,
+    this.cefrLevel,
     this.tutorId,
     this.tutorSlug,
     this.tutorNameKey,
@@ -71,6 +79,8 @@ class LessonNodeDto {
   final String status;
   final bool needsPractice;
   final bool hasNotes;
+  final String? lockReason;
+  final String? cefrLevel;
   final String? tutorId;
   final String? tutorSlug;
   final String? tutorNameKey;
@@ -83,7 +93,9 @@ class LessonNodeDto {
 
   bool get isLocked => status == 'locked';
   bool get isAvailable => status == 'available';
+  bool get isUnlocked => status == 'unlocked';
   bool get isCompleted => status == 'completed';
+  bool get canStart => isAvailable || isUnlocked || isCompleted;
 
   int get elapsedMinutes => (elapsedSeconds / 60).floor().clamp(0, 15);
   int get remainingMinutes => (remainingSeconds / 60).ceil().clamp(0, 15);
@@ -97,6 +109,8 @@ class LessonNodeDto {
       status: json['status'] as String? ?? 'locked',
       needsPractice: json['needsPractice'] == true,
       hasNotes: json['hasNotes'] == true,
+      lockReason: json['lockReason'] as String?,
+      cefrLevel: json['cefrLevel'] as String?,
       tutorId: json['tutorId'] as String?,
       tutorSlug: json['tutorSlug'] as String?,
       tutorNameKey: json['tutorNameKey'] as String?,

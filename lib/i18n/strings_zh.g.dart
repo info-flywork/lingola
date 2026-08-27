@@ -452,6 +452,9 @@ class _Translations$lessonPage$zh implements Translations$lessonPage$en {
 	@override String get startTalk => '开始课程';
 	@override String get chatInstead => '改为聊天';
 	@override String get lockedHint => '完成上一节课以解锁这一节。';
+	@override String get levelLockedTitle => '等级锁定';
+	@override String levelLockedBody({required Object userLevel, required Object lessonLevel}) => '你的英语水平是${userLevel}，因此在完成前面的路径之前无法打开${lessonLevel}课程。';
+	@override String get levelLockedOk => '知道了';
 	@override String get notesTitle => '课程笔记';
 	@override String get whatWeLearned => '我们今天学到了什么';
 	@override String get deleteNotes => '删除我的课程笔记';
@@ -1688,6 +1691,9 @@ extension on TranslationsZh {
 			'lessonPage.startTalk' => '开始课程',
 			'lessonPage.chatInstead' => '改为聊天',
 			'lessonPage.lockedHint' => '完成上一节课以解锁这一节。',
+			'lessonPage.levelLockedTitle' => '等级锁定',
+			'lessonPage.levelLockedBody' => ({required Object userLevel, required Object lessonLevel}) => '你的英语水平是${userLevel}，因此在完成前面的路径之前无法打开${lessonLevel}课程。',
+			'lessonPage.levelLockedOk' => '知道了',
 			'lessonPage.notesTitle' => '课程笔记',
 			'lessonPage.whatWeLearned' => '我们今天学到了什么',
 			'lessonPage.deleteNotes' => '删除我的课程笔记',
@@ -1889,11 +1895,11 @@ extension on TranslationsZh {
 			'lessonPage.levels.c1.lessons.2' => '职业选择',
 			'lessonPage.levels.c1.lessons.3' => '加速表现',
 			'lessonPage.levels.c1.lessons.4' => '发明',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.5' => '时间旅行',
 			'lessonPage.levels.c1.lessons.6' => '财物',
 			'lessonPage.levels.c1.lessons.7' => '工作技能',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.8' => '历史变迁',
 			'lessonPage.levels.c1.lessons.9' => '写作复习',
 			'lessonPage.levels.c1.lessons.10' => '神秘事件',

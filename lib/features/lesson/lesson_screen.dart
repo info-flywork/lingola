@@ -48,6 +48,7 @@ class LessonScreen extends StatefulWidget {
 
 class _LessonScreenState extends State<LessonScreen> {
   Map<String, List<LessonNodeDto>> _remote = const {};
+  String? _userCefrMax;
   var _busy = false;
 
   @override
@@ -68,6 +69,7 @@ class _LessonScreenState extends State<LessonScreen> {
       final path = await LessonApiService.fetchPath();
       if (!mounted) return;
       setState(() {
+        _userCefrMax = path.userCefrMax;
         _remote = {
           for (final level in path.levels) level.id: level.lessons,
         };
@@ -83,9 +85,10 @@ class _LessonScreenState extends State<LessonScreen> {
       final status = list[index].status;
       if (status == 'completed') return _NodeState.completed;
       if (status == 'available') return _NodeState.active;
+      if (status == 'unlocked') return _NodeState.unlocked;
       return _NodeState.locked;
     }
-    if (levelId == 'a1' && index == 0) return _NodeState.active;
+    if (levelId == 'a1' && index == 0) return _NodeState.unlocked;
     return _NodeState.locked;
   }
 
@@ -101,6 +104,41 @@ class _LessonScreenState extends State<LessonScreen> {
     return LessonCurriculum.slugAt(levelId, index);
   }
 
+  Future<void> _showLevelLockedDialog({
+    required String userLevel,
+    required String lessonLevel,
+  }) async {
+    final text = AppText.current.lessonPage;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          text.levelLockedTitle,
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          text.levelLockedBody(userLevel: userLevel, lessonLevel: lessonLevel),
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+            height: 21 / 14,
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(text.levelLockedOk),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _onNodeTap({
     required String levelId,
     required int index,
@@ -111,11 +149,21 @@ class _LessonScreenState extends State<LessonScreen> {
     final remote = _remoteAt(levelId, index);
     final slug = _slugFor(levelId, index);
     final state = _stateFor(levelId, index);
+    final lessonCefr =
+        (remote?.cefrLevel ?? levelId).toUpperCase();
 
     if (state == _NodeState.locked) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(text.lockedHint)),
-      );
+      final userMax = (_userCefrMax ?? '').toUpperCase();
+      if (userMax.isNotEmpty) {
+        await _showLevelLockedDialog(
+          userLevel: userMax,
+          lessonLevel: lessonCefr,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(text.lockedHint)),
+        );
+      }
       return;
     }
 
@@ -863,7 +911,7 @@ class _LevelLessonPath extends StatelessWidget {
   }
 }
 
-enum _NodeState { active, completed, locked }
+enum _NodeState { active, completed, locked, unlocked }
 
 enum _LabelSide { left, right, below }
 
@@ -888,12 +936,15 @@ class _LessonNode extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = AppText.current;
     final isLocked = state == _NodeState.locked;
-    final circle = isLocked ? const Color(0xFFDBDBDB) : AppColors.primary;
-    final iconColor = isLocked ? const Color(0xFF656565) : Colors.white;
+    final isMuted =
+        state == _NodeState.locked || state == _NodeState.unlocked;
+    final circle = isMuted ? const Color(0xFFDBDBDB) : AppColors.primary;
+    final iconColor = isMuted ? const Color(0xFF656565) : Colors.white;
     final labelColor = switch (state) {
       _NodeState.active => AppColors.primary,
       _NodeState.completed => AppColors.ink,
       _NodeState.locked => AppColors.secondary,
+      _NodeState.unlocked => AppColors.secondary,
     };
 
     return GestureDetector(
