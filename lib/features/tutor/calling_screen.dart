@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rive/rive.dart' show Fit;
 
+import '../../core/auth/api_client.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/rive/rive_preload_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
 import '../lesson/lesson_session_result.dart';
@@ -87,6 +88,17 @@ class _CallingScreenState extends State<CallingScreen> {
   @override
   void initState() {
     super.initState();
+    final cdn = widget.riveCdnUrl?.trim();
+    final slug = widget.tutorSlug?.trim();
+    RivePreloadService.preload(
+      (cdn != null && cdn.isNotEmpty)
+          ? cdn
+          : (slug != null && slug.isNotEmpty
+              ? AppAssets.tutorRiveCdn(slug)
+              : null),
+    );
+    // Backend pm2 log: bu tutor için CDN .riv gerçekten erişilebilir mi?
+    unawaited(_reportCallEnterToBackend());
     _watch = Stopwatch()..start();
     _elapsed = widget.initialElapsed;
     _segmentStartedAt = DateTime.now();
@@ -109,6 +121,32 @@ class _CallingScreenState extends State<CallingScreen> {
       }
       ..onSegmentContinued = _resetSegmentClock;
     unawaited(_conversation.start());
+  }
+
+  /// Backend'e "görüntülü konuşmaya girdim" bildir — CDN .riv probe loglanır.
+  Future<void> _reportCallEnterToBackend() async {
+    final slug = widget.tutorSlug?.trim();
+    if (slug == null || slug.isEmpty) {
+      debugPrint('[call-enter] skip: tutorSlug yok');
+      return;
+    }
+    final cdn = widget.riveCdnUrl?.trim();
+    final q = (cdn != null && cdn.isNotEmpty)
+        ? '?riveUrl=${Uri.encodeComponent(cdn)}'
+        : '';
+    try {
+      final json = await ApiClient.get('/tutors/$slug/call-enter$q');
+      final rive = json['rive'];
+      final ok = json['ok'] == true;
+      debugPrint(
+        '[call-enter] slug=$slug ok=$ok'
+        ' reachable=${rive is Map ? rive['reachable'] : '-'}'
+        ' magic=${rive is Map ? rive['magic'] : '-'}'
+        ' url=${rive is Map ? rive['url'] : '-'}',
+      );
+    } catch (e) {
+      debugPrint('[call-enter] backend probe fail: $e');
+    }
   }
 
   void _resetSegmentClock() {
@@ -379,45 +417,33 @@ class _CallingScreenState extends State<CallingScreen> {
     required EdgeInsets padding,
     Alignment alignment = Alignment.bottomCenter,
   }) {
-    final cdn = widget.riveCdnUrl?.trim();
-    final local = widget.riveAsset?.trim();
-    // Production: CDN riv birincil; local bundle sadece yedek.
-    final primary = (cdn != null && cdn.isNotEmpty)
-        ? cdn
-        : (local != null && local.isNotEmpty ? local : null);
-    final rivFallback = (primary != null &&
-            local != null &&
-            local.isNotEmpty &&
-            local != primary)
-        ? local
-        : null;
+    // DB `tutors.rive_cdn_url` → CDN only (Mindcoach gibi). Yerel .riv yok.
+    final cdnRaw = widget.riveCdnUrl?.trim();
+    final slug = widget.tutorSlug?.trim();
+    final primary = (cdnRaw != null && cdnRaw.isNotEmpty)
+        ? cdnRaw
+        : (slug != null && slug.isNotEmpty
+            ? AppAssets.tutorRiveCdn(slug)
+            : AppAssets.tutorLingolaRivCdn);
+    final rivFallback = primary == AppAssets.tutorLingolaRivCdn
+        ? null
+        : AppAssets.tutorLingolaRivCdn;
 
     return Padding(
       padding: padding,
-      child: primary != null
-          ? TutorRiveAvatar(
-              assetPath: primary,
-              talking: _conversation.avatarTalking,
-              fallbackImage: widget.imagePath,
-              fallbackRivePath: rivFallback,
-              // Tasarım: hoca ekranı doldursun (cover), boş mavi alan kalmasın.
-              fit: Fit.cover,
-              alignment: alignment,
-              lipsyncViseme: _conversation.avatarTalking
-                  ? (_conversation.hasLipsyncTrack
-                      ? _conversation.currentViseme
-                      : null)
-                  : null,
-              loadingBackgroundColor:
-                  widget.backgroundGradientStart ?? widget.backgroundGradientEnd,
-            )
-          : Image.asset(
-              widget.imagePath,
-              fit: BoxFit.cover,
-              alignment: alignment,
-              width: double.infinity,
-              height: double.infinity,
-            ),
+      child: TutorRiveAvatar(
+        assetPath: primary,
+        talking: _conversation.avatarTalking,
+        fallbackImage: widget.imagePath,
+        fallbackRivePath: rivFallback,
+        lipsyncViseme: _conversation.avatarTalking
+            ? (_conversation.hasLipsyncTrack
+                ? _conversation.currentViseme
+                : null)
+            : null,
+        loadingBackgroundColor:
+            widget.backgroundGradientStart ?? widget.backgroundGradientEnd,
+      ),
     );
   }
 

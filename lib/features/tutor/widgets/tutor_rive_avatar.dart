@@ -1,36 +1,36 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:rive/rive.dart';
+import 'package:rive/rive.dart' as rive;
 
-import '../../../core/cdn/cdn_file_cache.dart';
+import '../../../core/rive/rive_preload_service.dart';
 import '../../../widgets/home_asset.dart';
 
-/// Mindcoach `video_call_realtime_screen` ile aynı model:
-/// `talk` + `visemeNum` + `duration` (ms).
-///
-/// Kritik: `talk=true` iken Rive baked-in ağız idle animasyonu çalışır.
-/// Ses bitince mutlaka `talk=false` + `visemeNum=0` (sadece viseme yetmez).
+/// Lingola Buddy yükleme modeli + Lingola lipsync:
+/// - `ensureLoader` (disk cache → File.url, Factory.rive → Factory.flutter)
+/// - Yüklenene kadar blur placeholder; Rive gelince kaybolur
+/// - Inputs: `talk` + `visemeNum` + `duration` (ms)
 class TutorRiveAvatar extends StatefulWidget {
   const TutorRiveAvatar({
     required this.assetPath,
     required this.talking,
     this.fallbackImage,
-    /// Asıl .riv yüklenemezse bu yerel .riv denensin (PNG yerine).
     this.fallbackRivePath,
-    this.fit = Fit.contain,
-    this.alignment = Alignment.bottomCenter,
-    /// Ses zamanına hizalı viseme (null → fake cycle yok; ağız kapalı kalır).
+    this.fit = rive.Fit.contain,
+    this.alignment = const Alignment(0, 0.15),
     this.lipsyncViseme,
     this.loadingBackgroundColor,
     super.key,
   });
 
+  /// CDN `.riv` URL (http/https).
   final String assetPath;
   final bool talking;
   final String? fallbackImage;
+  /// CDN fail olursa denenecek ikinci CDN URL.
   final String? fallbackRivePath;
-  final Fit fit;
+  final rive.Fit fit;
   final Alignment alignment;
   final double? lipsyncViseme;
   final Color? loadingBackgroundColor;
@@ -40,22 +40,22 @@ class TutorRiveAvatar extends StatefulWidget {
 }
 
 class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
-  FileLoader? _fileLoader;
-  ViewModelInstance? _viewModel;
-  BooleanInput? _smTalk;
-  NumberInput? _smViseme;
-  NumberInput? _smDuration;
+  rive.FileLoader? _fileLoader;
+  rive.ViewModelInstance? _viewModel;
+  rive.BooleanInput? _smTalk;
+  rive.NumberInput? _smViseme;
+  rive.NumberInput? _smDuration;
   Timer? _visemeTimer;
   Timer? _closeLockTimer;
-  var _failed = false;
-  var _resolving = true;
-  var _loadGen = 0;
-  var _triedFallbackRive = false;
-  String? _activeAssetPath;
-  /// Mindcoach `_forceCloseLockedUntil` — kapanış sonrası kısa süre tekrar açma.
+  var _riveReady = false;
+  var _riveEverLoaded = false;
+  var _riveFailed = false;
+  var _recoveryAttempted = false;
+  var _loaderKey = 0;
+  var _resolveGen = 0;
+  String? _activeUrl;
   DateTime? _forceCloseLockedUntil;
 
-  /// Mindcoach sabitleri (ms).
   static const _talkOpenBlendMs = 45.0;
   static const _visemeBlendMs = 38.0;
   static const _talkCloseBlendMs = 40.0;
@@ -64,7 +64,7 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   @override
   void initState() {
     super.initState();
-    _loadFile();
+    unawaited(_resolveLoader(_resolvePrimaryUrl()));
   }
 
   @override
@@ -72,14 +72,17 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.assetPath != widget.assetPath ||
         oldWidget.fallbackRivePath != widget.fallbackRivePath) {
-      _triedFallbackRive = false;
-      _loadFile();
+      _recoveryAttempted = false;
+      _riveReady = false;
+      _riveEverLoaded = false;
+      _riveFailed = false;
+      _fileLoader = null;
+      unawaited(_resolveLoader(_resolvePrimaryUrl()));
       return;
     }
 
     if (oldWidget.talking != widget.talking) {
       if (widget.talking) {
-        // Konuşma başında lockout'u kaldır — aksi halde ağız hiç açılmaz.
         _forceCloseLockedUntil = null;
         _closeLockTimer?.cancel();
         _syncTalk(true);
@@ -103,7 +106,6 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     }
 
     if (newV != null && oldV != newV) {
-      // Kelime arası 0: talk açık kalsın, sadece şekil kapalı.
       _setRiveBool('talk', true);
       _applyLipsyncViseme(newV);
     } else if (newV == null && oldV != null) {
@@ -118,118 +120,109 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
   @override
   void dispose() {
-    _loadGen++;
+    _resolveGen++;
     _visemeTimer?.cancel();
     _closeLockTimer?.cancel();
     _smTalk?.dispose();
     _smViseme?.dispose();
     _smDuration?.dispose();
-    _fileLoader?.dispose();
+    // Cache'lenen FileLoader dispose edilmez (Buddy/Mindcoach).
     super.dispose();
   }
 
-  Future<void> _loadFile({String? overridePath}) async {
-    final gen = ++_loadGen;
-    final source = (overridePath ?? widget.assetPath).trim();
-    _activeAssetPath = source;
-    _fileLoader?.dispose();
-    _fileLoader = null;
-    _viewModel = null;
-    _smTalk = null;
-    _smViseme = null;
-    _smDuration = null;
-    _failed = false;
-    _resolving = true;
-    if (mounted) setState(() {});
+  String _resolvePrimaryUrl() {
+    return RivePreloadService.normalizeRiveUrl(widget.assetPath) ??
+        RivePreloadService.normalizeRiveUrl(widget.fallbackRivePath) ??
+        RivePreloadService.defaultFallbackUrl;
+  }
 
-    try {
-      final loader = await _loaderFor(source);
-      if (!mounted || gen != _loadGen) {
-        loader.dispose();
-        return;
-      }
+  Future<void> _resolveLoader(String url) async {
+    final gen = ++_resolveGen;
+    _activeUrl = url;
+    if (mounted) {
       setState(() {
-        _fileLoader = loader;
-        _resolving = false;
+        _fileLoader = null;
+        _riveFailed = false;
+        _riveReady = false;
+        _viewModel = null;
+        _smTalk = null;
+        _smViseme = null;
+        _smDuration = null;
       });
-    } catch (err) {
-      if (!mounted || gen != _loadGen) return;
-      debugPrint('Rive cache/load hatası ($source): $err');
-      final fb = widget.fallbackRivePath?.trim();
-      if (fb != null &&
-          fb.isNotEmpty &&
-          !_triedFallbackRive &&
-          fb != source) {
-        _triedFallbackRive = true;
-        debugPrint('Rive PNG yerine yerel fallback .riv: $fb');
-        await _loadFile(overridePath: fb);
-        return;
-      }
-      setState(() {
-        _failed = true;
-        _resolving = false;
-      });
+    }
+
+    final loader = await RivePreloadService.ensureLoader(url);
+    if (!mounted || gen != _resolveGen) return;
+
+    setState(() {
+      _fileLoader = loader;
+      _riveFailed = loader == null;
+      _loaderKey++;
+    });
+    debugPrint(
+      '[rive] ensureLoader url=$url ok=${loader != null} failed=$_riveFailed',
+    );
+
+    if (loader == null && !_recoveryAttempted) {
+      unawaited(_recoverAfterFailure());
     }
   }
 
-  Future<FileLoader> _loaderFor(String source) async {
-    final isNetwork =
-        source.startsWith('http://') || source.startsWith('https://');
-    if (!isNetwork) {
-      return FileLoader.fromAsset(source, riveFactory: Factory.rive);
-    }
+  Future<void> _recoverAfterFailure() async {
+    if (_riveEverLoaded || _recoveryAttempted || !mounted) return;
+    _recoveryAttempted = true;
 
-    try {
-      final localPath = await CdnFileCache.resolve(source, kind: 'rive')
-          .timeout(const Duration(seconds: 25));
-      final decoded = await File.path(localPath, riveFactory: Factory.rive);
-      if (decoded != null) {
-        return FileLoader.fromFile(decoded, riveFactory: Factory.rive);
+    final current = RivePreloadService.normalizeRiveUrl(_activeUrl);
+    final fallback =
+        RivePreloadService.normalizeRiveUrl(widget.fallbackRivePath) ??
+            RivePreloadService.defaultFallbackUrl;
+
+    if (current != null && current != fallback) {
+      debugPrint('[rive] recover → fallback CDN $fallback');
+      RivePreloadService.invalidate(current);
+      final ok = await RivePreloadService.ensurePreloaded(fallback);
+      if (!mounted) return;
+      if (ok) {
+        await _resolveLoader(fallback);
+        return;
       }
-    } catch (err) {
-      debugPrint('Rive disk cache miss, CDN fallback: $err');
     }
 
-    return FileLoader.fromUrl(source, riveFactory: Factory.rive);
+    debugPrint('[rive] recover invalidate+reload $current');
+    RivePreloadService.invalidate(current);
+    await _resolveLoader(current ?? fallback);
   }
 
-  RiveWidgetController _createController(File file) {
+  rive.RiveWidgetController _createController(rive.File file) {
     Object? lastError;
-    final isElrion = widget.assetPath.toLowerCase().contains('elrion');
-    final attempts = <RiveWidgetController Function()>[
-      () => RiveWidgetController(file),
-      () => RiveWidgetController(
+    final attempts = <rive.RiveWidgetController Function()>[
+      () => rive.RiveWidgetController(file),
+      () => rive.RiveWidgetController(
             file,
-            artboardSelector: const ArtboardAtIndex(0),
-            stateMachineSelector: const StateMachineAtIndex(0),
+            artboardSelector: const rive.ArtboardAtIndex(0),
+            stateMachineSelector: const rive.StateMachineAtIndex(0),
           ),
-      if (isElrion)
-        () => RiveWidgetController(
-              file,
-              artboardSelector: ArtboardSelector.byName('Elrion'),
-              stateMachineSelector:
-                  StateMachineSelector.byName('State Machine 1'),
-            ),
     ];
     for (final create in attempts) {
       try {
         return create();
       } catch (e) {
         lastError = e;
-        debugPrint('Rive controller denemesi başarısız: $e');
+        debugPrint('[rive] controller denemesi başarısız: $e');
       }
     }
     throw lastError ?? StateError('Rive controller oluşturulamadı');
   }
 
-  void _onLoaded(RiveLoaded loaded) {
+  void _onLoaded(rive.RiveLoaded loaded) {
     final controller = loaded.controller;
+    debugPrint('[rive] LOADED $_activeUrl');
 
     try {
-      _viewModel = controller.dataBind(DataBind.auto());
+      _viewModel = controller.dataBind(rive.DataBind.auto());
     } catch (e) {
       _viewModel = null;
-      debugPrint('Rive ViewModel yok: $e');
+      debugPrint('[rive] ViewModel yok: $e');
     }
 
     try {
@@ -237,15 +230,15 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       // ignore: deprecated_member_use
       final inputs = sm.inputs;
       debugPrint(
-        'Rive SM inputs: ${inputs.map((i) => '${i.name}(${i.runtimeType})').join(', ')}',
+        '[rive] SM inputs: ${inputs.map((i) => '${i.name}(${i.runtimeType})').join(', ')}',
       );
       for (final input in inputs) {
         final n = input.name.toLowerCase();
-        if (n == 'talk' && input is BooleanInput) {
+        if (n == 'talk' && input is rive.BooleanInput) {
           _smTalk = input;
-        } else if (n == 'visemenum' && input is NumberInput) {
+        } else if (n == 'visemenum' && input is rive.NumberInput) {
           _smViseme = input;
-        } else if (n == 'duration' && input is NumberInput) {
+        } else if (n == 'duration' && input is rive.NumberInput) {
           _smDuration = input;
         }
       }
@@ -256,36 +249,26 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       // ignore: deprecated_member_use
       _smDuration ??= sm.number('duration');
     } catch (e) {
-      debugPrint('Rive SM input okuma hatası: $e');
+      debugPrint('[rive] SM input hatası: $e');
     }
-
-    debugPrint(
-      'Rive bağlar → talkSM=${_smTalk != null} '
-      'visemeSM=${_smViseme != null} durationSM=${_smDuration != null} '
-      'vm=${_viewModel != null}',
-    );
 
     if (widget.talking) {
       _syncTalk(true);
     } else {
       _forceMouthClosed(lock: true);
     }
+
+    final wasReady = _riveReady;
+    _riveReady = true;
+    _riveEverLoaded = true;
+    _riveFailed = false;
+    if (mounted && !wasReady) setState(() {});
   }
 
   void _onFailed(Object error, StackTrace stack) {
-    debugPrint('Rive yükleme hatası (${_activeAssetPath ?? widget.assetPath}): $error');
-    final fb = widget.fallbackRivePath?.trim();
-    final current = (_activeAssetPath ?? widget.assetPath).trim();
-    if (fb != null &&
-        fb.isNotEmpty &&
-        !_triedFallbackRive &&
-        fb != current) {
-      _triedFallbackRive = true;
-      debugPrint('Rive onFailed → yerel fallback .riv: $fb');
-      unawaited(_loadFile(overridePath: fb));
-      return;
-    }
-    if (mounted) setState(() => _failed = true);
+    debugPrint('[rive] onFailed ($_activeUrl): $error');
+    if (_riveEverLoaded) return;
+    unawaited(_recoverAfterFailure());
   }
 
   void _syncTalk(bool talking) {
@@ -307,7 +290,6 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     }
   }
 
-  /// Viseme track yokken basit ağız döngüsü — sessiz PNG görünümünü önler.
   void _startTalkIdleCycle() {
     _visemeTimer?.cancel();
     const cycle = <double>[6, 10, 14, 2, 10, 6];
@@ -330,12 +312,9 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     });
   }
 
-  /// Mindcoach `_forceCloseMouthForSilence`.
-  /// [lock] true → cümle bitti; kısa süre tekrar açılmasın.
   void _forceMouthClosed({required bool lock}) {
     _visemeTimer?.cancel();
     _visemeTimer = null;
-    // Anında kapat — uzun blend son 1 sn ağız açık bırakıyordu.
     _setRiveNumber('duration', lock ? 0 : _talkCloseBlendMs);
     _setVisemeValues(0);
     _setRiveBool('talk', false);
@@ -345,7 +324,6 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       const Duration(milliseconds: _forceCloseLockoutMs),
     );
     _closeLockTimer?.cancel();
-    // İkinci ve üçüncü vuruş — Rive idle animasyonu direnmesin.
     _closeLockTimer = Timer(const Duration(milliseconds: 40), () {
       if (!mounted || widget.talking) return;
       _setRiveNumber('duration', 0);
@@ -370,7 +348,6 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     _setRiveNumber('viseme', id);
   }
 
-  /// Mindcoach: VM + SM ikisine birden yaz (kapanışta SM kaçmasın).
   void _setRiveNumber(String key, double value) {
     final vm = _viewModel;
     if (vm != null) {
@@ -417,73 +394,104 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildPlaceholder() {
     final image = widget.fallbackImage?.trim() ?? '';
-    final hasImage = image.isNotEmpty;
-
-    // Yüklenirken / fail'de foto göster — boş mavi ekran olmasın.
-    Widget imageOrColor() {
-      if (hasImage) {
-        return _Fallback(
-          imagePath: image,
-          alignment: widget.alignment,
-        );
-      }
-      return ColoredBox(
-        color: widget.loadingBackgroundColor ?? Colors.transparent,
-        child: const SizedBox.expand(),
-      );
-    }
-
-    if (_failed) {
-      return imageOrColor();
-    }
-
-    final loader = _fileLoader;
-    if (_resolving || loader == null) {
-      return imageOrColor();
-    }
-
-    return RiveWidgetBuilder(
-      fileLoader: loader,
-      controller: _createController,
-      onLoaded: _onLoaded,
-      onFailed: _onFailed,
-      builder: (context, state) {
-        return switch (state) {
-          RiveLoading() => imageOrColor(),
-          RiveFailed() => imageOrColor(),
-          RiveLoaded(:final controller) => RiveWidget(
-              controller: controller,
-              fit: widget.fit,
-              alignment: widget.alignment,
+    final bg = widget.loadingBackgroundColor ?? const Color(0xFF2D46FF);
+    return ClipRect(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ColoredBox(color: bg),
+          if (image.isNotEmpty)
+            Positioned(
+              top: -24,
+              bottom: -24,
+              left: -24,
+              right: -24,
+              child: Opacity(
+                opacity: 0.55,
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                  child: HomeAsset(
+                    image,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+              ),
             ),
-        };
-      },
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.25),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
-}
 
-class _Fallback extends StatelessWidget {
-  const _Fallback({this.imagePath, this.alignment = Alignment.bottomCenter});
-
-  final String? imagePath;
-  final Alignment alignment;
+  Widget _buildRiveAvatar(rive.RiveLoaded loaded) {
+    if (!_riveReady) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _onLoaded(loaded);
+      });
+    }
+    return Transform.scale(
+      scale: 0.92,
+      alignment: Alignment.center,
+      child: rive.RiveWidget(
+        controller: loaded.controller,
+        fit: widget.fit,
+        alignment: widget.alignment,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (imagePath == null || imagePath!.trim().isEmpty) {
-      return const Center(
-        child: Icon(Icons.person_rounded, color: Colors.white54, size: 72),
-      );
-    }
-    return HomeAsset(
-      imagePath!,
-      fit: BoxFit.contain,
-      alignment: alignment,
-      width: double.infinity,
-      height: double.infinity,
+    final hidePlaceholder = _riveEverLoaded;
+    final loader = _fileLoader;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned.fill(
+          child: ColoredBox(
+            color: widget.loadingBackgroundColor ?? const Color(0xFF2D46FF),
+          ),
+        ),
+        if (!_riveFailed && loader != null)
+          RepaintBoundary(
+            child: KeyedSubtree(
+              key: ValueKey('rive-$_loaderKey-$_activeUrl'),
+              child: rive.RiveWidgetBuilder(
+                fileLoader: loader,
+                controller: _createController,
+                onLoaded: _onLoaded,
+                onFailed: _onFailed,
+                builder: (context, state) {
+                  return switch (state) {
+                    rive.RiveLoading() => const SizedBox.shrink(),
+                    rive.RiveFailed() => const SizedBox.shrink(),
+                    rive.RiveLoaded loaded => _buildRiveAvatar(loaded),
+                  };
+                },
+              ),
+            ),
+          ),
+        IgnorePointer(
+          ignoring: hidePlaceholder,
+          child: AnimatedOpacity(
+            opacity: hidePlaceholder ? 0.0 : 1.0,
+            duration: const Duration(milliseconds: 140),
+            curve: Curves.easeOut,
+            child: _buildPlaceholder(),
+          ),
+        ),
+      ],
     );
   }
 }

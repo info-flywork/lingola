@@ -1,5 +1,6 @@
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_text.dart';
+import '../../../core/rive/rive_preload_service.dart';
 import '../../../i18n/strings.g.dart';
 import '../../lesson/lesson_api_service.dart';
 import '../../tutor/services/tutor_api_service.dart';
@@ -97,6 +98,12 @@ abstract final class HomeDataService {
       final path = results[0] as LessonPathDto;
       final tutors = results[1] as List<TutorDto>;
       final text = AppText.current;
+
+      // Mindcoach: konuşma açılmadan CDN .riv arka planda hazır olsun.
+      RivePreloadService.preloadMany([
+        AppAssets.tutorLingolaRivCdn,
+        ...tutors.map((t) => t.remoteRiveUrl),
+      ]);
 
       return HomeRemoteData(
         continueData: _buildContinue(path, text),
@@ -253,8 +260,8 @@ abstract final class HomeDataService {
           : AppAssets.flagForTutorSlug(dto.slug),
       tags: tagLabels,
       slug: dto.slug,
-      riveAsset: dto.bundledRivePath,
-      riveCdnUrl: dto.remoteRiveUrl,
+      riveAsset: dto.remoteRiveUrl ?? AppAssets.tutorRiveCdn(dto.slug),
+      riveCdnUrl: dto.remoteRiveUrl ?? AppAssets.tutorRiveCdn(dto.slug),
       voiceId: dto.voiceId,
     );
   }
@@ -314,7 +321,8 @@ abstract final class HomeDataService {
           home.tagMore,
         ],
         slug: 'lingola',
-        riveAsset: AppAssets.tutorLingolaRiv,
+        riveAsset: AppAssets.tutorLingolaRivCdn,
+        riveCdnUrl: AppAssets.tutorLingolaRivCdn,
       ),
       HomeTutorCarouselItem(
         name: home.tutorMei,

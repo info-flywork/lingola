@@ -178,6 +178,11 @@ abstract final class AppAssets {
   static const tutorSantaRiv = 'assets/riv/santa_claus.riv';
   static const tutorZephyrionRiv = 'assets/riv/zephyrion.riv';
   static const tutorLingolaRiv = 'assets/riv/Female/lingola_robot.riv';
+  /// Production: Mindcoach gibi CDN birincil kaynak.
+  static const tutorLingolaRivCdn =
+      'https://lingola.b-cdn.net/tutors/lingola/avatar.riv';
+  static String tutorRiveCdn(String slug) =>
+      'https://lingola.b-cdn.net/tutors/$slug/avatar.riv';
 
   // —— Tutor Rive (Female/Male foto eşleştirmesi) ——
   static const tutorElenaRiv = 'assets/riv/Female/avatar3.riv';

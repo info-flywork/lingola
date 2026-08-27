@@ -231,12 +231,13 @@ class _LessonScreenState extends State<LessonScreen> {
             builder: (_) => CallingScreen(
               tutorName: tutorName,
               imagePath: image,
-              riveAsset: choice!.tutor.bundledRivePath,
+              riveAsset: choice!.tutor.remoteRiveUrl ??
+                  AppAssets.tutorRiveCdn(choice.tutor.slug),
               riveCdnUrl: choice.tutor.remoteRiveUrl ??
                   ((start.tutorRive != null &&
                           start.tutorRive!.startsWith('http'))
                       ? start.tutorRive
-                      : null),
+                      : AppAssets.tutorRiveCdn(choice.tutor.slug)),
               voiceId: choice.tutor.voiceId ?? start.tutorVoiceId,
               backgroundGradientStart: _parseHex(theme?.gradientStart),
               backgroundGradientEnd: _parseHex(theme?.gradientEnd),

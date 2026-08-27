@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rive/rive.dart' show Fit;
 
 import '../core/auth/api_client.dart';
 import '../core/constants/app_assets.dart';
@@ -932,14 +931,13 @@ class _ChatRobotHero extends StatelessWidget {
         width: double.infinity,
         child: hasRive
             ? TutorRiveAvatar(
-                assetPath: rive,
+                assetPath: rive.startsWith('http')
+                    ? rive
+                    : AppAssets.tutorLingolaRivCdn,
                 talking: talking,
                 lipsyncViseme: lipsyncViseme,
-                // PNG yok — asıl path patlarsa yerel robot .riv.
-                fallbackRivePath: AppAssets.tutorLingolaRiv,
-                fallbackImage: null,
-                fit: Fit.contain,
-                alignment: Alignment.bottomCenter,
+                fallbackRivePath: AppAssets.tutorLingolaRivCdn,
+                fallbackImage: fallbackImage,
                 loadingBackgroundColor: Colors.transparent,
               )
             : HomeAsset(

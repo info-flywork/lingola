@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/rive/rive_preload_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
 import 'chat_history_screen.dart';
@@ -107,6 +108,10 @@ class _TutorScreenState extends State<TutorScreen> {
         _focusedTutor ??= mapped.isNotEmpty ? mapped.first : null;
         _loadingRemote = false;
       });
+      RivePreloadService.preloadMany([
+        AppAssets.tutorLingolaRivCdn,
+        ...mapped.map((t) => t.riveCdnUrl),
+      ]);
     } catch (_) {
       if (!mounted) return;
       setState(() => _loadingRemote = false);
@@ -122,8 +127,8 @@ class _TutorScreenState extends State<TutorScreen> {
       slug: dto.slug,
       name: _tutorDisplayName(text.tutors, dto.nameKey, dto.slug),
       image: image,
-      riveAsset: dto.bundledRivePath,
-      riveCdnUrl: dto.remoteRiveUrl,
+      riveAsset: dto.remoteRiveUrl ?? AppAssets.tutorRiveCdn(dto.slug),
+      riveCdnUrl: dto.remoteRiveUrl ?? AppAssets.tutorRiveCdn(dto.slug),
       voiceId: dto.voiceId,
       flagAsset: dto.flagAssetPath?.trim().isNotEmpty == true
           ? dto.flagAssetPath

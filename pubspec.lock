@@ -1009,18 +1009,18 @@ packages:
     dependency: "direct main"
     description:
       name: rive
-      sha256: "0319f216b753f5d8f3f624413cd5b5a18f6ed8f0a677f80d97b53ecd3d2080c3"
+      sha256: d3901d82850e17395a149d05c8b446a16eca42b328bac6ca9bd9ed760016f20c
       url: "https://pub.dev"
     source: hosted
-    version: "0.14.11"
+    version: "0.14.1"
   rive_native:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: rive_native
-      sha256: f1ae8a9ec4dab6b803fed006745e55c7de6cd568bd30750d4a6770479b9f8294
+      sha256: "955e7820b7cd508f4885aa6f25d6240791c932756291c400326ab8b1f3c57c7d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.11"
+    version: "0.1.1"
   serial_csv:
     dependency: transitive
     description:

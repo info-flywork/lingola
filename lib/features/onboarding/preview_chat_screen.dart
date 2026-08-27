@@ -5,6 +5,7 @@ import '../../core/auth/api_client.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/rive/rive_preload_service.dart';
 import '../../i18n/strings.g.dart';
 import '../tutor/services/tutor_chat_api_service.dart';
 import '../../widgets/lingola_chat_session.dart';
@@ -34,6 +35,7 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
   @override
   void initState() {
     super.initState();
+    RivePreloadService.preload(AppAssets.tutorLingolaRivCdn);
     _bootstrap();
   }
 
@@ -123,7 +125,7 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
       onSessionExpired: _goPaywall,
       initialMessages: _messages,
       ttsVoiceId: TutorVoiceIds.male,
-      riveAsset: AppAssets.tutorLingolaRiv,
+      riveAsset: AppAssets.tutorLingolaRivCdn,
       fallbackImage: null,
     );
   }

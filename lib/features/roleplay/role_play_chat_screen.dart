@@ -59,7 +59,7 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
   }
 
   /// Role play avatar: yalnızca yerel robot .riv (PNG yok).
-  static const _riveAsset = AppAssets.tutorLingolaRiv;
+  static const _riveAsset = AppAssets.tutorLingolaRivCdn;
 
   String? get _ttsVoiceId => _tutor?.voiceId;
 
