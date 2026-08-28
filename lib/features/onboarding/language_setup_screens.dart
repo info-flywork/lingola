@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/constants/app_text.dart';
 import '../../core/i18n/app_locale_sync.dart';
+import '../../core/i18n/locale_uppercase.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import 'language_flag.dart';
@@ -94,7 +95,6 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
             languages:
                 forNative ? _nativeSheetLanguages() : _targetSheetLanguages(),
             selectedCode: selected,
-            selectedLabel: forNative ? _nativeName : _targetName,
             targetMode: !forNative,
           ),
         );
@@ -174,7 +174,7 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                       ),
                       const SizedBox(height: 28),
                       Text(
-                        text.language.nativeSection.toUpperCase(),
+                        localeUpperCase(text.language.nativeSection),
                         style: const TextStyle(
                           color: Color(0xFF606060),
                           fontSize: 14,
@@ -221,7 +221,7 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                       ),
                       const SizedBox(height: 18),
                       Text(
-                        text.language.targetSection.toUpperCase(),
+                        localeUpperCase(text.language.targetSection),
                         style: const TextStyle(
                           color: Color(0xFF606060),
                           fontSize: 14,
@@ -274,109 +274,64 @@ class _LanguageCard extends StatelessWidget {
     required this.language,
     required this.flagCode,
     required this.onOpen,
-    this.fieldLabel,
-    this.highlighted = false,
   });
 
-  final String? fieldLabel;
   final String language;
   final String flagCode;
   final VoidCallback onOpen;
-  /// Sheet üst özeti: fill primary %20 + mavi border (ana ekranda false)
-  final bool highlighted;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: highlighted
-            ? [
-                BoxShadow(
-                  color: AppColors.darkShadow.withValues(alpha: 0.22),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.18),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
-      ),
-      child: Material(
-        color: highlighted
-            ? AppColors.primary.withValues(alpha: 0.20)
-            : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onOpen,
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 62),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: highlighted ? AppColors.primary : AppColors.border,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onOpen,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 62),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: AppColors.border,
+              width: 1,
             ),
-            child: Row(
-              children: [
-                LanguageFlag(flagCode, width: 39, height: 30),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (fieldLabel != null && fieldLabel!.isNotEmpty) ...[
-                        Text(
-                          fieldLabel!,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            color: AppColors.ink,
-                            fontSize: 12,
-                            height: 16 / 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                      Text(
-                        language,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          color: AppColors.primary,
-                          fontSize: 16,
-                          height: 20 / 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              LanguageFlag(flagCode, width: 39, height: 30),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  language,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    color: AppColors.primary,
+                    fontSize: 16,
+                    height: 20 / 16,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                Material(
-                  color: AppColors.primary,
-                  shape: const CircleBorder(),
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: onOpen,
-                    child: const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Icon(
-                        Icons.chevron_right_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      ),
+              ),
+              Material(
+                color: AppColors.primary,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: onOpen,
+                  child: const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Icon(
+                      Icons.chevron_right_rounded,
+                      color: Colors.white,
+                      size: 16,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -397,14 +352,12 @@ class _LanguagePickerSheet extends StatelessWidget {
     required this.title,
     required this.languages,
     required this.selectedCode,
-    required this.selectedLabel,
     this.targetMode = false,
   });
 
   final String title;
   final List<_SheetLanguage> languages;
   final String selectedCode;
-  final String selectedLabel;
   final bool targetMode;
 
   @override
@@ -488,19 +441,6 @@ class _LanguagePickerSheet extends StatelessWidget {
                     padding: EdgeInsets.fromLTRB(16, 10, 16, 16 + bottom),
                     shrinkWrap: true,
                     children: [
-                      // Figma: Target sheet üstünde seçili dil özeti (398×62)
-                      if (targetMode) ...[
-                        IgnorePointer(
-                          child: _LanguageCard(
-                            fieldLabel: text.language.targetField,
-                            language: selectedLabel,
-                            flagCode: selectedCode,
-                            highlighted: true,
-                            onOpen: () {},
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
                       for (final item in activeLanguages)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 10),

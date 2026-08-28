@@ -7,13 +7,17 @@ import 'package:flutter/services.dart';
 import '../core/auth/api_client.dart';
 import '../core/constants/app_assets.dart';
 import '../core/constants/app_text.dart';
+import '../core/i18n/native_language.dart';
+import '../core/i18n/word_translation_cache.dart';
 import '../core/theme/app_theme.dart';
 import '../i18n/strings.g.dart';
 import '../features/tutor/services/hold_to_speak_service.dart';
 import '../features/tutor/services/openai_chat_service.dart';
 import '../features/tutor/services/tutor_tts_service.dart';
 import '../features/tutor/services/viseme_cue.dart';
+import '../features/tutor/tutor_scene_theme.dart';
 import '../features/tutor/widgets/tutor_rive_avatar.dart';
+import 'chat_word_chip.dart';
 import 'home_asset.dart';
 
 /// Ortak sohbet mesaj modeli (onboarding preview + role play).
@@ -73,6 +77,7 @@ class LingolaChatSession extends StatefulWidget {
     this.busy = false,
     this.errorText,
     this.onRetry,
+    this.nativeLanguageCode,
     super.key,
   });
 
@@ -98,6 +103,8 @@ class LingolaChatSession extends StatefulWidget {
   final bool busy;
   final String? errorText;
   final VoidCallback? onRetry;
+  /// Anadil çevirisi (örn. onboarding draft); yoksa oturumdan çözülür.
+  final String? nativeLanguageCode;
 
   @override
   State<LingolaChatSession> createState() => _LingolaChatSessionState();
@@ -118,12 +125,10 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   StreamSubscription<Duration>? _playerPositionSub;
 
   List<VisemeCue> _visemeTrack = const [];
-  double _currentViseme = 0;
+  final _visemeNotifier = ValueNotifier<double>(0);
+  final _lipsActiveNotifier = ValueNotifier<bool>(false);
   double? _speechEndSec;
   Timer? _lipsyncPollTimer;
-  var _lipsActive = false;
-
-  bool get _avatarTalking => _speaking && _lipsActive;
 
   Timer? _ticker;
   Timer? _sessionTimer;
@@ -155,11 +160,11 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       _stopLipsyncPoll();
       setState(() {
         _speaking = false;
-        _lipsActive = false;
-        _currentViseme = 0;
         _visemeTrack = const [];
         _speechEndSec = null;
       });
+      _lipsActiveNotifier.value = false;
+      _visemeNotifier.value = 0;
     });
     _playerPositionSub = _player.onPositionChanged.listen((pos) {
       if (!_speaking || _visemeTrack.isEmpty) return;
@@ -217,18 +222,16 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     final t = pos.inMilliseconds / 1000.0;
     final lipEnd = _speechEndSec;
     if (lipEnd != null && lipEnd > 0 && t >= lipEnd) {
-      if (_lipsActive) {
-        setState(() {
-          _lipsActive = false;
-          _currentViseme = 0;
-        });
+      if (_lipsActiveNotifier.value) {
+        _lipsActiveNotifier.value = false;
+        _visemeNotifier.value = 0;
       }
       return;
     }
-    if (!_lipsActive || _visemeTrack.isEmpty) return;
+    if (!_lipsActiveNotifier.value || _visemeTrack.isEmpty) return;
     final next = visemeAt(_visemeTrack, t);
-    if (next == _currentViseme) return;
-    setState(() => _currentViseme = next);
+    if (next == _visemeNotifier.value) return;
+    _visemeNotifier.value = next;
   }
 
   void _startLipsyncPoll() {
@@ -266,6 +269,8 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     unawaited(_playerPositionSub?.cancel());
     unawaited(_player.dispose());
     unawaited(_mic.dispose());
+    _visemeNotifier.dispose();
+    _lipsActiveNotifier.dispose();
     _tts.dispose();
     super.dispose();
   }
@@ -473,10 +478,10 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
           visemes: speech.visemes,
           audioDurationSec: null,
         );
-        _currentViseme = 0;
-        _lipsActive = true;
         _speaking = false;
       });
+      _visemeNotifier.value = 0;
+      _lipsActiveNotifier.value = true;
       if (!mounted || _finished) return;
       await _player.play(DeviceFileSource(speech.file.path));
       if (!mounted || _finished) {
@@ -500,12 +505,12 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       _stopLipsyncPoll();
       setState(() {
         _speaking = false;
-        _lipsActive = false;
-        _currentViseme = 0;
         _visemeTrack = const [];
         _speechEndSec = null;
         _localError = e.toString();
       });
+      _lipsActiveNotifier.value = false;
+      _visemeNotifier.value = 0;
     }
   }
 
@@ -722,14 +727,20 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   }
 
   Widget _buildAvatarHero({required bool fill}) {
-    return _ChatRobotHero(
-      riveAsset: widget.riveAsset,
-      talking: _avatarTalking,
-      lipsyncViseme: _avatarTalking
-          ? (_visemeTrack.isNotEmpty ? _currentViseme : null)
-          : null,
-      fallbackImage: null,
-      fill: fill,
+    return ListenableBuilder(
+      listenable: Listenable.merge([_visemeNotifier, _lipsActiveNotifier]),
+      builder: (context, _) {
+        final talking = _speaking && _lipsActiveNotifier.value;
+        return _ChatRobotHero(
+          riveAsset: widget.riveAsset,
+          talking: talking,
+          lipsyncViseme: talking
+              ? (_visemeTrack.isNotEmpty ? _visemeNotifier.value : null)
+              : null,
+          fallbackImage: null,
+          fill: fill,
+        );
+      },
     );
   }
 
@@ -825,7 +836,10 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
               }
               return _BotBubble(
                 message: message,
-                onSpeak: widget.enableTts ? () => _speak(message.text) : null,
+                nativeLanguageCode: widget.nativeLanguageCode,
+                onSpeak: widget.enableTts
+                    ? (text) => _speak(text)
+                    : null,
               );
             },
           ),
@@ -855,7 +869,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                       left: 0,
                       right: 0,
                       height: topInset + heroH,
-                      child: const _ChatHeroBackdrop(),
+                      child: const OnboardingHeroBackdrop(),
                     ),
                     SafeArea(
                       bottom: false,
@@ -959,9 +973,11 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const _ChatHeroBackdrop(fullBleed: true),
+          const OnboardingHeroBackdrop(fullBleed: true),
           Positioned.fill(
-            child: _buildAvatarHero(fill: true),
+            child: IgnorePointer(
+              child: _buildAvatarHero(fill: true),
+            ),
           ),
           const Positioned(
             left: 0,
@@ -1016,6 +1032,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                 _ExpandedFloatingMessages(
                   messages: _messages,
                   sending: _sending,
+                  nativeLanguageCode: widget.nativeLanguageCode,
                   onSpeak: widget.enableTts
                       ? (text) => unawaited(_speak(text))
                       : null,
@@ -1095,36 +1112,6 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   }
 }
 
-class _ChatHeroBackdrop extends StatelessWidget {
-  const _ChatHeroBackdrop({this.fullBleed = false});
-
-  final bool fullBleed;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: fullBleed
-              ? const [
-                  Color(0xFF2D46FF),
-                  Color(0xFF5B9FFF),
-                  Color(0xFF1A2A4A),
-                ]
-              : const [
-                  Color(0xFF7EB6FF),
-                  Color(0xFFB8D9FF),
-                  Color(0xFFFFFFFF),
-                ],
-          stops: fullBleed ? const [0, 0.45, 1] : const [0, 0.55, 1],
-        ),
-      ),
-    );
-  }
-}
-
 class _ChatRobotHero extends StatelessWidget {
   const _ChatRobotHero({
     required this.talking,
@@ -1191,11 +1178,13 @@ class _ExpandedFloatingMessages extends StatelessWidget {
     required this.messages,
     required this.sending,
     this.onSpeak,
+    this.nativeLanguageCode,
   });
 
   final List<LingolaChatMessage> messages;
   final bool sending;
   final void Function(String text)? onSpeak;
+  final String? nativeLanguageCode;
 
   @override
   Widget build(BuildContext context) {
@@ -1249,9 +1238,8 @@ class _ExpandedFloatingMessages extends StatelessWidget {
                   ? _UserBubble(message.text)
                   : _BotBubble(
                       message: message,
-                      onSpeak: onSpeak == null
-                          ? null
-                          : () => onSpeak!(message.text),
+                      nativeLanguageCode: nativeLanguageCode,
+                      onSpeak: onSpeak,
                     ),
             );
           },
@@ -1608,10 +1596,15 @@ class _WhatsAppChatComposer extends StatelessWidget {
 }
 
 class _BotBubble extends StatefulWidget {
-  const _BotBubble({required this.message, this.onSpeak});
+  const _BotBubble({
+    required this.message,
+    this.nativeLanguageCode,
+    this.onSpeak,
+  });
 
   final LingolaChatMessage message;
-  final VoidCallback? onSpeak;
+  final String? nativeLanguageCode;
+  final void Function(String text)? onSpeak;
 
   @override
   State<_BotBubble> createState() => _BotBubbleState();
@@ -1620,8 +1613,32 @@ class _BotBubble extends StatefulWidget {
 class _BotBubbleState extends State<_BotBubble> {
   String? _translation;
   var _translating = false;
+  String? _selectedWord;
+  String? _wordTranslation;
+  var _wordBusy = false;
 
-  Future<void> _translate() async {
+  String get _nativeLang => NativeLanguageResolver.normalize(
+        widget.nativeLanguageCode ?? NativeLanguageResolver.resolve(),
+      );
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _clearWordSelection() {
+    _selectedWord = null;
+    _wordTranslation = null;
+    _wordBusy = false;
+  }
+
+  String _withPunctuation(String original, String translated) {
+    final prefix = RegExp(r"^[^\w']+").firstMatch(original)?.group(0) ?? '';
+    final suffix = RegExp(r"[^\w']+$").firstMatch(original)?.group(0) ?? '';
+    return '$prefix$translated$suffix';
+  }
+
+  Future<void> _translateSentence() async {
     if (_translating) return;
     if (_translation != null) {
       setState(() => _translation = null);
@@ -1629,11 +1646,13 @@ class _BotBubbleState extends State<_BotBubble> {
     }
     setState(() => _translating = true);
     try {
-      final tr =
-          await OpenAiChatService().translateToTurkish(widget.message.text);
+      final translated = await OpenAiChatService().translateToNative(
+        widget.message.text,
+        targetLang: _nativeLang,
+      );
       if (!mounted) return;
       setState(() {
-        _translation = tr.trim().isEmpty ? null : tr.trim();
+        _translation = translated.trim().isEmpty ? null : translated.trim();
         _translating = false;
       });
     } catch (_) {
@@ -1645,65 +1664,180 @@ class _BotBubbleState extends State<_BotBubble> {
     }
   }
 
-  Widget _messageBody(LingolaChatMessage message) {
-    if (message.highlight == null || message.rest == null) {
-      return Text(
-        message.text,
-        style: const TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 14,
-          height: 18 / 14,
-          fontWeight: FontWeight.w400,
-          color: AppColors.ink,
+  Future<void> _onWordTap(String raw) async {
+    final word = raw.replaceAll(RegExp(r"[^\w'\-]+"), '');
+    if (word.isEmpty) return;
+
+    if (_selectedWord != null &&
+        _selectedWord!.toLowerCase() == word.toLowerCase() &&
+        _wordTranslation != null) {
+      setState(_clearWordSelection);
+      return;
+    }
+
+    final cached = WordTranslationCache.get(word, _nativeLang);
+    if (cached != null) {
+      setState(() {
+        _selectedWord = word;
+        _wordTranslation = cached;
+        _wordBusy = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _selectedWord = word;
+      _wordTranslation = null;
+      _wordBusy = true;
+    });
+
+    try {
+      final translated = await OpenAiChatService().translateToNative(
+        word,
+        targetLang: _nativeLang,
+      );
+      if (!mounted || _selectedWord?.toLowerCase() != word.toLowerCase()) return;
+      setState(() {
+        _wordTranslation = translated.trim().isEmpty ? '—' : translated.trim();
+        _wordBusy = false;
+      });
+    } catch (_) {
+      if (!mounted || _selectedWord?.toLowerCase() != word.toLowerCase()) return;
+      setState(() {
+        _wordTranslation = '—';
+        _wordBusy = false;
+      });
+    }
+  }
+
+  void _onSpeak() {
+    final speak = widget.onSpeak;
+    if (speak == null) return;
+    final text = (_selectedWord != null && _selectedWord!.isNotEmpty)
+        ? _selectedWord!
+        : widget.message.text;
+    speak(text);
+  }
+
+  List<InlineSpan> _buildWordSpans(String text) {
+    const baseStyle = TextStyle(
+      fontFamily: 'Poppins',
+      fontSize: 14,
+      height: 18 / 14,
+      fontWeight: FontWeight.w400,
+      color: AppColors.ink,
+    );
+
+    final wordList =
+        text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final spans = <InlineSpan>[];
+    for (var i = 0; i < wordList.length; i++) {
+      final word = wordList[i];
+      var displayText = i < wordList.length - 1 ? '$word ' : word;
+      final clean = word.replaceAll(RegExp(r"[^\w'\-]+"), '');
+      if (clean.isEmpty) {
+        spans.add(TextSpan(text: displayText, style: baseStyle));
+        continue;
+      }
+
+      final selected =
+          _selectedWord != null &&
+          _selectedWord!.toLowerCase() == clean.toLowerCase();
+
+      if (selected) {
+        var chipLabel = word;
+        if (!_wordBusy &&
+            _wordTranslation != null &&
+            _wordTranslation != '—') {
+          chipLabel = _withPunctuation(word, _wordTranslation!);
+        }
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Padding(
+              padding: EdgeInsets.only(right: i < wordList.length - 1 ? 4 : 0),
+              child: ChatWordChip(
+                label: chipLabel,
+                onTap: () => _onWordTap(word),
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+
+      spans.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _onWordTap(word),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Text(displayText, style: baseStyle),
+            ),
+          ),
         ),
       );
     }
-    return Text.rich(
-      TextSpan(
-        children: [
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 6,
-                vertical: 2,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                message.highlight!,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  height: 18 / 14,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white,
+    return spans;
+  }
+
+  Widget _messageBody(LingolaChatMessage message) {
+    if (message.highlight != null && message.rest != null) {
+      return Text.rich(
+        TextSpan(
+          children: [
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  message.highlight!,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    height: 18 / 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
-          TextSpan(
-            text: message.rest,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 14,
-              height: 18 / 14,
-              fontWeight: FontWeight.w400,
-              color: AppColors.ink,
+            TextSpan(
+              text: message.rest,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                height: 18 / 14,
+                fontWeight: FontWeight.w400,
+                color: AppColors.ink,
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      );
+    }
+
+    return Text.rich(
+      TextSpan(children: _buildWordSpans(message.text)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final message = widget.message;
+
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Flexible(
           child: Container(
@@ -1711,10 +1845,8 @@ class _BotBubbleState extends State<_BotBubble> {
               maxWidth: MediaQuery.sizeOf(context).width * 0.72,
             ),
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.black.withValues(alpha: .06)),
+            decoration: chatBubbleDecoration(
+              wordSelected: _selectedWord != null,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1753,15 +1885,17 @@ class _BotBubbleState extends State<_BotBubble> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _RoundIconButton(
-              asset: AppAssets.writingTranslate,
+              asset: AppAssets.callingChatTranslate,
               color: AppColors.primary,
-              onTap: _translating ? null : _translate,
+              useRaster: true,
+              onTap: _translating ? null : _translateSentence,
             ),
             const SizedBox(width: 6),
             _RoundIconButton(
-              asset: AppAssets.speaker,
+              asset: AppAssets.callingChatSpeaker,
               color: AppColors.secondary,
-              onTap: widget.onSpeak,
+              useRaster: true,
+              onTap: widget.onSpeak == null ? null : _onSpeak,
             ),
           ],
         ),
@@ -1808,14 +1942,38 @@ class _RoundIconButton extends StatelessWidget {
     required this.asset,
     required this.color,
     this.onTap,
+    this.useRaster = false,
   });
 
   final String asset;
   final Color color;
   final VoidCallback? onTap;
+  final bool useRaster;
+
+  static const _rasterSize = 25.0;
 
   @override
   Widget build(BuildContext context) {
+    if (useRaster) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: SizedBox(
+            width: _rasterSize,
+            height: _rasterSize,
+            child: HomeAsset(
+              asset,
+              width: _rasterSize,
+              height: _rasterSize,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Material(
       color: Colors.transparent,
       shape: CircleBorder(side: BorderSide(color: color, width: 1.4)),

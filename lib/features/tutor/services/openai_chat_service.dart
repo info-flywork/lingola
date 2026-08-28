@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../../core/auth/api_client.dart';
+import '../../../core/i18n/native_language.dart';
+import '../../../core/i18n/word_translation_cache.dart';
 
 class ChatTurn {
   const ChatTurn({required this.role, required this.content});
@@ -67,16 +69,36 @@ Rules:
     return text;
   }
 
-  Future<String> translateToTurkish(String text) async {
+  Future<String> translateToNative(
+    String text, {
+    String? targetLang,
+  }) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return '';
 
+    final lang = NativeLanguageResolver.normalize(
+      targetLang ?? NativeLanguageResolver.resolve(),
+    );
+
+    final cached = WordTranslationCache.get(trimmed, lang);
+    if (cached != null) return cached;
+
     final json = await ApiClient.post(
       '/ai/translate',
-      body: {'text': trimmed},
+      body: {
+        'text': trimmed,
+        'targetLang': lang,
+      },
     );
-    return (json['text'] as String?)?.trim() ?? '';
+    final result = (json['text'] as String?)?.trim() ?? '';
+    if (result.isNotEmpty) {
+      WordTranslationCache.put(trimmed, lang, result);
+    }
+    return result;
   }
+
+  Future<String> translateToTurkish(String text) =>
+      translateToNative(text, targetLang: 'tr');
 
   /// Hoca cümlesine uygun, öğrencinin söyleyebileceği kısa İngilizce cevap.
   Future<String> suggestStudentReply({

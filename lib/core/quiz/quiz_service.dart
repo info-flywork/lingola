@@ -12,6 +12,7 @@ class QuizReadingCard {
     required this.sentence,
     required this.sentenceTranslation,
     required this.level,
+    this.saved = false,
   });
 
   final String id;
@@ -21,6 +22,7 @@ class QuizReadingCard {
   final String sentence;
   final String sentenceTranslation;
   final String level;
+  final bool saved;
 
   factory QuizReadingCard.fromJson(Map<String, dynamic> json) {
     final translations = json['translations'];
@@ -34,6 +36,7 @@ class QuizReadingCard {
       sentence: json['sentence'] as String? ?? '',
       sentenceTranslation: json['sentenceTranslation'] as String? ?? '',
       level: json['level'] as String? ?? '',
+      saved: json['saved'] == true,
     );
   }
 }

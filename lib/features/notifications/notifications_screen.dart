@@ -5,7 +5,14 @@ import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
+import 'notification_inbox_item.dart';
+import 'notification_inbox_store.dart';
 import 'notifications_api_service.dart';
+import 'notifications_unread_store.dart';
+
+/// Figma stroke: 1px siyah %10 — kartlarda hafif daha belirgin.
+const _notificationCardBorder = Color(0x24000000);
+const _offerTitle = Color(0xFFFF8A00);
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -15,10 +22,9 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  static const _offerTitle = Color(0xFFFF8A00);
-
-  List<_NotificationItem>? _items;
+  List<_NotificationItem> _items = [];
   String? _openSwipeId;
+  var _loading = true;
 
   @override
   void initState() {
@@ -27,34 +33,42 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> _loadNotifications() async {
+    setState(() => _loading = true);
     try {
-      final remote = await NotificationsApiService.fetchNotifications();
-      if (!mounted || remote.isEmpty) return;
-      final text = AppText.current.notificationsPage;
-      final mapped = remote
-          .map((dto) => _mapNotification(dto, text))
-          .whereType<_NotificationItem>()
-          .toList();
-      if (mapped.isEmpty) return;
-      setState(() => _items = mapped);
+      final inbox = await NotificationInboxStore.loadDelivered();
+      if (!mounted) return;
+
+      if (inbox.any((item) => item.isUnread)) {
+        try {
+          await NotificationsApiService.markAllRead();
+          await NotificationInboxStore.markAllReadLocal();
+        } catch (_) {}
+      }
+
+      final items = inbox.map(_mapItem).toList();
+      NotificationsUnreadStore.setCount(0);
+
+      setState(() {
+        _items = items;
+        _loading = false;
+      });
     } catch (_) {
-      // Yerel kartlar korunur.
+      if (!mounted) return;
+      setState(() => _loading = false);
     }
   }
 
-  List<_NotificationItem> _itemsFor(dynamic text) {
-    return _items ?? _fallbackItems(text);
-  }
-
-  void _deleteItem(String id) {
+  Future<void> _deleteItem(_NotificationItem item) async {
     setState(() {
-      final current = List<_NotificationItem>.from(
-        _items ?? _fallbackItems(AppText.current.notificationsPage),
-      );
-      current.removeWhere((item) => item.id == id);
-      _items = current;
-      if (_openSwipeId == id) _openSwipeId = null;
+      _items = List<_NotificationItem>.from(_items)
+        ..removeWhere((i) => i.id == item.id);
+      if (_openSwipeId == item.id) _openSwipeId = null;
     });
+
+    try {
+      await NotificationInboxStore.remove(item.id);
+      await NotificationsUnreadStore.refresh();
+    } catch (_) {}
   }
 
   Future<void> _confirmAndDelete(_NotificationItem item) async {
@@ -78,73 +92,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
     );
     if (ok != true || !mounted) return;
-    _deleteItem(item.id);
+    await _deleteItem(item);
   }
 
-  static List<_NotificationItem> _fallbackItems(dynamic text) {
-    return [
-      _NotificationItem(
-        id: 'fallback-translation',
-        icon: 'assets/images/notifications/icon_translation.svg',
-        iconBg: const Color(0x1A2D46FF),
-        title: text.translation.title,
-        body: text.translation.body,
-        titleColor: AppColors.ink,
-      ),
-      _NotificationItem(
-        id: 'fallback-offer',
-        icon: 'assets/images/notifications/icon_offer.svg',
-        iconBg: const Color(0x1AFF8A00),
-        title: text.offer.title,
-        body: text.offer.body,
-        titleColor: _offerTitle,
-      ),
-      _NotificationItem(
-        id: 'fallback-stories',
-        icon: 'assets/images/notifications/icon_stories.svg',
-        iconBg: const Color(0x1A34C759),
-        title: text.stories.title,
-        body: text.stories.body,
-        titleColor: AppColors.ink,
-      ),
-    ];
-  }
-
-  static _NotificationItem? _mapNotification(
-    NotificationDto dto,
-    dynamic text,
-  ) {
-    final resolved = _resolveCopy(text, dto.titleKey, dto.bodyKey);
-    if (resolved == null) return null;
+  static _NotificationItem _mapItem(NotificationInboxItem item) {
     return _NotificationItem(
-      id: dto.id.isNotEmpty ? dto.id : '${dto.titleKey}-${dto.bodyKey}',
-      icon: dto.iconAsset,
-      iconBg: _parseColor(dto.iconBg) ?? const Color(0x1A2D46FF),
-      title: resolved.$1,
-      body: resolved.$2,
-      titleColor: _parseColor(dto.titleColor) ?? AppColors.ink,
+      id: item.id,
+      icon: item.iconAsset.isNotEmpty
+          ? item.iconAsset
+          : 'assets/images/notifications/icon_translation.svg',
+      iconBg: _parseColor(item.iconBg) ?? const Color(0x1A2D46FF),
+      title: item.title,
+      body: item.body,
+      titleColor: _parseColor(item.titleColor) ??
+          (item.type == 'premium' ? _offerTitle : AppColors.ink),
+      isUnread: item.isUnread,
     );
-  }
-
-  static (String, String)? _resolveCopy(
-    dynamic text,
-    String titleKey,
-    String bodyKey,
-  ) {
-    final title = switch (titleKey) {
-      'translation.title' => text.translation.title as String?,
-      'offer.title' => text.offer.title as String?,
-      'stories.title' => text.stories.title as String?,
-      _ => null,
-    };
-    final body = switch (bodyKey) {
-      'translation.body' => text.translation.body as String?,
-      'offer.body' => text.offer.body as String?,
-      'stories.body' => text.stories.body as String?,
-      _ => null,
-    };
-    if (title == null || body == null) return null;
-    return (title, body);
   }
 
   static Color? _parseColor(String? raw) {
@@ -164,12 +127,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.notificationsPage;
-    final items = _itemsFor(text);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.white,
+        systemNavigationBarColor: AppColors.surface,
       ),
       child: Scaffold(
         backgroundColor: AppColors.surface,
@@ -204,29 +166,88 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
               ),
               Expanded(
-                child: items.isEmpty
-                    ? const SizedBox.shrink()
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                        itemCount: items.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          final item = items[index];
-                          return _NotificationSwipeRow(
-                            item: item,
-                            isOpen: _openSwipeId == item.id,
-                            onOpenChanged: (open) {
-                              setState(() {
-                                _openSwipeId = open ? item.id : null;
-                              });
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _items.isEmpty
+                        ? _NotificationsEmptyState(
+                            title: text.emptyTitle,
+                            subtitle: text.emptySubtitle,
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                            itemCount: _items.length,
+                            separatorBuilder: (_, _) => const SizedBox(height: 10),
+                            itemBuilder: (context, index) {
+                              final item = _items[index];
+                              return _NotificationSwipeRow(
+                                item: item,
+                                isOpen: _openSwipeId == item.id,
+                                onOpenChanged: (open) {
+                                  setState(() {
+                                    _openSwipeId = open ? item.id : null;
+                                  });
+                                },
+                                onDeleteTap: () => _confirmAndDelete(item),
+                              );
                             },
-                            onDeleteTap: () => _confirmAndDelete(item),
-                          );
-                        },
-                      ),
+                          ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NotificationsEmptyState extends StatelessWidget {
+  const _NotificationsEmptyState({
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              AppAssets.notificationsEmptyBell,
+              width: 120,
+              height: 120,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 24,
+                height: 36 / 24,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                height: 21 / 14,
+                fontWeight: FontWeight.w400,
+                color: AppColors.secondary,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -241,6 +262,7 @@ class _NotificationItem {
     required this.title,
     required this.body,
     required this.titleColor,
+    this.isUnread = false,
   });
 
   final String id;
@@ -249,9 +271,9 @@ class _NotificationItem {
   final String title;
   final String body;
   final Color titleColor;
+  final bool isUnread;
 }
 
-/// Sola kaydır → Figma 44×44 çöp butonu; tık → onay diyalogu.
 class _NotificationSwipeRow extends StatefulWidget {
   const _NotificationSwipeRow({
     required this.item,
@@ -298,7 +320,6 @@ class _NotificationSwipeRowState extends State<_NotificationSwipeRow> {
     return Stack(
       alignment: Alignment.centerRight,
       children: [
-        // Çöp — kartın sağında (Figma: 44×44, radius 8, #FF0014 @ 20%)
         Positioned(
           right: 0,
           top: 0,
@@ -364,6 +385,10 @@ class _NotificationCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: _notificationCardBorder,
+          width: 1,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -414,6 +439,16 @@ class _NotificationCard extends StatelessWidget {
               ),
             ),
           ),
+          if (item.isUnread)
+            Container(
+              width: 8,
+              height: 8,
+              margin: const EdgeInsets.only(left: 4),
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
         ],
       ),
     );

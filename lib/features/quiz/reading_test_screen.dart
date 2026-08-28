@@ -13,7 +13,10 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/practice/practice_service.dart';
+import '../../core/notifications/notification_activity_store.dart';
 import '../../core/quiz/quiz_service.dart';
+import '../../core/text/text_similarity.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
@@ -128,6 +131,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
               translations: c.translations,
               exampleEn: c.sentence,
               exampleTr: c.sentenceTranslation,
+              saved: c.saved,
             ),
           )
           .toList();
@@ -139,7 +143,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
           _words = mapped;
           _index = 0;
         }
-        _saved = false;
+        _saved = _current?.saved ?? false;
         _hintActive = false;
         _loading = false;
         _error = mapped.isEmpty ? 'No words found' : null;
@@ -278,7 +282,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
     if (!mounted) return;
     setState(() {
       _index -= 1;
-      _saved = false;
+      _saved = _current?.saved ?? false;
       _hintActive = false;
       _resetRecorderForWord();
     });
@@ -295,10 +299,38 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
     if (!mounted) return;
     setState(() {
       _index += 1;
-      _saved = false;
+      _saved = _current?.saved ?? false;
       _hintActive = false;
       _resetRecorderForWord();
     });
+  }
+
+  Future<void> _onToggleSave() async {
+    final word = _current;
+    if (word == null || word.id.isEmpty) return;
+    final next = !_saved;
+    setState(() => _saved = next);
+    try {
+      if (next) {
+        await PracticeService.saveWord(word.id);
+      } else {
+        await PracticeService.unsaveWord(word.id);
+      }
+      if (!mounted) return;
+      setState(() {
+        _words = [
+          for (var i = 0; i < _words.length; i++)
+            if (i == _index) _words[i].copyWith(saved: next) else _words[i],
+        ];
+        _saved = next;
+      });
+    } catch (err) {
+      if (!mounted) return;
+      setState(() => _saved = !next);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppText.current.common.genericError)),
+      );
+    }
   }
 
   Future<void> _toggleRead() async {
@@ -572,6 +604,7 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
   }
 
   Future<void> _showSuccessSheet() async {
+    unawaited(NotificationActivityStore.recordQuiz());
     final text = AppText.current.quizPage;
     await _showResultSheet(
       iconAsset: AppAssets.success,
@@ -667,22 +700,11 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
   }
 
   static bool _matchesTarget(String heard, String word, String sentence) {
-    final normalizedHeard = _normalize(heard);
-    if (normalizedHeard.isEmpty) return false;
-    final targetWord = _normalize(word);
-    final targetSentence = _normalize(sentence);
-    return normalizedHeard == targetWord ||
-        normalizedHeard == targetSentence ||
-        normalizedHeard.contains(targetWord) ||
-        targetSentence.contains(normalizedHeard);
-  }
-
-  static String _normalize(String value) {
-    return value
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9\s]'), '')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
+    return TextSimilarity.matchesReadingTarget(
+      heard: heard,
+      word: word,
+      sentence: sentence,
+    );
   }
 
   @override
@@ -765,10 +787,10 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
                         languageLabel: practice.turkish,
                         hintActive: _hintActive,
                         saved: _saved,
-                        saveLabel: practice.save,
+                        saveLabel: _saved ? practice.saved : practice.save,
                         readLabel: quiz.read,
                         hintLabel: practice.hint,
-                        onSave: () => setState(() => _saved = !_saved),
+                        onSave: _onToggleSave,
                         onRead: _toggleRead,
                         onHint: () {
                           unawaited(_onToggleHint());
@@ -843,6 +865,7 @@ class _ReadingWord {
     required this.translations,
     required this.exampleEn,
     required this.exampleTr,
+    this.saved = false,
   });
 
   final String id;
@@ -851,6 +874,19 @@ class _ReadingWord {
   final List<String> translations;
   final String exampleEn;
   final String exampleTr;
+  final bool saved;
+
+  _ReadingWord copyWith({bool? saved}) {
+    return _ReadingWord(
+      id: id,
+      word: word,
+      phonetic: phonetic,
+      translations: translations,
+      exampleEn: exampleEn,
+      exampleTr: exampleTr,
+      saved: saved ?? this.saved,
+    );
+  }
 }
 
 class _ReadingCard extends StatelessWidget {
@@ -941,11 +977,17 @@ class _ReadingCard extends StatelessWidget {
                   label: saveLabel,
                   background: saved ? const Color(0x33FF383C) : saveBg,
                   foreground: saveRed,
-                  icon: const HomeAsset(
-                    AppAssets.heart,
-                    width: 20,
-                    height: 20,
-                  ),
+                  icon: saved
+                      ? Icon(
+                          Icons.favorite_rounded,
+                          size: 20,
+                          color: saveRed,
+                        )
+                      : const HomeAsset(
+                          AppAssets.heart,
+                          width: 20,
+                          height: 20,
+                        ),
                   onTap: onSave,
                 ),
               ),

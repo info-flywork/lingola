@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../auth/session_store.dart';
+import '../../features/notifications/notification_inbox_store.dart';
+import '../../features/notifications/notifications_unread_store.dart';
 import 'lingola_notification_service.dart';
 
 /// Uygulama arka plana gidince hatırlatıcıları planlar; açılınca iptal eder.
@@ -29,6 +31,8 @@ class NotificationLifecycleObserver extends WidgetsBindingObserver {
   }
 
   Future<void> _onForeground() async {
+    await NotificationInboxStore.flushDueDeliveries();
     await LingolaNotificationService.cancelAll();
+    await NotificationsUnreadStore.refresh();
   }
 }

@@ -30,6 +30,21 @@ class LanguageFlag extends StatelessWidget {
     return 'assets/images/flags/$file.svg';
   }
 
+  /// Küçük yuvarlak rozet (home / ders header) — SVG oranı korunur.
+  static Widget badge(String code, {double size = 22}) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ClipOval(
+        child: SvgPicture.asset(
+          assetPathFor(code),
+          fit: BoxFit.cover,
+          alignment: Alignment.center,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -39,6 +54,7 @@ class LanguageFlag extends StatelessWidget {
         width: width,
         height: height,
         fit: BoxFit.cover,
+        alignment: Alignment.center,
         placeholderBuilder: (_) => SizedBox(width: width, height: height),
       ),
     );

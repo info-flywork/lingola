@@ -9,7 +9,9 @@ import 'package:speech_to_text/speech_to_text.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/notifications/notification_activity_store.dart';
 import '../../core/quiz/quiz_service.dart';
+import '../../core/text/text_similarity.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
@@ -351,6 +353,7 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
       matched = _matchesPrompt(heard, _current);
     }
     if (matched) {
+      unawaited(NotificationActivityStore.recordQuiz());
       await _showResultSheet(
         iconAsset: AppAssets.success,
         title: AppText.current.quizPage.successfulTitle,
@@ -438,13 +441,11 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
   }
 
   static bool _matchesPrompt(String heard, _SpeakingPrompt prompt) {
-    final normalized = heard
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9\s]'), '')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
+    final normalized = TextSimilarity.normalize(heard);
     if (normalized.isEmpty) return false;
-    return prompt.keywords.any(normalized.contains);
+    return prompt.keywords.any(
+      (keyword) => TextSimilarity.matches(normalized, keyword.toLowerCase()),
+    );
   }
 
   @override

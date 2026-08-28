@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,9 +11,13 @@ import '../../core/constants/app_text.dart';
 import '../../core/config/app_env.dart';
 import '../../core/rive/rive_preload_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../widgets/chat_word_chip.dart';
 import '../../widgets/home_asset.dart';
+import '../lesson/lesson_api_service.dart';
+import '../lesson/lesson_badge.dart';
 import '../lesson/lesson_session_result.dart';
 import 'services/calling_conversation_controller.dart';
+import 'services/tutor_tts_service.dart';
 import 'tutor_scene_theme.dart';
 import 'widgets/tutor_rive_avatar.dart';
 
@@ -30,6 +35,8 @@ class CallingScreen extends StatefulWidget {
     this.systemPrompt,
     this.returnTranscript = false,
     this.tutorSlug,
+    this.lessonBadge,
+    this.lessonSlug,
     this.lessonSegmentMode = false,
     this.segmentDuration = const Duration(minutes: 15),
     this.initialElapsed = Duration.zero,
@@ -51,6 +58,10 @@ class CallingScreen extends StatefulWidget {
   final String? systemPrompt;
   final bool returnTranscript;
   final String? tutorSlug;
+  /// Üstteki "Ders N : …" rozeti; yoksa API'den yüklenir.
+  final String? lessonBadge;
+  /// Rozet için tercih edilen ders slug'ı.
+  final String? lessonSlug;
 
   /// Ders oturumu: ~15 dk sonra uzatma sor / sessizlikte bitir.
   final bool lessonSegmentMode;
@@ -84,6 +95,7 @@ class _CallingScreenState extends State<CallingScreen> {
 
   /// false = yarım ekran (sohbet altta), true = tam ekran calling.
   var _expanded = false;
+  String? _lessonBadge;
 
   DateTime _segmentStartedAt = DateTime.now();
   var _checkpointFired = false;
@@ -117,6 +129,10 @@ class _CallingScreenState extends State<CallingScreen> {
       tutorSlug: widget.tutorSlug,
       lessonMode: widget.lessonSegmentMode,
     );
+    _lessonBadge = widget.lessonBadge;
+    if (_lessonBadge == null) {
+      unawaited(_loadLessonBadge());
+    }
     debugPrint(
       '[calling] slug=${widget.tutorSlug} voiceId=${_conversation.voiceId}',
     );
@@ -213,14 +229,27 @@ class _CallingScreenState extends State<CallingScreen> {
     _popSession(finish: false);
   }
 
-  void _finishLessonManually() {
-    if (_lessonEnding) return;
-    _lessonEnding = true;
-    _popSession(finish: true);
-  }
-
   void _onConvo() {
     if (mounted) setState(() {});
+  }
+
+  String get _displayLessonBadge =>
+      _lessonBadge ?? LessonBadge.fallback();
+
+  Future<void> _loadLessonBadge() async {
+    try {
+      final path = await LessonApiService.fetchPath();
+      final slug = widget.lessonSlug?.trim();
+      final badge = LessonBadge.fromPath(
+        path,
+        preferSlug: (slug != null && slug.isNotEmpty) ? slug : null,
+      );
+      if (!mounted) return;
+      setState(() => _lessonBadge = badge);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _lessonBadge = LessonBadge.fallback());
+    }
   }
 
   @override
@@ -279,6 +308,20 @@ class _CallingScreenState extends State<CallingScreen> {
 
   Color get _topScrimColor =>
       _sceneStart ?? const Color(0xFF2D46FF);
+
+  bool get _useOnboardingHeroBg =>
+      !TutorSceneTheme.isThemedSlug(widget.tutorSlug);
+
+  Widget _buildCompactHeroBackdrop() {
+    if (_useOnboardingHeroBg) {
+      return const OnboardingHeroBackdrop();
+    }
+    return TutorSceneBackdrop(
+      gradientStart: _sceneStart,
+      gradientEnd: _sceneEnd,
+      fadeToWhite: true,
+    );
+  }
 
   void _toggleExpanded() {
     setState(() => _expanded = !_expanded);
@@ -345,26 +388,6 @@ class _CallingScreenState extends State<CallingScreen> {
             ),
           ),
           const Spacer(),
-          if (widget.lessonSegmentMode) ...[
-            TextButton(
-              onPressed: _lessonEnding ? null : _finishLessonManually,
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                AppText.current.lessonPage.finishLesson,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(width: 4),
-          ],
           // Kırmızı kayıt pill’i: tıklayınca hız 0.5 → 1 → 1.5 → 2
           Material(
             color: Colors.transparent,
@@ -447,6 +470,7 @@ class _CallingScreenState extends State<CallingScreen> {
   Widget _buildAvatar({
     required EdgeInsets padding,
     Alignment alignment = Alignment.bottomCenter,
+    bool anchorBottom = false,
   }) {
     // DB `tutors.rive_cdn_url` → CDN only (Mindcoach gibi). Yerel .riv yok.
     final cdnRaw = widget.riveCdnUrl?.trim();
@@ -473,6 +497,7 @@ class _CallingScreenState extends State<CallingScreen> {
                 : null)
             : null,
         loadingBackgroundColor: Colors.transparent,
+        anchorBottom: anchorBottom,
       ),
     );
   }
@@ -560,7 +585,7 @@ class _CallingScreenState extends State<CallingScreen> {
 
     try {
       final hint = await _conversation.suggestHint(
-        lessonLabel: AppText.current.tutorPage.calling.lessonBadge,
+        lessonLabel: _displayLessonBadge,
       );
       if (!mounted) return;
       if (hint == null) {
@@ -676,7 +701,6 @@ class _CallingScreenState extends State<CallingScreen> {
 
   /// Yarım ekran: üstte Rive hoca, altta sohbet + mikrofon.
   Widget _buildCompact(BuildContext context) {
-    final text = AppText.current.tutorPage.calling;
     final topInset = MediaQuery.paddingOf(context).top;
     const heroHeight = 400.0;
     final listening = _conversation.listening;
@@ -693,11 +717,7 @@ class _CallingScreenState extends State<CallingScreen> {
                   left: 0,
                   right: 0,
                   height: topInset + heroHeight,
-                  child: TutorSceneBackdrop(
-                    gradientStart: _sceneStart,
-                    gradientEnd: _sceneEnd,
-                    fadeToWhite: true,
-                  ),
+                  child: _buildCompactHeroBackdrop(),
                 ),
                 SafeArea(
                   bottom: false,
@@ -707,18 +727,26 @@ class _CallingScreenState extends State<CallingScreen> {
                       SizedBox(
                         height: heroHeight - 48,
                         child: Stack(
-                          alignment: Alignment.bottomCenter,
+                          alignment: Alignment.topCenter,
+                          clipBehavior: Clip.none,
                           children: [
-                            _buildAvatar(
-                              padding: EdgeInsets.zero,
-                              alignment: const Alignment(0, -0.2),
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: SizedBox(
+                                height: 300,
+                                width: double.infinity,
+                                child: _buildAvatar(
+                                  padding: EdgeInsets.zero,
+                                  anchorBottom: false,
+                                ),
+                              ),
                             ),
                             Positioned(
                               right: 16,
-                              bottom: 16,
+                              bottom: 24,
                               child: _GlassPill(
                                 child: Text(
-                                  text.lessonBadge,
+                                  _displayLessonBadge,
                                   style: const TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 12,
@@ -730,7 +758,7 @@ class _CallingScreenState extends State<CallingScreen> {
                             ),
                             Positioned(
                               left: 16,
-                              bottom: 16,
+                              bottom: 24,
                               child: _buildSpeedChip(),
                             ),
                           ],
@@ -853,8 +881,6 @@ class _CallingScreenState extends State<CallingScreen> {
 
   /// Tam ekran calling (eski layout).
   Widget _buildExpanded(BuildContext context) {
-    final text = AppText.current.tutorPage;
-    final calling = text.calling;
     final bottom = MediaQuery.paddingOf(context).bottom;
     final listening = _conversation.listening;
 
@@ -961,7 +987,7 @@ class _CallingScreenState extends State<CallingScreen> {
                 ],
                 _GlassPill(
                   child: Text(
-                    calling.lessonBadge,
+                    _displayLessonBadge,
                     style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 12,
@@ -1019,29 +1045,10 @@ class _CompactMessageList extends StatelessWidget {
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final msg = messages[index];
-        final isUser = msg.role == CallMessageRole.user;
-        return Align(
-          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 300),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: isUser ? AppColors.primary : const Color(0xFFF2F4F7),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                msg.text,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  height: 1.4,
-                  fontWeight: FontWeight.w500,
-                  color: isUser ? Colors.white : AppColors.ink,
-                ),
-              ),
-            ),
-          ),
+        return _CallingMessageBubble(
+          message: msg,
+          onTranslateSentence: () => onTranslateSentence(index),
+          onTranslateWord: onTranslateWord,
         );
       },
     );
@@ -1092,7 +1099,7 @@ class _ScrollingChat extends StatelessWidget {
             final msg = messages[messageIndex];
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: _ChatBubble(
+              child: _CallingMessageBubble(
                 message: msg,
                 onTranslateSentence: () => onTranslateSentence(messageIndex),
                 onTranslateWord: onTranslateWord,
@@ -1105,8 +1112,8 @@ class _ScrollingChat extends StatelessWidget {
   }
 }
 
-class _ChatBubble extends StatefulWidget {
-  const _ChatBubble({
+class _CallingMessageBubble extends StatefulWidget {
+  const _CallingMessageBubble({
     required this.message,
     required this.onTranslateSentence,
     required this.onTranslateWord,
@@ -1117,18 +1124,20 @@ class _ChatBubble extends StatefulWidget {
   final Future<String> Function(String word) onTranslateWord;
 
   @override
-  State<_ChatBubble> createState() => _ChatBubbleState();
+  State<_CallingMessageBubble> createState() => _CallingMessageBubbleState();
 }
 
-class _ChatBubbleState extends State<_ChatBubble> {
+class _CallingMessageBubbleState extends State<_CallingMessageBubble> {
   String? _selectedWord;
   String? _wordTranslation;
   var _wordBusy = false;
   var _sentenceBusy = false;
   final List<TapGestureRecognizer> _recognizers = [];
+  final _tts = TutorTtsService();
+  final _player = AudioPlayer();
 
   @override
-  void didUpdateWidget(covariant _ChatBubble oldWidget) {
+  void didUpdateWidget(covariant _CallingMessageBubble oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.message.text != widget.message.text) {
       _clearWordSelection();
@@ -1140,6 +1149,8 @@ class _ChatBubbleState extends State<_ChatBubble> {
     for (final r in _recognizers) {
       r.dispose();
     }
+    unawaited(_player.dispose());
+    _tts.dispose();
     super.dispose();
   }
 
@@ -1147,6 +1158,12 @@ class _ChatBubbleState extends State<_ChatBubble> {
     _selectedWord = null;
     _wordTranslation = null;
     _wordBusy = false;
+  }
+
+  String _withPunctuation(String original, String translated) {
+    final prefix = RegExp(r"^[^\w']+").firstMatch(original)?.group(0) ?? '';
+    final suffix = RegExp(r"[^\w']+$").firstMatch(original)?.group(0) ?? '';
+    return '$prefix$translated$suffix';
   }
 
   Future<void> _onWordTap(String raw) async {
@@ -1189,6 +1206,18 @@ class _ChatBubbleState extends State<_ChatBubble> {
     }
   }
 
+  Future<void> _onSpeak() async {
+    final source = (_selectedWord != null && _selectedWord!.isNotEmpty)
+        ? _selectedWord!
+        : widget.message.text.trim();
+    if (source.isEmpty) return;
+    try {
+      final file = await _tts.synthesizeToFile(source);
+      await _player.stop();
+      await _player.play(DeviceFileSource(file.path));
+    } catch (_) {}
+  }
+
   List<InlineSpan> _buildWordSpans({
     required bool isTutor,
     required Color baseColor,
@@ -1217,20 +1246,46 @@ class _ChatBubbleState extends State<_ChatBubble> {
         continue;
       }
 
-      final selected = _selectedWord == clean;
+      final selected =
+          _selectedWord != null &&
+          _selectedWord!.toLowerCase() == clean.toLowerCase();
       final recognizer = TapGestureRecognizer()
         ..onTap = () => _onWordTap(word);
       _recognizers.add(recognizer);
 
+      var displayText = display;
+      if (selected &&
+          !_wordBusy &&
+          _wordTranslation != null &&
+          _wordTranslation != '—' &&
+          _wordTranslation != 'Çeviri alınamadı') {
+        displayText = _withPunctuation(word, _wordTranslation!);
+      }
+
+      if (selected) {
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Padding(
+              padding: EdgeInsets.only(right: i < words.length - 1 ? 4 : 0),
+              child: ChatWordChip(
+                label: displayText.trim(),
+                fontSize: 13,
+                onTap: () => _onWordTap(word),
+              ),
+            ),
+          ),
+        );
+        continue;
+      }
+
       spans.add(
         TextSpan(
-          text: display,
+          text: displayText,
           recognizer: recognizer,
           style: TextStyle(
-            color: selected ? Colors.white : baseColor,
-            backgroundColor:
-                selected ? AppColors.primary : Colors.transparent,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            color: baseColor,
+            fontWeight: FontWeight.w500,
           ),
         ),
       );
@@ -1241,52 +1296,67 @@ class _ChatBubbleState extends State<_ChatBubble> {
   @override
   Widget build(BuildContext context) {
     final isTutor = widget.message.role == CallMessageRole.tutor;
-    final baseColor = isTutor ? Colors.white : AppColors.ink;
-    final showWordTip =
-        isTutor && _selectedWord != null && (_wordBusy || _wordTranslation != null);
+
+    if (!isTutor) {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.sizeOf(context).width * 0.78,
+          ),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            widget.message.text,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              height: 18 / 14,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final baseColor = AppColors.ink;
 
     final bubble = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: isTutor
-            ? const Color(0xFF2D46FF).withValues(alpha: 0.30)
-            : Colors.white.withValues(alpha: 0.40),
-        borderRadius: BorderRadius.circular(14),
+      padding: const EdgeInsets.all(12),
+      decoration: chatBubbleDecoration(
+        wordSelected: _selectedWord != null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (showWordTip) ...[
-            _WordTranslationTip(
-              text: _wordBusy
-                  ? '…'
-                  : (_wordTranslation ?? ''),
-            ),
-            const SizedBox(height: 8),
-          ],
           Text.rich(
             TextSpan(
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 13,
-                height: 1.4,
-                fontWeight: FontWeight.w500,
-                color: baseColor,
+                fontSize: 14,
+                height: 18 / 14,
+                fontWeight: FontWeight.w400,
+                color: AppColors.ink,
               ),
-              children: _buildWordSpans(isTutor: isTutor, baseColor: baseColor),
+              children: _buildWordSpans(isTutor: true, baseColor: baseColor),
             ),
           ),
-          if (isTutor && widget.message.translation != null) ...[
+          if (widget.message.translation != null) ...[
             const SizedBox(height: 8),
             Text(
               widget.message.translation!,
               style: TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 12,
-                height: 1.35,
+                fontSize: 13,
+                height: 18 / 13,
                 fontWeight: FontWeight.w500,
-                color: Colors.white.withValues(alpha: 0.92),
+                fontStyle: FontStyle.italic,
+                color: AppColors.ink.withValues(alpha: .78),
               ),
             ),
           ],
@@ -1294,116 +1364,101 @@ class _ChatBubbleState extends State<_ChatBubble> {
       ),
     );
 
-    if (!isTutor) {
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 280),
-          child: bubble,
-        ),
-      );
-    }
-
-    return Align(
-      alignment: Alignment.center,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 260),
-                child: bubble,
-              ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Flexible(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.sizeOf(context).width * 0.72,
             ),
+            child: bubble,
           ),
-          const SizedBox(width: 8),
-          _TranslateCircleButton(
-            busy: _sentenceBusy,
-            active: widget.message.translation != null,
-            onTap: _onSentenceTap,
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 8),
+        _CallingBubbleActions(
+          translateBusy: _sentenceBusy,
+          onTranslate: _onSentenceTap,
+          onSpeak: _onSpeak,
+        ),
+      ],
     );
   }
 }
 
-class _WordTranslationTip extends StatelessWidget {
-  const _WordTranslationTip({required this.text});
+/// Figma: balon sağında, dikey ortada — çeviri + hoparlör PNG.
+class _CallingBubbleActions extends StatelessWidget {
+  const _CallingBubbleActions({
+    required this.translateBusy,
+    required this.onTranslate,
+    required this.onSpeak,
+  });
 
-  final String text;
+  final bool translateBusy;
+  final VoidCallback onTranslate;
+  final VoidCallback onSpeak;
+
+  static const _size = 25.0;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: AppColors.ink,
-          height: 1.2,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _CallingBubbleActionIcon(
+          asset: AppAssets.callingChatTranslate,
+          onTap: translateBusy ? null : onTranslate,
+          busy: translateBusy,
         ),
-      ),
+        const SizedBox(width: 6),
+        _CallingBubbleActionIcon(
+          asset: AppAssets.callingChatSpeaker,
+          onTap: onSpeak,
+        ),
+      ],
     );
   }
 }
 
-class _TranslateCircleButton extends StatelessWidget {
-  const _TranslateCircleButton({
+class _CallingBubbleActionIcon extends StatelessWidget {
+  const _CallingBubbleActionIcon({
+    required this.asset,
     required this.onTap,
-    required this.busy,
-    required this.active,
+    this.busy = false,
   });
 
-  final VoidCallback onTap;
+  final String asset;
+  final VoidCallback? onTap;
   final bool busy;
-  final bool active;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? AppColors.primary.withValues(alpha: 0.85) : AppColors.primary,
-      shape: const CircleBorder(),
-      elevation: 2,
+      color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: busy ? null : onTap,
+        onTap: onTap,
         child: SizedBox(
-          width: 40,
-          height: 40,
-          child: Center(
-            child: busy
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
+          width: _CallingBubbleActions._size,
+          height: _CallingBubbleActions._size,
+          child: busy
+              ? const Center(
+                  child: SizedBox(
+                    width: 14,
+                    height: 14,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: AppColors.primary,
                     ),
-                  )
-                : const HomeAsset(
-                    AppAssets.writingTranslate,
-                    width: 22,
-                    height: 22,
-                    color: Colors.white,
                   ),
-          ),
+                )
+              : HomeAsset(
+                  asset,
+                  width: _CallingBubbleActions._size,
+                  height: _CallingBubbleActions._size,
+                  fit: BoxFit.contain,
+                ),
         ),
       ),
     );

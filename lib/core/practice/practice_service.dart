@@ -1,4 +1,5 @@
 import '../auth/api_client.dart';
+import '../notifications/notification_activity_store.dart';
 
 class PracticeCard {
   const PracticeCard({
@@ -161,6 +162,7 @@ abstract final class PracticeService {
       '/practice/words/$vocabularyWordId/save',
       auth: true,
     );
+    await NotificationActivityStore.recordWordLearned();
   }
 
   static Future<void> unsaveWord(String vocabularyWordId) async {

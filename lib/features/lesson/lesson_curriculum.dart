@@ -443,6 +443,16 @@ abstract final class LessonCurriculum {
     return list[index];
   }
 
+  /// Ders slug'ı → seviye + sıra indeksi (rozet numarası için).
+  static ({String levelId, int index})? locateSlug(String slug) {
+    final needle = slug.trim().toLowerCase();
+    if (needle.isEmpty) return null;
+    for (final entry in slugsByLevel.entries) {
+      final idx = entry.value.indexWhere((s) => s.toLowerCase() == needle);
+      if (idx >= 0) return (levelId: entry.key, index: idx);
+    }
+    return null;
+  }
 
   static final levels = <LessonLevelData>[
     const LessonLevelData(id: 'a1', iconAssets: a1Icons),

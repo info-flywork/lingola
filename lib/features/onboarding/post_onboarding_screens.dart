@@ -79,46 +79,89 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.white,
+        systemNavigationBarColor: AppColors.primary,
       ),
       child: Scaffold(
-        body: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.white, Color(0xFFE8F2FF), AppColors.primary],
-              stops: [0, .42, 1],
-            ),
-          ),
-          child: SafeArea(
-            child: LayoutBuilder(
+        backgroundColor: AppColors.primary,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            LayoutBuilder(
               builder: (context, constraints) {
-                final robotHeight = (constraints.maxHeight * 0.42).clamp(
+                final topInset = MediaQuery.paddingOf(context).top;
+                final fullHeight = MediaQuery.sizeOf(context).height;
+                final contentHeight = fullHeight - topInset;
+
+                final robotHeight = (contentHeight * 0.42).clamp(
                   220.0,
                   320.0,
                 );
-                // Kartı biraz aşağı — robot blur geçişi bozulmasın, başlık nefes alsın.
-                final cardTop = robotHeight + 10;
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
+                const cardOverlap = 40.0;
+                final cardTop = robotHeight - cardOverlap;
+                const colorTransitionFromCardTop =
+                    34.0 + 30.0 + 16.0 + 28.0 + 10.0;
+                final whiteGradientEnd =
+                    ((topInset + cardTop + colorTransitionFromCardTop) /
+                            fullHeight)
+                        .clamp(0.44, 0.62);
+                final blueGradientMid = (whiteGradientEnd + 0.14)
+                    .clamp(whiteGradientEnd + 0.08, 0.88);
+
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: const [
+                        Colors.white,
+                        Colors.white,
+                        Color(0xFFE8F2FF),
+                        AppColors.primary,
+                      ],
+                      stops: [
+                        0,
+                        whiteGradientEnd,
+                        blueGradientMid,
+                        1,
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            SafeArea(
+              bottom: false,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final bottomInset = MediaQuery.paddingOf(context).bottom;
+                  final robotHeight = (constraints.maxHeight * 0.42).clamp(
+                    220.0,
+                    320.0,
+                  );
+                  const cardOverlap = 40.0;
+                  final cardTop = robotHeight - cardOverlap;
+                  const colorTransitionFromCardTop =
+                      34.0 + 30.0 + 16.0 + 28.0 + 10.0;
+
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
                     Positioned(
                       top: 0,
                       left: 0,
                       right: 0,
                       height: robotHeight,
                       child: const _FadedRobotHero(
-                        asset: 'auth/account_robot.png',
-                        fadeStart: 0.52,
+                        asset: 'auth/account_robot_final.png',
+                        fadeStart: 0.54,
                       ),
                     ),
                     // Figma: kart üstünden robota doğru ince blurlu beyaz ışınlar
                     Positioned(
-                      top: cardTop - 72,
+                      top: cardTop - 52,
                       left: 0,
                       right: 0,
-                      height: 96,
+                      height: 108,
                       child: const IgnorePointer(
                         child: _AccountCardTopLightRays(),
                       ),
@@ -127,29 +170,10 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen> {
                       top: cardTop,
                       left: 16,
                       right: 16,
-                      bottom: 16,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(alpha: .18),
-                              blurRadius: 28,
-                              offset: const Offset(0, 12),
-                            ),
-                            // Üst kenardan yukarı süzülen yumuşak beyaz bloom
-                            BoxShadow(
-                              color: Colors.white.withValues(alpha: 0.95),
-                              blurRadius: 28,
-                              spreadRadius: 2,
-                              offset: const Offset(0, -10),
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                          child: LayoutBuilder(
+                      bottom: 16 + bottomInset,
+                      child: _AccountCreatingCard(
+                        colorTransitionFromTop: colorTransitionFromCardTop,
+                        child: LayoutBuilder(
                             builder: (context, cardConstraints) {
                               return SingleChildScrollView(
                                 child: ConstrainedBox(
@@ -231,17 +255,138 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen> {
                                 ),
                               );
                             },
-                          ),
                         ),
                       ),
                     ),
                   ],
                 );
-              },
+                },
+              ),
             ),
-          ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+/// Üst kenar görünmez (robota kayar), yan/alt kenarlar belirgin mavi glow.
+class _AccountCreatingCard extends StatelessWidget {
+  const _AccountCreatingCard({
+    required this.child,
+    required this.colorTransitionFromTop,
+  });
+
+  final Widget child;
+  final double colorTransitionFromTop;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final transitionFrac =
+            (colorTransitionFromTop / constraints.maxHeight).clamp(0.24, 0.46);
+        final glowTop = (colorTransitionFromTop - 8).clamp(40.0, 200.0);
+
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              top: glowTop,
+              left: -4,
+              right: -4,
+              bottom: -2,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.24),
+                      blurRadius: 36,
+                      offset: const Offset(0, 16),
+                    ),
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.16),
+                      blurRadius: 26,
+                      offset: const Offset(-7, 12),
+                    ),
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.16),
+                      blurRadius: 26,
+                      offset: const Offset(7, 12),
+                    ),
+                  ],
+                ),
+                child: const SizedBox.expand(),
+              ),
+            ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Stack(
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withValues(alpha: 0),
+                          Colors.white.withValues(alpha: 0.45),
+                          Colors.white.withValues(alpha: 0.88),
+                          Colors.white,
+                          Colors.white,
+                        ],
+                        stops: [
+                          0.0,
+                          transitionFrac * 0.35,
+                          transitionFrac * 0.72,
+                          transitionFrac,
+                          1.0,
+                        ],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 34, 16, 16),
+                      child: child,
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: (colorTransitionFromTop * 0.55).clamp(48.0, 88.0),
+                    child: IgnorePointer(
+                      child: ImageFiltered(
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: 10,
+                          sigmaY: 14,
+                          tileMode: TileMode.decal,
+                        ),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.white.withValues(alpha: 0),
+                                Colors.white.withValues(alpha: 0.4),
+                                Colors.white.withValues(alpha: 0),
+                              ],
+                              stops: const [0.0, 0.52, 1.0],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -263,11 +408,11 @@ class _AccountCardTopLightRays extends StatelessWidget {
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
               colors: [
-                Color(0xF2FFFFFF),
+                Color(0xE6FFFFFF),
                 Color(0x66FFFFFF),
                 Color(0x00FFFFFF),
               ],
-              stops: [0.0, 0.42, 1.0],
+              stops: [0.0, 0.40, 1.0],
             ),
           ),
         ),
@@ -396,8 +541,8 @@ class _FadedRobotHero extends StatelessWidget {
         alignment: Alignment.topCenter,
         child: LocalPicture(
           asset,
-          width: 300,
-          height: 320,
+          width: 324,
+          height: 334,
           fit: BoxFit.contain,
           alignment: Alignment.topCenter,
         ),
@@ -571,7 +716,7 @@ class _AuthScreenState extends State<AuthScreen> {
         systemNavigationBarColor: AppColors.primary,
       ),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF7FBFF),
         body: Stack(
           fit: StackFit.expand,
           children: [
@@ -593,43 +738,64 @@ class _AuthScreenState extends State<AuthScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const _AuthHero(),
-                          Transform.translate(
-                            offset: const Offset(0, 8),
-                            child: Center(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(
-                                    alpha: .40,
+                          Builder(
+                            builder: (context) {
+                              final imageH = constraints.maxWidth *
+                                  _AuthHero.aspectH /
+                                  _AuthHero.aspectW;
+                              final badgeTop = 35 + imageH + 28;
+
+                              return Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  const Padding(
+                                    padding: EdgeInsets.only(top: 35),
+                                    child: _AuthHero(),
                                   ),
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.person_outline_rounded,
-                                      color: Colors.white,
-                                      size: 15,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      text.auth.trainersBadge,
-                                      style: const TextStyle(
-                                        fontFamily: 'Poppins',
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
+                                  Positioned(
+                                    left: 0,
+                                    right: 0,
+                                    top: badgeTop,
+                                    child: Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withValues(
+                                            alpha: .40,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(999),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Image.asset(
+                                              'assets/images/auth/trainers_badge_icon.png',
+                                              width: 15,
+                                              height: 15,
+                                              fit: BoxFit.contain,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              text.auth.trainersBadge,
+                                              style: const TextStyle(
+                                                fontFamily: 'Poppins',
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                           const Spacer(flex: 2),
                           Padding(
@@ -754,44 +920,54 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 }
 
-/// Yüzler tam görünsün; fade yalnızca omuz/göğüs altında.
+/// Yüzler tam görünsün; alt fade arka planla aynı beyaz tonunda erir.
 class _AuthHero extends StatelessWidget {
   const _AuthHero();
 
+  static const aspectW = 860.0;
+  static const aspectH = 380.0;
+  static const fadeExtend = 56.0;
+
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 860 / 380,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'assets/images/loginHero.png',
-            width: double.infinity,
-            fit: BoxFit.fitWidth,
-            alignment: Alignment.topCenter,
-            filterQuality: FilterQuality.high,
-            gaplessPlayback: true,
-          ),
-          const IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0x00FFFFFF),
-                    Color(0x00FFFFFF),
-                    Color(0x66FFFFFF),
-                    Color(0xFFFFFFFF),
-                  ],
-                  stops: [0.0, 0.68, 0.86, 1.0],
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final imageH = constraints.maxWidth * aspectH / aspectW;
+
+        return SizedBox(
+          height: imageH + fadeExtend,
+          child: ShaderMask(
+            blendMode: BlendMode.dstIn,
+            shaderCallback: (bounds) {
+              return LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: const [
+                  Color(0xFFFFFFFF),
+                  Color(0xFFFFFFFF),
+                  Color(0xF0FFFFFF),
+                  Color(0xB8FFFFFF),
+                  Color(0x60FFFFFF),
+                  Color(0x18FFFFFF),
+                  Color(0x00FFFFFF),
+                ],
+                stops: const [0.0, 0.58, 0.72, 0.82, 0.90, 0.96, 1.0],
+              ).createShader(bounds);
+            },
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Image.asset(
+                'assets/images/loginHero.png',
+                width: double.infinity,
+                fit: BoxFit.fitWidth,
+                alignment: Alignment.topCenter,
+                filterQuality: FilterQuality.high,
+                gaplessPlayback: true,
               ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -858,28 +1034,30 @@ class _AuthBackground extends StatelessWidget {
                 colors: [
                   Colors.white,
                   Colors.white,
+                  Color(0xFFF7FBFF),
+                  Color(0xFFE8F4FF),
                   Color(0xFFD6EBFF),
                   Color(0xFF7EB8F5),
                 ],
-                stops: [0, 0.24, 0.40, 1],
+                stops: [0, 0.34, 0.42, 0.48, 0.56, 1],
               ),
             ),
           ),
           circle(
             left: -22,
-            top: 360,
+            top: 400,
             diameter: 490,
             color: const Color(0xFF2D85FF),
           ),
           circle(
             left: -81,
-            top: 430,
+            top: 470,
             diameter: 594,
             color: const Color(0xFF37B2E3),
           ),
           circle(
             left: -65,
-            top: 580,
+            top: 620,
             diameter: 559,
             color: const Color(0xFF2D46FF),
           ),

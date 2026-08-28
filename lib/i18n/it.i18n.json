@@ -281,6 +281,7 @@
     "moreCountries": "8+ in più",
     "moreFocus": "+8",
     "save": "SALVA",
+    "clearFilter": "Rimuovi filtri",
     "startTalkNow": "Inizia a parlare ora",
     "typeMessage": "Scrivi un messaggio...",
     "speaker": "Parlante",
@@ -339,6 +340,7 @@
     },
     "calling": {
       "lessonBadge": "Lezione 1 : Saluti",
+      "lessonBadgeFormat": "Lezione $number : $title",
       "nativeLine": "Sıkıldın mı?",
       "englishLine": "Noioso? Ho cancellato quella parola dal mio vocabolario. Alzati, il piano è già fatto: andiamo in quel nuovo bar arcade a Kadıköy.",
       "highlight": "Noioso?",
@@ -696,7 +698,21 @@
     "stories": {
       "title": "Scopri Nuove Storie",
       "body": "Impara nuove parole attraverso le storie"
-    }
+    },
+    "practice": {
+      "title": "Your daily practice is waiting",
+      "body": "Spend 5 minutes on a quick word, reading, or speaking exercise."
+    },
+    "streak": {
+      "title": "Keep your streak alive",
+      "body": "A short session today protects your day streak and builds the habit."
+    },
+    "premium": {
+      "title": "Unlock all tutors & lessons",
+      "body": "Go Premium for unlimited lessons, role-play scenarios, and AI tutors."
+    },
+    "emptyTitle": "Nessuna notifica ancora",
+    "emptySubtitle": "Non dimenticare di controllare di nuovo quando ricevi una notifica."
   },
   "profilePage": {
     "title": "Profilo",
@@ -830,7 +846,38 @@
       "fri": "VEN",
       "sat": "SAB",
       "sun": "DOM"
-    }
+    },
+    "profileSaved": "Profile saved",
+    "profilePhotoUpdated": "Profile photo updated",
+    "nameCannotBeEmpty": "Name cannot be empty",
+    "profileSaveFailed": "Could not save profile",
+    "photoUploadFailed": "Photo upload failed",
+    "notificationsUpdateFailed": "Could not update notifications",
+    "notificationsPermissionDenied": "Allow notifications in your device settings to get study reminders.",
+    "certificateTitle": "Il tuo certificato",
+    "certificateLevelTitle": "$level Certificate",
+    "certificateOf": "Certificate of Achievement",
+    "certificateCertifiesThat": "This certifies that",
+    "certificatePathway": "Lingola English Pathway",
+    "certificateAwardedTo": "Awarded to",
+    "certificateCompleted": "has successfully completed",
+    "certificateCompletedDetail": "has successfully completed the Lingola English Proficiency Pathway and was awarded a certificate in",
+    "certificateLevelLine": "English Level — CEFR $level",
+    "certificateIssued": "Issued on $date",
+    "certificateDateOfCompletion": "Date of Completion",
+    "certificateIdLabel": "Certificate ID",
+    "certificateVerify": "Scan to verify this certificate",
+    "certificateVerifyAuthenticity": "VERIFY AUTHENTICITY",
+    "certificateScanOrVisit": "Scan the QR code or visit the link to verify authenticity.",
+    "certificateVerifyHint": "Chiunque può scansionare il codice QR per verificare il tuo risultato.",
+    "certificateShare": "Condividi certificato",
+    "certificateShareQr": "Condividi codice QR",
+    "certificateShareBody": "I earned my Lingola $level certificate!",
+    "certificateShareSubject": "Lingola $level Certificate",
+    "certificateProvidedBy": "Certificate provided by",
+    "certificatePreviewBody": "Quando completi un livello CEFR su Lingola, il tuo certificato apparirà qui — con il tuo nome, livello e un codice QR da scansionare per la verifica.",
+    "certificatePreviewHint": "Completa un percorso di livello per sbloccare il certificato",
+    "certificateTapToView": "Tocca per visualizzare e condividere il certificato"
   },
   "pushNotifications": {
     "title": "Lingola",
@@ -861,6 +908,45 @@
       "Il tuo posto è proprio dove lo hai lasciato.",
       "Continua quando vuoi.",
       "La lingua non scapperà — né noi."
-    ]
+    ],
+    "lessonReminderTitle": "Today's lesson is waiting",
+    "lessonReminder": [
+      "You haven't opened today's lesson yet — even 5 minutes counts.",
+      "Your tutor is ready. Pick up where you left off.",
+      "A short lesson today keeps your rhythm going.",
+      "Today's lesson is still open — want to jump in?"
+    ],
+    "quizReminderTitle": "Ready for a quick quiz?",
+    "quizReminderWords": "You learned $count words recently — want a quiz? $savedCount saved words are waiting.",
+    "quizReminderSaved": "$savedCount saved words are waiting for review.",
+    "quizReminder": [
+      "It's been a while since your last quiz — a 3-minute review could help.",
+      "Your saved words miss you. A quick quiz?",
+      "Test what you remember — it only takes a few minutes.",
+      "A short quiz now makes tomorrow easier."
+    ],
+    "eveningLessonTitle": "Don't miss today's practice",
+    "eveningLesson": [
+      "You haven't studied today yet. One short lesson keeps the habit alive.",
+      "Before the day ends — a quick lesson with your tutor?",
+      "There's still time for a 5-minute English session today.",
+      "Your daily lesson is waiting. Shall we start?"
+    ],
+    "streakReminderTitle": "Keep your streak",
+    "streakReminder": "You're on a $streak-day streak — a short lesson today keeps it alive."
+  },
+  "apiErrors": {
+    "unauthorized": "Please sign in again.",
+    "notFound": "We couldn't find what you were looking for.",
+    "validationFailed": "Please check your input and try again.",
+    "nameRequired": "Name cannot be empty.",
+    "imageRequired": "Please choose a photo to upload.",
+    "avatarInvalidType": "Only JPEG, PNG, or WebP photos are allowed.",
+    "avatarEmpty": "The selected photo is empty.",
+    "avatarTooLarge": "Photo is too large (max 5 MB).",
+    "notificationsRequired": "Notification preference is required.",
+    "premiumRequired": "Premium is required for this lesson.",
+    "levelRequired": "Complete earlier lessons to unlock this level.",
+    "internalError": "Something went wrong. Please try again."
   }
 }

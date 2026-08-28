@@ -39,6 +39,7 @@ class TranslationsTr with BaseTranslations<AppLocale, Translations> implements T
 	// Translations
 	@override late final _Translations$app$tr app = _Translations$app$tr._(_root);
 	@override late final _Translations$common$tr common = _Translations$common$tr._(_root);
+	@override late final _Translations$apiErrors$tr apiErrors = _Translations$apiErrors$tr._(_root);
 	@override late final _Translations$onboarding$tr onboarding = _Translations$onboarding$tr._(_root);
 	@override late final _Translations$targetLanguage$tr targetLanguage = _Translations$targetLanguage$tr._(_root);
 	@override late final _Translations$language$tr language = _Translations$language$tr._(_root);
@@ -93,6 +94,27 @@ class _Translations$common$tr implements Translations$common$en {
 	@override String get tryAgain => 'Tekrar dene';
 }
 
+// Path: apiErrors
+class _Translations$apiErrors$tr implements Translations$apiErrors$en {
+	_Translations$apiErrors$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get unauthorized => 'Lütfen tekrar giriş yap.';
+	@override String get notFound => 'Aradığın içerik bulunamadı.';
+	@override String get validationFailed => 'Lütfen bilgilerini kontrol edip tekrar dene.';
+	@override String get nameRequired => 'İsim boş olamaz.';
+	@override String get imageRequired => 'Lütfen yüklenecek bir fotoğraf seç.';
+	@override String get avatarInvalidType => 'Yalnızca JPEG, PNG veya WebP fotoğraflar kabul edilir.';
+	@override String get avatarEmpty => 'Seçilen fotoğraf boş.';
+	@override String get avatarTooLarge => 'Fotoğraf çok büyük (en fazla 5 MB).';
+	@override String get notificationsRequired => 'Bildirim tercihi gerekli.';
+	@override String get premiumRequired => 'Bu ders için Premium gerekli.';
+	@override String get levelRequired => 'Bu seviyeyi açmak için önceki dersleri tamamla.';
+	@override String get internalError => 'Bir şeyler ters gitti. Lütfen tekrar dene.';
+}
+
 // Path: onboarding
 class _Translations$onboarding$tr implements Translations$onboarding$en {
 	_Translations$onboarding$tr._(this._root);
@@ -135,7 +157,7 @@ class _Translations$language$tr implements Translations$language$en {
 	// Translations
 	@override String step({required Object current, required Object total}) => 'Adım ${current} / ${total}';
 	@override String get title => 'Ne hakkında konuşmak istersin?';
-	@override String get nativeSection => 'Ben konuşuyorum';
+	@override String get nativeSection => 'Anadilim';
 	@override String get nativeField => 'Ana dil';
 	@override String get nativeName => 'Türkçe';
 	@override String get targetSection => 'Öğrenmek istiyorum';
@@ -411,7 +433,7 @@ class _Translations$tutorPage$tr implements Translations$tutorPage$en {
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Öğretmen';
+	@override String get title => 'Eğitmen';
 	@override String get chatWithLingola => 'Lingola ile Sohbet Et';
 	@override String chatWithTutor({required Object name}) => '${name} ile Sohbet Et';
 	@override String get chatHistory => 'Sohbet Geçmişi';
@@ -422,7 +444,8 @@ class _Translations$tutorPage$tr implements Translations$tutorPage$en {
 	@override String get moreCountries => '8+ daha';
 	@override String get moreFocus => '+8';
 	@override String get save => 'KAYDET';
-	@override String get startTalkNow => 'Şimdi Sohbete Başla';
+	@override String get clearFilter => 'Filtreyi kaldır';
+	@override String get startTalkNow => 'Sohbete Başla';
 	@override String get typeMessage => 'Bir mesaj yaz...';
 	@override String get speaker => 'Konuşmacı';
 	@override String get messagesCount => '12';
@@ -539,6 +562,31 @@ class _Translations$pushNotifications$tr implements Translations$pushNotificatio
 		'Ne zaman istersen devam edebilirsin.',
 		'Dil kaçmaz, biz de.',
 	];
+	@override String get lessonReminderTitle => 'Bugünün dersi seni bekliyor';
+	@override List<String> get lessonReminder => [
+		'Bugün henüz derse girmedin — 5 dakika bile yeter.',
+		'Hocan hazır. Kaldığın yerden devam et.',
+		'Kısa bir ders bugün ritmini korur.',
+		'Bugünkü ders hâlâ açık — başlamak ister misin?',
+	];
+	@override String get quizReminderTitle => 'Kısa bir quiz yapalım mı?';
+	@override String quizReminderWords({required Object count, required Object savedCount}) => 'Son zamanlarda ${count} kelime öğrendin — quiz yapmak ister misin? ${savedCount} kayıtlı kelime seni bekliyor.';
+	@override String quizReminderSaved({required Object savedCount}) => '${savedCount} kayıtlı kelime gözden geçirmeyi bekliyor.';
+	@override List<String> get quizReminder => [
+		'Bir süredir quiz yapmadın — 3 dakikalık tekrar iyi gelir.',
+		'Kayıtlı kelimelerin seni özledi. Hızlı bir quiz?',
+		'Ne kadar hatırladığını test et — sadece birkaç dakika.',
+		'Şimdi kısa bir quiz, yarını kolaylaştırır.',
+	];
+	@override String get eveningLessonTitle => 'Bugünkü pratiği kaçırma';
+	@override List<String> get eveningLesson => [
+		'Bugün henüz çalışmadın. Kısa bir ders alışkanlığı korur.',
+		'Gün bitmeden — hocanla hızlı bir ders?',
+		'Bugün hâlâ 5 dakikalık bir İngilizce seansı için vakit var.',
+		'Günlük dersin bekliyor. Başlayalım mı?',
+	];
+	@override String get streakReminderTitle => 'Serini koru';
+	@override String streakReminder({required Object streak}) => '${streak} günlük seridesin — bugün kısa bir ders serini canlı tutar.';
 }
 
 // Path: notificationsPage
@@ -556,6 +604,11 @@ class _Translations$notificationsPage$tr implements Translations$notificationsPa
 	@override late final _Translations$notificationsPage$translation$tr translation = _Translations$notificationsPage$translation$tr._(_root);
 	@override late final _Translations$notificationsPage$offer$tr offer = _Translations$notificationsPage$offer$tr._(_root);
 	@override late final _Translations$notificationsPage$stories$tr stories = _Translations$notificationsPage$stories$tr._(_root);
+	@override late final _Translations$notificationsPage$practice$tr practice = _Translations$notificationsPage$practice$tr._(_root);
+	@override late final _Translations$notificationsPage$streak$tr streak = _Translations$notificationsPage$streak$tr._(_root);
+	@override late final _Translations$notificationsPage$premium$tr premium = _Translations$notificationsPage$premium$tr._(_root);
+	@override String get emptyTitle => 'Henüz bildirim yok';
+	@override String get emptySubtitle => 'Bildirim aldığında tekrar kontrol etmeyi unutma.';
 }
 
 // Path: profilePage
@@ -576,6 +629,13 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get email => 'E-posta';
 	@override String get deleteAccount => 'Hesabı Sil';
 	@override String get save => 'KAYDET';
+	@override String get profileSaved => 'Profil kaydedildi';
+	@override String get profilePhotoUpdated => 'Profil fotoğrafı güncellendi';
+	@override String get nameCannotBeEmpty => 'İsim boş olamaz';
+	@override String get profileSaveFailed => 'Profil kaydedilemedi';
+	@override String get photoUploadFailed => 'Fotoğraf yüklenemedi';
+	@override String get notificationsUpdateFailed => 'Bildirimler güncellenemedi';
+	@override String get notificationsPermissionDenied => 'Hatırlatıcı almak için cihaz ayarlarından bildirimlere izin ver.';
 	@override String get deleteTitle => 'Gitmeni istemiyoruz ama seni anlıyoruz.';
 	@override String get deleteBody => 'Lingola deneyimini iyileştirmemiz için bize neden ayrılmak istediğini söyler misin?';
 	@override late final _Translations$profilePage$deleteReasons$tr deleteReasons = _Translations$profilePage$deleteReasons$tr._(_root);
@@ -641,6 +701,30 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get logoutConfirm => 'ÇIKIŞ YAP';
 	@override String get logoutCancel => 'İPTAL';
 	@override late final _Translations$profilePage$days$tr days = _Translations$profilePage$days$tr._(_root);
+	@override String get certificateTitle => 'Sertifikanız';
+	@override String certificateLevelTitle({required Object level}) => '${level} Sertifikası';
+	@override String get certificateOf => 'Başarı Sertifikası';
+	@override String get certificateCertifiesThat => 'Bu belge, aşağıda adı geçen kişinin';
+	@override String get certificatePathway => 'Lingola İngilizce Yolu';
+	@override String get certificateAwardedTo => 'Verilen kişi';
+	@override String get certificateCompleted => 'başarıyla tamamlamıştır';
+	@override String get certificateCompletedDetail => 'Lingola İngilizce Yeterlilik Programını başarıyla tamamlamış ve aşağıdaki seviyede sertifika almaya hak kazanmıştır:';
+	@override String certificateLevelLine({required Object level}) => 'İngilizce Seviyesi — CEFR ${level}';
+	@override String certificateIssued({required Object date}) => 'Veriliş tarihi: ${date}';
+	@override String get certificateDateOfCompletion => 'Tamamlanma Tarihi';
+	@override String get certificateIdLabel => 'Sertifika No';
+	@override String get certificateVerify => 'Sertifikayı doğrulamak için tarayın';
+	@override String get certificateVerifyAuthenticity => 'DOĞRULAMA';
+	@override String get certificateScanOrVisit => 'QR kodu tarayın veya bağlantıyı ziyaret ederek doğrulayın.';
+	@override String get certificateVerifyHint => 'QR kodu tarayan herkes başarınızı doğrulayabilir.';
+	@override String get certificateShare => 'Sertifikayı Paylaş';
+	@override String get certificateShareQr => 'QR Kodunu Paylaş';
+	@override String certificateShareBody({required Object level}) => 'Lingola ${level} sertifikamı kazandım!';
+	@override String certificateShareSubject({required Object level}) => 'Lingola ${level} Sertifikası';
+	@override String get certificateProvidedBy => 'Sertifika sağlayıcı';
+	@override String get certificatePreviewBody => 'Lingola\'da bir CEFR seviyesini tamamladığınızda sertifikanız burada görünecek — adınız, seviyeniz ve doğrulanabilir QR kodu ile.';
+	@override String get certificatePreviewHint => 'Sertifikanızı açmak için bir seviye yolunu tamamlayın';
+	@override String get certificateTapToView => 'Sertifikanızı görüntülemek ve paylaşmak için dokunun';
 }
 
 // Path: onboarding.slide1
@@ -791,6 +875,7 @@ class _Translations$tutorPage$calling$tr implements Translations$tutorPage$calli
 
 	// Translations
 	@override String get lessonBadge => 'Ders 1 : Selamlaşmalar';
+	@override String lessonBadgeFormat({required Object number, required Object title}) => 'Ders ${number} : ${title}';
 	@override String get nativeLine => 'Sıkıldın mı?';
 	@override String get englishLine => 'Sıkıldın mı? O kelimeyi kelime dağarcığımdan sildim. Kalk, plan hazır: Kadıköy\'deki o yeni oyun barına gidiyoruz.';
 	@override String get highlight => 'Sıkıldın mı?';
@@ -882,6 +967,39 @@ class _Translations$notificationsPage$stories$tr implements Translations$notific
 	// Translations
 	@override String get title => 'Yeni Hikayeleri Keşfedin';
 	@override String get body => 'Hikayeler aracılığıyla yeni kelimeler öğrenin';
+}
+
+// Path: notificationsPage.practice
+class _Translations$notificationsPage$practice$tr implements Translations$notificationsPage$practice$en {
+	_Translations$notificationsPage$practice$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Günlük pratiğin seni bekliyor';
+	@override String get body => '5 dakikada kelime, okuma veya konuşma egzersizi yap.';
+}
+
+// Path: notificationsPage.streak
+class _Translations$notificationsPage$streak$tr implements Translations$notificationsPage$streak$en {
+	_Translations$notificationsPage$streak$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Serini koru';
+	@override String get body => 'Bugün kısa bir oturum gün serini korur ve alışkanlığı güçlendirir.';
+}
+
+// Path: notificationsPage.premium
+class _Translations$notificationsPage$premium$tr implements Translations$notificationsPage$premium$en {
+	_Translations$notificationsPage$premium$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Tüm hocalar ve dersler açılsın';
+	@override String get body => 'Premium ile sınırsız ders, rol oynama ve AI hocalara eriş.';
 }
 
 // Path: profilePage.deleteReasons
@@ -1397,6 +1515,18 @@ extension on TranslationsTr {
 			'common.connectionError' => 'Bağlantı yok. İnternetini kontrol et ve tekrar dene.',
 			'common.genericError' => 'Bir şeyler ters gitti. Lütfen tekrar dene.',
 			'common.tryAgain' => 'Tekrar dene',
+			'apiErrors.unauthorized' => 'Lütfen tekrar giriş yap.',
+			'apiErrors.notFound' => 'Aradığın içerik bulunamadı.',
+			'apiErrors.validationFailed' => 'Lütfen bilgilerini kontrol edip tekrar dene.',
+			'apiErrors.nameRequired' => 'İsim boş olamaz.',
+			'apiErrors.imageRequired' => 'Lütfen yüklenecek bir fotoğraf seç.',
+			'apiErrors.avatarInvalidType' => 'Yalnızca JPEG, PNG veya WebP fotoğraflar kabul edilir.',
+			'apiErrors.avatarEmpty' => 'Seçilen fotoğraf boş.',
+			'apiErrors.avatarTooLarge' => 'Fotoğraf çok büyük (en fazla 5 MB).',
+			'apiErrors.notificationsRequired' => 'Bildirim tercihi gerekli.',
+			'apiErrors.premiumRequired' => 'Bu ders için Premium gerekli.',
+			'apiErrors.levelRequired' => 'Bu seviyeyi açmak için önceki dersleri tamamla.',
+			'apiErrors.internalError' => 'Bir şeyler ters gitti. Lütfen tekrar dene.',
 			'onboarding.pageA11y' => ({required Object current, required Object total}) => 'Eğitim sayfası ${current} / ${total}',
 			'onboarding.slide1.title' => 'Haftalar İçinde Kendine Güvenle Konuş',
 			'onboarding.slide1.body' => 'AI ile gerçek konuşmalar pratiği yap. Aksanını, özgüvenini ve akıcılığını her gün geliştir.',
@@ -1434,7 +1564,7 @@ extension on TranslationsTr {
 			'targetLanguage.hindi' => 'Hintçe',
 			'language.step' => ({required Object current, required Object total}) => 'Adım ${current} / ${total}',
 			'language.title' => 'Ne hakkında konuşmak istersin?',
-			'language.nativeSection' => 'Ben konuşuyorum',
+			'language.nativeSection' => 'Anadilim',
 			'language.nativeField' => 'Ana dil',
 			'language.nativeName' => 'Türkçe',
 			'language.targetSection' => 'Öğrenmek istiyorum',
@@ -1613,7 +1743,7 @@ extension on TranslationsTr {
 			'quizPage.questionOf' => ({required Object current, required Object total}) => 'SORU ${current} / ${total}',
 			'placeholder.title' => ({required Object tab}) => '${tab} yolda',
 			'placeholder.body' => ({required Object tab}) => 'Senin için odaklanmış bir ${tab} deneyimi hazırlıyoruz.',
-			'tutorPage.title' => 'Öğretmen',
+			'tutorPage.title' => 'Eğitmen',
 			'tutorPage.chatWithLingola' => 'Lingola ile Sohbet Et',
 			'tutorPage.chatWithTutor' => ({required Object name}) => '${name} ile Sohbet Et',
 			'tutorPage.chatHistory' => 'Sohbet Geçmişi',
@@ -1624,7 +1754,8 @@ extension on TranslationsTr {
 			'tutorPage.moreCountries' => '8+ daha',
 			'tutorPage.moreFocus' => '+8',
 			'tutorPage.save' => 'KAYDET',
-			'tutorPage.startTalkNow' => 'Şimdi Sohbete Başla',
+			'tutorPage.clearFilter' => 'Filtreyi kaldır',
+			'tutorPage.startTalkNow' => 'Sohbete Başla',
 			'tutorPage.typeMessage' => 'Bir mesaj yaz...',
 			'tutorPage.speaker' => 'Konuşmacı',
 			'tutorPage.messagesCount' => '12',
@@ -1675,6 +1806,7 @@ extension on TranslationsTr {
 			'tutorPage.chat.incoming2' => 'Harika. Bir meslektaşına merhaba derken ne dersin?',
 			'tutorPage.chat.typing' => 'Yazıyor',
 			'tutorPage.calling.lessonBadge' => 'Ders 1 : Selamlaşmalar',
+			'tutorPage.calling.lessonBadgeFormat' => ({required Object number, required Object title}) => 'Ders ${number} : ${title}',
 			'tutorPage.calling.nativeLine' => 'Sıkıldın mı?',
 			'tutorPage.calling.englishLine' => 'Sıkıldın mı? O kelimeyi kelime dağarcığımdan sildim. Kalk, plan hazır: Kadıköy\'deki o yeni oyun barına gidiyoruz.',
 			'tutorPage.calling.highlight' => 'Sıkıldın mı?',
@@ -1881,6 +2013,8 @@ extension on TranslationsTr {
 			'lessonPage.levels.b2.lessons.13' => 'Çevresel sorunlar',
 			'lessonPage.levels.b2.lessons.14' => 'Bunu çözebiliriz',
 			'lessonPage.levels.b2.lessons.15' => 'Gizemler ve suçlar',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.b2.lessons.16' => 'Olası gelecekler',
 			'lessonPage.levels.b2.lessons.17' => 'İş planları',
 			'lessonPage.levels.b2.lessons.18' => 'Toplantı kararları',
@@ -1895,8 +2029,6 @@ extension on TranslationsTr {
 			'lessonPage.levels.c1.lessons.2' => 'Kariyer seçimleri',
 			'lessonPage.levels.c1.lessons.3' => 'Performansı hızlandırmak',
 			'lessonPage.levels.c1.lessons.4' => 'İcatlar',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.5' => 'Zaman yolculuğu',
 			'lessonPage.levels.c1.lessons.6' => 'Mülkler',
 			'lessonPage.levels.c1.lessons.7' => 'İş becerileri',
@@ -1994,6 +2126,25 @@ extension on TranslationsTr {
 			'pushNotifications.h24.2' => 'Kaldığın yer duruyor.',
 			'pushNotifications.h24.3' => 'Ne zaman istersen devam edebilirsin.',
 			'pushNotifications.h24.4' => 'Dil kaçmaz, biz de.',
+			'pushNotifications.lessonReminderTitle' => 'Bugünün dersi seni bekliyor',
+			'pushNotifications.lessonReminder.0' => 'Bugün henüz derse girmedin — 5 dakika bile yeter.',
+			'pushNotifications.lessonReminder.1' => 'Hocan hazır. Kaldığın yerden devam et.',
+			'pushNotifications.lessonReminder.2' => 'Kısa bir ders bugün ritmini korur.',
+			'pushNotifications.lessonReminder.3' => 'Bugünkü ders hâlâ açık — başlamak ister misin?',
+			'pushNotifications.quizReminderTitle' => 'Kısa bir quiz yapalım mı?',
+			'pushNotifications.quizReminderWords' => ({required Object count, required Object savedCount}) => 'Son zamanlarda ${count} kelime öğrendin — quiz yapmak ister misin? ${savedCount} kayıtlı kelime seni bekliyor.',
+			'pushNotifications.quizReminderSaved' => ({required Object savedCount}) => '${savedCount} kayıtlı kelime gözden geçirmeyi bekliyor.',
+			'pushNotifications.quizReminder.0' => 'Bir süredir quiz yapmadın — 3 dakikalık tekrar iyi gelir.',
+			'pushNotifications.quizReminder.1' => 'Kayıtlı kelimelerin seni özledi. Hızlı bir quiz?',
+			'pushNotifications.quizReminder.2' => 'Ne kadar hatırladığını test et — sadece birkaç dakika.',
+			'pushNotifications.quizReminder.3' => 'Şimdi kısa bir quiz, yarını kolaylaştırır.',
+			'pushNotifications.eveningLessonTitle' => 'Bugünkü pratiği kaçırma',
+			'pushNotifications.eveningLesson.0' => 'Bugün henüz çalışmadın. Kısa bir ders alışkanlığı korur.',
+			'pushNotifications.eveningLesson.1' => 'Gün bitmeden — hocanla hızlı bir ders?',
+			'pushNotifications.eveningLesson.2' => 'Bugün hâlâ 5 dakikalık bir İngilizce seansı için vakit var.',
+			'pushNotifications.eveningLesson.3' => 'Günlük dersin bekliyor. Başlayalım mı?',
+			'pushNotifications.streakReminderTitle' => 'Serini koru',
+			'pushNotifications.streakReminder' => ({required Object streak}) => '${streak} günlük seridesin — bugün kısa bir ders serini canlı tutar.',
 			'notificationsPage.title' => 'Bildirimler',
 			'notificationsPage.deleteConfirmTitle' => 'Emin misiniz?',
 			'notificationsPage.deleteConfirmBody' => 'Bu bildirim silinecek.',
@@ -2005,6 +2156,14 @@ extension on TranslationsTr {
 			'notificationsPage.offer.body' => 'Sınırsız fotoğraf çevirisi için Premium\'a %50 indirimle geçin.',
 			'notificationsPage.stories.title' => 'Yeni Hikayeleri Keşfedin',
 			'notificationsPage.stories.body' => 'Hikayeler aracılığıyla yeni kelimeler öğrenin',
+			'notificationsPage.practice.title' => 'Günlük pratiğin seni bekliyor',
+			'notificationsPage.practice.body' => '5 dakikada kelime, okuma veya konuşma egzersizi yap.',
+			'notificationsPage.streak.title' => 'Serini koru',
+			'notificationsPage.streak.body' => 'Bugün kısa bir oturum gün serini korur ve alışkanlığı güçlendirir.',
+			'notificationsPage.premium.title' => 'Tüm hocalar ve dersler açılsın',
+			'notificationsPage.premium.body' => 'Premium ile sınırsız ders, rol oynama ve AI hocalara eriş.',
+			'notificationsPage.emptyTitle' => 'Henüz bildirim yok',
+			'notificationsPage.emptySubtitle' => 'Bildirim aldığında tekrar kontrol etmeyi unutma.',
 			'profilePage.title' => 'Profil',
 			'profilePage.userName' => 'Jhon Doe',
 			'profilePage.freeVersion' => 'Ücretsiz Versiyon',
@@ -2016,6 +2175,13 @@ extension on TranslationsTr {
 			'profilePage.email' => 'E-posta',
 			'profilePage.deleteAccount' => 'Hesabı Sil',
 			'profilePage.save' => 'KAYDET',
+			'profilePage.profileSaved' => 'Profil kaydedildi',
+			'profilePage.profilePhotoUpdated' => 'Profil fotoğrafı güncellendi',
+			'profilePage.nameCannotBeEmpty' => 'İsim boş olamaz',
+			'profilePage.profileSaveFailed' => 'Profil kaydedilemedi',
+			'profilePage.photoUploadFailed' => 'Fotoğraf yüklenemedi',
+			'profilePage.notificationsUpdateFailed' => 'Bildirimler güncellenemedi',
+			'profilePage.notificationsPermissionDenied' => 'Hatırlatıcı almak için cihaz ayarlarından bildirimlere izin ver.',
 			'profilePage.deleteTitle' => 'Gitmeni istemiyoruz ama seni anlıyoruz.',
 			'profilePage.deleteBody' => 'Lingola deneyimini iyileştirmemiz için bize neden ayrılmak istediğini söyler misin?',
 			'profilePage.deleteReasons.aiCharacters' => 'Yapay zeka karakterlerini gerçekçi bulmadım.',
@@ -2111,6 +2277,30 @@ extension on TranslationsTr {
 			'profilePage.days.fri' => 'CUM',
 			'profilePage.days.sat' => 'CMT',
 			'profilePage.days.sun' => 'PZR',
+			'profilePage.certificateTitle' => 'Sertifikanız',
+			'profilePage.certificateLevelTitle' => ({required Object level}) => '${level} Sertifikası',
+			'profilePage.certificateOf' => 'Başarı Sertifikası',
+			'profilePage.certificateCertifiesThat' => 'Bu belge, aşağıda adı geçen kişinin',
+			'profilePage.certificatePathway' => 'Lingola İngilizce Yolu',
+			'profilePage.certificateAwardedTo' => 'Verilen kişi',
+			'profilePage.certificateCompleted' => 'başarıyla tamamlamıştır',
+			'profilePage.certificateCompletedDetail' => 'Lingola İngilizce Yeterlilik Programını başarıyla tamamlamış ve aşağıdaki seviyede sertifika almaya hak kazanmıştır:',
+			'profilePage.certificateLevelLine' => ({required Object level}) => 'İngilizce Seviyesi — CEFR ${level}',
+			'profilePage.certificateIssued' => ({required Object date}) => 'Veriliş tarihi: ${date}',
+			'profilePage.certificateDateOfCompletion' => 'Tamamlanma Tarihi',
+			'profilePage.certificateIdLabel' => 'Sertifika No',
+			'profilePage.certificateVerify' => 'Sertifikayı doğrulamak için tarayın',
+			'profilePage.certificateVerifyAuthenticity' => 'DOĞRULAMA',
+			'profilePage.certificateScanOrVisit' => 'QR kodu tarayın veya bağlantıyı ziyaret ederek doğrulayın.',
+			'profilePage.certificateVerifyHint' => 'QR kodu tarayan herkes başarınızı doğrulayabilir.',
+			'profilePage.certificateShare' => 'Sertifikayı Paylaş',
+			'profilePage.certificateShareQr' => 'QR Kodunu Paylaş',
+			'profilePage.certificateShareBody' => ({required Object level}) => 'Lingola ${level} sertifikamı kazandım!',
+			'profilePage.certificateShareSubject' => ({required Object level}) => 'Lingola ${level} Sertifikası',
+			'profilePage.certificateProvidedBy' => 'Sertifika sağlayıcı',
+			'profilePage.certificatePreviewBody' => 'Lingola\'da bir CEFR seviyesini tamamladığınızda sertifikanız burada görünecek — adınız, seviyeniz ve doğrulanabilir QR kodu ile.',
+			'profilePage.certificatePreviewHint' => 'Sertifikanızı açmak için bir seviye yolunu tamamlayın',
+			'profilePage.certificateTapToView' => 'Sertifikanızı görüntülemek ve paylaşmak için dokunun',
 			_ => null,
 		};
 	}

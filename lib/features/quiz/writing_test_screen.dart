@@ -8,6 +8,7 @@ import '../../core/auth/api_client.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/notifications/notification_activity_store.dart';
 import '../../core/quiz/quiz_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
@@ -241,6 +242,7 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
   Future<void> _showEvalResult({required bool matched}) async {
     final quiz = AppText.current.quizPage;
     if (matched) {
+      unawaited(NotificationActivityStore.recordQuiz());
       await _showResultSheet(
         iconAsset: AppAssets.success,
         title: quiz.successfulTitle,

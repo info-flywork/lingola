@@ -7,6 +7,7 @@ import '../core/auth/session_store.dart';
 import '../core/constants/app_text.dart';
 import '../core/notifications/lingola_notification_service.dart';
 import '../core/notifications/notification_lifecycle.dart';
+import '../features/notifications/notification_inbox_store.dart';
 import '../core/theme/app_theme.dart';
 import '../features/onboarding/onboarding_flow.dart';
 import '../i18n/strings.g.dart';
@@ -31,6 +32,9 @@ class _LingolaAppState extends State<LingolaApp> {
 
   Future<void> _bootstrapNotifications() async {
     await LingolaNotificationService.init();
+    await NotificationInboxStore.flushDueDeliveries();
+    // Ön planda açılışta bekleyen planları temizle; lifecycle arka planda yeniler.
+    await LingolaNotificationService.cancelAll();
     final user = await SessionStore.loadCachedUser();
     if (user?.notificationsEnabled == true) {
       await LingolaNotificationService.syncEnabled(true);

@@ -21,6 +21,7 @@ class TutorRiveAvatar extends StatefulWidget {
     this.alignment = const Alignment(0, 0.15),
     this.lipsyncViseme,
     this.loadingBackgroundColor,
+    this.anchorBottom = false,
     super.key,
   });
 
@@ -34,6 +35,8 @@ class TutorRiveAvatar extends StatefulWidget {
   final Alignment alignment;
   final double? lipsyncViseme;
   final Color? loadingBackgroundColor;
+  /// Yarım ekran calling: avatar alt kenarı sohbet alanına yapışsın.
+  final bool anchorBottom;
 
   @override
   State<TutorRiveAvatar> createState() => _TutorRiveAvatarState();
@@ -419,9 +422,62 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     }
   }
 
-  Widget _buildPlaceholder() {
+  rive.Fit get _effectiveFit =>
+      widget.anchorBottom ? rive.Fit.cover : widget.fit;
+
+  Alignment get _effectiveAlignment => widget.anchorBottom
+      ? Alignment.bottomCenter
+      : widget.alignment;
+
+  Widget _buildFallbackPhoto({double opacity = 1}) {
     final image = widget.fallbackImage?.trim() ?? '';
+    if (image.isEmpty) return const SizedBox.shrink();
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Opacity(
+        opacity: opacity,
+        child: HomeAsset(
+          image,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          alignment: Alignment.bottomCenter,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackPhotoContained({double opacity = 1}) {
+    final image = widget.fallbackImage?.trim() ?? '';
+    if (image.isEmpty) return const SizedBox.shrink();
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Opacity(
+        opacity: opacity,
+        child: HomeAsset(
+          image,
+          height: 280,
+          fit: BoxFit.contain,
+          alignment: Alignment.bottomCenter,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
     final bg = widget.loadingBackgroundColor ?? const Color(0xFF2D46FF);
+    if (widget.anchorBottom) {
+      return ClipRect(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            ColoredBox(color: bg),
+            _buildFallbackPhoto(opacity: 0.55),
+          ],
+        ),
+      );
+    }
+    final image = widget.fallbackImage?.trim() ?? '';
     return ClipRect(
       child: Stack(
         fit: StackFit.expand,
@@ -464,14 +520,16 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
         if (mounted) _onLoaded(loaded);
       });
     }
+    final riveWidget = rive.RiveWidget(
+      controller: loaded.controller,
+      fit: _effectiveFit,
+      alignment: _effectiveAlignment,
+    );
+    if (widget.anchorBottom) return riveWidget;
     return Transform.scale(
       scale: 0.92,
       alignment: Alignment.center,
-      child: rive.RiveWidget(
-        controller: loaded.controller,
-        fit: widget.fit,
-        alignment: widget.alignment,
-      ),
+      child: riveWidget,
     );
   }
 
@@ -513,7 +571,11 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
             opacity: hidePlaceholder ? 0.0 : 1.0,
             duration: const Duration(milliseconds: 140),
             curve: Curves.easeOut,
-            child: _buildPlaceholder(),
+            child: _riveFailed
+                ? (widget.anchorBottom
+                    ? _buildFallbackPhoto()
+                    : _buildFallbackPhotoContained())
+                : _buildPlaceholder(),
           ),
         ),
       ],

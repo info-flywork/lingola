@@ -59,6 +59,7 @@ class TranslationsHi with BaseTranslations<AppLocale, Translations> implements T
 	@override late final _Translations$notificationsPage$hi notificationsPage = _Translations$notificationsPage$hi._(_root);
 	@override late final _Translations$profilePage$hi profilePage = _Translations$profilePage$hi._(_root);
 	@override late final _Translations$pushNotifications$hi pushNotifications = _Translations$pushNotifications$hi._(_root);
+	@override late final _Translations$apiErrors$hi apiErrors = _Translations$apiErrors$hi._(_root);
 }
 
 // Path: app
@@ -422,6 +423,7 @@ class _Translations$tutorPage$hi implements Translations$tutorPage$en {
 	@override String get moreCountries => '8+ और';
 	@override String get moreFocus => '+8';
 	@override String get save => 'सहेजें';
+	@override String get clearFilter => 'फ़िल्टर हटाएँ';
 	@override String get startTalkNow => 'अब बात शुरू करें';
 	@override String get typeMessage => 'एक संदेश टाइप करें...';
 	@override String get speaker => 'स्पीकर';
@@ -518,6 +520,11 @@ class _Translations$notificationsPage$hi implements Translations$notificationsPa
 	@override late final _Translations$notificationsPage$translation$hi translation = _Translations$notificationsPage$translation$hi._(_root);
 	@override late final _Translations$notificationsPage$offer$hi offer = _Translations$notificationsPage$offer$hi._(_root);
 	@override late final _Translations$notificationsPage$stories$hi stories = _Translations$notificationsPage$stories$hi._(_root);
+	@override late final _Translations$notificationsPage$practice$hi practice = _Translations$notificationsPage$practice$hi._(_root);
+	@override late final _Translations$notificationsPage$streak$hi streak = _Translations$notificationsPage$streak$hi._(_root);
+	@override late final _Translations$notificationsPage$premium$hi premium = _Translations$notificationsPage$premium$hi._(_root);
+	@override String get emptyTitle => 'अभी तक कोई सूचना नहीं';
+	@override String get emptySubtitle => 'जब आपको सूचना मिले तो दोबारा जाँचना न भूलें।';
 }
 
 // Path: profilePage
@@ -603,6 +610,37 @@ class _Translations$profilePage$hi implements Translations$profilePage$en {
 	@override String get logoutConfirm => 'लॉगआउट';
 	@override String get logoutCancel => 'रद्द करें';
 	@override late final _Translations$profilePage$days$hi days = _Translations$profilePage$days$hi._(_root);
+	@override String get profileSaved => 'Profile saved';
+	@override String get profilePhotoUpdated => 'Profile photo updated';
+	@override String get nameCannotBeEmpty => 'Name cannot be empty';
+	@override String get profileSaveFailed => 'Could not save profile';
+	@override String get photoUploadFailed => 'Photo upload failed';
+	@override String get notificationsUpdateFailed => 'Could not update notifications';
+	@override String get notificationsPermissionDenied => 'Allow notifications in your device settings to get study reminders.';
+	@override String get certificateTitle => 'आपका प्रमाणपत्र';
+	@override String certificateLevelTitle({required Object level}) => '${level} Certificate';
+	@override String get certificateOf => 'Certificate of Achievement';
+	@override String get certificateCertifiesThat => 'This certifies that';
+	@override String get certificatePathway => 'Lingola English Pathway';
+	@override String get certificateAwardedTo => 'Awarded to';
+	@override String get certificateCompleted => 'has successfully completed';
+	@override String get certificateCompletedDetail => 'has successfully completed the Lingola English Proficiency Pathway and was awarded a certificate in';
+	@override String certificateLevelLine({required Object level}) => 'English Level — CEFR ${level}';
+	@override String certificateIssued({required Object date}) => 'Issued on ${date}';
+	@override String get certificateDateOfCompletion => 'Date of Completion';
+	@override String get certificateIdLabel => 'Certificate ID';
+	@override String get certificateVerify => 'Scan to verify this certificate';
+	@override String get certificateVerifyAuthenticity => 'VERIFY AUTHENTICITY';
+	@override String get certificateScanOrVisit => 'Scan the QR code or visit the link to verify authenticity.';
+	@override String get certificateVerifyHint => 'कोई भी QR कोड स्कैन करके आपकी उपलब्धि की पुष्टि कर सकता है।';
+	@override String get certificateShare => 'प्रमाणपत्र साझा करें';
+	@override String get certificateShareQr => 'QR कोड साझा करें';
+	@override String certificateShareBody({required Object level}) => 'I earned my Lingola ${level} certificate!';
+	@override String certificateShareSubject({required Object level}) => 'Lingola ${level} Certificate';
+	@override String get certificateProvidedBy => 'Certificate provided by';
+	@override String get certificatePreviewBody => 'जब आप Lingola पर CEFR स्तर पूरा करेंगे, तो आपका प्रमाणपत्र यहाँ दिखेगा — आपके नाम, स्तर और सत्यापन के लिए QR कोड के साथ।';
+	@override String get certificatePreviewHint => 'अपना प्रमाणपत्र अनलॉक करने के लिए एक स्तर पथ पूरा करें';
+	@override String get certificateTapToView => 'प्रमाणपत्र देखने और साझा करने के लिए टैप करें';
 }
 
 // Path: pushNotifications
@@ -641,6 +679,52 @@ class _Translations$pushNotifications$hi implements Translations$pushNotificatio
 		'जब चाहें जारी रखें।',
 		'भाषा भाग नहीं जाएगी — न ही हम।',
 	];
+	@override String get lessonReminderTitle => 'Today\'s lesson is waiting';
+	@override List<String> get lessonReminder => [
+		'You haven\'t opened today\'s lesson yet — even 5 minutes counts.',
+		'Your tutor is ready. Pick up where you left off.',
+		'A short lesson today keeps your rhythm going.',
+		'Today\'s lesson is still open — want to jump in?',
+	];
+	@override String get quizReminderTitle => 'Ready for a quick quiz?';
+	@override String quizReminderWords({required Object count, required Object savedCount}) => 'You learned ${count} words recently — want a quiz? ${savedCount} saved words are waiting.';
+	@override String quizReminderSaved({required Object savedCount}) => '${savedCount} saved words are waiting for review.';
+	@override List<String> get quizReminder => [
+		'It\'s been a while since your last quiz — a 3-minute review could help.',
+		'Your saved words miss you. A quick quiz?',
+		'Test what you remember — it only takes a few minutes.',
+		'A short quiz now makes tomorrow easier.',
+	];
+	@override String get eveningLessonTitle => 'Don\'t miss today\'s practice';
+	@override List<String> get eveningLesson => [
+		'You haven\'t studied today yet. One short lesson keeps the habit alive.',
+		'Before the day ends — a quick lesson with your tutor?',
+		'There\'s still time for a 5-minute English session today.',
+		'Your daily lesson is waiting. Shall we start?',
+	];
+	@override String get streakReminderTitle => 'Keep your streak';
+	@override String streakReminder({required Object streak}) => 'You\'re on a ${streak}-day streak — a short lesson today keeps it alive.';
+}
+
+// Path: apiErrors
+class _Translations$apiErrors$hi implements Translations$apiErrors$en {
+	_Translations$apiErrors$hi._(this._root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get unauthorized => 'Please sign in again.';
+	@override String get notFound => 'We couldn\'t find what you were looking for.';
+	@override String get validationFailed => 'Please check your input and try again.';
+	@override String get nameRequired => 'Name cannot be empty.';
+	@override String get imageRequired => 'Please choose a photo to upload.';
+	@override String get avatarInvalidType => 'Only JPEG, PNG, or WebP photos are allowed.';
+	@override String get avatarEmpty => 'The selected photo is empty.';
+	@override String get avatarTooLarge => 'Photo is too large (max 5 MB).';
+	@override String get notificationsRequired => 'Notification preference is required.';
+	@override String get premiumRequired => 'Premium is required for this lesson.';
+	@override String get levelRequired => 'Complete earlier lessons to unlock this level.';
+	@override String get internalError => 'Something went wrong. Please try again.';
 }
 
 // Path: onboarding.slide1
@@ -791,6 +875,7 @@ class _Translations$tutorPage$calling$hi implements Translations$tutorPage$calli
 
 	// Translations
 	@override String get lessonBadge => 'पाठ 1 : अभिवादन';
+	@override String lessonBadgeFormat({required Object number, required Object title}) => 'पाठ ${number} : ${title}';
 	@override String get nativeLine => 'क्या तुम बोर हो गए?';
 	@override String get englishLine => 'बोर? मैंने अपने शब्दकोश से वह शब्द हटा दिया। उठो, योजना पहले से तय है: हम कादिकॉय में उस नए आर्केड बार में जा रहे हैं।';
 	@override String get highlight => 'बोर?';
@@ -882,6 +967,39 @@ class _Translations$notificationsPage$stories$hi implements Translations$notific
 	// Translations
 	@override String get title => 'नई कहानियाँ खोजें';
 	@override String get body => 'कहानियों के माध्यम से नए शब्द सीखें';
+}
+
+// Path: notificationsPage.practice
+class _Translations$notificationsPage$practice$hi implements Translations$notificationsPage$practice$en {
+	_Translations$notificationsPage$practice$hi._(this._root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Your daily practice is waiting';
+	@override String get body => 'Spend 5 minutes on a quick word, reading, or speaking exercise.';
+}
+
+// Path: notificationsPage.streak
+class _Translations$notificationsPage$streak$hi implements Translations$notificationsPage$streak$en {
+	_Translations$notificationsPage$streak$hi._(this._root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Keep your streak alive';
+	@override String get body => 'A short session today protects your day streak and builds the habit.';
+}
+
+// Path: notificationsPage.premium
+class _Translations$notificationsPage$premium$hi implements Translations$notificationsPage$premium$en {
+	_Translations$notificationsPage$premium$hi._(this._root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Unlock all tutors & lessons';
+	@override String get body => 'Go Premium for unlimited lessons, role-play scenarios, and AI tutors.';
 }
 
 // Path: profilePage.deleteReasons
@@ -1624,6 +1742,7 @@ extension on TranslationsHi {
 			'tutorPage.moreCountries' => '8+ और',
 			'tutorPage.moreFocus' => '+8',
 			'tutorPage.save' => 'सहेजें',
+			'tutorPage.clearFilter' => 'फ़िल्टर हटाएँ',
 			'tutorPage.startTalkNow' => 'अब बात शुरू करें',
 			'tutorPage.typeMessage' => 'एक संदेश टाइप करें...',
 			'tutorPage.speaker' => 'स्पीकर',
@@ -1675,6 +1794,7 @@ extension on TranslationsHi {
 			'tutorPage.chat.incoming2' => 'परफेक्ट। आप एक सहयोगी को कैसे नमस्ते कहेंगे?',
 			'tutorPage.chat.typing' => 'टाइप कर रहे हैं',
 			'tutorPage.calling.lessonBadge' => 'पाठ 1 : अभिवादन',
+			'tutorPage.calling.lessonBadgeFormat' => ({required Object number, required Object title}) => 'पाठ ${number} : ${title}',
 			'tutorPage.calling.nativeLine' => 'क्या तुम बोर हो गए?',
 			'tutorPage.calling.englishLine' => 'बोर? मैंने अपने शब्दकोश से वह शब्द हटा दिया। उठो, योजना पहले से तय है: हम कादिकॉय में उस नए आर्केड बार में जा रहे हैं।',
 			'tutorPage.calling.highlight' => 'बोर?',
@@ -1893,10 +2013,10 @@ extension on TranslationsHi {
 			'lessonPage.levels.c1.lessons.0' => 'संस्कृतिक मानदंड',
 			'lessonPage.levels.c1.lessons.1' => 'सोशल मीडिया का प्रभाव',
 			'lessonPage.levels.c1.lessons.2' => 'करियर के विकल्प',
-			'lessonPage.levels.c1.lessons.3' => 'प्रदर्शन को तेज करें',
-			'lessonPage.levels.c1.lessons.4' => 'आविष्कार',
 			_ => null,
 		} ?? switch (path) {
+			'lessonPage.levels.c1.lessons.3' => 'प्रदर्शन को तेज करें',
+			'lessonPage.levels.c1.lessons.4' => 'आविष्कार',
 			'lessonPage.levels.c1.lessons.5' => 'समय यात्रा',
 			'lessonPage.levels.c1.lessons.6' => 'संपत्ति',
 			'lessonPage.levels.c1.lessons.7' => 'नौकरी के कौशल',
@@ -1984,6 +2104,14 @@ extension on TranslationsHi {
 			'notificationsPage.offer.body' => '50% छूट पर अनलिमिटेड फोटो अनुवाद के लिए Premium में अपग्रेड करें।',
 			'notificationsPage.stories.title' => 'नई कहानियाँ खोजें',
 			'notificationsPage.stories.body' => 'कहानियों के माध्यम से नए शब्द सीखें',
+			'notificationsPage.practice.title' => 'Your daily practice is waiting',
+			'notificationsPage.practice.body' => 'Spend 5 minutes on a quick word, reading, or speaking exercise.',
+			'notificationsPage.streak.title' => 'Keep your streak alive',
+			'notificationsPage.streak.body' => 'A short session today protects your day streak and builds the habit.',
+			'notificationsPage.premium.title' => 'Unlock all tutors & lessons',
+			'notificationsPage.premium.body' => 'Go Premium for unlimited lessons, role-play scenarios, and AI tutors.',
+			'notificationsPage.emptyTitle' => 'अभी तक कोई सूचना नहीं',
+			'notificationsPage.emptySubtitle' => 'जब आपको सूचना मिले तो दोबारा जाँचना न भूलें।',
 			'profilePage.title' => 'प्रोफ़ाइल',
 			'profilePage.userName' => 'जॉन डो',
 			'profilePage.freeVersion' => 'फ्री वर्ज़न',
@@ -2090,6 +2218,37 @@ extension on TranslationsHi {
 			'profilePage.days.fri' => 'शुक्र',
 			'profilePage.days.sat' => 'शनिवार',
 			'profilePage.days.sun' => 'रविवार',
+			'profilePage.profileSaved' => 'Profile saved',
+			'profilePage.profilePhotoUpdated' => 'Profile photo updated',
+			'profilePage.nameCannotBeEmpty' => 'Name cannot be empty',
+			'profilePage.profileSaveFailed' => 'Could not save profile',
+			'profilePage.photoUploadFailed' => 'Photo upload failed',
+			'profilePage.notificationsUpdateFailed' => 'Could not update notifications',
+			'profilePage.notificationsPermissionDenied' => 'Allow notifications in your device settings to get study reminders.',
+			'profilePage.certificateTitle' => 'आपका प्रमाणपत्र',
+			'profilePage.certificateLevelTitle' => ({required Object level}) => '${level} Certificate',
+			'profilePage.certificateOf' => 'Certificate of Achievement',
+			'profilePage.certificateCertifiesThat' => 'This certifies that',
+			'profilePage.certificatePathway' => 'Lingola English Pathway',
+			'profilePage.certificateAwardedTo' => 'Awarded to',
+			'profilePage.certificateCompleted' => 'has successfully completed',
+			'profilePage.certificateCompletedDetail' => 'has successfully completed the Lingola English Proficiency Pathway and was awarded a certificate in',
+			'profilePage.certificateLevelLine' => ({required Object level}) => 'English Level — CEFR ${level}',
+			'profilePage.certificateIssued' => ({required Object date}) => 'Issued on ${date}',
+			'profilePage.certificateDateOfCompletion' => 'Date of Completion',
+			'profilePage.certificateIdLabel' => 'Certificate ID',
+			'profilePage.certificateVerify' => 'Scan to verify this certificate',
+			'profilePage.certificateVerifyAuthenticity' => 'VERIFY AUTHENTICITY',
+			'profilePage.certificateScanOrVisit' => 'Scan the QR code or visit the link to verify authenticity.',
+			'profilePage.certificateVerifyHint' => 'कोई भी QR कोड स्कैन करके आपकी उपलब्धि की पुष्टि कर सकता है।',
+			'profilePage.certificateShare' => 'प्रमाणपत्र साझा करें',
+			'profilePage.certificateShareQr' => 'QR कोड साझा करें',
+			'profilePage.certificateShareBody' => ({required Object level}) => 'I earned my Lingola ${level} certificate!',
+			'profilePage.certificateShareSubject' => ({required Object level}) => 'Lingola ${level} Certificate',
+			'profilePage.certificateProvidedBy' => 'Certificate provided by',
+			'profilePage.certificatePreviewBody' => 'जब आप Lingola पर CEFR स्तर पूरा करेंगे, तो आपका प्रमाणपत्र यहाँ दिखेगा — आपके नाम, स्तर और सत्यापन के लिए QR कोड के साथ।',
+			'profilePage.certificatePreviewHint' => 'अपना प्रमाणपत्र अनलॉक करने के लिए एक स्तर पथ पूरा करें',
+			'profilePage.certificateTapToView' => 'प्रमाणपत्र देखने और साझा करने के लिए टैप करें',
 			'pushNotifications.title' => 'Lingola',
 			'pushNotifications.h2.0' => 'लगता है आपने थोड़ी देर का ब्रेक लिया।',
 			'pushNotifications.h2.1' => 'क्या आपके पास एक शब्द के लिए एक पल है?',
@@ -2111,6 +2270,37 @@ extension on TranslationsHi {
 			'pushNotifications.h24.2' => 'आपका स्थान ठीक वहीं है जहाँ आपने छोड़ा था।',
 			'pushNotifications.h24.3' => 'जब चाहें जारी रखें।',
 			'pushNotifications.h24.4' => 'भाषा भाग नहीं जाएगी — न ही हम।',
+			'pushNotifications.lessonReminderTitle' => 'Today\'s lesson is waiting',
+			'pushNotifications.lessonReminder.0' => 'You haven\'t opened today\'s lesson yet — even 5 minutes counts.',
+			'pushNotifications.lessonReminder.1' => 'Your tutor is ready. Pick up where you left off.',
+			'pushNotifications.lessonReminder.2' => 'A short lesson today keeps your rhythm going.',
+			'pushNotifications.lessonReminder.3' => 'Today\'s lesson is still open — want to jump in?',
+			'pushNotifications.quizReminderTitle' => 'Ready for a quick quiz?',
+			'pushNotifications.quizReminderWords' => ({required Object count, required Object savedCount}) => 'You learned ${count} words recently — want a quiz? ${savedCount} saved words are waiting.',
+			'pushNotifications.quizReminderSaved' => ({required Object savedCount}) => '${savedCount} saved words are waiting for review.',
+			'pushNotifications.quizReminder.0' => 'It\'s been a while since your last quiz — a 3-minute review could help.',
+			'pushNotifications.quizReminder.1' => 'Your saved words miss you. A quick quiz?',
+			'pushNotifications.quizReminder.2' => 'Test what you remember — it only takes a few minutes.',
+			'pushNotifications.quizReminder.3' => 'A short quiz now makes tomorrow easier.',
+			'pushNotifications.eveningLessonTitle' => 'Don\'t miss today\'s practice',
+			'pushNotifications.eveningLesson.0' => 'You haven\'t studied today yet. One short lesson keeps the habit alive.',
+			'pushNotifications.eveningLesson.1' => 'Before the day ends — a quick lesson with your tutor?',
+			'pushNotifications.eveningLesson.2' => 'There\'s still time for a 5-minute English session today.',
+			'pushNotifications.eveningLesson.3' => 'Your daily lesson is waiting. Shall we start?',
+			'pushNotifications.streakReminderTitle' => 'Keep your streak',
+			'pushNotifications.streakReminder' => ({required Object streak}) => 'You\'re on a ${streak}-day streak — a short lesson today keeps it alive.',
+			'apiErrors.unauthorized' => 'Please sign in again.',
+			'apiErrors.notFound' => 'We couldn\'t find what you were looking for.',
+			'apiErrors.validationFailed' => 'Please check your input and try again.',
+			'apiErrors.nameRequired' => 'Name cannot be empty.',
+			'apiErrors.imageRequired' => 'Please choose a photo to upload.',
+			'apiErrors.avatarInvalidType' => 'Only JPEG, PNG, or WebP photos are allowed.',
+			'apiErrors.avatarEmpty' => 'The selected photo is empty.',
+			'apiErrors.avatarTooLarge' => 'Photo is too large (max 5 MB).',
+			'apiErrors.notificationsRequired' => 'Notification preference is required.',
+			'apiErrors.premiumRequired' => 'Premium is required for this lesson.',
+			'apiErrors.levelRequired' => 'Complete earlier lessons to unlock this level.',
+			'apiErrors.internalError' => 'Something went wrong. Please try again.',
 			_ => null,
 		};
 	}

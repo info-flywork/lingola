@@ -484,13 +484,13 @@ class _SpeakerVisual extends StatelessWidget {
       children: [
         Positioned(
           left: 82.5,
-          top: 200,
+          top: 230,
           width: 265,
           height: 404,
           child: LocalPicture(
-            'onboarding_speaker.png',
+            'onboarding/onboarding_speaker.png',
             fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
+            alignment: const Alignment(0, 0.22),
           ),
         ),
         Positioned(
@@ -500,7 +500,7 @@ class _SpeakerVisual extends StatelessWidget {
           height: 73,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: const Color(0x33B7B7B7),
+              color: const Color(0xFFB7B7B7).withValues(alpha: 0.20),
               border: Border.all(color: const Color(0xFFB6B6B6)),
               borderRadius: BorderRadius.circular(50),
             ),
@@ -508,14 +508,23 @@ class _SpeakerVisual extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(11, 9, 14, 8),
               child: Row(
                 children: [
-                  const ClipOval(
-                    child: SizedBox(
-                      width: 51,
-                      height: 51,
-                      child: LocalPicture(
-                        'onboarding/testimonial_avatar.png',
-                        fit: BoxFit.cover,
-                        alignment: Alignment.topCenter,
+                  Container(
+                    width: 51,
+                    height: 51,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF78CAD2),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: ClipOval(
+                      child: SizedBox(
+                        width: 47,
+                        height: 47,
+                        child: LocalPicture(
+                          'onboarding/testimonial_avatar_figma.png',
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                        ),
                       ),
                     ),
                   ),
@@ -533,9 +542,11 @@ class _SpeakerVisual extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
+                                  fontFamily: 'Poppins',
                                   fontSize: 12,
-                                  height: 1,
+                                  height: 12 / 12,
                                   fontWeight: FontWeight.w500,
+                                  color: Colors.black,
                                 ),
                               ),
                             ),
@@ -546,7 +557,7 @@ class _SpeakerVisual extends StatelessWidget {
                                 const Icon(
                                   Icons.star_rounded,
                                   color: Color(0xFFFF8848),
-                                  size: 13,
+                                  size: 12.75,
                                 ),
                               ),
                             ),
@@ -558,6 +569,7 @@ class _SpeakerVisual extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
+                            fontFamily: 'Poppins',
                             color: Color(0x99000000),
                             fontSize: 12,
                             height: 16 / 12,

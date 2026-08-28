@@ -9,6 +9,7 @@ import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
+import '../../widgets/chat_word_chip.dart';
 import '../lesson/lesson_session_result.dart';
 import 'services/openai_chat_service.dart';
 import 'services/tutor_chat_api_service.dart';
@@ -555,7 +556,7 @@ class _IncomingBubbleState extends State<_IncomingBubble> {
     });
 
     try {
-      final tr = await OpenAiChatService().translateToTurkish(clean);
+      final tr = await OpenAiChatService().translateToNative(clean);
       if (!mounted || _selectedClean != clean) return;
       final trimmed = tr.trim();
       setState(() {
@@ -630,17 +631,31 @@ class _IncomingBubbleState extends State<_IncomingBubble> {
         display = _translatedDisplay!;
       }
 
+      if (selected) {
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Padding(
+              padding: EdgeInsets.only(right: space.isEmpty ? 0 : 4),
+              child: ChatWordChip(
+                label: display,
+                fontSize: 13,
+                onTap: () => _onWordTap(word),
+              ),
+            ),
+          ),
+        );
+        if (space.isNotEmpty) {
+          spans.add(TextSpan(text: space, style: baseStyle));
+        }
+        continue;
+      }
+
       spans.add(
         TextSpan(
           text: '$display$space',
           recognizer: recognizer,
-          style: selected
-              ? baseStyle.copyWith(
-                  color: Colors.white,
-                  backgroundColor: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                )
-              : baseStyle,
+          style: baseStyle,
         ),
       );
     }
@@ -666,10 +681,9 @@ class _IncomingBubbleState extends State<_IncomingBubble> {
         Flexible(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
+            decoration: chatBubbleDecoration(
+              wordSelected: _selectedClean != null,
+              radius: 16,
             ),
             child: Text.rich(
               TextSpan(children: _buildWordSpans()),

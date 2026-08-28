@@ -7,6 +7,7 @@ import '../../core/auth/auth_service.dart';
 import '../../core/auth/session_store.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/errors/api_error_localizer.dart';
 import '../../core/theme/app_theme.dart';
 import '../../i18n/strings.g.dart';
 import '../../widgets/app_widgets.dart';
@@ -79,10 +80,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     FocusScope.of(context).unfocus();
     if (_saving || _loading) return;
 
+    final text = AppText.current.profilePage;
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Name cannot be empty')),
+        SnackBar(content: Text(text.nameCannotBeEmpty)),
       );
       return;
     }
@@ -93,13 +95,13 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       if (!mounted) return;
       _hydrateFrom(updated);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile saved')),
+        SnackBar(content: Text(text.profileSaved)),
       );
       Navigator.of(context).maybePop(true);
     } catch (err) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save profile: $err')),
+        SnackBar(content: Text(ApiErrorLocalizer.message(err))),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -108,6 +110,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
   Future<void> _pickAndUploadAvatar() async {
     if (_uploadingAvatar || _loading) return;
+    final text = AppText.current.profilePage;
     final picker = ImagePicker();
     final file = await picker.pickImage(
       source: ImageSource.gallery,
@@ -133,12 +136,12 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       if (!mounted) return;
       setState(() => _hydrateFrom(user));
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile photo updated')),
+        SnackBar(content: Text(text.profilePhotoUpdated)),
       );
     } catch (err) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Photo upload failed: $err')),
+        SnackBar(content: Text(ApiErrorLocalizer.message(err))),
       );
     } finally {
       if (mounted) setState(() => _uploadingAvatar = false);

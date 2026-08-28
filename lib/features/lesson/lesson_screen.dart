@@ -1,13 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/auth/api_client.dart';
+import '../../core/auth/auth_service.dart';
+import '../../core/auth/app_user.dart';
+import '../../core/auth/session_store.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
+import '../../core/i18n/app_locale_sync.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/premium/premium_service.dart';
+import '../../core/notifications/notification_activity_store.dart';
 import '../../core/theme/app_theme.dart';
 import '../../i18n/strings.g.dart';
 import '../tutor/calling_screen.dart';
@@ -15,9 +22,13 @@ import '../tutor/chat_screen.dart';
 import '../tutor/services/tutor_api_service.dart';
 import '../tutor/tutor_scene_theme.dart';
 import 'lesson_api_service.dart';
+import 'lesson_badge.dart';
 import 'lesson_curriculum.dart';
 import 'lesson_notes_screen.dart';
 import 'lesson_session_result.dart';
+import '../onboarding/language_flag.dart';
+import '../shell/main_shell.dart';
+import '../../widgets/user_avatar.dart';
 import 'lesson_tutor_sheet.dart';
 
 class LessonScreen extends StatefulWidget {
@@ -270,6 +281,8 @@ class _LessonScreenState extends State<LessonScreen> {
       );
       if (!mounted) return;
 
+      unawaited(NotificationActivityStore.recordLesson());
+
       final tutorName = _tutorName(choice.tutor);
       final image = _resolveTutorImage(choice.tutor, start.tutorImage);
       final priorElapsed = Duration(seconds: start.lessonElapsedSeconds);
@@ -327,6 +340,11 @@ class _LessonScreenState extends State<LessonScreen> {
               tutorSlug: choice.tutor.slug.isNotEmpty
                   ? choice.tutor.slug
                   : start.tutorSlug,
+              lessonSlug: slug,
+              lessonBadge: LessonBadge.fromSlug(
+                slug: slug,
+                fallbackTitle: label,
+              ),
             ),
           ),
         );
@@ -719,75 +737,84 @@ class _LessonHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(21, 12, 21, 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: .04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Semantics(
-                label: text.lessonPage.profile,
-                child: Container(
-                  width: 43,
-                  height: 43,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF2F2F2),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFE5E5E5)),
+    return ValueListenableBuilder<AppLocale>(
+      valueListenable: AppLocaleSync.localeChanges,
+      builder: (context, locale, _) {
+        return ValueListenableBuilder<AppUser?>(
+          valueListenable: SessionStore.userListenable,
+          builder: (context, user, _) {
+            final effective = user ?? SessionStore.currentUser;
+            final name = AuthService.displayNameOf(effective);
+            final avatarUrl = effective?.avatarUrl?.trim() ?? '';
+
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(21, 12, 21, 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(24)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .04),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
-                  child: const Icon(
-                    Icons.person_outline_rounded,
-                    color: Color(0xFF9A9A9A),
-                  ),
-                ),
+                ],
               ),
-              const Spacer(),
-              Semantics(
-                label: text.lessonPage.language,
-                child: Container(
-                  width: 33,
-                  height: 33,
-                  padding: const EdgeInsets.all(6),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF5F5F5),
-                    shape: BoxShape.circle,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => MainShell.goToProfile(context),
+                        child: Semantics(
+                          button: true,
+                          label: text.lessonPage.profile,
+                          child: UserAvatar(
+                            size: 43,
+                            avatarUrl: avatarUrl,
+                            displayName: name,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      Semantics(
+                        label: text.lessonPage.language,
+                        child: Container(
+                          width: 33,
+                          height: 33,
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF5F5F5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: LanguageFlag.badge(
+                            locale.languageCode,
+                            size: 21,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  child: ClipOval(
-                    child: SvgPicture.asset(
-                      'assets/images/flags/en.svg',
-                      fit: BoxFit.cover,
+                  const SizedBox(height: 18),
+                  Text(
+                    text.lessonPage.title,
+                    style: const TextStyle(
+                      color: AppColors.ink,
+                      fontFamily: 'Poppins',
+                      fontSize: 28,
+                      height: 36 / 28,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Text(
-            text.lessonPage.title,
-            style: const TextStyle(
-              color: AppColors.ink,
-              fontFamily: 'Poppins',
-              fontSize: 28,
-              height: 36 / 28,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

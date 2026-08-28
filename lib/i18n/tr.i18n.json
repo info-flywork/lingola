@@ -17,6 +17,20 @@
     "genericError": "Bir şeyler ters gitti. Lütfen tekrar dene.",
     "tryAgain": "Tekrar dene"
   },
+  "apiErrors": {
+    "unauthorized": "Lütfen tekrar giriş yap.",
+    "notFound": "Aradığın içerik bulunamadı.",
+    "validationFailed": "Lütfen bilgilerini kontrol edip tekrar dene.",
+    "nameRequired": "İsim boş olamaz.",
+    "imageRequired": "Lütfen yüklenecek bir fotoğraf seç.",
+    "avatarInvalidType": "Yalnızca JPEG, PNG veya WebP fotoğraflar kabul edilir.",
+    "avatarEmpty": "Seçilen fotoğraf boş.",
+    "avatarTooLarge": "Fotoğraf çok büyük (en fazla 5 MB).",
+    "notificationsRequired": "Bildirim tercihi gerekli.",
+    "premiumRequired": "Bu ders için Premium gerekli.",
+    "levelRequired": "Bu seviyeyi açmak için önceki dersleri tamamla.",
+    "internalError": "Bir şeyler ters gitti. Lütfen tekrar dene."
+  },
   "onboarding": {
     "pageA11y": "Eğitim sayfası $current / $total",
     "slide1": {
@@ -65,7 +79,7 @@
   "language": {
     "step": "Adım $current / $total",
     "title": "Ne hakkında konuşmak istersin?",
-    "nativeSection": "Ben konuşuyorum",
+    "nativeSection": "Anadilim",
     "nativeField": "Ana dil",
     "nativeName": "Türkçe",
     "targetSection": "Öğrenmek istiyorum",
@@ -270,7 +284,7 @@
     "body": "Senin için odaklanmış bir $tab deneyimi hazırlıyoruz."
   },
   "tutorPage": {
-    "title": "Öğretmen",
+    "title": "Eğitmen",
     "chatWithLingola": "Lingola ile Sohbet Et",
     "chatWithTutor": "$name ile Sohbet Et",
     "chatHistory": "Sohbet Geçmişi",
@@ -281,7 +295,8 @@
     "moreCountries": "8+ daha",
     "moreFocus": "+8",
     "save": "KAYDET",
-    "startTalkNow": "Şimdi Sohbete Başla",
+    "clearFilter": "Filtreyi kaldır",
+    "startTalkNow": "Sohbete Başla",
     "typeMessage": "Bir mesaj yaz...",
     "speaker": "Konuşmacı",
     "messagesCount": "12",
@@ -339,6 +354,7 @@
     },
     "calling": {
       "lessonBadge": "Ders 1 : Selamlaşmalar",
+      "lessonBadgeFormat": "Ders $number : $title",
       "nativeLine": "Sıkıldın mı?",
       "englishLine": "Sıkıldın mı? O kelimeyi kelime dağarcığımdan sildim. Kalk, plan hazır: Kadıköy'deki o yeni oyun barına gidiyoruz.",
       "highlight": "Sıkıldın mı?",
@@ -708,7 +724,32 @@
       "Kaldığın yer duruyor.",
       "Ne zaman istersen devam edebilirsin.",
       "Dil kaçmaz, biz de."
-    ]
+    ],
+    "lessonReminderTitle": "Bugünün dersi seni bekliyor",
+    "lessonReminder": [
+      "Bugün henüz derse girmedin — 5 dakika bile yeter.",
+      "Hocan hazır. Kaldığın yerden devam et.",
+      "Kısa bir ders bugün ritmini korur.",
+      "Bugünkü ders hâlâ açık — başlamak ister misin?"
+    ],
+    "quizReminderTitle": "Kısa bir quiz yapalım mı?",
+    "quizReminderWords": "Son zamanlarda $count kelime öğrendin — quiz yapmak ister misin? $savedCount kayıtlı kelime seni bekliyor.",
+    "quizReminderSaved": "$savedCount kayıtlı kelime gözden geçirmeyi bekliyor.",
+    "quizReminder": [
+      "Bir süredir quiz yapmadın — 3 dakikalık tekrar iyi gelir.",
+      "Kayıtlı kelimelerin seni özledi. Hızlı bir quiz?",
+      "Ne kadar hatırladığını test et — sadece birkaç dakika.",
+      "Şimdi kısa bir quiz, yarını kolaylaştırır."
+    ],
+    "eveningLessonTitle": "Bugünkü pratiği kaçırma",
+    "eveningLesson": [
+      "Bugün henüz çalışmadın. Kısa bir ders alışkanlığı korur.",
+      "Gün bitmeden — hocanla hızlı bir ders?",
+      "Bugün hâlâ 5 dakikalık bir İngilizce seansı için vakit var.",
+      "Günlük dersin bekliyor. Başlayalım mı?"
+    ],
+    "streakReminderTitle": "Serini koru",
+    "streakReminder": "$streak günlük seridesin — bugün kısa bir ders serini canlı tutar."
   },
   "notificationsPage": {
     "title": "Bildirimler",
@@ -727,7 +768,21 @@
     "stories": {
       "title": "Yeni Hikayeleri Keşfedin",
       "body": "Hikayeler aracılığıyla yeni kelimeler öğrenin"
-    }
+    },
+    "practice": {
+      "title": "Günlük pratiğin seni bekliyor",
+      "body": "5 dakikada kelime, okuma veya konuşma egzersizi yap."
+    },
+    "streak": {
+      "title": "Serini koru",
+      "body": "Bugün kısa bir oturum gün serini korur ve alışkanlığı güçlendirir."
+    },
+    "premium": {
+      "title": "Tüm hocalar ve dersler açılsın",
+      "body": "Premium ile sınırsız ders, rol oynama ve AI hocalara eriş."
+    },
+    "emptyTitle": "Henüz bildirim yok",
+    "emptySubtitle": "Bildirim aldığında tekrar kontrol etmeyi unutma."
   },
   "profilePage": {
     "title": "Profil",
@@ -741,6 +796,13 @@
     "email": "E-posta",
     "deleteAccount": "Hesabı Sil",
     "save": "KAYDET",
+    "profileSaved": "Profil kaydedildi",
+    "profilePhotoUpdated": "Profil fotoğrafı güncellendi",
+    "nameCannotBeEmpty": "İsim boş olamaz",
+    "profileSaveFailed": "Profil kaydedilemedi",
+    "photoUploadFailed": "Fotoğraf yüklenemedi",
+    "notificationsUpdateFailed": "Bildirimler güncellenemedi",
+    "notificationsPermissionDenied": "Hatırlatıcı almak için cihaz ayarlarından bildirimlere izin ver.",
     "deleteTitle": "Gitmeni istemiyoruz ama seni anlıyoruz.",
     "deleteBody": "Lingola deneyimini iyileştirmemiz için bize neden ayrılmak istediğini söyler misin?",
     "deleteReasons": {
@@ -861,6 +923,30 @@
       "fri": "CUM",
       "sat": "CMT",
       "sun": "PZR"
-    }
+    },
+    "certificateTitle": "Sertifikanız",
+    "certificateLevelTitle": "$level Sertifikası",
+    "certificateOf": "Başarı Sertifikası",
+    "certificateCertifiesThat": "Bu belge, aşağıda adı geçen kişinin",
+    "certificatePathway": "Lingola İngilizce Yolu",
+    "certificateAwardedTo": "Verilen kişi",
+    "certificateCompleted": "başarıyla tamamlamıştır",
+    "certificateCompletedDetail": "Lingola İngilizce Yeterlilik Programını başarıyla tamamlamış ve aşağıdaki seviyede sertifika almaya hak kazanmıştır:",
+    "certificateLevelLine": "İngilizce Seviyesi — CEFR $level",
+    "certificateIssued": "Veriliş tarihi: $date",
+    "certificateDateOfCompletion": "Tamamlanma Tarihi",
+    "certificateIdLabel": "Sertifika No",
+    "certificateVerify": "Sertifikayı doğrulamak için tarayın",
+    "certificateVerifyAuthenticity": "DOĞRULAMA",
+    "certificateScanOrVisit": "QR kodu tarayın veya bağlantıyı ziyaret ederek doğrulayın.",
+    "certificateVerifyHint": "QR kodu tarayan herkes başarınızı doğrulayabilir.",
+    "certificateShare": "Sertifikayı Paylaş",
+    "certificateShareQr": "QR Kodunu Paylaş",
+    "certificateShareBody": "Lingola $level sertifikamı kazandım!",
+    "certificateShareSubject": "Lingola $level Sertifikası",
+    "certificateProvidedBy": "Sertifika sağlayıcı",
+    "certificatePreviewBody": "Lingola'da bir CEFR seviyesini tamamladığınızda sertifikanız burada görünecek — adınız, seviyeniz ve doğrulanabilir QR kodu ile.",
+    "certificatePreviewHint": "Sertifikanızı açmak için bir seviye yolunu tamamlayın",
+    "certificateTapToView": "Sertifikanızı görüntülemek ve paylaşmak için dokunun"
   }
 }

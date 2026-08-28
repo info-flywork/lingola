@@ -7,13 +7,16 @@ import 'app_user.dart';
 import 'session_store.dart';
 
 class ApiException implements Exception {
-  ApiException(this.message, {this.statusCode, this.debugDetail});
+  ApiException(this.message, {this.statusCode, this.debugDetail, this.code});
 
   final String message;
   final int? statusCode;
 
   /// Developer-only context (base URL, Dio error). Never shown to the user.
   final String? debugDetail;
+
+  /// Stable backend error code for localization.
+  final String? code;
 
   @override
   String toString() => message;
@@ -149,6 +152,7 @@ abstract final class ApiClient {
         throw ApiException(
           data['error'] as String? ?? err.message ?? 'Request failed',
           statusCode: status,
+          code: data['code'] as String?,
         );
       }
       final isOffline = err.type == DioExceptionType.connectionError ||
@@ -218,6 +222,7 @@ abstract final class ApiClient {
       throw ApiException(
         json['error'] as String? ?? 'Request failed',
         statusCode: status,
+        code: json['code'] as String?,
       );
     }
     return json;

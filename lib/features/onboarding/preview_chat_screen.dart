@@ -121,6 +121,7 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
       speedLabel: text.speed,
       lessonBadge: text.lessonBadge,
       typeMessageHint: text.typeMessage,
+      nativeLanguageCode: widget.draft.nativeLanguageCode,
       onSendAsync: canChat ? _sendToBackend : null,
       busy: _loading,
       errorText: _error,

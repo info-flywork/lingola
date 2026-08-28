@@ -9,15 +9,19 @@ import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/i18n/app_locale_sync.dart';
+import '../../i18n/strings.g.dart';
 import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
 import '../../widgets/user_avatar.dart';
+import '../lesson/lesson_badge.dart';
 import '../lesson/lesson_screen.dart';
 import '../library/library_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../notifications/notifications_unread_store.dart';
 import '../practice/word_practice_screen.dart';
 import '../profile/progress_screen.dart';
+import '../onboarding/language_flag.dart';
 import '../profile/select_language_screen.dart';
 import '../streak/streak_api_service.dart';
 import '../quiz/quiz_screen.dart';
@@ -33,30 +37,33 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  bool _heavyContentReady = false;
-  HomeRemoteData? _remoteData;
+  HomeRemoteData? _remoteData = HomeDataService.cached;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _loadRemoteData();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      setState(() => _heavyContentReady = true);
-    });
+    NotificationsUnreadStore.unreadCount.addListener(_onUnreadChanged);
+    unawaited(NotificationsUnreadStore.refresh());
+    unawaited(_loadRemoteData());
   }
 
   @override
   void dispose() {
+    NotificationsUnreadStore.unreadCount.removeListener(_onUnreadChanged);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  void _onUnreadChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(_loadRemoteData());
+      unawaited(NotificationsUnreadStore.refresh());
     }
   }
 
@@ -119,69 +126,57 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     onContinue: _onContinueTap,
                   ),
                 ),
-                if (!_heavyContentReady)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 48),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  )
-                else ...[
-                  const SizedBox(height: 16),
-                  _LearningPathSection(
-                    title: text.home.learningPath,
-                    action: text.home.allLessons,
-                    scrollLabel: text.home.scroll,
-                    pathNodes: _remoteData?.pathNodes,
-                  ),
-                  const SizedBox(height: 16),
-                  _LiveLessonSection(
-                    title: text.home.liveLesson,
-                    subtitle: text.home.liveLessonSubtitle,
-                    action: text.home.moreTutor,
-                    tutors: _remoteData?.tutors,
-                    continueData: _remoteData?.continueData,
-                    onResumeWithTutor: (slug) async {
-                      final data = _remoteData?.continueData;
-                      if (data == null || data.slug.isEmpty) return false;
-                      MainShell.goToLessons(context);
-                      await Future<void>.delayed(
-                        const Duration(milliseconds: 120),
-                      );
-                      if (!mounted) return true;
-                      await LessonScreen.resumeFromHome(
-                        slug: data.slug,
-                        label: data.lessonLabel,
-                        forceTutorSlug: slug,
-                      );
-                      if (!mounted) return true;
-                      await _loadRemoteData();
-                      return true;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: PremiumService.isPremiumListenable,
-                    builder: (context, isPremium, _) {
-                      if (isPremium) return const SizedBox.shrink();
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: _PremiumCard(),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _MoreFeaturesSection(title: text.home.moreFeatures),
-                  const SizedBox(height: 16),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: _LibraryBanner(),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                const SizedBox(height: 16),
+                _LearningPathSection(
+                  title: text.home.learningPath,
+                  action: text.home.allLessons,
+                  scrollLabel: text.home.scroll,
+                  pathNodes: _remoteData?.pathNodes,
+                ),
+                const SizedBox(height: 16),
+                _LiveLessonSection(
+                  title: text.home.liveLesson,
+                  subtitle: text.home.liveLessonSubtitle,
+                  action: text.home.moreTutor,
+                  tutors: _remoteData?.tutors,
+                  continueData: _remoteData?.continueData,
+                  onResumeWithTutor: (slug) async {
+                    final data = _remoteData?.continueData;
+                    if (data == null || data.slug.isEmpty) return false;
+                    MainShell.goToLessons(context);
+                    await Future<void>.delayed(
+                      const Duration(milliseconds: 120),
+                    );
+                    if (!mounted) return true;
+                    await LessonScreen.resumeFromHome(
+                      slug: data.slug,
+                      label: data.lessonLabel,
+                      forceTutorSlug: slug,
+                    );
+                    if (!mounted) return true;
+                    await _loadRemoteData();
+                    return true;
+                  },
+                ),
+                const SizedBox(height: 16),
+                ValueListenableBuilder<bool>(
+                  valueListenable: PremiumService.isPremiumListenable,
+                  builder: (context, isPremium, _) {
+                    if (isPremium) return const SizedBox.shrink();
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: _PremiumCard(),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                _MoreFeaturesSection(title: text.home.moreFeatures),
+                const SizedBox(height: 16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: _LibraryBanner(),
+                ),
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -218,8 +213,7 @@ class _LearningPathSection extends StatelessWidget {
             onActionTap: goLessons,
           ),
         ),
-        // Yildizlar All Lessons butonuna degmesin.
-        const SizedBox(height: 20),
+        const SizedBox(height: 25),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: _LearningPathMap(
@@ -471,33 +465,74 @@ class _HomeHeaderState extends State<_HomeHeader> {
                         await AuthService.updateProfile(appLocale: code);
                       } catch (_) {}
                     },
-                    child: const _TopIconBadge(
-                      child: HomeAsset(
-                        'assets/images/home/flag_icon.svg',
-                        width: 21,
-                        height: 21,
-                      ),
+                    child: ValueListenableBuilder<AppLocale>(
+                      valueListenable: AppLocaleSync.localeChanges,
+                      builder: (context, locale, _) {
+                        return _TopIconBadge(
+                          child: LanguageFlag.badge(
+                            locale.languageCode,
+                            size: 22,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(width: 10),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
+                    onTap: () async {
+                      await Navigator.of(context).push<void>(
                         MaterialPageRoute<void>(
                           builder: (_) => const NotificationsScreen(),
                         ),
                       );
+                      if (!mounted) return;
+                      await NotificationsUnreadStore.refresh();
                     },
-                    child: _TopIconBadge(
-                      child: Semantics(
-                        button: true,
-                        label: text.app.notifications,
-                        child: const HomeAsset(
-                          'assets/images/home/notification_icon.svg',
-                          width: 15,
-                          height: 17,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        _TopIconBadge(
+                          child: Semantics(
+                            button: true,
+                            label: text.app.notifications,
+                            child: const HomeAsset(
+                              'assets/images/home/notification_icon.svg',
+                              width: 15,
+                              height: 17,
+                            ),
+                          ),
                         ),
-                      ),
+                        if (NotificationsUnreadStore.unreadCount.value > 0)
+                          Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 2,
+                              ),
+                              constraints: const BoxConstraints(minWidth: 16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF3B30),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(color: Colors.white, width: 1.5),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                NotificationsUnreadStore.unreadCount.value > 9
+                                    ? '9+'
+                                    : '${NotificationsUnreadStore.unreadCount.value}',
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 9,
+                                  height: 1,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -554,7 +589,7 @@ class _ContinueConversationCard extends StatelessWidget {
     final lessonLabel = data?.lessonLabel ?? text.home.lessonProgress;
     final remaining = data?.remainingMinutes ?? data?.totalMinutes ?? 15;
     final total = data?.totalMinutes ?? 15;
-    final progressFactor = data?.progressFactor ?? 0.05;
+    final progressFactor = data?.progressFactor ?? 0.0;
     final timeCurrent = text.home.minutesLeft(value: remaining);
     final timeTotal = '/ ${total}min';
     // Figma: 398×138, pad dikey 10, gap 10; üst satır space-between
@@ -796,7 +831,7 @@ class _LearningPathMap extends StatelessWidget {
   static const _designHeight = 425.0;
 
   static const _layout = <({double left, double top, _PathLabelSide side})>[
-    (left: 65, top: 30, side: _PathLabelSide.right),
+    (left: 65, top: 20, side: _PathLabelSide.right),
     (left: 278, top: -12, side: _PathLabelSide.below),
     (left: 278, top: 115, side: _PathLabelSide.left),
     (left: 65, top: 204, side: _PathLabelSide.right),
@@ -1164,6 +1199,13 @@ class _LiveTutorCarousel extends StatelessWidget {
                 if (handled) return;
               }
               if (!context.mounted) return;
+              final data = continueData;
+              final lessonBadge = data != null && data.slug.isNotEmpty
+                  ? LessonBadge.fromSlug(
+                      slug: data.slug,
+                      fallbackTitle: data.lessonLabel,
+                    )
+                  : null;
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => CallingScreen(
@@ -1176,6 +1218,8 @@ class _LiveTutorCarousel extends StatelessWidget {
                       preferred: tutor.voiceId,
                     ),
                     tutorSlug: tutor.slug,
+                    lessonSlug: data?.slug,
+                    lessonBadge: lessonBadge,
                   ),
                 ),
               );

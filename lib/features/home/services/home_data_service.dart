@@ -79,6 +79,10 @@ class HomeRemoteData {
 
 abstract final class HomeDataService {
   static const _estimatedLessonMinutes = 15;
+  static HomeRemoteData? _cached;
+
+  /// Son başarılı home yanıtı — açılışta path anında görünsün.
+  static HomeRemoteData? get cached => _cached;
 
   /// Home learning path preview slots — Figma layout order, not catalog order.
   static const _previewSlots = <({String asset, int a1Index})>[
@@ -105,11 +109,13 @@ abstract final class HomeDataService {
         ...tutors.map((t) => t.remoteRiveUrl),
       ]);
 
-      return HomeRemoteData(
+      final data = HomeRemoteData(
         continueData: _buildContinue(path, text),
         pathNodes: _buildPathPreview(path, text),
         tutors: _buildTutors(tutors, text),
       );
+      _cached = data;
+      return data;
     } catch (_) {
       return null;
     }
@@ -160,7 +166,7 @@ abstract final class HomeDataService {
     final elapsedSeconds = current.elapsedSeconds;
     final elapsed = current.elapsedMinutes;
     final remaining = current.remainingMinutes;
-    final progressFactor = (elapsedSeconds / (15 * 60)).clamp(0.05, 1.0);
+    final progressFactor = (elapsedSeconds / (15 * 60)).clamp(0.0, 1.0);
 
     return HomeContinueData(
       lessonLabel: title,

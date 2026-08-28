@@ -72,33 +72,33 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
-    final text = AppText.current;
-    final labels = [
-      text.nav.home,
-      text.nav.tutor,
-      text.nav.lesson,
-      text.nav.rolePlay,
-      text.nav.profile,
-    ];
+    return ValueListenableBuilder<AppLocale>(
+      valueListenable: AppLocaleSync.localeChanges,
+      builder: (context, locale, _) {
+        final text = AppText.current;
+        final labels = [
+          text.nav.home,
+          text.nav.tutor,
+          text.nav.lesson,
+          text.nav.rolePlay,
+          text.nav.profile,
+        ];
+        final localeKey = locale.languageCode;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        // Açık #F5F6FA zemin → koyu saat / wifi / şarj ikonları
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-        systemNavigationBarColor: Colors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        backgroundColor: AppColors.surface,
-        body: SafeArea(
-          bottom: false,
-          child: ValueListenableBuilder<AppLocale>(
-            valueListenable: AppLocaleSync.localeChanges,
-            builder: (context, locale, _) {
-              final localeKey = locale.languageCode;
-              return IndexedStack(
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            // Açık #F5F6FA zemin → koyu saat / wifi / şarj ikonları
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+            systemNavigationBarColor: Colors.white,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          ),
+          child: Scaffold(
+            backgroundColor: AppColors.surface,
+            body: SafeArea(
+              bottom: false,
+              child: IndexedStack(
                 index: _index,
                 children: [
                   HomeScreen(key: ValueKey('home-$localeKey')),
@@ -107,40 +107,40 @@ class _MainShellState extends State<MainShell> {
                   RolePlayScreen(key: ValueKey('roleplay-$localeKey')),
                   ProfileScreen(key: ValueKey('profile-$localeKey')),
                 ],
-              );
-            },
-          ),
-        ),
-        bottomNavigationBar: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              top: BorderSide(color: Colors.black.withValues(alpha: .05)),
+              ),
             ),
-          ),
-          child: SafeArea(
-            top: false,
-            child: SizedBox(
-              height: 73,
-              child: Row(
-                children: List.generate(labels.length, (index) {
-                  final active = _index == index;
-                  final icons = _iconSets[index];
-                  return Expanded(
-                    child: _NavItem(
-                      label: labels[index],
-                      active: active,
-                      activeIcon: icons.$1,
-                      inactiveIcon: icons.$2,
-                      onTap: () => setState(() => _index = index),
-                    ),
-                  );
-                }),
+            bottomNavigationBar: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(color: Colors.black.withValues(alpha: .05)),
+                ),
+              ),
+              child: SafeArea(
+                top: false,
+                child: SizedBox(
+                  height: 73,
+                  child: Row(
+                    children: List.generate(labels.length, (index) {
+                      final active = _index == index;
+                      final icons = _iconSets[index];
+                      return Expanded(
+                        child: _NavItem(
+                          label: labels[index],
+                          active: active,
+                          activeIcon: icons.$1,
+                          inactiveIcon: icons.$2,
+                          onTap: () => setState(() => _index = index),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

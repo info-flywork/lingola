@@ -87,7 +87,7 @@ class QuizScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     _QuizOptionCard(
                       iconAsset: AppAssets.quizBook,
-                      iconBg: const Color(0x1A2D46FF),
+                      brandPrimaryIcon: true,
                       title: text.readingTitle,
                       description: text.readingBody,
                       titleColor: AppColors.ink,
@@ -152,7 +152,8 @@ class QuizScreen extends StatelessWidget {
 class _QuizOptionCard extends StatelessWidget {
   const _QuizOptionCard({
     required this.iconAsset,
-    required this.iconBg,
+    this.iconBg,
+    this.brandPrimaryIcon = false,
     required this.title,
     required this.description,
     required this.titleColor,
@@ -163,7 +164,8 @@ class _QuizOptionCard extends StatelessWidget {
   });
 
   final String iconAsset;
-  final Color iconBg;
+  final Color? iconBg;
+  final bool brandPrimaryIcon;
   final String title;
   final String description;
   final Color titleColor;
@@ -192,15 +194,10 @@ class _QuizOptionCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: iconBg,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: HomeAsset(iconAsset, width: 32, height: 32),
+                  _QuizIconBadge(
+                    iconAsset: iconAsset,
+                    iconBg: iconBg,
+                    brandPrimary: brandPrimaryIcon,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -256,6 +253,37 @@ class _QuizOptionCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Quiz kartı sol ikon — yazma/konuşma ile aynı ölçü ve kenarlık.
+class _QuizIconBadge extends StatelessWidget {
+  const _QuizIconBadge({
+    required this.iconAsset,
+    this.iconBg,
+    this.brandPrimary = false,
+  });
+
+  final String iconAsset;
+  final Color? iconBg;
+  final bool brandPrimary;
+
+  static const _size = 52.0;
+  static const _radius = 10.0;
+  static const _iconPadding = 10.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _size,
+      height: _size,
+      padding: const EdgeInsets.all(_iconPadding),
+      decoration: BoxDecoration(
+        color: brandPrimary ? AppColors.primary : iconBg,
+        borderRadius: BorderRadius.circular(_radius),
+      ),
+      child: HomeAsset(iconAsset, width: 32, height: 32),
     );
   }
 }

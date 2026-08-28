@@ -17,6 +17,20 @@
     "genericError": "Something went wrong. Please try again.",
     "tryAgain": "Try again"
   },
+  "apiErrors": {
+    "unauthorized": "Please sign in again.",
+    "notFound": "We couldn't find what you were looking for.",
+    "validationFailed": "Please check your input and try again.",
+    "nameRequired": "Name cannot be empty.",
+    "imageRequired": "Please choose a photo to upload.",
+    "avatarInvalidType": "Only JPEG, PNG, or WebP photos are allowed.",
+    "avatarEmpty": "The selected photo is empty.",
+    "avatarTooLarge": "Photo is too large (max 5 MB).",
+    "notificationsRequired": "Notification preference is required.",
+    "premiumRequired": "Premium is required for this lesson.",
+    "levelRequired": "Complete earlier lessons to unlock this level.",
+    "internalError": "Something went wrong. Please try again."
+  },
   "onboarding": {
     "pageA11y": "Onboarding page $current of $total",
     "slide1": {
@@ -281,6 +295,7 @@
     "moreCountries": "8+ more",
     "moreFocus": "+8",
     "save": "SAVE",
+    "clearFilter": "Clear filters",
     "startTalkNow": "Start Talk Now",
     "typeMessage": "Type a message...",
     "speaker": "Speaker",
@@ -339,6 +354,7 @@
     },
     "calling": {
       "lessonBadge": "Lesson 1 : Greetings",
+      "lessonBadgeFormat": "Lesson $number : $title",
       "nativeLine": "Sıkıldın mı?",
       "englishLine": "Bored? I deleted that word from my vocabulary. Get up, the plan's already set: we're hitting that new arcade bar in Kadıköy.",
       "highlight": "Bored?",
@@ -708,7 +724,32 @@
       "Your place is right where you left it.",
       "Continue whenever you want.",
       "Language won't run away — neither will we."
-    ]
+    ],
+    "lessonReminderTitle": "Today's lesson is waiting",
+    "lessonReminder": [
+      "You haven't opened today's lesson yet — even 5 minutes counts.",
+      "Your tutor is ready. Pick up where you left off.",
+      "A short lesson today keeps your rhythm going.",
+      "Today's lesson is still open — want to jump in?"
+    ],
+    "quizReminderTitle": "Ready for a quick quiz?",
+    "quizReminderWords": "You learned $count words recently — want a quiz? $savedCount saved words are waiting.",
+    "quizReminderSaved": "$savedCount saved words are waiting for review.",
+    "quizReminder": [
+      "It's been a while since your last quiz — a 3-minute review could help.",
+      "Your saved words miss you. A quick quiz?",
+      "Test what you remember — it only takes a few minutes.",
+      "A short quiz now makes tomorrow easier."
+    ],
+    "eveningLessonTitle": "Don't miss today's practice",
+    "eveningLesson": [
+      "You haven't studied today yet. One short lesson keeps the habit alive.",
+      "Before the day ends — a quick lesson with your tutor?",
+      "There's still time for a 5-minute English session today.",
+      "Your daily lesson is waiting. Shall we start?"
+    ],
+    "streakReminderTitle": "Keep your streak",
+    "streakReminder": "You're on a $streak-day streak — a short lesson today keeps it alive."
   },
   "notificationsPage": {
     "title": "Notifications",
@@ -727,7 +768,21 @@
     "stories": {
       "title": "Discover New Stories",
       "body": "Learn new words through stories"
-    }
+    },
+    "practice": {
+      "title": "Your daily practice is waiting",
+      "body": "Spend 5 minutes on a quick word, reading, or speaking exercise."
+    },
+    "streak": {
+      "title": "Keep your streak alive",
+      "body": "A short session today protects your day streak and builds the habit."
+    },
+    "premium": {
+      "title": "Unlock all tutors & lessons",
+      "body": "Go Premium for unlimited lessons, role-play scenarios, and AI tutors."
+    },
+    "emptyTitle": "No notifications yet",
+    "emptySubtitle": "Don't forget to check again when you receive the notification."
   },
   "profilePage": {
     "title": "Profile",
@@ -741,6 +796,13 @@
     "email": "E-mail",
     "deleteAccount": "Delete Account",
     "save": "SAVE",
+    "profileSaved": "Profile saved",
+    "profilePhotoUpdated": "Profile photo updated",
+    "nameCannotBeEmpty": "Name cannot be empty",
+    "profileSaveFailed": "Could not save profile",
+    "photoUploadFailed": "Photo upload failed",
+    "notificationsUpdateFailed": "Could not update notifications",
+    "notificationsPermissionDenied": "Allow notifications in your device settings to get study reminders.",
     "deleteTitle": "Gitmeni istemiyoruz ama seni anlıyoruz.",
     "deleteBody": "Lingola deneyimini iyileştirmemiz için bize neden ayrılmak istediğini söyler misin?",
     "deleteReasons": {
@@ -861,6 +923,30 @@
       "fri": "FRI",
       "sat": "SAT",
       "sun": "SUN"
-    }
+    },
+    "certificateTitle": "Your Certificate",
+    "certificateLevelTitle": "$level Certificate",
+    "certificateOf": "Certificate of Achievement",
+    "certificateCertifiesThat": "This certifies that",
+    "certificatePathway": "Lingola English Pathway",
+    "certificateAwardedTo": "Awarded to",
+    "certificateCompleted": "has successfully completed",
+    "certificateCompletedDetail": "has successfully completed the Lingola English Proficiency Pathway and was awarded a certificate in",
+    "certificateLevelLine": "English Level — CEFR $level",
+    "certificateIssued": "Issued on $date",
+    "certificateDateOfCompletion": "Date of Completion",
+    "certificateIdLabel": "Certificate ID",
+    "certificateVerify": "Scan to verify this certificate",
+    "certificateVerifyAuthenticity": "VERIFY AUTHENTICITY",
+    "certificateScanOrVisit": "Scan the QR code or visit the link to verify authenticity.",
+    "certificateVerifyHint": "Anyone can scan the QR code to verify your achievement.",
+    "certificateShare": "Share Certificate",
+    "certificateShareQr": "Share QR Code",
+    "certificateShareBody": "I earned my Lingola $level certificate!",
+    "certificateShareSubject": "Lingola $level Certificate",
+    "certificateProvidedBy": "Certificate provided by",
+    "certificatePreviewBody": "When you complete a CEFR level on Lingola, your certificate will appear here — with your name, level, and a QR code others can scan to verify.",
+    "certificatePreviewHint": "Complete a level path to unlock your certificate",
+    "certificateTapToView": "Tap to view and share your certificate"
   }
 }

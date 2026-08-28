@@ -18,6 +18,8 @@ import '../../widgets/home_asset.dart';
 import '../../widgets/user_avatar.dart';
 import '../onboarding/onboarding_flow.dart';
 import '../streak/streak_api_service.dart';
+import '../certificate/certificate_api_service.dart';
+import '../certificate/certificate_screen.dart';
 import 'faq_screen.dart';
 import 'profile_settings_screen.dart';
 import 'progress_screen.dart';
@@ -55,6 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   var _displayName = '';
   var _avatarUrl = '';
   var _appLocale = 'en';
+  var _certificates = CertificatesSummaryDto.empty();
+  var _certificatesLoading = true;
 
   @override
   void initState() {
@@ -62,6 +66,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     SessionStore.userListenable.addListener(_onSessionUserChanged);
     _loadProfile();
     _loadStreak();
+    _loadCertificates();
+  }
+
+  Future<void> _loadCertificates() async {
+    try {
+      final data = await CertificateApiService.fetchMine();
+      if (!mounted) return;
+      setState(() {
+        _certificates = data;
+        _certificatesLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _certificatesLoading = false);
+    }
+  }
+
+  void _openCertificate() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CertificateScreen(
+          displayName: _displayName,
+          summary: _certificates,
+        ),
+      ),
+    );
   }
 
   static List<_StreakDayState> _streakStatesFromSummary(
@@ -151,7 +181,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _notificationsOn = user.notificationsEnabled;
         _notificationsBusy = false;
       });
-      await LingolaNotificationService.syncEnabled(user.notificationsEnabled);
+      final granted =
+          await LingolaNotificationService.syncEnabled(user.notificationsEnabled);
+      if (!mounted) return;
+      if (value && !granted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppText.current.profilePage.notificationsPermissionDenied),
+          ),
+        );
+      }
     } catch (err) {
       if (!mounted) return;
       setState(() {
@@ -159,7 +198,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _notificationsBusy = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Notifications update failed: $err')),
+        SnackBar(
+          content: Text(AppText.current.profilePage.notificationsUpdateFailed),
+        ),
       );
     }
   }
@@ -275,6 +316,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 10),
               _SettingsGroup(
                 children: [
+                  ProfileCertificateTile(
+                    summary: _certificates,
+                    loading: _certificatesLoading,
+                    onTap: _openCertificate,
+                  ),
                   _SettingsTile(
                     icon: AppAssets.profileSettings,
                     iconBg: _settingsBlueBg,
@@ -297,11 +343,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ? null
                         : () => _setNotifications(!_notificationsOn),
                     trailing: Transform.scale(
-                      scale: 0.75,
+                      scale: 0.78,
                       alignment: Alignment.centerRight,
                       child: SizedBox(
-                        width: 39,
-                        height: 24,
+                        width: 41,
+                        height: 26,
                         child: FittedBox(
                           fit: BoxFit.contain,
                           child: Switch.adaptive(

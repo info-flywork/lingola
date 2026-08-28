@@ -35,6 +35,40 @@ abstract final class TutorSceneTheme {
 
   static Color? resolveEnd({Color? end, String? slug}) =>
       end ?? gradientForSlug(slug)?.$2;
+
+  static bool isThemedSlug(String? slug) =>
+      themedSlugs.contains((slug ?? '').toLowerCase().trim());
+}
+
+/// Onboarding robot + varsayılan hoca yarım ekran hero arka planı.
+class OnboardingHeroBackdrop extends StatelessWidget {
+  const OnboardingHeroBackdrop({this.fullBleed = false, super.key});
+
+  final bool fullBleed;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: fullBleed
+              ? const [
+                  Color(0xFF2D46FF),
+                  Color(0xFF5B9FFF),
+                  Color(0xFF1A2A4A),
+                ]
+              : const [
+                  Color(0xFF7EB6FF),
+                  Color(0xFFB8D9FF),
+                  Color(0xFFFFFFFF),
+                ],
+          stops: fullBleed ? const [0, 0.45, 1] : const [0, 0.55, 1],
+        ),
+      ),
+    );
+  }
 }
 
 /// Figma: base gradient + 3 layer-blur ellipse.

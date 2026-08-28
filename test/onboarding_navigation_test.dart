@@ -82,8 +82,8 @@ void main() {
     await tester.tap(find.byIcon(Icons.chevron_right_rounded).last);
     await _settle(tester);
 
-    expect(find.text(text.language.targetField), findsNWidgets(2));
-    expect(find.text(text.language.english), findsNWidgets(2));
+    expect(find.text(text.language.targetField), findsOneWidget);
+    expect(find.text(text.language.english), findsOneWidget);
     expect(find.text(text.language.comingSoonBadge), findsOneWidget);
     expect(find.text(text.targetLanguage.german), findsOneWidget);
     expect(find.text(text.targetLanguage.italian), findsOneWidget);

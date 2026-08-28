@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import 'hold_to_speak_service.dart';
 import 'openai_chat_service.dart';
+import 'tutor_personality.dart';
 import 'tutor_tts_service.dart';
 import 'viseme_cue.dart';
 import '../../../core/auth/auth_service.dart';
@@ -104,6 +105,7 @@ class CallingConversationController extends ChangeNotifier {
   var _userHasSpoken = false;
   var _nudgeCount = 0;
   var _awaitingInactivityConfirm = false;
+  var _closingSession = false;
   DateTime? _lastUserSpeechAt;
   late final DateTime _callStartedAt = DateTime.now();
   var _disposed = false;
@@ -123,16 +125,7 @@ class CallingConversationController extends ChangeNotifier {
   static const _maxNudges = 2;
   static const playbackRates = <double>[0.5, 1.0, 1.5, 2.0];
   static const _userInactivityTimeout = Duration(minutes: 2);
-  static const _inactivityConfirmTimeout = Duration(seconds: 28);
-
-  /// Eğlenceli / alternatif hoca önerileri (sessizlikle bitişte).
-  static const _funTutorSuggestions = <(String slug, String label)>[
-    ('elrion', 'Elrion the elf'),
-    ('vaelen', 'Vaelen the witch'),
-    ('zephyrion', 'Zephyrion the alien'),
-    ('ukrath', 'Ukrath the orc'),
-    ('santa', 'Santa'),
-  ];
+  static const _inactivityConfirmTimeout = Duration(seconds: 40);
 
   bool get busy => _busy;
   bool get listening => _listening;
@@ -314,7 +307,7 @@ class CallingConversationController extends ChangeNotifier {
     }
     _notify();
     _scheduleIdleNudge();
-    if (!_awaitingInactivityConfirm) {
+    if (!_awaitingInactivityConfirm && !_closingSession) {
       _armUserInactivityWatch();
     }
   }
@@ -346,11 +339,7 @@ class CallingConversationController extends ChangeNotifier {
     unawaited(_mic.warmUp());
     await _preparePlaybackSession();
     notifyListeners();
-    await _tutorSay(
-      openingLine ??
-          "Hi! I'm your tutor. Let's practice English greetings. "
-              'How are you today?',
-    );
+    await _tutorSay(openingLine ?? _defaultOpeningLine);
     if (!_speaking) _scheduleIdleNudge();
     _armUserInactivityWatch();
   }
@@ -540,17 +529,19 @@ class CallingConversationController extends ChangeNotifier {
       final decision = _parseInactivityDecision(text);
       messages.add(CallMessage(role: CallMessageRole.user, text: text));
       notifyListeners();
-      if (decision == _InactivityDecision.continuePractice) {
-        _awaitingInactivityConfirm = false;
-        _armUserInactivityWatch();
-        await _tutorSay(
-          "No problem — I'm here whenever you're ready. Let's keep going.",
-        );
+      _awaitingInactivityConfirm = false;
+      _clearInactivityConfirmWatch();
+      if (decision == _InactivityDecision.end) {
+        await _closeAfterInactivity();
         return;
       }
-      // Evet/ok / belirsiz → bitir (sessizlikte de aynı).
-      _awaitingInactivityConfirm = false;
-      await _closeAfterInactivity(userSaidNo: decision == _InactivityDecision.end);
+      // Devam veya belirsiz cevap → kapatma, pratiğe dön.
+      _armUserInactivityWatch();
+      await _tutorSay(
+        decision == _InactivityDecision.continuePractice
+            ? "Great — let's keep going."
+            : "I'm still here whenever you're ready.",
+      );
       return;
     }
     messages.add(CallMessage(role: CallMessageRole.user, text: text));
@@ -588,7 +579,7 @@ class CallingConversationController extends ChangeNotifier {
       final reply = await _chat.complete(
         history: _history,
         userMessage: text,
-        systemPrompt: systemPrompt,
+        systemPrompt: _effectiveSystemPrompt,
       );
       _history.add(ChatTurn(role: 'user', content: text));
       _history.add(ChatTurn(role: 'assistant', content: reply));
@@ -710,19 +701,22 @@ class CallingConversationController extends ChangeNotifier {
 
   String get _learnerFirstName {
     final raw = AuthService.displayNameOf(SessionStore.currentUser).trim();
-    if (raw.isEmpty || raw.toLowerCase() == 'guest') return 'there';
+    if (raw.isEmpty || raw.toLowerCase() == 'guest') return '';
     final first = raw.split(RegExp(r'\s+')).first.trim();
-    return first.isEmpty ? 'there' : first;
+    return first;
   }
 
-  (String slug, String label) _randomFunTutorSuggestion() {
-    final current = (tutorSlug ?? '').toLowerCase();
-    final options = _funTutorSuggestions
-        .where((e) => e.$1 != current)
-        .toList(growable: false);
-    final pool = options.isEmpty ? _funTutorSuggestions : options;
-    return pool[DateTime.now().millisecondsSinceEpoch % pool.length];
-  }
+  String get _effectiveSystemPrompt =>
+      systemPrompt ??
+      TutorPersonality.freeTalkSystemPrompt(
+        tutorSlug: tutorSlug,
+        learnerFirstName: _learnerFirstName,
+      );
+
+  String get _defaultOpeningLine => TutorPersonality.freeTalkOpening(
+        tutorSlug: tutorSlug,
+        learnerFirstName: _learnerFirstName,
+      );
 
   void _armUserInactivityWatch() {
     _inactivityTimer?.cancel();
@@ -749,7 +743,10 @@ class CallingConversationController extends ChangeNotifier {
   }
 
   Future<void> _onUserInactivityTimeout() async {
-    if (_disposed || _awaitingInactivityConfirm || _awaitingExtensionReply) {
+    if (_disposed ||
+        _closingSession ||
+        _awaitingInactivityConfirm ||
+        _awaitingExtensionReply) {
       return;
     }
     if (_listening || _busy || _speaking) {
@@ -763,11 +760,12 @@ class CallingConversationController extends ChangeNotifier {
     _clearUserInactivityWatch();
     _awaitingInactivityConfirm = true;
     final name = _learnerFirstName;
-    await _tutorSay(
-      '$name, I understand — this might not be a good time to talk. '
-      "If you don't speak, it won't be effective, so I think we should end the lesson. "
-      'Okay?',
+    final prefix = name.isEmpty ? '' : '$name, ';
+    await _tutorSayAndWait(
+      '${prefix}still there? '
+      "Say something if you'd like to keep practicing — otherwise I'll end here.",
     );
+    if (_disposed || !_awaitingInactivityConfirm) return;
     _armInactivityConfirmWatch();
   }
 
@@ -779,26 +777,29 @@ class CallingConversationController extends ChangeNotifier {
   }
 
   Future<void> _onInactivityConfirmSilence() async {
-    if (_disposed || !_awaitingInactivityConfirm) return;
+    if (_disposed || !_awaitingInactivityConfirm || _closingSession) return;
     if (_listening || _busy || _speaking) {
       _armInactivityConfirmWatch();
       return;
     }
     _awaitingInactivityConfirm = false;
-    await _closeAfterInactivity(userSaidNo: false);
+    await _closeAfterInactivity();
   }
 
-  Future<void> _closeAfterInactivity({required bool userSaidNo}) async {
+  Future<void> _closeAfterInactivity() async {
+    if (_closingSession || _disposed) return;
+    _closingSession = true;
+    _awaitingInactivityConfirm = false;
     _clearInactivityConfirmWatch();
     _clearUserInactivityWatch();
     _cancelIdleNudge();
-    final tip = _randomFunTutorSuggestion();
-    await _tutorSayAndWait(
-      'Take care of yourself. '
-      "If practicing with me isn't working right now, next time try someone more fun — "
-      'maybe ${tip.$2}. Goodbye!',
-    );
-    await _endLessonAfterGoodbye();
+    final name = _learnerFirstName;
+    final prefix = name.isEmpty ? '' : '$name, ';
+    await _tutorSayAndWait('${prefix}Take care — goodbye!');
+    if (!_disposed) {
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+    }
+    if (!_disposed) onRequestEndLesson?.call();
   }
 
   /// Goodbye TTS bittikten ~2 sn sonra ekranı kapat.
@@ -838,18 +839,18 @@ class CallingConversationController extends ChangeNotifier {
       'one more',
       'dont end',
       "don't end",
+      'ok',
+      'okay',
+      'tamam',
     ];
     const endKeys = [
       'yes',
       'yeah',
       'yep',
       'yup',
-      'ok',
-      'okay',
       'sure',
       'fine',
       'evet',
-      'tamam',
       'finish',
       'end',
       'stop',
@@ -859,6 +860,8 @@ class CallingConversationController extends ChangeNotifier {
       'bye',
       'close',
       'goodbye',
+      'end here',
+      'end the lesson',
     ];
     // "no we can continue" gibi karışık cevaplarda devam kazanır.
     for (final k in continueKeys) {
@@ -879,7 +882,7 @@ class CallingConversationController extends ChangeNotifier {
       final reply = await _chat.complete(
         history: _history,
         userMessage: userMessage,
-        systemPrompt: systemPrompt,
+        systemPrompt: _effectiveSystemPrompt,
       );
       _history.add(ChatTurn(role: 'user', content: userMessage));
       _history.add(ChatTurn(role: 'assistant', content: reply));
@@ -1049,14 +1052,14 @@ class CallingConversationController extends ChangeNotifier {
     }
   }
 
-  /// Kelime veya kısa ifade → Türkçe (önbellekli).
+  /// Kelime veya kısa ifade → anadil (önbellekli).
   Future<String> translateText(String text) async {
     final key = text.trim().toLowerCase();
     if (key.isEmpty) return '';
     final cached = _translationCache[key];
     if (cached != null) return cached;
 
-    final result = await _chat.translateToTurkish(text);
+    final result = await _chat.translateToNative(text);
     if (result.isNotEmpty) {
       _translationCache[key] = result;
     }
@@ -1080,12 +1083,12 @@ class CallingConversationController extends ChangeNotifier {
     );
     if (english.isEmpty) return null;
 
-    var turkish = await _chat.translateToTurkish(english);
-    if (turkish.isEmpty) turkish = english;
+    var nativeHint = await _chat.translateToNative(english);
+    if (nativeHint.isEmpty) nativeHint = english;
 
     return CallHintSuggestion(
       english: english,
-      turkish: turkish,
+      turkish: nativeHint,
       basedOn: lastTutor.text.trim(),
     );
   }

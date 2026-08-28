@@ -281,6 +281,7 @@
     "moreCountries": "8カ国以上",
     "moreFocus": "+8",
     "save": "保存",
+    "clearFilter": "フィルターを解除",
     "startTalkNow": "今すぐ話し始める",
     "typeMessage": "メッセージを入力...",
     "speaker": "スピーカー",
@@ -339,6 +340,7 @@
     },
     "calling": {
       "lessonBadge": "レッスン1 : 挨拶",
+      "lessonBadgeFormat": "レッスン $number : $title",
       "nativeLine": "退屈？",
       "englishLine": "退屈？その言葉は私の語彙から消したよ。立ち上がって、計画はもう決まってる：カディキョイの新しいアーケードバーに行くよ。",
       "highlight": "退屈？",
@@ -696,7 +698,21 @@
     "stories": {
       "title": "新しいストーリーを発見しよう",
       "body": "ストーリーを通じて新しい単語を学びましょう"
-    }
+    },
+    "practice": {
+      "title": "Your daily practice is waiting",
+      "body": "Spend 5 minutes on a quick word, reading, or speaking exercise."
+    },
+    "streak": {
+      "title": "Keep your streak alive",
+      "body": "A short session today protects your day streak and builds the habit."
+    },
+    "premium": {
+      "title": "Unlock all tutors & lessons",
+      "body": "Go Premium for unlimited lessons, role-play scenarios, and AI tutors."
+    },
+    "emptyTitle": "まだ通知はありません",
+    "emptySubtitle": "通知を受け取ったら、もう一度確認するのを忘れないでください。"
   },
   "profilePage": {
     "title": "プロフィール",
@@ -830,7 +846,38 @@
       "fri": "金",
       "sat": "土",
       "sun": "日"
-    }
+    },
+    "profileSaved": "Profile saved",
+    "profilePhotoUpdated": "Profile photo updated",
+    "nameCannotBeEmpty": "Name cannot be empty",
+    "profileSaveFailed": "Could not save profile",
+    "photoUploadFailed": "Photo upload failed",
+    "notificationsUpdateFailed": "Could not update notifications",
+    "notificationsPermissionDenied": "Allow notifications in your device settings to get study reminders.",
+    "certificateTitle": "あなたの証明書",
+    "certificateLevelTitle": "$level Certificate",
+    "certificateOf": "Certificate of Achievement",
+    "certificateCertifiesThat": "This certifies that",
+    "certificatePathway": "Lingola English Pathway",
+    "certificateAwardedTo": "Awarded to",
+    "certificateCompleted": "has successfully completed",
+    "certificateCompletedDetail": "has successfully completed the Lingola English Proficiency Pathway and was awarded a certificate in",
+    "certificateLevelLine": "English Level — CEFR $level",
+    "certificateIssued": "Issued on $date",
+    "certificateDateOfCompletion": "Date of Completion",
+    "certificateIdLabel": "Certificate ID",
+    "certificateVerify": "Scan to verify this certificate",
+    "certificateVerifyAuthenticity": "VERIFY AUTHENTICITY",
+    "certificateScanOrVisit": "Scan the QR code or visit the link to verify authenticity.",
+    "certificateVerifyHint": "QRコードをスキャンすれば、誰でも成果を確認できます。",
+    "certificateShare": "証明書を共有",
+    "certificateShareQr": "QRコードを共有",
+    "certificateShareBody": "I earned my Lingola $level certificate!",
+    "certificateShareSubject": "Lingola $level Certificate",
+    "certificateProvidedBy": "Certificate provided by",
+    "certificatePreviewBody": "LingolaでCEFRレベルを完了すると、お名前・レベル・確認用QRコード付きの証明書がここに表示されます。",
+    "certificatePreviewHint": "レベルコースを完了して証明書を解除しましょう",
+    "certificateTapToView": "タップして証明書を表示・共有"
   },
   "pushNotifications": {
     "title": "Lingola",
@@ -861,6 +908,45 @@
       "あなたの場所は、あなたが離れたところにそのままです。",
       "いつでも続けてください。",
       "言語は逃げません — 私たちも逃げません。"
-    ]
+    ],
+    "lessonReminderTitle": "Today's lesson is waiting",
+    "lessonReminder": [
+      "You haven't opened today's lesson yet — even 5 minutes counts.",
+      "Your tutor is ready. Pick up where you left off.",
+      "A short lesson today keeps your rhythm going.",
+      "Today's lesson is still open — want to jump in?"
+    ],
+    "quizReminderTitle": "Ready for a quick quiz?",
+    "quizReminderWords": "You learned $count words recently — want a quiz? $savedCount saved words are waiting.",
+    "quizReminderSaved": "$savedCount saved words are waiting for review.",
+    "quizReminder": [
+      "It's been a while since your last quiz — a 3-minute review could help.",
+      "Your saved words miss you. A quick quiz?",
+      "Test what you remember — it only takes a few minutes.",
+      "A short quiz now makes tomorrow easier."
+    ],
+    "eveningLessonTitle": "Don't miss today's practice",
+    "eveningLesson": [
+      "You haven't studied today yet. One short lesson keeps the habit alive.",
+      "Before the day ends — a quick lesson with your tutor?",
+      "There's still time for a 5-minute English session today.",
+      "Your daily lesson is waiting. Shall we start?"
+    ],
+    "streakReminderTitle": "Keep your streak",
+    "streakReminder": "You're on a $streak-day streak — a short lesson today keeps it alive."
+  },
+  "apiErrors": {
+    "unauthorized": "Please sign in again.",
+    "notFound": "We couldn't find what you were looking for.",
+    "validationFailed": "Please check your input and try again.",
+    "nameRequired": "Name cannot be empty.",
+    "imageRequired": "Please choose a photo to upload.",
+    "avatarInvalidType": "Only JPEG, PNG, or WebP photos are allowed.",
+    "avatarEmpty": "The selected photo is empty.",
+    "avatarTooLarge": "Photo is too large (max 5 MB).",
+    "notificationsRequired": "Notification preference is required.",
+    "premiumRequired": "Premium is required for this lesson.",
+    "levelRequired": "Complete earlier lessons to unlock this level.",
+    "internalError": "Something went wrong. Please try again."
   }
 }

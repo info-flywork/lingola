@@ -122,10 +122,15 @@ abstract final class AppAssets {
   static const profileDiscount = 'assets/images/profilIcons/discount.svg';
   static const profileChain = 'assets/images/profilIcons/chain.svg';
   static const profileLock = 'assets/images/profilIcons/lock.svg';
+
+  // —— Certificate ——
+  static const flyworkLogo = 'assets/images/certificate/flywork_logo.png';
   static const profileNotification =
       'assets/images/home/notification_icon.svg';
   static const notificationTrash =
       'assets/images/notifications/trash.svg';
+  static const notificationsEmptyBell =
+      'assets/images/notifications/empty_bell.png';
   static const profileStreakFlame = 'assets/images/home/streak_icon.svg';
   static const profileFireOrange =
       'assets/images/profilIcons/fireOrange.svg';
@@ -177,6 +182,11 @@ abstract final class AppAssets {
   // —— Calling ——
   static const callingEye = 'assets/images/callinScreen/eye.svg';
   static const callingClosedEye = 'assets/images/callinScreen/closedEye.svg';
+  /// Figma: mesaj balonu yanı — çeviri / hoparlör (calling + tutor sohbet).
+  static const callingChatTranslate =
+      'assets/images/callinScreen/chat_translate.png';
+  static const callingChatSpeaker =
+      'assets/images/callinScreen/chat_speaker.png';
   static const callingResize = 'assets/images/roleplay/kucultmebuyutme.svg';
   static const tutorElrionRiv = 'assets/riv/elrion.riv';
   static const tutorVaelenRiv = 'assets/riv/vaelen.riv';

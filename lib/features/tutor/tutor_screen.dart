@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../i18n/strings.g.dart';
 import '../../core/premium/premium_service.dart';
 import '../../core/rive/rive_preload_service.dart';
 import '../../core/theme/app_theme.dart';
@@ -16,6 +17,7 @@ import 'chat_screen.dart';
 import 'calling_screen.dart';
 import 'services/tutor_api_service.dart';
 import 'services/tutor_tts_service.dart';
+import 'tutor_filter.dart';
 import 'tutor_filter_sheet.dart';
 import 'tutor_scene_theme.dart';
 
@@ -30,6 +32,7 @@ class _TutorScreenState extends State<TutorScreen> {
   List<_TutorData>? _remoteTutors;
   var _loadingRemote = true;
   _TutorData? _focusedTutor;
+  TutorFilter _filter = TutorFilter.empty;
 
   @override
   void initState() {
@@ -39,6 +42,47 @@ class _TutorScreenState extends State<TutorScreen> {
 
   List<_TutorData> _tutorsFor(dynamic text) =>
       _remoteTutors ?? _localTutorCards(text);
+
+  List<_TutorData> _visibleTutors(dynamic text) {
+    final all = _tutorsFor(text);
+    if (!_filter.isActive) return all;
+    return all
+        .where(
+          (t) => _filter.matches(
+            tutorTagKeys: t.filterTagKeys,
+            tutorFlagAsset: t.flagAsset,
+          ),
+        )
+        .toList();
+  }
+
+  void _applyFilter(TutorFilter filter, dynamic text) {
+    final visible = _visibleTutorsFrom(all: _tutorsFor(text), filter: filter);
+    setState(() {
+      _filter = filter;
+      final focused = _focusedTutor;
+      if (focused != null &&
+          visible.any((t) => t.identity == focused.identity)) {
+        return;
+      }
+      _focusedTutor = visible.isNotEmpty ? visible.first : null;
+    });
+  }
+
+  List<_TutorData> _visibleTutorsFrom({
+    required List<_TutorData> all,
+    required TutorFilter filter,
+  }) {
+    if (!filter.isActive) return all;
+    return all
+        .where(
+          (t) => filter.matches(
+            tutorTagKeys: t.filterTagKeys,
+            tutorFlagAsset: t.flagAsset,
+          ),
+        )
+        .toList();
+  }
 
   _TutorData _resolvedFocus(List<_TutorData> tutors) {
     final focused = _focusedTutor;
@@ -144,6 +188,7 @@ class _TutorScreenState extends State<TutorScreen> {
       tags: dto.tagKeys
           .map((key) => _tagDisplayName(tags, key))
           .toList(growable: false),
+      tagKeys: dto.tagKeys,
       theme: _themeFromDto(dto.theme, slug: dto.slug),
     );
   }
@@ -273,8 +318,10 @@ class _TutorScreenState extends State<TutorScreen> {
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.tutorPage;
-    final tutors = _tutorsFor(text);
-    final focused = _resolvedFocus(tutors);
+    final tutors = _visibleTutors(text);
+    final focused = tutors.isEmpty
+        ? _fallbackLingola(text: text)
+        : _resolvedFocus(tutors);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -323,7 +370,14 @@ class _TutorScreenState extends State<TutorScreen> {
                       shape: const CircleBorder(),
                       child: InkWell(
                         customBorder: const CircleBorder(),
-                        onTap: () => showTutorFilterSheet(context),
+                        onTap: () async {
+                          final result = await showTutorFilterSheet(
+                            context,
+                            initial: _filter,
+                          );
+                          if (result == null || !mounted) return;
+                          _applyFilter(result, text);
+                        },
                         child: Container(
                           width: 36,
                           height: 36,
@@ -331,13 +385,33 @@ class _TutorScreenState extends State<TutorScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.black.withValues(alpha: .10),
+                              color: _filter.isActive
+                                  ? AppColors.primary
+                                  : Colors.black.withValues(alpha: .10),
+                              width: _filter.isActive ? 1.5 : 1,
                             ),
                           ),
-                          child: const HomeAsset(
-                            AppAssets.tutorFilter,
-                            width: 20,
-                            height: 20,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              const HomeAsset(
+                                AppAssets.tutorFilter,
+                                width: 20,
+                                height: 20,
+                              ),
+                              if (_filter.isActive)
+                                const Positioned(
+                                  top: 6,
+                                  right: 6,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: SizedBox(width: 7, height: 7),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
@@ -403,9 +477,69 @@ class _TutorScreenState extends State<TutorScreen> {
                 ),
               ),
             ),
+            if (_filter.isActive)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Material(
+                      color: AppColors.primaryTint05,
+                      borderRadius: BorderRadius.circular(999),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(999),
+                        onTap: () => _applyFilter(TutorFilter.empty, text),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.filter_alt_off_rounded,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                text.clearFilter,
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              sliver: SliverGrid(
+              sliver: tutors.isEmpty
+                  ? SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Text(
+                          LocaleSettings.currentLocale == AppLocale.tr
+                              ? 'Seçilen filtrelere uygun eğitmen bulunamadı.'
+                              : 'No tutors match these filters.',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            color: AppColors.secondary,
+                          ),
+                        ),
+                      ),
+                    )
+                  : SliverGrid(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 10,
@@ -672,13 +806,37 @@ class _TutorData {
     this.riveAsset,
     this.riveCdnUrl,
     this.voiceId,
+    this.tagKeys = const [],
   });
+
+  static const slugTagKeys = <String, List<String>>{
+    'lingola': ['analytic', 'curious'],
+    'elena': ['adaptive', 'calm'],
+    'kenji': ['patient', 'organized'],
+    'freya': ['calm', 'attentive'],
+    'camila': ['adaptive', 'relaxed'],
+    'marco': ['methodical', 'patient'],
+    'julian': ['adaptive', 'calm'],
+    'ines': ['patient', 'attentive'],
+    'felix': ['organized', 'relaxed'],
+    'diego': ['methodical', 'calm'],
+    'amara': ['adaptive', 'patient'],
+    'erik': ['relaxed', 'attentive'],
+    'katie': ['disciplined', 'decisive'],
+    'morgan': ['smart', 'patient'],
+    'santa': ['cheerful', 'generous'],
+    'zephyrion': ['curious', 'observer'],
+    'vaelen': ['calm', 'ancientKnowledge'],
+    'ukrath': ['clear', 'decisive'],
+    'elrion': ['wise', 'patient'],
+  };
 
   final String? id;
   final String? slug;
   final String name;
   final String image;
   final List<String> tags;
+  final List<String> tagKeys;
   final TutorCardTheme? theme;
   final String? flagAsset;
   final String? riveAsset;
@@ -686,6 +844,13 @@ class _TutorData {
   final String? voiceId;
 
   String get identity => id ?? slug ?? name;
+
+  List<String> get filterTagKeys {
+    if (tagKeys.isNotEmpty) return tagKeys;
+    final s = slug;
+    if (s == null || s.isEmpty) return const [];
+    return slugTagKeys[s] ?? const [];
+  }
 }
 
 class _TutorHero extends StatefulWidget {
