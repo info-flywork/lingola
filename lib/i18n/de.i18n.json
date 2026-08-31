@@ -774,11 +774,11 @@
     "shareWithFriendTitle": "Mit Freund teilen",
     "shareInviteBody": "Lade deine Freunde ein und genießt das Übersetzen zusammen",
     "rateUs": "Bewerte uns",
-    "faq": "Lingola FAQ",
+    "faq": "Häufig gestellte Fragen",
     "faqItems": {
       "supportedLanguages": {
         "question": "Welche Sprachen unterstützt die App?",
-        "answer": "Die App unterstützt derzeit Englisch, Türkisch und Deutsch. Neue Sprachen werden regelmäßig hinzugefügt."
+        "answer": "Die Lingola-Oberfläche ist auf Englisch, Deutsch, Italienisch, Französisch, Türkisch, Japanisch, Spanisch, Russisch, Hindi, Portugiesisch und Vereinfachtes Chinesisch verfügbar."
       },
       "howAiWorks": {
         "question": "Wie funktioniert die KI?",

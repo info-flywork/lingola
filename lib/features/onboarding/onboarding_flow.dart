@@ -592,16 +592,21 @@ class _SpeakerVisual extends StatelessWidget {
 class _TutorComparison extends StatelessWidget {
   const _TutorComparison();
 
+  static const _cardTop = 116.0;
+  static const _cardHeight = 362.0;
+  static const _cardInset = 27.0;
+  static const _cardWidth = 142.0;
+
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
     return Stack(
       children: [
         Positioned(
-          left: 27,
-          top: 116,
-          width: 142,
-          height: 362,
+          left: _cardInset,
+          top: _cardTop,
+          width: _cardWidth,
+          height: _cardHeight,
           child: _TutorCard(
             image: 'tutors/realTutor.png',
             name: text.onboarding.slide2.realTutor,
@@ -613,10 +618,10 @@ class _TutorComparison extends StatelessWidget {
           ),
         ),
         Positioned(
-          right: 27,
-          top: 116,
-          width: 142,
-          height: 362,
+          right: _cardInset,
+          top: _cardTop,
+          width: _cardWidth,
+          height: _cardHeight,
           child: _TutorCard(
             image: 'tutors/lingolaTutor.png',
             name: text.onboarding.slide2.lingola,
@@ -629,44 +634,74 @@ class _TutorComparison extends StatelessWidget {
           ),
         ),
         Positioned(
-          left: 194,
-          top: 208,
-          width: 42,
-          height: 42,
-          child: DecoratedBox(
+          left: _cardInset + _cardWidth,
+          right: _cardInset + _cardWidth,
+          top: _cardTop + (_cardHeight - _VsDivider.totalHeight) / 2,
+          child: Center(
+            child: _VsDivider(label: text.onboarding.slide2.versus),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _VsDivider extends StatelessWidget {
+  const _VsDivider({required this.label});
+
+  final String label;
+
+  static const _lineColor = Color(0x66000000);
+  static const _badgeSize = 42.0;
+  static const _lineHeight = 59.0;
+  /// Figma: çizgiler VS dairesine değmez, arada boşluk var.
+  static const _gap = 10.0;
+  static const totalHeight = _lineHeight + _gap + _badgeSize + _gap + _lineHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: _badgeSize,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Container(
+              width: 1,
+              height: _lineHeight,
+              color: _lineColor,
+            ),
+          ),
+          const SizedBox(height: _gap),
+          Container(
+            width: _badgeSize,
+            height: _badgeSize,
+            alignment: Alignment.center,
             decoration: const BoxDecoration(
               color: Colors.black,
               shape: BoxShape.circle,
             ),
-            child: Center(
-              child: Text(
-                text.onboarding.slide2.versus,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  color: Colors.white,
-                  fontSize: 16,
-                  height: 1,
-                  fontWeight: FontWeight.w600,
-                ),
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.white,
+                fontSize: 16,
+                height: 1,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-        ),
-        const Positioned(
-          left: 214.5,
-          top: 149,
-          width: 1,
-          height: 59,
-          child: ColoredBox(color: Color(0x66000000)),
-        ),
-        const Positioned(
-          left: 214.5,
-          top: 250,
-          width: 1,
-          height: 59,
-          child: ColoredBox(color: Color(0x66000000)),
-        ),
-      ],
+          const SizedBox(height: _gap),
+          Center(
+            child: Container(
+              width: 1,
+              height: _lineHeight,
+              color: _lineColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

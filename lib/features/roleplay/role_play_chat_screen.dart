@@ -10,24 +10,37 @@ import '../../i18n/strings.g.dart';
 import '../../widgets/lingola_chat_session.dart';
 import '../tutor/services/tutor_api_service.dart';
 import '../tutor/services/tutor_chat_api_service.dart';
+import 'role_play_api_service.dart';
 
 enum RolePlayScenarioId { coffee, directions, interview }
 
+extension RolePlayScenarioIdX on RolePlayScenarioId {
+  String get apiId => name;
+}
+
 class RolePlayChatScreen extends StatefulWidget {
-  const RolePlayChatScreen({required this.scenarioId, super.key});
+  const RolePlayChatScreen({
+    required this.scenarioId,
+    this.sessionId,
+    super.key,
+  });
 
   final RolePlayScenarioId scenarioId;
+  final String? sessionId;
 
   @override
   State<RolePlayChatScreen> createState() => _RolePlayChatScreenState();
 }
 
 class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
+  static const _sessionDuration = Duration(minutes: 8);
+
   String? _sessionId;
   var _syncingSession = false;
   String? _error;
   List<LingolaChatMessage> _messages = const [];
   TutorDto? _tutor;
+  var _savingProgress = false;
 
   /// UI rozeti — kullanıcının dilinde olabilir.
   String get _lessonBadge {
@@ -97,7 +110,7 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
       final en = _scenarioEnglish;
       final session = await TutorChatApiService.openSession(
         tutorSlug: 'lingola',
-        forceNew: true,
+        forceNew: false,
         title: 'Role Play: ${en.titleEn}',
         openingMessage: en.openingEn,
       );
@@ -137,13 +150,39 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
     return result.assistantMessage.content;
   }
 
+  Future<void> _persistProgress(Duration elapsed) async {
+    if (_savingProgress) return;
+    final seconds = elapsed.inSeconds;
+    if (seconds <= 0) return;
+    final sessionId = _sessionId;
+    if (sessionId == null) return;
+
+    _savingProgress = true;
+    try {
+      await RolePlayApiService.saveProgress(
+        scenarioId: widget.scenarioId.apiId,
+        sessionId: sessionId,
+        additionalSeconds: seconds,
+      );
+    } catch (_) {
+      // Liste yenilenince tekrar denenebilir.
+    } finally {
+      _savingProgress = false;
+    }
+  }
+
+  Future<void> _handleClose(Duration elapsed) async {
+    await _persistProgress(elapsed);
+    if (!mounted) return;
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final preview = AppText.current.previewChat;
     final sessionReady = _sessionId != null;
 
     return LingolaChatSession(
-      // Stabil key — session gelince remount TTS/lipsync'i öldürmesin.
       key: ValueKey('roleplay-${widget.scenarioId.name}'),
       brand: preview.brand,
       speedLabel: preview.speed,
@@ -159,9 +198,10 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
           : 'Great — keep going! What would you like to say next?',
       ttsVoiceId: _ttsVoiceId ?? TutorVoiceIds.male,
       riveAsset: _riveAsset,
-      // PNG kullanma — yükleme/hata fallback’i de aynı .riv.
       fallbackImage: null,
-      onClose: () => Navigator.of(context).pop(),
+      sessionLimit: _sessionDuration,
+      onClose: _handleClose,
+      onSessionExpired: _handleClose,
     );
   }
 }

@@ -12,6 +12,7 @@ import '../../core/config/app_env.dart';
 import '../../core/rive/rive_preload_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/chat_word_chip.dart';
+import '../../widgets/chat_session_action_bar.dart';
 import '../../widgets/home_asset.dart';
 import '../lesson/lesson_api_service.dart';
 import '../lesson/lesson_badge.dart';
@@ -277,7 +278,10 @@ class _CallingScreenState extends State<CallingScreen> {
   void _toggleTextCompose() {
     setState(() {
       _textComposeOn = !_textComposeOn;
-      if (_textComposeOn) _captionsOn = true;
+      if (_textComposeOn) {
+        _captionsOn = true;
+        _hintsOn = false;
+      }
     });
     if (_textComposeOn) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -502,6 +506,81 @@ class _CallingScreenState extends State<CallingScreen> {
     );
   }
 
+  Widget _buildSessionActionBar({required bool darkChrome}) {
+    if (darkChrome) {
+      return _buildMicRow(darkChrome: true);
+    }
+    final listening = _conversation.listening;
+    final busy = _conversation.busy;
+    return ChatSessionActionBar(
+      listening: listening,
+      busy: busy,
+      messageActive: _textComposeOn,
+      hintActive: _hintsOn,
+      hintLoading: _hintLoading,
+      onMessage: _toggleTextCompose,
+      onHint: () => unawaited(_toggleHint()),
+      onMicPointerDown: (_) => unawaited(_conversation.startListening()),
+      onMicPointerUp: (_) => unawaited(_conversation.stopListening()),
+      onPointerCancel: (_) => unawaited(_conversation.stopListening()),
+    );
+  }
+
+  Widget _buildTextComposeField() {
+    return Container(
+      height: 48,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(left: 16, right: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.black.withValues(alpha: .05)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _textController,
+              focusNode: _textFocus,
+              autofocus: true,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => unawaited(_submitTypedMessage()),
+              decoration: InputDecoration(
+                hintText: AppText.current.tutorPage.typeMessage,
+                border: InputBorder.none,
+                isDense: true,
+                hintStyle: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  height: 18 / 14,
+                  color: AppColors.secondary,
+                ),
+              ),
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                height: 18 / 14,
+                color: AppColors.ink,
+              ),
+            ),
+          ),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () => unawaited(_submitTypedMessage()),
+              child: const HomeAsset(
+                AppAssets.send,
+                width: 32,
+                height: 32,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMicRow({required bool darkChrome}) {
     final listening = _conversation.listening;
     final busy = _conversation.busy;
@@ -581,6 +660,7 @@ class _CallingScreenState extends State<CallingScreen> {
       _hintsOn = true;
       _hintLoading = true;
       _hintSuggestion = null;
+      _textComposeOn = false;
     });
 
     try {
@@ -821,55 +901,8 @@ class _CallingScreenState extends State<CallingScreen> {
                     hint,
                     const SizedBox(height: 10),
                   ],
-                  if (_textComposeOn) ...[
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _textController,
-                            focusNode: _textFocus,
-                            autofocus: true,
-                            textInputAction: TextInputAction.send,
-                            onSubmitted: (_) => unawaited(_submitTypedMessage()),
-                            onTapOutside: (_) => _textFocus.unfocus(),
-                            decoration: InputDecoration(
-                              hintText: AppText.current.tutorPage.typeMessage,
-                              filled: true,
-                              fillColor: AppColors.surface,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(999),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Material(
-                          color: AppColors.primary,
-                          shape: const CircleBorder(),
-                          child: InkWell(
-                            customBorder: const CircleBorder(),
-                            onTap: () => unawaited(_submitTypedMessage()),
-                            child: const SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: Icon(
-                                Icons.send_rounded,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                  _buildMicRow(darkChrome: false),
+                  if (_textComposeOn) _buildTextComposeField(),
+                  _buildSessionActionBar(darkChrome: false),
                 ],
               ),
             ),
@@ -1003,7 +1036,7 @@ class _CallingScreenState extends State<CallingScreen> {
                   hint,
                 ],
                 const SizedBox(height: 18),
-                _buildMicRow(darkChrome: true),
+                _buildSessionActionBar(darkChrome: true),
               ],
             ),
           ),
@@ -1386,7 +1419,7 @@ class _CallingMessageBubbleState extends State<_CallingMessageBubble> {
   }
 }
 
-/// Figma: balon sağında, dikey ortada — çeviri + hoparlör PNG.
+/// Figma: balon sağında, dikey ortada — çeviri + hoparlör.
 class _CallingBubbleActions extends StatelessWidget {
   const _CallingBubbleActions({
     required this.translateBusy,
@@ -1398,8 +1431,6 @@ class _CallingBubbleActions extends StatelessWidget {
   final VoidCallback onTranslate;
   final VoidCallback onSpeak;
 
-  static const _size = 25.0;
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -1407,13 +1438,15 @@ class _CallingBubbleActions extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _CallingBubbleActionIcon(
-          asset: AppAssets.callingChatTranslate,
+          asset: AppAssets.translate,
+          color: AppColors.primary,
           onTap: translateBusy ? null : onTranslate,
           busy: translateBusy,
         ),
         const SizedBox(width: 6),
         _CallingBubbleActionIcon(
-          asset: AppAssets.callingChatSpeaker,
+          asset: AppAssets.speaker,
+          color: AppColors.secondary,
           onTap: onSpeak,
         ),
       ],
@@ -1424,11 +1457,13 @@ class _CallingBubbleActions extends StatelessWidget {
 class _CallingBubbleActionIcon extends StatelessWidget {
   const _CallingBubbleActionIcon({
     required this.asset,
+    required this.color,
     required this.onTap,
     this.busy = false,
   });
 
   final String asset;
+  final Color color;
   final VoidCallback? onTap;
   final bool busy;
 
@@ -1436,28 +1471,31 @@ class _CallingBubbleActionIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
+      shape: CircleBorder(side: BorderSide(color: color, width: 1.4)),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: SizedBox(
-          width: _CallingBubbleActions._size,
-          height: _CallingBubbleActions._size,
+          width: 34,
+          height: 34,
           child: busy
-              ? const Center(
+              ? Center(
                   child: SizedBox(
                     width: 14,
                     height: 14,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: AppColors.primary,
+                      color: color,
                     ),
                   ),
                 )
-              : HomeAsset(
-                  asset,
-                  width: _CallingBubbleActions._size,
-                  height: _CallingBubbleActions._size,
-                  fit: BoxFit.contain,
+              : Center(
+                  child: HomeAsset(
+                    asset,
+                    width: 16,
+                    height: 16,
+                    color: color,
+                  ),
                 ),
         ),
       ),

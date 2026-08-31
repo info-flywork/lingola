@@ -1021,9 +1021,10 @@ class _TutorHeroState extends State<_TutorHero> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const HomeAsset(
-                              AppAssets.tutorChatWithLingola,
+                              AppAssets.chatActionMessage,
                               width: 21,
                               height: 21,
+                              color: Colors.white,
                             ),
                             const SizedBox(width: 8),
                             Text(

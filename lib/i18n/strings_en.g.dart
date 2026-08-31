@@ -2484,8 +2484,8 @@ class Translations$profilePage$faqItems$supportedLanguages$en {
 	/// en: 'Which languages does the app support?'
 	String get question => 'Which languages does the app support?';
 
-	/// en: 'The app currently supports English, Turkish, and German. New languages are added regularly.'
-	String get answer => 'The app currently supports English, Turkish, and German. New languages are added regularly.';
+	/// en: 'Lingola's interface is available in English, German, Italian, French, Turkish, Japanese, Spanish, Russian, Hindi, Portuguese, and Simplified Chinese.'
+	String get answer => 'Lingola\'s interface is available in English, German, Italian, French, Turkish, Japanese, Spanish, Russian, Hindi, Portuguese, and Simplified Chinese.';
 }
 
 // Path: profilePage.faqItems.howAiWorks
@@ -3360,7 +3360,7 @@ extension on Translations {
 			'profilePage.rateUs' => 'Rate Us',
 			'profilePage.faq' => 'Lingola FAQ',
 			'profilePage.faqItems.supportedLanguages.question' => 'Which languages does the app support?',
-			'profilePage.faqItems.supportedLanguages.answer' => 'The app currently supports English, Turkish, and German. New languages are added regularly.',
+			'profilePage.faqItems.supportedLanguages.answer' => 'Lingola\'s interface is available in English, German, Italian, French, Turkish, Japanese, Spanish, Russian, Hindi, Portuguese, and Simplified Chinese.',
 			'profilePage.faqItems.howAiWorks.question' => 'How does the AI work?',
 			'profilePage.faqItems.howAiWorks.answer' => 'The AI interacts with you like a real tutor. It analyzes your conversations, detects mistakes, and offers personalized feedback based on your progress.',
 			'profilePage.faqItems.offlineUse.question' => 'Can I use the app offline?',

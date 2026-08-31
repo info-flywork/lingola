@@ -87,7 +87,8 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
       id: dto.id,
       title: title,
       image: dto.imageAsset.isNotEmpty ? dto.imageAsset : _imageFor(dto.id),
-      progress: dto.progressPercent > 0 ? dto.progressPercent : null,
+      progress: dto.progressPercent > 0.001 ? dto.progressPercent.clamp(0, 1) : null,
+      sessionId: dto.sessionId,
       minutes: dto.minutes,
       level: page.beginner as String,
       screenplay: screenplay,
@@ -208,9 +209,9 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => _RolePlayDetailSheet(
         scenario: scenario,
-        onGetStarted: () {
+        onGetStarted: () async {
           Navigator.of(sheetContext).pop();
-          Navigator.of(context).push(
+          await Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (_) => RolePlayChatScreen(
                 scenarioId: switch (scenario.id) {
@@ -218,9 +219,12 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
                   'interview' => RolePlayScenarioId.interview,
                   _ => RolePlayScenarioId.directions,
                 },
+                sessionId: scenario.sessionId,
               ),
             ),
           );
+          if (!mounted) return;
+          await _loadScenarios();
         },
       ),
     );
@@ -236,6 +240,7 @@ class _RolePlayScenario {
     required this.level,
     required this.screenplay,
     this.progress,
+    this.sessionId,
     this.section,
   });
 
@@ -243,6 +248,7 @@ class _RolePlayScenario {
   final String title;
   final String image;
   final double? progress;
+  final String? sessionId;
   final int minutes;
   final String level;
   final String screenplay;

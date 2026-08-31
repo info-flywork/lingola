@@ -1391,7 +1391,7 @@ class _Translations$profilePage$faqItems$supportedLanguages$pt implements Transl
 
 	// Translations
 	@override String get question => 'Quais idiomas o app suporta?';
-	@override String get answer => 'O app atualmente suporta inglês, turco e alemão. Novos idiomas são adicionados regularmente.';
+	@override String get answer => 'A interface do Lingola está disponível em inglês, alemão, italiano, francês, turco, japonês, espanhol, russo, hindi, português e chinês simplificado.';
 }
 
 // Path: profilePage.faqItems.howAiWorks
@@ -2171,7 +2171,7 @@ extension on TranslationsPt {
 			'profilePage.rateUs' => 'Avalie-nos',
 			'profilePage.faq' => 'FAQ do Lingola',
 			'profilePage.faqItems.supportedLanguages.question' => 'Quais idiomas o app suporta?',
-			'profilePage.faqItems.supportedLanguages.answer' => 'O app atualmente suporta inglês, turco e alemão. Novos idiomas são adicionados regularmente.',
+			'profilePage.faqItems.supportedLanguages.answer' => 'A interface do Lingola está disponível em inglês, alemão, italiano, francês, turco, japonês, espanhol, russo, hindi, português e chinês simplificado.',
 			'profilePage.faqItems.howAiWorks.question' => 'Como a IA funciona?',
 			'profilePage.faqItems.howAiWorks.answer' => 'A IA interage com você como um tutor real. Ela analisa suas conversas, detecta erros e oferece feedback personalizado com base no seu progresso.',
 			'profilePage.faqItems.offlineUse.question' => 'Posso usar o app offline?',

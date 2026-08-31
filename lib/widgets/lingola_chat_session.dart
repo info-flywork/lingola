@@ -18,6 +18,8 @@ import '../features/tutor/services/viseme_cue.dart';
 import '../features/tutor/tutor_scene_theme.dart';
 import '../features/tutor/widgets/tutor_rive_avatar.dart';
 import 'chat_word_chip.dart';
+import 'chat_session_action_bar.dart';
+import 'tutor_compact_hero_panel.dart';
 import 'home_asset.dart';
 
 /// Ortak sohbet mesaj modeli (onboarding preview + role play).
@@ -82,7 +84,7 @@ class LingolaChatSession extends StatefulWidget {
   });
 
   final List<LingolaChatMessage> initialMessages;
-  final VoidCallback onClose;
+  final void Function(Duration elapsed) onClose;
   final String? brand;
   final String? speedLabel;
   final String? lessonBadge;
@@ -98,7 +100,7 @@ class LingolaChatSession extends StatefulWidget {
   final String? riveAsset;
   final String? fallbackImage;
   final Duration? sessionLimit;
-  final VoidCallback? onSessionExpired;
+  final void Function(Duration elapsed)? onSessionExpired;
   final bool showBack;
   final bool busy;
   final String? errorText;
@@ -134,6 +136,8 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   Timer? _sessionTimer;
   var _hintLoading = false;
   String? _hintSuggestion;
+  var _hintsOn = false;
+  var _textComposeOn = false;
   var _expanded = false;
   var _closing = false;
   Timer? _recordingTicker;
@@ -220,8 +224,12 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   void _applyVisemeAt(Duration pos) {
     if (!_speaking) return;
     final t = pos.inMilliseconds / 1000.0;
+    final syncedT = ((t - kVisemeLatencySec) * kLipsyncTimelineBoost).clamp(
+      0.0,
+      double.infinity,
+    );
     final lipEnd = _speechEndSec;
-    if (lipEnd != null && lipEnd > 0 && t >= lipEnd) {
+    if (lipEnd != null && lipEnd > 0 && syncedT >= lipEnd) {
       if (_lipsActiveNotifier.value) {
         _lipsActiveNotifier.value = false;
         _visemeNotifier.value = 0;
@@ -386,7 +394,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       _cancelRecordingPending = false;
       _speaking = false;
     });
-    (widget.onSessionExpired ?? widget.onClose)();
+    (widget.onSessionExpired ?? widget.onClose)(_elapsed);
   }
 
   void _handleClose() {
@@ -400,7 +408,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     unawaited(_player.stop());
     unawaited(_cancelRecording());
     try {
-      widget.onClose();
+      widget.onClose(_elapsed);
     } catch (_) {
       _finished = false;
       _closing = false;
@@ -419,6 +427,14 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   Future<void> _requestHint() async {
     if (_hintLoading || _finished) return;
+    if (_hintsOn) {
+      setState(() {
+        _hintsOn = false;
+        _hintSuggestion = null;
+      });
+      return;
+    }
+
     String? lastBot;
     for (var i = _messages.length - 1; i >= 0; i--) {
       if (!_messages[i].isUser) {
@@ -429,8 +445,10 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     if (lastBot == null || lastBot.trim().isEmpty) return;
 
     setState(() {
+      _hintsOn = true;
       _hintLoading = true;
       _hintSuggestion = null;
+      _textComposeOn = false;
     });
     try {
       final hint = await OpenAiChatService().suggestStudentReply(
@@ -442,19 +460,42 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       setState(() {
         _hintLoading = false;
         _hintSuggestion = cleaned.isEmpty ? null : cleaned;
-        if (cleaned.isNotEmpty) {
-          _controller
-            ..text = cleaned
-            ..selection = TextSelection.collapsed(offset: cleaned.length);
-        }
+        if (cleaned.isEmpty) _hintsOn = false;
       });
+      if (cleaned.isNotEmpty) _scrollToBottom();
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _hintLoading = false;
+        _hintsOn = false;
         _localError = e.toString();
       });
     }
+  }
+
+  void _toggleTextCompose() {
+    setState(() {
+      _textComposeOn = !_textComposeOn;
+      if (_textComposeOn) {
+        _hintsOn = false;
+        final suggestion = _hintSuggestion?.trim();
+        if (suggestion != null &&
+            suggestion.isNotEmpty &&
+            _controller.text.trim().isEmpty) {
+          _controller.text = suggestion;
+        }
+      }
+    });
+  }
+
+  Future<void> _sendHintSuggestion() async {
+    final text = _hintSuggestion?.trim();
+    if (text == null || text.isEmpty || _finished || _sending) return;
+    setState(() {
+      _hintsOn = false;
+      _hintSuggestion = null;
+    });
+    await _sendMessage(text);
   }
 
   void _toggleExpanded() {
@@ -576,6 +617,18 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     }
   }
 
+  Future<void> _robotSay(String text) async {
+    if (!mounted || _finished) return;
+    setState(() {
+      _localError = null;
+      _messages.add(LingolaChatMessage.bot(text));
+    });
+    _scrollToBottom();
+    if (widget.enableTts) {
+      await _speak(text);
+    }
+  }
+
   Future<void> _stopMicAndSend() async {
     if (!_recording) return;
     setState(() {
@@ -594,10 +647,8 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
           .timeout(const Duration(seconds: 35));
       if (!mounted) return;
       if (text.trim().isEmpty) {
-        setState(() {
-          _localError = 'Ses anlaşılamadı — tekrar dene';
-          _sending = false;
-        });
+        setState(() => _sending = false);
+        unawaited(_robotSay('Ses anlaşılamadı — tekrar dene'));
         return;
       }
       await _sendMessage(text.trim());
@@ -747,25 +798,69 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   Widget _buildComposer() {
     final hint = widget.typeMessageHint ?? AppText.current.previewChat.typeMessage;
     final blocked = _sending || (widget.busy && _messages.isEmpty);
-    return _WhatsAppChatComposer(
-      controller: _controller,
-      hint: hint,
-      enabled: !blocked,
-      enableMic: widget.enableMic,
-      recording: _recording,
-      recordingLocked: _recordingLocked,
-      cancelPending: _cancelRecordingPending,
-      recordingTimer: _recordingTimerLabel,
-      chatLabels: AppText.current.previewChat,
-      onSend: () => unawaited(_sendMessage()),
-      onHint: () => unawaited(_requestHint()),
-      hintLoading: _hintLoading,
-      onMicPointerDown: _onMicPointerDown,
-      onMicPointerCancel: (e) => unawaited(_onMicPointerCancel(e)),
-      onCancelRecording: () => unawaited(_cancelRecording()),
-      onFinishLockedRecording: () => unawaited(_finishLockedRecording()),
+
+    if (_recording || _recordingLocked) {
+      return _WhatsAppChatComposer(
+        controller: _controller,
+        hint: hint,
+        enabled: !blocked,
+        enableMic: false,
+        recording: _recording,
+        recordingLocked: _recordingLocked,
+        cancelPending: _cancelRecordingPending,
+        recordingTimer: _recordingTimerLabel,
+        chatLabels: AppText.current.previewChat,
+        onSend: () => unawaited(_sendMessage()),
+        onMicPointerDown: (_) {},
+        onMicPointerCancel: (_) {},
+        onCancelRecording: () => unawaited(_cancelRecording()),
+        onFinishLockedRecording: () => unawaited(_finishLockedRecording()),
+      );
+    }
+
+    if (_textComposeOn) {
+      return _WhatsAppChatComposer(
+        controller: _controller,
+        hint: hint,
+        enabled: !blocked,
+        enableMic: widget.enableMic,
+        micDismissesComposer: true,
+        onMicDismiss: _toggleTextCompose,
+        recording: false,
+        recordingLocked: false,
+        cancelPending: false,
+        recordingTimer: _recordingTimerLabel,
+        chatLabels: AppText.current.previewChat,
+        onSend: () => unawaited(_sendMessage()),
+        onHint: () => unawaited(_requestHint()),
+        hintLoading: _hintLoading,
+        onMicPointerDown: (_) {},
+        onMicPointerCancel: (_) {},
+        onCancelRecording: () {},
+        onFinishLockedRecording: () {},
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+      child: ChatSessionActionBar(
+        enableMic: widget.enableMic,
+        busy: blocked,
+        listening: _recording,
+        messageActive: false,
+        hintActive: _hintsOn,
+        hintLoading: _hintLoading,
+        onMessage: _toggleTextCompose,
+        onHint: () => unawaited(_requestHint()),
+        onMicPointerDown: _onMicPointerDown,
+        onMicPointerUp: _onMicPointerUp,
+        onPointerCancel: _onMicPointerCancel,
+      ),
     );
   }
+
+  bool get _hintDraftVisible =>
+      _hintsOn && (_hintSuggestion?.trim().isNotEmpty ?? false);
 
   Widget _buildMessageList({required bool darkChrome}) {
     final blocked = _sending || (widget.busy && _messages.isEmpty);
@@ -811,10 +906,20 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
           child: ListView.separated(
             controller: _scrollController,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            itemCount: _messages.length + (blocked ? 1 : 0),
+            itemCount: _messages.length +
+                (_hintDraftVisible ? 1 : 0) +
+                (blocked ? 1 : 0),
             separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               if (index >= _messages.length) {
+                final hintIndex = _messages.length;
+                if (_hintDraftVisible && index == hintIndex) {
+                  return _HintDraftBubble(
+                    message: _hintSuggestion!,
+                    enabled: !blocked,
+                    onSend: () => unawaited(_sendHintSuggestion()),
+                  );
+                }
                 return Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
@@ -848,12 +953,10 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     );
   }
 
-  /// Yarım ekran: üstte robot, altta sohbet + composer (mevcut deneme UI).
+  /// Yarım ekran: üstte robot, altta sohbet + composer.
   Widget _buildCompact(BuildContext context) {
     final preview = AppText.current.previewChat;
     final speed = widget.speedLabel ?? preview.speed;
-    final topInset = MediaQuery.paddingOf(context).top;
-    const heroH = _heroHeight;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -862,83 +965,19 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
           Column(
             children: [
               Expanded(
-                child: Stack(
+                child: Column(
                   children: [
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: topInset + heroH,
-                      child: const OnboardingHeroBackdrop(),
+                    TutorCompactHeroPanel(
+                      heroHeight: _heroHeight,
+                      speedLabel: speed,
+                      lessonBadge: widget.lessonBadge,
+                      topBar: _buildTopBar(),
+                      avatar: _buildAvatarHero(fill: false),
                     ),
-                    SafeArea(
-                      bottom: false,
-                      child: Column(
-                        children: [
-                          _buildTopBar(),
-                          SizedBox(
-                            height: heroH - 48,
-                            child: Stack(
-                              alignment: Alignment.topCenter,
-                              clipBehavior: Clip.none,
-                              children: [
-                                _buildAvatarHero(fill: false),
-                                Positioned(
-                                  left: 16,
-                                  bottom: 24,
-                                  child: Container(
-                                    width: 36,
-                                    height: 36,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: _pillBg,
-                                      borderRadius: BorderRadius.circular(99),
-                                    ),
-                                    child: Text(
-                                      speed,
-                                      style: const TextStyle(
-                                        fontFamily: 'Poppins',
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                if (widget.lessonBadge != null)
-                                  Positioned(
-                                    right: 16,
-                                    bottom: 24,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: _pillBg,
-                                        borderRadius: BorderRadius.circular(999),
-                                      ),
-                                      child: Text(
-                                        widget.lessonBadge!,
-                                        style: const TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: ColoredBox(
-                              color: Colors.white,
-                              child: _buildMessageList(darkChrome: false),
-                            ),
-                          ),
-                        ],
+                    Expanded(
+                      child: ColoredBox(
+                        color: Colors.white,
+                        child: _buildMessageList(darkChrome: false),
                       ),
                     ),
                   ],
@@ -1296,6 +1335,8 @@ class _WhatsAppChatComposer extends StatelessWidget {
     required this.onFinishLockedRecording,
     this.onHint,
     this.hintLoading = false,
+    this.micDismissesComposer = false,
+    this.onMicDismiss,
   });
 
   final TextEditingController controller;
@@ -1314,6 +1355,8 @@ class _WhatsAppChatComposer extends StatelessWidget {
   final VoidCallback onFinishLockedRecording;
   final VoidCallback? onHint;
   final bool hintLoading;
+  final bool micDismissesComposer;
+  final VoidCallback? onMicDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -1432,22 +1475,14 @@ class _WhatsAppChatComposer extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Material(
-                      color: AppColors.primary,
-                      shape: const CircleBorder(),
+                      color: Colors.transparent,
                       child: InkWell(
                         customBorder: const CircleBorder(),
                         onTap: enabled ? onFinishLockedRecording : null,
-                        child: const SizedBox(
-                          width: 36,
-                          height: 36,
-                          child: Center(
-                            child: HomeAsset(
-                              AppAssets.send,
-                              width: 18,
-                              height: 18,
-                              color: Colors.white,
-                            ),
-                          ),
+                        child: const HomeAsset(
+                          AppAssets.send,
+                          width: 32,
+                          height: 32,
                         ),
                       ),
                     ),
@@ -1476,11 +1511,63 @@ class _WhatsAppChatComposer extends StatelessWidget {
         builder: (context, value, _) {
           final hasText = value.text.trim().isNotEmpty;
           return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              if (enableMic) ...[
+                Material(
+                  color: Colors.white,
+                  elevation: 0,
+                  shadowColor: Colors.transparent,
+                  shape: const CircleBorder(),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.black.withValues(alpha: .05),
+                      ),
+                    ),
+                    child: micDismissesComposer
+                        ? InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: enabled ? onMicDismiss : null,
+                            child: const SizedBox(
+                              width: 46,
+                              height: 46,
+                              child: Center(
+                                child: HomeAsset(
+                                  AppAssets.microphone,
+                                  width: 22,
+                                  height: 22,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Listener(
+                            onPointerDown: enabled ? onMicPointerDown : null,
+                            onPointerCancel:
+                                enabled ? onMicPointerCancel : null,
+                            child: const SizedBox(
+                              width: 46,
+                              height: 46,
+                              child: Center(
+                                child: HomeAsset(
+                                  AppAssets.microphone,
+                                  width: 22,
+                                  height: 22,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+              ],
               Expanded(
                 child: Container(
                   height: 48,
-                  padding: const EdgeInsets.only(left: 16, right: 8),
+                  padding: const EdgeInsets.only(left: 16, right: 6),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(999),
@@ -1495,7 +1582,9 @@ class _WhatsAppChatComposer extends StatelessWidget {
                           controller: controller,
                           enabled: enabled,
                           textInputAction: TextInputAction.send,
-                          onSubmitted: (_) => onSend(),
+                          onSubmitted: (_) {
+                            if (hasText) onSend();
+                          },
                           decoration: InputDecoration(
                             hintText: hint,
                             border: InputBorder.none,
@@ -1513,80 +1602,45 @@ class _WhatsAppChatComposer extends StatelessWidget {
                           ),
                         ),
                       ),
-                      InkWell(
-                        onTap: (!enabled || hintLoading)
-                            ? null
-                            : onHint,
-                        borderRadius: BorderRadius.circular(99),
-                        child: Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: hintLoading
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.primary,
+                      if (onHint != null)
+                        InkWell(
+                          onTap: (!enabled || hintLoading) ? null : onHint,
+                          borderRadius: BorderRadius.circular(99),
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: hintLoading
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  )
+                                : const HomeAsset(
+                                    AppAssets.lightbulb,
+                                    width: 18,
+                                    height: 22,
                                   ),
-                                )
-                              : const HomeAsset(
-                                  AppAssets.lightbulb,
-                                  width: 18,
-                                  height: 22,
-                                ),
+                          ),
+                        ),
+                      const SizedBox(width: 2),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: enabled && hasText ? onSend : null,
+                          child: const HomeAsset(
+                            AppAssets.send,
+                            width: 32,
+                            height: 32,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              if (hasText)
-                Material(
-                  color: AppColors.primary,
-                  shape: const CircleBorder(),
-                  elevation: 1.5,
-                  shadowColor: Colors.black26,
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: enabled ? onSend : null,
-                    child: const SizedBox(
-                      width: 46,
-                      height: 46,
-                      child: Center(
-                        child: HomeAsset(
-                          AppAssets.send,
-                          width: 22,
-                          height: 22,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              else if (enableMic)
-                Material(
-                  color: AppColors.primary,
-                  shape: const CircleBorder(),
-                  elevation: 1.5,
-                  shadowColor: Colors.black26,
-                  child: Listener(
-                    onPointerDown: enabled ? onMicPointerDown : null,
-                    onPointerCancel: enabled ? onMicPointerCancel : null,
-                    child: const SizedBox(
-                      width: 46,
-                      height: 46,
-                      child: Center(
-                        child: HomeAsset(
-                          AppAssets.microphone,
-                          width: 22,
-                          height: 22,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
             ],
           );
         },
@@ -1885,21 +1939,79 @@ class _BotBubbleState extends State<_BotBubble> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _RoundIconButton(
-              asset: AppAssets.callingChatTranslate,
+              asset: AppAssets.translate,
               color: AppColors.primary,
-              useRaster: true,
               onTap: _translating ? null : _translateSentence,
             ),
             const SizedBox(width: 6),
             _RoundIconButton(
-              asset: AppAssets.callingChatSpeaker,
+              asset: AppAssets.speaker,
               color: AppColors.secondary,
-              useRaster: true,
               onTap: widget.onSpeak == null ? null : _onSpeak,
             ),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _HintDraftBubble extends StatelessWidget {
+  const _HintDraftBubble({
+    required this.message,
+    required this.enabled,
+    required this.onSend,
+  });
+
+  final String message;
+  final bool enabled;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Flexible(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width * 0.72,
+              ),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  height: 18 / 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: enabled ? onSend : null,
+              child: const HomeAsset(
+                AppAssets.send,
+                width: 32,
+                height: 32,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1942,38 +2054,14 @@ class _RoundIconButton extends StatelessWidget {
     required this.asset,
     required this.color,
     this.onTap,
-    this.useRaster = false,
   });
 
   final String asset;
   final Color color;
   final VoidCallback? onTap;
-  final bool useRaster;
-
-  static const _rasterSize = 25.0;
 
   @override
   Widget build(BuildContext context) {
-    if (useRaster) {
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          child: SizedBox(
-            width: _rasterSize,
-            height: _rasterSize,
-            child: HomeAsset(
-              asset,
-              width: _rasterSize,
-              height: _rasterSize,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      );
-    }
-
     return Material(
       color: Colors.transparent,
       shape: CircleBorder(side: BorderSide(color: color, width: 1.4)),

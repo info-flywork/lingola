@@ -1391,7 +1391,7 @@ class _Translations$profilePage$faqItems$supportedLanguages$tr implements Transl
 
 	// Translations
 	@override String get question => 'Uygulama hangi dilleri destekliyor?';
-	@override String get answer => 'Uygulama şu anda İngilizce, Türkçe ve Almanca\'yı destekliyor. Yeni diller düzenli olarak ekleniyor.';
+	@override String get answer => 'Lingola arayüzü İngilizce, Almanca, İtalyanca, Fransızca, Türkçe, Japonca, İspanyolca, Rusça, Hintçe, Portekizce ve Basitleştirilmiş Çince dillerinde kullanılabilir.';
 }
 
 // Path: profilePage.faqItems.howAiWorks
@@ -2230,7 +2230,7 @@ extension on TranslationsTr {
 			'profilePage.rateUs' => 'Bizi Değerlendir',
 			'profilePage.faq' => 'Lingola SSS',
 			'profilePage.faqItems.supportedLanguages.question' => 'Uygulama hangi dilleri destekliyor?',
-			'profilePage.faqItems.supportedLanguages.answer' => 'Uygulama şu anda İngilizce, Türkçe ve Almanca\'yı destekliyor. Yeni diller düzenli olarak ekleniyor.',
+			'profilePage.faqItems.supportedLanguages.answer' => 'Lingola arayüzü İngilizce, Almanca, İtalyanca, Fransızca, Türkçe, Japonca, İspanyolca, Rusça, Hintçe, Portekizce ve Basitleştirilmiş Çince dillerinde kullanılabilir.',
 			'profilePage.faqItems.howAiWorks.question' => 'Yapay zeka nasıl çalışıyor?',
 			'profilePage.faqItems.howAiWorks.answer' => 'Yapay zeka seninle gerçek bir eğitmen gibi etkileşimde bulunuyor. Konuşmalarını analiz ediyor, hataları tespit ediyor ve ilerlemene göre kişiselleştirilmiş geri bildirim sunuyor.',
 			'profilePage.faqItems.offlineUse.question' => 'Uygulamayı çevrimdışı kullanabilir miyim?',

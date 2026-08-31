@@ -63,6 +63,19 @@ abstract final class PremiumService {
     }
     syncFromUser(user);
     await refreshFromRevenueCat();
+    if (!isPremium) {
+      await _tryRestorePurchases();
+    }
+  }
+
+  /// App Store / Play aboneliği başka RC kimliğinde kalmışsa geri yükle.
+  static Future<void> _tryRestorePurchases() async {
+    try {
+      await Purchases.restorePurchases();
+      await refreshFromRevenueCat();
+    } on MissingPluginException {
+      // ignore
+    } catch (_) {}
   }
 
   static Future<void> logOut() async {

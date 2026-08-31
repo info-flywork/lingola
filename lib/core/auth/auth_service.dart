@@ -7,15 +7,20 @@ import 'dart:convert';
 
 import 'api_client.dart';
 import 'app_user.dart';
+import 'device_id_service.dart';
 import 'firebase_auth_gateway.dart';
 import 'session_store.dart';
 
 abstract final class AuthService {
   static Future<AppUser> signInAsGuest(OnboardingDraft draft) async {
+    final deviceId = await DeviceIdService.getStableDeviceId();
     return _persistSession(
       await ApiClient.post(
         '/auth/guest',
-        body: _authBody(draft),
+        body: {
+          ..._authBody(draft),
+          'deviceId': deviceId,
+        },
       ),
     );
   }

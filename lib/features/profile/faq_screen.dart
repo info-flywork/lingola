@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/i18n/app_locale_sync.dart';
 import '../../core/theme/app_theme.dart';
+import '../../i18n/strings.g.dart';
 import '../../widgets/home_asset.dart';
 
 class FaqScreen extends StatefulWidget {
@@ -16,28 +18,31 @@ class FaqScreen extends StatefulWidget {
 class _FaqScreenState extends State<FaqScreen> {
   int? _expandedIndex = 0;
 
-  List<({String q, String a})> _faqItems(dynamic page) {
+  List<({String q, String a})> _faqItems(page) {
     final items = page.faqItems;
     return [
-      (q: items.supportedLanguages.question as String, a: items.supportedLanguages.answer as String),
-      (q: items.howAiWorks.question as String, a: items.howAiWorks.answer as String),
-      (q: items.offlineUse.question as String, a: items.offlineUse.answer as String),
-      (q: items.isFree.question as String, a: items.isFree.answer as String),
-      (q: items.pronunciationEval.question as String, a: items.pronunciationEval.answer as String),
-      (q: items.dailyPractice.question as String, a: items.dailyPractice.answer as String),
-      (q: items.levelDetermination.question as String, a: items.levelDetermination.answer as String),
-      (q: items.realPeopleChat.question as String, a: items.realPeopleChat.answer as String),
-      (q: items.dataSecurity.question as String, a: items.dataSecurity.answer as String),
-      (q: items.disableReminders.question as String, a: items.disableReminders.answer as String),
+      (q: items.supportedLanguages.question, a: items.supportedLanguages.answer),
+      (q: items.howAiWorks.question, a: items.howAiWorks.answer),
+      (q: items.offlineUse.question, a: items.offlineUse.answer),
+      (q: items.isFree.question, a: items.isFree.answer),
+      (q: items.pronunciationEval.question, a: items.pronunciationEval.answer),
+      (q: items.dailyPractice.question, a: items.dailyPractice.answer),
+      (q: items.levelDetermination.question, a: items.levelDetermination.answer),
+      (q: items.realPeopleChat.question, a: items.realPeopleChat.answer),
+      (q: items.dataSecurity.question, a: items.dataSecurity.answer),
+      (q: items.disableReminders.question, a: items.disableReminders.answer),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    final text = AppText.current.profilePage;
-    final items = _faqItems(text);
+    return ValueListenableBuilder<AppLocale>(
+      valueListenable: AppLocaleSync.localeChanges,
+      builder: (context, _, __) {
+        final text = AppText.current.profilePage;
+        final items = _faqItems(text);
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
+        return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
         systemNavigationBarColor: Colors.white,
@@ -101,6 +106,8 @@ class _FaqScreenState extends State<FaqScreen> {
           ),
         ),
       ),
+    );
+      },
     );
   }
 }

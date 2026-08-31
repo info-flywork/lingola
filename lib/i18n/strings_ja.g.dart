@@ -586,7 +586,7 @@ class _Translations$profilePage$ja implements Translations$profilePage$en {
 	@override String get shareWithFriendTitle => '友達と共有';
 	@override String get shareInviteBody => '友達を招待して、一緒に翻訳を楽しもう';
 	@override String get rateUs => '評価する';
-	@override String get faq => 'Lingola FAQ';
+	@override String get faq => 'よくある質問';
 	@override late final _Translations$profilePage$faqItems$ja faqItems = _Translations$profilePage$faqItems$ja._(_root);
 	@override String get support => 'サポート';
 	@override String get feedback => 'フィードバック';
@@ -1391,7 +1391,7 @@ class _Translations$profilePage$faqItems$supportedLanguages$ja implements Transl
 
 	// Translations
 	@override String get question => 'アプリはどの言語をサポートしていますか？';
-	@override String get answer => 'アプリは現在、英語、トルコ語、ドイツ語をサポートしています。新しい言語は定期的に追加されます。';
+	@override String get answer => 'Lingolaのインターフェースは、英語、ドイツ語、イタリア語、フランス語、トルコ語、日本語、スペイン語、ロシア語、ヒンディー語、ポルトガル語、簡体字中国語で利用できます。';
 }
 
 // Path: profilePage.faqItems.howAiWorks
@@ -2169,9 +2169,9 @@ extension on TranslationsJa {
 			'profilePage.shareWithFriendTitle' => '友達と共有',
 			'profilePage.shareInviteBody' => '友達を招待して、一緒に翻訳を楽しもう',
 			'profilePage.rateUs' => '評価する',
-			'profilePage.faq' => 'Lingola FAQ',
+			'profilePage.faq' => 'よくある質問',
 			'profilePage.faqItems.supportedLanguages.question' => 'アプリはどの言語をサポートしていますか？',
-			'profilePage.faqItems.supportedLanguages.answer' => 'アプリは現在、英語、トルコ語、ドイツ語をサポートしています。新しい言語は定期的に追加されます。',
+			'profilePage.faqItems.supportedLanguages.answer' => 'Lingolaのインターフェースは、英語、ドイツ語、イタリア語、フランス語、トルコ語、日本語、スペイン語、ロシア語、ヒンディー語、ポルトガル語、簡体字中国語で利用できます。',
 			'profilePage.faqItems.howAiWorks.question' => 'AIはどのように機能しますか？',
 			'profilePage.faqItems.howAiWorks.answer' => 'AIは本物のチューターのようにあなたと対話します。会話を分析し、間違いを検出し、進捗に基づいてパーソナライズされたフィードバックを提供します。',
 			'profilePage.faqItems.offlineUse.question' => 'アプリをオフラインで使用できますか？',

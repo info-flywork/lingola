@@ -586,7 +586,7 @@ class _Translations$profilePage$de implements Translations$profilePage$en {
 	@override String get shareWithFriendTitle => 'Mit Freund teilen';
 	@override String get shareInviteBody => 'Lade deine Freunde ein und genießt das Übersetzen zusammen';
 	@override String get rateUs => 'Bewerte uns';
-	@override String get faq => 'Lingola FAQ';
+	@override String get faq => 'Häufig gestellte Fragen';
 	@override late final _Translations$profilePage$faqItems$de faqItems = _Translations$profilePage$faqItems$de._(_root);
 	@override String get support => 'Support';
 	@override String get feedback => 'Feedback';
@@ -1391,7 +1391,7 @@ class _Translations$profilePage$faqItems$supportedLanguages$de implements Transl
 
 	// Translations
 	@override String get question => 'Welche Sprachen unterstützt die App?';
-	@override String get answer => 'Die App unterstützt derzeit Englisch, Türkisch und Deutsch. Neue Sprachen werden regelmäßig hinzugefügt.';
+	@override String get answer => 'Die Lingola-Oberfläche ist auf Englisch, Deutsch, Italienisch, Französisch, Türkisch, Japanisch, Spanisch, Russisch, Hindi, Portugiesisch und Vereinfachtes Chinesisch verfügbar.';
 }
 
 // Path: profilePage.faqItems.howAiWorks
@@ -2169,9 +2169,9 @@ extension on TranslationsDe {
 			'profilePage.shareWithFriendTitle' => 'Mit Freund teilen',
 			'profilePage.shareInviteBody' => 'Lade deine Freunde ein und genießt das Übersetzen zusammen',
 			'profilePage.rateUs' => 'Bewerte uns',
-			'profilePage.faq' => 'Lingola FAQ',
+			'profilePage.faq' => 'Häufig gestellte Fragen',
 			'profilePage.faqItems.supportedLanguages.question' => 'Welche Sprachen unterstützt die App?',
-			'profilePage.faqItems.supportedLanguages.answer' => 'Die App unterstützt derzeit Englisch, Türkisch und Deutsch. Neue Sprachen werden regelmäßig hinzugefügt.',
+			'profilePage.faqItems.supportedLanguages.answer' => 'Die Lingola-Oberfläche ist auf Englisch, Deutsch, Italienisch, Französisch, Türkisch, Japanisch, Spanisch, Russisch, Hindi, Portugiesisch und Vereinfachtes Chinesisch verfügbar.',
 			'profilePage.faqItems.howAiWorks.question' => 'Wie funktioniert die KI?',
 			'profilePage.faqItems.howAiWorks.answer' => 'Die KI interagiert mit dir wie ein echter Tutor. Sie analysiert deine Gespräche, erkennt Fehler und bietet personalisiertes Feedback basierend auf deinem Fortschritt.',
 			'profilePage.faqItems.offlineUse.question' => 'Kann ich die App offline nutzen?',

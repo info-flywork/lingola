@@ -1391,7 +1391,7 @@ class _Translations$profilePage$faqItems$supportedLanguages$ru implements Transl
 
 	// Translations
 	@override String get question => 'Какие языки поддерживает приложение?';
-	@override String get answer => 'Приложение в настоящее время поддерживает английский, турецкий и немецкий. Новые языки добавляются регулярно.';
+	@override String get answer => 'Интерфейс Lingola доступен на английском, немецком, итальянском, французском, турецком, японском, испанском, русском, хинди, португальском и упрощённом китайском языках.';
 }
 
 // Path: profilePage.faqItems.howAiWorks
@@ -2171,7 +2171,7 @@ extension on TranslationsRu {
 			'profilePage.rateUs' => 'Оцените нас',
 			'profilePage.faq' => 'Часто задаваемые вопросы Lingola',
 			'profilePage.faqItems.supportedLanguages.question' => 'Какие языки поддерживает приложение?',
-			'profilePage.faqItems.supportedLanguages.answer' => 'Приложение в настоящее время поддерживает английский, турецкий и немецкий. Новые языки добавляются регулярно.',
+			'profilePage.faqItems.supportedLanguages.answer' => 'Интерфейс Lingola доступен на английском, немецком, итальянском, французском, турецком, японском, испанском, русском, хинди, португальском и упрощённом китайском языках.',
 			'profilePage.faqItems.howAiWorks.question' => 'Как работает ИИ?',
 			'profilePage.faqItems.howAiWorks.answer' => 'ИИ взаимодействует с тобой как настоящий репетитор. Он анализирует твои разговоры, выявляет ошибки и предлагает персонализированную обратную связь на основе твоего прогресса.',
 			'profilePage.faqItems.offlineUse.question' => 'Могу ли я использовать приложение офлайн?',

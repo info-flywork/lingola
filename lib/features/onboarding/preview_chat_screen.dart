@@ -101,7 +101,7 @@ class _PreviewChatScreenState extends State<PreviewChatScreen> {
     return result.assistantMessage.content;
   }
 
-  void _closePreview() {
+  void _closePreview([Duration _ = Duration.zero]) {
     if (!mounted) return;
     final draft = widget.draft;
     // Navigasyon senkron — X basınca ekran anında kapansın.

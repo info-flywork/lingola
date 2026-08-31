@@ -778,7 +778,7 @@
     "faqItems": {
       "supportedLanguages": {
         "question": "Quelles langues l'application prend-elle en charge ?",
-        "answer": "L'application prend actuellement en charge l'anglais, le turc et l'allemand. De nouvelles langues sont ajoutées régulièrement."
+        "answer": "L'interface Lingola est disponible en anglais, allemand, italien, français, turc, japonais, espagnol, russe, hindi, portugais et chinois simplifié."
       },
       "howAiWorks": {
         "question": "Comment fonctionne l'IA ?",

@@ -2,16 +2,19 @@ import 'dart:io';
 import 'dart:math' as math;
 
 /// Dudaklar sesten hafif önde bitsin (kuyrukta ağız açık kalmasın).
-const kVisemeLatencySec = -0.02;
+const kVisemeLatencySec = -0.04;
+
+/// Timeline okuma hızı (>1 = dudaklar sese göre biraz daha çabuk ilerler).
+const kLipsyncTimelineBoost = 1.07;
 
 /// Aynı ağız şekli en az bu kadar tutulsun — harf-harf titreme olmasın.
-const kMinVisemeHoldSec = 0.14;
+const kMinVisemeHoldSec = 0.11;
 
 /// Sessizlik (kelime arası) bu süreden uzunsa ağız kapalı kalsın.
 const kMinSilenceHoldSec = 0.07;
 
 /// Ardışık viseme değişimleri arası min süre (1x wall-clock; rate'e bölünür).
-const kMinVisemeGapMs = 110;
+const kMinVisemeGapMs = 92;
 
 /// Ses zamanına hizalı Rive `visemeNum` değeri.
 class VisemeCue {
@@ -208,7 +211,10 @@ double visemeAt(
   double? cutOffSec,
   double latencySec = kVisemeLatencySec,
 }) {
-  final t = (tSec - latencySec).clamp(0.0, double.infinity);
+  final t = ((tSec - latencySec) * kLipsyncTimelineBoost).clamp(
+    0.0,
+    double.infinity,
+  );
   if (cutOffSec != null && t >= cutOffSec) return 0;
   if (cues.isEmpty) return 0;
   for (final cue in cues) {

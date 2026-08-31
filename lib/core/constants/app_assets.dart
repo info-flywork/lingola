@@ -12,6 +12,10 @@ abstract final class AppAssets {
   static const hintOn = 'assets/images/hintOn.svg';
   static const lightbulb = 'assets/images/ampul.svg';
   static const send = 'assets/images/oksign.svg';
+  static const chatMic = 'assets/images/chat_mic.svg';
+  static const chatVideo = 'assets/images/chat_video.svg';
+  static const chatActionMessage = 'assets/images/chat_action_message.svg';
+  static const chatActionMic = 'assets/images/chat_action_mic.svg';
   static const success = 'assets/images/quizSection/succesfull.svg';
   static const failed = 'assets/images/onboarding/unseccesfull.svg';
 

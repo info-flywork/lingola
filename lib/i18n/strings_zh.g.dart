@@ -1391,7 +1391,7 @@ class _Translations$profilePage$faqItems$supportedLanguages$zh implements Transl
 
 	// Translations
 	@override String get question => '应用支持哪些语言？';
-	@override String get answer => '该应用目前支持英语、土耳其语和德语。新语言会定期添加。';
+	@override String get answer => 'Lingola 界面支持英语、德语、意大利语、法语、土耳其语、日语、西班牙语、俄语、印地语、葡萄牙语和简体中文。';
 }
 
 // Path: profilePage.faqItems.howAiWorks
@@ -2171,7 +2171,7 @@ extension on TranslationsZh {
 			'profilePage.rateUs' => '评价我们',
 			'profilePage.faq' => 'Lingola 常见问题',
 			'profilePage.faqItems.supportedLanguages.question' => '应用支持哪些语言？',
-			'profilePage.faqItems.supportedLanguages.answer' => '该应用目前支持英语、土耳其语和德语。新语言会定期添加。',
+			'profilePage.faqItems.supportedLanguages.answer' => 'Lingola 界面支持英语、德语、意大利语、法语、土耳其语、日语、西班牙语、俄语、印地语、葡萄牙语和简体中文。',
 			'profilePage.faqItems.howAiWorks.question' => '人工智能是如何工作的？',
 			'profilePage.faqItems.howAiWorks.answer' => '人工智能像真正的导师一样与你互动。它分析你的对话，检测错误，并根据你的进度提供个性化反馈。',
 			'profilePage.faqItems.offlineUse.question' => '我可以离线使用应用吗？',

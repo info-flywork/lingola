@@ -586,7 +586,7 @@ class _Translations$profilePage$hi implements Translations$profilePage$en {
 	@override String get shareWithFriendTitle => 'मित्र के साथ साझा करें';
 	@override String get shareInviteBody => 'अपने दोस्तों को आमंत्रित करें और एक साथ अनुवाद का आनंद लें';
 	@override String get rateUs => 'हमें रेट करें';
-	@override String get faq => 'Lingola FAQ';
+	@override String get faq => 'अक्सर पूछे जाने वाले प्रश्न';
 	@override late final _Translations$profilePage$faqItems$hi faqItems = _Translations$profilePage$faqItems$hi._(_root);
 	@override String get support => 'सहायता';
 	@override String get feedback => 'फीडबैक';
@@ -1391,7 +1391,7 @@ class _Translations$profilePage$faqItems$supportedLanguages$hi implements Transl
 
 	// Translations
 	@override String get question => 'ऐप कौन सी भाषाओं का समर्थन करता है?';
-	@override String get answer => 'ऐप वर्तमान में अंग्रेजी, तुर्की और जर्मन का समर्थन करता है। नई भाषाएँ नियमित रूप से जोड़ी जाती हैं।';
+	@override String get answer => 'Lingola इंटरफ़ेस अंग्रेज़ी, जर्मन, इतालवी, फ़्रेंच, तुर्की, जापानी, स्पेनिश, रूसी, हिंदी, पुर्तगाली और सरलीकृत चीनी में उपलब्ध है।';
 }
 
 // Path: profilePage.faqItems.howAiWorks
@@ -2169,9 +2169,9 @@ extension on TranslationsHi {
 			'profilePage.shareWithFriendTitle' => 'मित्र के साथ साझा करें',
 			'profilePage.shareInviteBody' => 'अपने दोस्तों को आमंत्रित करें और एक साथ अनुवाद का आनंद लें',
 			'profilePage.rateUs' => 'हमें रेट करें',
-			'profilePage.faq' => 'Lingola FAQ',
+			'profilePage.faq' => 'अक्सर पूछे जाने वाले प्रश्न',
 			'profilePage.faqItems.supportedLanguages.question' => 'ऐप कौन सी भाषाओं का समर्थन करता है?',
-			'profilePage.faqItems.supportedLanguages.answer' => 'ऐप वर्तमान में अंग्रेजी, तुर्की और जर्मन का समर्थन करता है। नई भाषाएँ नियमित रूप से जोड़ी जाती हैं।',
+			'profilePage.faqItems.supportedLanguages.answer' => 'Lingola इंटरफ़ेस अंग्रेज़ी, जर्मन, इतालवी, फ़्रेंच, तुर्की, जापानी, स्पेनिश, रूसी, हिंदी, पुर्तगाली और सरलीकृत चीनी में उपलब्ध है।',
 			'profilePage.faqItems.howAiWorks.question' => 'एआई कैसे काम करता है?',
 			'profilePage.faqItems.howAiWorks.answer' => 'एआई आपके साथ एक असली ट्यूटर की तरह बातचीत करता है। यह आपकी बातचीत का विश्लेषण करता है, गलतियों का पता लगाता है, और आपकी प्रगति के आधार पर व्यक्तिगत फीडबैक प्रदान करता है।',
 			'profilePage.faqItems.offlineUse.question' => 'क्या मैं ऐप का ऑफ़लाइन उपयोग कर सकता हूँ?',

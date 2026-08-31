@@ -63,6 +63,8 @@ dependencies:
   qr_flutter: ^4.1.0
   share_plus: ^10.1.4
   intl: ^0.20.2
+  device_info_plus: ^11.5.0
+  uuid: ^4.5.1
 
 # Buddy ile aynı native sürümü kilitle (TestFlight riv).
 dependency_overrides:

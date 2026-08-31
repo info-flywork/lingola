@@ -61,7 +61,7 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
   static const _talkOpenBlendMs = 70.0;
   /// Viseme geçiş blend'i — kısa olursa ağız titrer.
-  static const _visemeBlendMs = 110.0;
+  static const _visemeBlendMs = 88.0;
   static const _talkCloseBlendMs = 55.0;
   static const _forceCloseLockoutMs = 220;
   DateTime? _lastVisemePushAt;
@@ -351,7 +351,7 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     if (!force &&
         id != 0 &&
         last != null &&
-        now.difference(last).inMilliseconds < 70) {
+        now.difference(last).inMilliseconds < 58) {
       return;
     }
     _lastVisemePushAt = now;

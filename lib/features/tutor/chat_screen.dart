@@ -5,8 +5,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/auth/api_client.dart';
+import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
+import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
 import '../../widgets/chat_word_chip.dart';
@@ -14,6 +16,7 @@ import '../lesson/lesson_session_result.dart';
 import 'services/openai_chat_service.dart';
 import 'services/tutor_chat_api_service.dart';
 import 'services/tutor_tts_service.dart';
+import 'calling_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
@@ -274,6 +277,27 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  Future<void> _openVideoCall() async {
+    final slug = widget.tutorSlug ?? 'lingola';
+    if (!await PremiumService.requireTutorOrPaywall(context, slug)) return;
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CallingScreen(
+          tutorName: widget.tutorName,
+          imagePath: widget.imagePath,
+          tutorSlug: slug,
+          voiceId: TutorVoiceIds.resolve(slug),
+          riveCdnUrl: AppAssets.tutorRiveCdn(slug),
+          lessonSlug: widget.lessonSlug,
+          lessonSegmentMode: widget.lessonSegmentMode,
+          segmentDuration: widget.segmentDuration,
+          initialElapsed: widget.initialElapsed + _watch.elapsed,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.tutorPage;
@@ -292,12 +316,20 @@ class _ChatScreenState extends State<ChatScreen> {
         titleSpacing: 0,
         title: Row(
           children: [
-            ClipOval(
-              child: HomeAsset(
-                widget.imagePath,
-                width: 36,
-                height: 36,
-                fit: BoxFit.cover,
+            Container(
+              width: 43,
+              height: 43,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF2D46FF), width: 3),
+              ),
+              child: ClipOval(
+                child: HomeAsset(
+                  widget.imagePath,
+                  width: 37,
+                  height: 37,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const SizedBox(width: 10),
@@ -317,6 +349,15 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'Video call',
+            onPressed: _loading ? null : _openVideoCall,
+            icon: const HomeAsset(
+              AppAssets.chatVideo,
+              width: 28,
+              height: 28,
+            ),
+          ),
           if (widget.finishOnPop)
             TextButton(
               onPressed: () => _popSession(finish: true),
@@ -384,6 +425,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                   message: message.content,
                                   imagePath: widget.imagePath,
                                   dismissEpoch: _wordSelectionEpoch,
+                                  voiceId: TutorVoiceIds.resolve(
+                                    widget.tutorSlug,
+                                  ),
                                 ),
                         );
                       },
@@ -392,72 +436,140 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           SafeArea(
             top: false,
-            child: Container(
-              color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 44,
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: TextField(
-                        controller: _controller,
-                        enabled: !_loading && _sessionId != null && !_sending,
-                        textInputAction: TextInputAction.send,
-                        onSubmitted: (_) => _send(),
-                        decoration: InputDecoration(
-                          hintText: text.typeMessage,
-                          border: InputBorder.none,
-                          isDense: true,
-                          hintStyle: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 13,
-                            color: AppColors.secondary,
-                          ),
-                        ),
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Material(
-                    color: AppColors.primary,
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: _sending || _loading ? null : _send,
-                      child: SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: _sending
-                            ? const Padding(
-                                padding: EdgeInsets.all(10),
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.send_rounded,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            child: _ChatComposer(
+              controller: _controller,
+              hint: text.typeMessage,
+              enabled: !_loading && _sessionId != null && !_sending,
+              onSend: _send,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ChatComposer extends StatelessWidget {
+  const _ChatComposer({
+    required this.controller,
+    required this.hint,
+    required this.enabled,
+    required this.onSend,
+  });
+
+  final TextEditingController controller;
+  final String hint;
+  final bool enabled;
+  final VoidCallback onSend;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+      child: ValueListenableBuilder<TextEditingValue>(
+        valueListenable: controller,
+        builder: (context, value, _) {
+          final hasText = value.text.trim().isNotEmpty;
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Material(
+                color: Colors.white,
+                elevation: 0,
+                shadowColor: Colors.transparent,
+                shape: const CircleBorder(),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: .05),
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: 46,
+                    height: 46,
+                    child: Center(
+                      child: Icon(
+                        Icons.add_rounded,
+                        size: 24,
+                        color: AppColors.primary.withValues(
+                          alpha: enabled ? 1 : .4,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Container(
+                  height: 48,
+                  padding: const EdgeInsets.only(left: 16, right: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: Colors.black.withValues(alpha: .05),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: controller,
+                          enabled: enabled,
+                          textInputAction: TextInputAction.send,
+                          onSubmitted: (_) {
+                            if (hasText) onSend();
+                          },
+                          decoration: InputDecoration(
+                            hintText: hint,
+                            border: InputBorder.none,
+                            isDense: true,
+                            hintStyle: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              height: 18 / 14,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            height: 18 / 14,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: HomeAsset(
+                          AppAssets.chatMic,
+                          width: 22,
+                          height: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: enabled && hasText ? onSend : null,
+                          child: const HomeAsset(
+                            AppAssets.send,
+                            width: 32,
+                            height: 32,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -468,11 +580,13 @@ class _IncomingBubble extends StatefulWidget {
     required this.message,
     required this.imagePath,
     required this.dismissEpoch,
+    this.voiceId,
   });
 
   final String message;
   final String imagePath;
   final ValueNotifier<int> dismissEpoch;
+  final String? voiceId;
 
   @override
   State<_IncomingBubble> createState() => _IncomingBubbleState();
@@ -585,7 +699,10 @@ class _IncomingBubbleState extends State<_IncomingBubble> {
     if (source == null || source.isEmpty) return;
     try {
       // Öğrenilen İngilizce kelimenin telaffuzu.
-      final file = await _tts.synthesizeToFile(source);
+      final file = await _tts.synthesizeToFile(
+        source,
+        voiceId: widget.voiceId,
+      );
       await _player.stop();
       await _player.play(DeviceFileSource(file.path));
     } catch (_) {}
@@ -667,7 +784,7 @@ class _IncomingBubbleState extends State<_IncomingBubble> {
     final showActions = _selectedClean != null;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClipOval(
           child: HomeAsset(
@@ -678,47 +795,57 @@ class _IncomingBubbleState extends State<_IncomingBubble> {
           ),
         ),
         const SizedBox(width: 10),
-        Flexible(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: chatBubbleDecoration(
-              wordSelected: _selectedClean != null,
-              radius: 16,
-            ),
-            child: Text.rich(
-              TextSpan(children: _buildWordSpans()),
-            ),
-          ),
-        ),
-        if (showActions) ...[
-          const SizedBox(width: 8),
-          Row(
-            mainAxisSize: MainAxisSize.min,
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _ChatRoundIcon(
-                asset: AppAssets.writingTranslate,
-                color: AppColors.primary,
-                onTap: _busy ? null : _onTranslateIcon,
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: chatBubbleDecoration(
+                    wordSelected: _selectedClean != null,
+                    radius: 16,
+                  ),
+                  child: Text.rich(
+                    TextSpan(children: _buildWordSpans()),
+                  ),
+                ),
               ),
-              const SizedBox(width: 6),
-              _ChatRoundIcon(
-                asset: AppAssets.speaker,
-                color: AppColors.primary,
-                onTap: _busy ? null : _onSpeakIcon,
-              ),
+              if (showActions) ...[
+                const SizedBox(width: 8),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _ChatBubbleActionIcon(
+                      asset: AppAssets.translate,
+                      color: AppColors.primary,
+                      onTap: _busy ? null : _onTranslateIcon,
+                    ),
+                    const SizedBox(width: 6),
+                    _ChatBubbleActionIcon(
+                      asset: AppAssets.speaker,
+                      color: AppColors.secondary,
+                      onTap: _busy ? null : _onSpeakIcon,
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
-        ],
+        ),
       ],
     );
   }
 }
 
-class _ChatRoundIcon extends StatelessWidget {
-  const _ChatRoundIcon({
+class _ChatBubbleActionIcon extends StatelessWidget {
+  const _ChatBubbleActionIcon({
     required this.asset,
     required this.color,
-    this.onTap,
+    required this.onTap,
   });
 
   final String asset;
@@ -734,13 +861,13 @@ class _ChatRoundIcon extends StatelessWidget {
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: SizedBox(
-          width: 28,
-          height: 28,
+          width: 34,
+          height: 34,
           child: Center(
             child: HomeAsset(
               asset,
-              width: 14,
-              height: 14,
+              width: 16,
+              height: 16,
               color: color,
             ),
           ),

@@ -855,7 +855,7 @@
     "faqItems": {
       "supportedLanguages": {
         "question": "Uygulama hangi dilleri destekliyor?",
-        "answer": "Uygulama şu anda İngilizce, Türkçe ve Almanca'yı destekliyor. Yeni diller düzenli olarak ekleniyor."
+        "answer": "Lingola arayüzü İngilizce, Almanca, İtalyanca, Fransızca, Türkçe, Japonca, İspanyolca, Rusça, Hintçe, Portekizce ve Basitleştirilmiş Çince dillerinde kullanılabilir."
       },
       "howAiWorks": {
         "question": "Yapay zeka nasıl çalışıyor?",
