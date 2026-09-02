@@ -11,6 +11,7 @@
 #include <firebase_auth/firebase_auth_plugin_c_api.h>
 #include <firebase_core/firebase_core_plugin_c_api.h>
 #include <flutter_timezone/flutter_timezone_plugin_c_api.h>
+#include <gal/gal_plugin_c_api.h>
 #include <record_windows/record_windows_plugin_c_api.h>
 #include <rive_native/rive_native_plugin.h>
 #include <share_plus/share_plus_windows_plugin_c_api.h>
@@ -28,6 +29,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FirebaseCorePluginCApi"));
   FlutterTimezonePluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterTimezonePluginCApi"));
+  GalPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("GalPluginCApi"));
   RecordWindowsPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("RecordWindowsPluginCApi"));
   RiveNativePluginRegisterWithRegistrar(

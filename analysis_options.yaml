@@ -13,6 +13,8 @@ analyzer:
   exclude:
     - build/**
     - .dart_tool/**
+    - ios/build/**
+    - macos/build/**
 
 linter:
   # The lint rules applied to this project can be customized in the

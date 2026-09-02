@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/auth/api_client.dart';
+import '../core/config/app_env.dart';
 import '../core/constants/app_assets.dart';
 import '../core/constants/app_text.dart';
 import '../core/i18n/native_language.dart';
@@ -70,6 +71,7 @@ class LingolaChatSession extends StatefulWidget {
     this.enableTts = true,
     this.enableMic = true,
     this.autoSpeakBot = true,
+    this.speakOnMount,
     this.ttsVoiceId,
     this.riveAsset,
     this.fallbackImage,
@@ -94,6 +96,8 @@ class LingolaChatSession extends StatefulWidget {
   final bool enableTts;
   final bool enableMic;
   final bool autoSpeakBot;
+  /// Oturum açılışında okunacak metin (ör. role play devam mesajı).
+  final String? speakOnMount;
   /// ElevenLabs voice (örn. erkek ses için TutorVoiceIds.male).
   final String? ttsVoiceId;
   /// Varsa Rive avatar (dudak senkronu).
@@ -122,7 +126,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   late final List<LingolaChatMessage> _messages;
   final _tts = TutorTtsService();
   final _player = AudioPlayer();
-  final _mic = HoldToSpeakService();
+  late final HoldToSpeakService _mic;
   StreamSubscription<void>? _playerCompleteSub;
   StreamSubscription<Duration>? _playerPositionSub;
 
@@ -144,20 +148,28 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   Duration _elapsed = Duration.zero;
   Duration _recordingElapsed = Duration.zero;
   bool _finished = false;
-  bool _sending = false;
+  bool _transcribing = false;
+  bool _awaitingReply = false;
   bool _recording = false;
   bool _recordingLocked = false;
   bool _cancelRecordingPending = false;
   bool _speaking = false;
   String? _localError;
-  Offset? _micDownGlobal;
 
-  static const _lockSlideThreshold = 72.0;
-  static const _cancelSlideThreshold = 72.0;
+  bool get _composerBlocked =>
+      _transcribing ||
+      _awaitingReply ||
+      (widget.busy && _messages.isEmpty);
+
+  bool get _showTyping => _awaitingReply;
 
   @override
   void initState() {
     super.initState();
+    _mic = HoldToSpeakService(
+      multilingual: true,
+      nativeLanguageCode: widget.nativeLanguageCode,
+    );
     _messages = List<LingolaChatMessage>.of(widget.initialMessages);
     _playerCompleteSub = _player.onPlayerComplete.listen((_) {
       if (!mounted) return;
@@ -185,17 +197,22 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       _sessionTimer = Timer(limit, () => unawaited(_expireSession()));
     }
 
-    if (widget.autoSpeakBot && widget.enableTts) {
-      final firstBot = _messages.cast<LingolaChatMessage?>().firstWhere(
-            (m) => m != null && !m.isUser,
-            orElse: () => null,
-          );
-      if (firstBot != null) {
-        unawaited(_speak(firstBot.text));
+    if (widget.enableTts) {
+      final speakOnMount = widget.speakOnMount?.trim();
+      if (speakOnMount != null && speakOnMount.isNotEmpty) {
+        unawaited(_speak(speakOnMount));
+      } else if (widget.autoSpeakBot) {
+        final firstBot = _messages.cast<LingolaChatMessage?>().firstWhere(
+              (m) => m != null && !m.isUser,
+              orElse: () => null,
+            );
+        if (firstBot != null) {
+          unawaited(_speak(firstBot.text));
+        }
       }
     }
 
-    unawaited(_mic.warmUp());
+    unawaited(_mic.warmUp(nativeLanguageCode: widget.nativeLanguageCode));
   }
 
   @override
@@ -224,12 +241,8 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   void _applyVisemeAt(Duration pos) {
     if (!_speaking) return;
     final t = pos.inMilliseconds / 1000.0;
-    final syncedT = ((t - kVisemeLatencySec) * kLipsyncTimelineBoost).clamp(
-      0.0,
-      double.infinity,
-    );
     final lipEnd = _speechEndSec;
-    if (lipEnd != null && lipEnd > 0 && syncedT >= lipEnd) {
+    if (lipEnd != null && lipEnd > 0 && t >= lipEnd - 0.02) {
       if (_lipsActiveNotifier.value) {
         _lipsActiveNotifier.value = false;
         _visemeNotifier.value = 0;
@@ -237,9 +250,36 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       return;
     }
     if (!_lipsActiveNotifier.value || _visemeTrack.isEmpty) return;
-    final next = visemeAt(_visemeTrack, t);
+    final next = visemeAt(
+      _visemeTrack,
+      t,
+      cutOffSec: lipEnd,
+    );
     if (next == _visemeNotifier.value) return;
     _visemeNotifier.value = next;
+  }
+
+  Future<void> _resolveSpeechEnd(TutorSpeechAudio speech) async {
+    Duration? duration;
+    for (var i = 0; i < 16; i++) {
+      duration = await _player.getDuration();
+      if (duration != null && duration.inMilliseconds > 0) break;
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+    }
+    if (!mounted || !_speaking) return;
+    final audioSec = duration != null && duration.inMilliseconds > 0
+        ? duration.inMilliseconds / 1000.0
+        : null;
+    if (audioSec != null && speech.visemes.isNotEmpty) {
+      final scaled = scaleVisemesToAudioDuration(speech.visemes, audioSec);
+      setState(() {
+        _visemeTrack = scaled;
+        _speechEndSec = effectiveSpeechEndSec(
+          visemes: scaled,
+          audioDurationSec: audioSec,
+        );
+      });
+    }
   }
 
   void _startLipsyncPoll() {
@@ -313,55 +353,40 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     _recordingElapsed = Duration.zero;
   }
 
-  Future<void> _onMicPointerDown(PointerDownEvent event) async {
-    if (!widget.enableMic || _sending || _finished || _recording) return;
-    _micDownGlobal = event.position;
-    _cancelRecordingPending = false;
-    await _startMic();
-    if (_recording) _startRecordingTimer();
+  String _micErrorMessage(Object e) {
+    if (e is StateError) return e.message;
+    if (e is ApiException) {
+      final msg = e.message.toLowerCase();
+      if (msg.contains('whisper') ||
+          msg.contains('audio') ||
+          msg.contains('decode')) {
+        return 'Ses kaydı işlenemedi — tekrar dene';
+      }
+      return e.message;
+    }
+    final raw = e.toString();
+    if (raw.toLowerCase().contains('whisper')) {
+      return 'Ses kaydı işlenemedi — tekrar dene';
+    }
+    const prefix = 'Bad state: ';
+    if (raw.startsWith(prefix)) return raw.substring(prefix.length);
+    return raw;
   }
 
-  void _onMicPointerMove(PointerMoveEvent event) {
-    if (!_recording || _recordingLocked || _micDownGlobal == null) return;
-    final delta = event.position - _micDownGlobal!;
-
-    if (delta.dy < -_lockSlideThreshold) {
-      HapticFeedback.mediumImpact();
-      setState(() => _recordingLocked = true);
-      _micDownGlobal = null;
-      return;
-    }
-
-    final shouldCancel = delta.dx < -_cancelSlideThreshold;
-    if (shouldCancel != _cancelRecordingPending) {
-      if (shouldCancel) HapticFeedback.lightImpact();
-      setState(() => _cancelRecordingPending = shouldCancel);
-    }
-  }
-
-  Future<void> _onMicPointerCancel(PointerCancelEvent event) async {
-    if (_recordingLocked) return;
-    await _cancelRecording();
-  }
-
-  Future<void> _onMicPointerUp(PointerUpEvent event) async {
-    if (_recordingLocked) return;
-    _micDownGlobal = null;
-    _stopRecordingTimer();
-
-    if (_cancelRecordingPending) {
-      await _cancelRecording();
-      return;
-    }
+  Future<void> _toggleMic() async {
+    if (!widget.enableMic || _composerBlocked || _finished) return;
     if (_recording) {
       await _stopMicAndSend();
+      return;
     }
+    _cancelRecordingPending = false;
+    await _startMic();
+    if (mounted && _recording) _startRecordingTimer();
   }
 
   Future<void> _cancelRecording() async {
     if (!_recording && !_recordingLocked) return;
     _stopRecordingTimer();
-    _micDownGlobal = null;
     await _mic.cancel();
     if (!mounted) return;
     setState(() {
@@ -490,7 +515,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   Future<void> _sendHintSuggestion() async {
     final text = _hintSuggestion?.trim();
-    if (text == null || text.isEmpty || _finished || _sending) return;
+    if (text == null || text.isEmpty || _finished || _composerBlocked) return;
     setState(() {
       _hintsOn = false;
       _hintSuggestion = null;
@@ -509,38 +534,32 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       _stopLipsyncPoll();
       final speech = await _tts.synthesizeForLipsync(
         text,
-        voiceId: widget.ttsVoiceId,
+        voiceId: widget.ttsVoiceId ?? TutorVoiceIds.lingola,
         modelId: TutorTtsService.flashModel,
+        nativeLanguageCode: widget.nativeLanguageCode,
       );
       if (!mounted || _finished) return;
-      setState(() {
-        _visemeTrack = speech.visemes;
-        _speechEndSec = effectiveSpeechEndSec(
-          visemes: speech.visemes,
-          audioDurationSec: null,
-        );
-        _speaking = false;
-      });
-      _visemeNotifier.value = 0;
-      _lipsActiveNotifier.value = true;
-      if (!mounted || _finished) return;
+
+      var track = coalesceVisemes(speech.visemes);
+      await _player.setReleaseMode(ReleaseMode.stop);
       await _player.play(DeviceFileSource(speech.file.path));
       if (!mounted || _finished) {
         unawaited(_player.stop());
         return;
       }
-      final duration = await _player.getDuration();
-      if (duration != null && duration.inMilliseconds > 0 && mounted) {
-        setState(() {
-          _speechEndSec = effectiveSpeechEndSec(
-            visemes: speech.visemes,
-            audioDurationSec: duration.inMilliseconds / 1000.0,
-          );
-        });
-      }
-      if (!mounted) return;
-      setState(() => _speaking = true);
+
+      setState(() {
+        _visemeTrack = track;
+        _speechEndSec = effectiveSpeechEndSec(
+          visemes: track,
+          audioDurationSec: null,
+        );
+        _speaking = true;
+      });
+      _visemeNotifier.value = 0;
+      _lipsActiveNotifier.value = true;
       _startLipsyncPoll();
+      unawaited(_resolveSpeechEnd(speech));
     } catch (e) {
       if (!mounted) return;
       _stopLipsyncPoll();
@@ -558,11 +577,10 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   Future<void> _sendMessage([String? override]) async {
     final value = (override ?? _controller.text).trim();
     if (value.isEmpty || _finished || widget.busy) return;
-    // Mic yolu STT için _sending açmış olabilir; override varken erken return yapma.
-    if (_sending && override == null) return;
+    if (_awaitingReply && override == null) return;
 
     setState(() {
-      _sending = true;
+      _awaitingReply = true;
       _localError = null;
       _messages.add(LingolaChatMessage.user(value));
       _controller.clear();
@@ -595,12 +613,12 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                 : e.toString();
       });
     } finally {
-      if (mounted) setState(() => _sending = false);
+      if (mounted) setState(() => _awaitingReply = false);
     }
   }
 
   Future<void> _startMic() async {
-    if (!widget.enableMic || _recording || _sending || _finished) return;
+    if (!widget.enableMic || _recording || _composerBlocked || _finished) return;
     await _player.stop();
 
     try {
@@ -613,7 +631,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _localError = e.toString());
+      setState(() => _localError = _micErrorMessage(e));
     }
   }
 
@@ -635,8 +653,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       _recording = false;
       _recordingLocked = false;
       _cancelRecordingPending = false;
-      // STT sırasında spinner; gönderim _sendMessage içinde yönetilir.
-      _sending = true;
+      _transcribing = true;
       _localError = null;
     });
     HapticFeedback.lightImpact();
@@ -647,18 +664,19 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
           .timeout(const Duration(seconds: 35));
       if (!mounted) return;
       if (text.trim().isEmpty) {
-        setState(() => _sending = false);
+        setState(() => _transcribing = false);
         unawaited(_robotSay('Ses anlaşılamadı — tekrar dene'));
         return;
       }
+      setState(() => _transcribing = false);
       await _sendMessage(text.trim());
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _localError = e is TimeoutException
             ? 'Ses tanıma zaman aşımı — tekrar dene'
-            : e.toString();
-        _sending = false;
+            : _micErrorMessage(e);
+        _transcribing = false;
       });
     }
   }
@@ -797,9 +815,9 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
 
   Widget _buildComposer() {
     final hint = widget.typeMessageHint ?? AppText.current.previewChat.typeMessage;
-    final blocked = _sending || (widget.busy && _messages.isEmpty);
+    final blocked = _composerBlocked;
 
-    if (_recording || _recordingLocked) {
+    if (_recordingLocked) {
       return _WhatsAppChatComposer(
         controller: _controller,
         hint: hint,
@@ -846,15 +864,14 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       child: ChatSessionActionBar(
         enableMic: widget.enableMic,
         busy: blocked,
+        micBusy: _transcribing,
         listening: _recording,
         messageActive: false,
         hintActive: _hintsOn,
         hintLoading: _hintLoading,
         onMessage: _toggleTextCompose,
         onHint: () => unawaited(_requestHint()),
-        onMicPointerDown: _onMicPointerDown,
-        onMicPointerUp: _onMicPointerUp,
-        onPointerCancel: _onMicPointerCancel,
+        onMicTap: () => unawaited(_toggleMic()),
       ),
     );
   }
@@ -863,7 +880,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
       _hintsOn && (_hintSuggestion?.trim().isNotEmpty ?? false);
 
   Widget _buildMessageList({required bool darkChrome}) {
-    final blocked = _sending || (widget.busy && _messages.isEmpty);
+    final blocked = _composerBlocked;
     final error = widget.errorText ?? _localError;
 
     if (widget.busy && _messages.isEmpty) {
@@ -908,7 +925,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             itemCount: _messages.length +
                 (_hintDraftVisible ? 1 : 0) +
-                (blocked ? 1 : 0),
+                (_showTyping ? 1 : 0),
             separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               if (index >= _messages.length) {
@@ -920,20 +937,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
                     onSend: () => unawaited(_sendHintSuggestion()),
                   );
                 }
-                return Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: darkChrome ? Colors.white : AppColors.primary,
-                      ),
-                    ),
-                  ),
-                );
+                return _TypingBubble(dark: darkChrome);
               }
               final message = _messages[index];
               if (message.isUser) {
@@ -986,15 +990,6 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
               SafeArea(top: false, child: _buildComposer()),
             ],
           ),
-          if (_recording && !_recordingLocked)
-            Positioned.fill(
-              child: Listener(
-                behavior: HitTestBehavior.translucent,
-                onPointerMove: _onMicPointerMove,
-                onPointerUp: _onMicPointerUp,
-                onPointerCancel: _onMicPointerCancel,
-              ),
-            ),
         ],
       ),
     );
@@ -1070,7 +1065,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
               children: [
                 _ExpandedFloatingMessages(
                   messages: _messages,
-                  sending: _sending,
+                  showTyping: _showTyping,
                   nativeLanguageCode: widget.nativeLanguageCode,
                   onSpeak: widget.enableTts
                       ? (text) => unawaited(_speak(text))
@@ -1136,15 +1131,6 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
               ],
             ),
           ),
-          if (_recording && !_recordingLocked)
-            Positioned.fill(
-              child: Listener(
-                behavior: HitTestBehavior.translucent,
-                onPointerMove: _onMicPointerMove,
-                onPointerUp: _onMicPointerUp,
-                onPointerCancel: _onMicPointerCancel,
-              ),
-            ),
         ],
       ),
     );
@@ -1215,19 +1201,19 @@ class _ChatRobotHero extends StatelessWidget {
 class _ExpandedFloatingMessages extends StatelessWidget {
   const _ExpandedFloatingMessages({
     required this.messages,
-    required this.sending,
+    required this.showTyping,
     this.onSpeak,
     this.nativeLanguageCode,
   });
 
   final List<LingolaChatMessage> messages;
-  final bool sending;
+  final bool showTyping;
   final void Function(String text)? onSpeak;
   final String? nativeLanguageCode;
 
   @override
   Widget build(BuildContext context) {
-    if (messages.isEmpty && !sending) {
+    if (messages.isEmpty && !showTyping) {
       return const SizedBox(height: 8);
     }
 
@@ -1250,26 +1236,16 @@ class _ExpandedFloatingMessages extends StatelessWidget {
         child: ListView.builder(
           reverse: true,
           padding: EdgeInsets.zero,
-          itemCount: messages.length + (sending ? 1 : 0),
+          itemCount: messages.length + (showTyping ? 1 : 0),
           itemBuilder: (context, index) {
-            if (sending && index == 0) {
-              return const Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: 10, left: 4),
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+            if (showTyping && index == 0) {
+              return const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: _TypingBubble(dark: true),
               );
             }
             final msgIndex =
-                messages.length - 1 - (sending ? index - 1 : index);
+                messages.length - 1 - (showTyping ? index - 1 : index);
             final message = messages[msgIndex];
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -2011,6 +1987,45 @@ class _HintDraftBubble extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TypingBubble extends StatelessWidget {
+  const _TypingBubble({this.dark = false});
+
+  final bool dark;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = '${AppText.current.tutorPage.chat.typing}...';
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width * 0.78,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: dark
+              ? Colors.white.withValues(alpha: .18)
+              : const Color(0xFFF0F2F5),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 13,
+            height: 18 / 13,
+            fontStyle: FontStyle.italic,
+            fontWeight: FontWeight.w400,
+            color: dark
+                ? Colors.white.withValues(alpha: .75)
+                : AppColors.secondary,
+          ),
+        ),
       ),
     );
   }

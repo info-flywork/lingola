@@ -29,6 +29,7 @@ import 'lesson_session_result.dart';
 import '../onboarding/language_flag.dart';
 import '../shell/main_shell.dart';
 import '../../widgets/user_avatar.dart';
+import '../../widgets/path_scroll_fab.dart';
 import 'lesson_tutor_sheet.dart';
 
 class LessonScreen extends StatefulWidget {
@@ -55,6 +56,33 @@ class LessonScreen extends StatefulWidget {
     );
   }
 
+  /// Ana sayfa path node — doğrudan derse gir.
+  static Future<void> openLessonFromHome({
+    required String slug,
+    required String label,
+    required String status,
+    required int a1Index,
+    bool hasNotes = false,
+    String? tutorId,
+    String? tutorSlug,
+    String? cefrLevel,
+    String? userCefrMax,
+  }) async {
+    final state = _state;
+    if (state == null) return;
+    await state.openLessonFromHome(
+      slug: slug,
+      label: label,
+      status: status,
+      a1Index: a1Index,
+      hasNotes: hasNotes,
+      tutorId: tutorId,
+      tutorSlug: tutorSlug,
+      cefrLevel: cefrLevel,
+      userCefrMax: userCefrMax,
+    );
+  }
+
   @override
   State<LessonScreen> createState() => _LessonScreenState();
 }
@@ -63,18 +91,103 @@ class _LessonScreenState extends State<LessonScreen> {
   Map<String, List<LessonNodeDto>> _remote = const {};
   String? _userCefrMax;
   var _busy = false;
+  final _scrollController = ScrollController();
+  final _progressAnchorKey = GlobalKey();
+  var _fabPointsToTop = false;
+  var _fabVisible = false;
 
   @override
   void initState() {
     super.initState();
     LessonScreen._state = this;
+    _scrollController.addListener(_onScroll);
     _loadPath();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onScroll();
+    });
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     if (LessonScreen._state == this) LessonScreen._state = null;
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final offset = _scrollController.offset;
+    final max = _scrollController.position.maxScrollExtent;
+    final visible = max > 80;
+    // Üstteyken ↓ (ilerleme), aşağıdaysan ↑ (başa).
+    final pointsToTop = offset > 120;
+    if (visible != _fabVisible || pointsToTop != _fabPointsToTop) {
+      setState(() {
+        _fabVisible = visible;
+        _fabPointsToTop = pointsToTop;
+      });
+    }
+  }
+
+  void _updateFabAfterLayout() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _onScroll();
+    });
+  }
+
+  Future<void> _onPathScrollFabTap() async {
+    if (!_scrollController.hasClients) return;
+    if (_fabPointsToTop) {
+      await _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeOutCubic,
+      );
+      return;
+    }
+    await _scrollToProgressNode();
+  }
+
+  ({String levelId, int nodeIndex})? _progressTarget() {
+    for (final level in LessonCurriculum.levels) {
+      final list = _remote[level.id];
+      final count = list?.length ?? level.iconAssets.length;
+      for (var i = 0; i < count; i++) {
+        if (_stateFor(level.id, i) == _NodeState.active) {
+          return (levelId: level.id, nodeIndex: i);
+        }
+      }
+    }
+    for (final level in LessonCurriculum.levels) {
+      final list = _remote[level.id];
+      final count = list?.length ?? level.iconAssets.length;
+      for (var i = 0; i < count; i++) {
+        if (_stateFor(level.id, i) == _NodeState.unlocked) {
+          return (levelId: level.id, nodeIndex: i);
+        }
+      }
+    }
+    return const (levelId: 'a1', nodeIndex: 0);
+  }
+
+  Future<void> _scrollToProgressNode() async {
+    final anchor = _progressAnchorKey.currentContext;
+    if (anchor != null) {
+      await Scrollable.ensureVisible(
+        anchor,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeOutCubic,
+        alignment: 0.42,
+      );
+      return;
+    }
+    if (!_scrollController.hasClients) return;
+    await _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   Future<void> _loadPath() async {
@@ -87,6 +200,7 @@ class _LessonScreenState extends State<LessonScreen> {
           for (final level in path.levels) level.id: level.lessons,
         };
       });
+      _updateFabAfterLayout();
     } catch (_) {
       // Yerel müfredat durur; kilit durumu aşağıda fallback.
     }
@@ -197,6 +311,65 @@ class _LessonScreenState extends State<LessonScreen> {
       label: label,
       kind: 'lesson',
     );
+  }
+
+  Future<void> openLessonFromHome({
+    required String slug,
+    required String label,
+    required String status,
+    required int a1Index,
+    bool hasNotes = false,
+    String? tutorId,
+    String? tutorSlug,
+    String? cefrLevel,
+    String? userCefrMax,
+  }) async {
+    if (_busy) return;
+    final text = AppText.current.lessonPage;
+    final nodeState = switch (status) {
+      'completed' => _NodeState.completed,
+      'available' => _NodeState.active,
+      'unlocked' => _NodeState.unlocked,
+      _ => _NodeState.locked,
+    };
+
+    if (nodeState == _NodeState.locked) {
+      final userMax = (userCefrMax ?? _userCefrMax ?? '').toUpperCase();
+      final lessonCefr = (cefrLevel ?? 'a1').toUpperCase();
+      if (userMax.isNotEmpty) {
+        await _showLevelLockedDialog(
+          userLevel: userMax,
+          lessonLevel: lessonCefr,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(text.lockedHint)),
+        );
+      }
+      return;
+    }
+
+    if (!PremiumService.canAccessLessonIndex(a1Index)) {
+      await PremiumService.presentPaywall(context);
+      return;
+    }
+
+    if (nodeState == _NodeState.completed && hasNotes) {
+      await _openNotes(slug: slug, label: label, offerPractice: true);
+      return;
+    }
+
+    if (tutorId != null || tutorSlug != null) {
+      await resumeFromHome(
+        slug: slug,
+        label: label,
+        tutorId: tutorId,
+        tutorSlug: tutorSlug,
+      );
+      return;
+    }
+
+    await _startWithTutor(slug: slug, label: label, kind: 'lesson');
   }
 
   int _globalLessonIndex(String levelId, int index) {
@@ -654,6 +827,7 @@ class _LessonScreenState extends State<LessonScreen> {
     };
 
     final sections = <_LevelSectionData>[];
+    final progress = _progressTarget();
     for (final level in LessonCurriculum.levels) {
       final lessons = lessonLists[level.id]!;
       final icons = level.iconAssets;
@@ -674,6 +848,10 @@ class _LessonScreenState extends State<LessonScreen> {
         _LevelSectionData(
           title: titles[level.id]!,
           nodes: levelNodes,
+          progressNodeIndex:
+              progress != null && progress.levelId == level.id
+                  ? progress.nodeIndex
+                  : null,
         ),
       );
     }
@@ -687,18 +865,35 @@ class _LessonScreenState extends State<LessonScreen> {
         backgroundColor: Colors.white,
         body: SafeArea(
           bottom: false,
-          child: CustomScrollView(
-            scrollCacheExtent: const ScrollCacheExtent.pixels(1200),
-            slivers: [
-              SliverToBoxAdapter(child: _LessonHeader(text: text)),
-              for (final section in sections)
-                SliverToBoxAdapter(
-                  child: _LevelPathSection(
-                    title: section.title,
-                    nodes: section.nodes,
-                  ),
-                ),
-              const SliverToBoxAdapter(child: SizedBox(height: 32)),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              CustomScrollView(
+                controller: _scrollController,
+                scrollCacheExtent: const ScrollCacheExtent.pixels(1200),
+                slivers: [
+                  SliverToBoxAdapter(child: _LessonHeader(text: text)),
+                  for (final section in sections)
+                    SliverToBoxAdapter(
+                      child: _LevelPathSection(
+                        title: section.title,
+                        nodes: section.nodes,
+                        progressNodeIndex: section.progressNodeIndex,
+                        progressAnchorKey: section.progressNodeIndex != null
+                            ? _progressAnchorKey
+                            : null,
+                      ),
+                    ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 88)),
+                ],
+              ),
+              PathScrollFab(
+                visible: _fabVisible,
+                pointsToTop: _fabPointsToTop,
+                onTap: _onPathScrollFabTap,
+                bottom: 16,
+                right: 12,
+              ),
             ],
           ),
         ),
@@ -724,10 +919,12 @@ class _LevelSectionData {
   const _LevelSectionData({
     required this.title,
     required this.nodes,
+    this.progressNodeIndex,
   });
 
   final String title;
   final List<_LessonPathNodeData> nodes;
+  final int? progressNodeIndex;
 }
 
 class _LessonHeader extends StatelessWidget {
@@ -749,16 +946,16 @@ class _LessonHeader extends StatelessWidget {
 
             return Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(21, 12, 21, 20),
+              padding: const EdgeInsets.fromLTRB(21, 12, 21, 24),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius:
-                    const BorderRadius.vertical(bottom: Radius.circular(24)),
-                boxShadow: [
+                    const BorderRadius.vertical(bottom: Radius.circular(20)),
+                boxShadow: const [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: .04),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    color: Color(0xFFB6BBC4),
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
                   ),
                 ],
               ),
@@ -824,10 +1021,14 @@ class _LevelPathSection extends StatelessWidget {
   const _LevelPathSection({
     required this.title,
     required this.nodes,
+    this.progressNodeIndex,
+    this.progressAnchorKey,
   });
 
   final String title;
   final List<_LessonPathNodeData> nodes;
+  final int? progressNodeIndex;
+  final GlobalKey? progressAnchorKey;
 
   @override
   Widget build(BuildContext context) {
@@ -851,6 +1052,8 @@ class _LevelPathSection extends StatelessWidget {
         ),
         _LevelLessonPath(
           nodes: nodes,
+          progressNodeIndex: progressNodeIndex,
+          progressAnchorKey: progressAnchorKey,
         ),
       ],
     );
@@ -861,9 +1064,13 @@ class _LevelPathSection extends StatelessWidget {
 class _LevelLessonPath extends StatelessWidget {
   const _LevelLessonPath({
     required this.nodes,
+    this.progressNodeIndex,
+    this.progressAnchorKey,
   });
 
   final List<_LessonPathNodeData> nodes;
+  final int? progressNodeIndex;
+  final GlobalKey? progressAnchorKey;
 
   static const _designWidth = 398.0;
   static const _leftX = 65.0;
@@ -933,17 +1140,20 @@ class _LevelLessonPath extends StatelessWidget {
                     Positioned(
                       left: _isLeft(i) ? _leftX : _rightX,
                       top: nodeTop(i),
-                      child: _LessonNode(
-                        label: nodes[i].label,
-                        iconAsset: nodes[i].iconAsset,
-                        state: nodes[i].state,
-                        onTap: nodes[i].onTap,
-                        // İlk node (Greetings): Figma’da etiket ikonun altında.
-                        labelSide: i == 0
-                            ? _LabelSide.below
-                            : (_isLeft(i)
-                                ? _LabelSide.right
-                                : _LabelSide.left),
+                      child: KeyedSubtree(
+                        key: progressNodeIndex == i ? progressAnchorKey : null,
+                        child: _LessonNode(
+                          label: nodes[i].label,
+                          iconAsset: nodes[i].iconAsset,
+                          state: nodes[i].state,
+                          onTap: nodes[i].onTap,
+                          // İlk node (Greetings): Figma’da etiket ikonun altında.
+                          labelSide: i == 0
+                              ? _LabelSide.below
+                              : (_isLeft(i)
+                                  ? _LabelSide.right
+                                  : _LabelSide.left),
+                        ),
                       ),
                     ),
                 ],

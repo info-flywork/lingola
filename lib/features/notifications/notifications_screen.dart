@@ -71,30 +71,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     } catch (_) {}
   }
 
-  Future<void> _confirmAndDelete(_NotificationItem item) async {
-    final text = AppText.current.notificationsPage;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(text.deleteConfirmTitle),
-        content: Text(text.deleteConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(text.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFFFF0014)),
-            child: Text(text.delete),
-          ),
-        ],
-      ),
-    );
-    if (ok != true || !mounted) return;
-    await _deleteItem(item);
-  }
-
   static _NotificationItem _mapItem(NotificationInboxItem item) {
     return _NotificationItem(
       id: item.id,
@@ -187,7 +163,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                     _openSwipeId = open ? item.id : null;
                                   });
                                 },
-                                onDeleteTap: () => _confirmAndDelete(item),
+                                onDeleteTap: () => _deleteItem(item),
                               );
                             },
                           ),

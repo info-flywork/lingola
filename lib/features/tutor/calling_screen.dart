@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive/rive.dart' as rive;
 
 import '../../core/auth/api_client.dart';
 import '../../core/constants/app_assets.dart';
@@ -135,7 +136,7 @@ class _CallingScreenState extends State<CallingScreen> {
       unawaited(_loadLessonBadge());
     }
     debugPrint(
-      '[calling] slug=${widget.tutorSlug} voiceId=${_conversation.voiceId}',
+      '[calling] slug=${widget.tutorSlug} voiceId=${_conversation.resolvedVoiceId}',
     );
     _conversation
       ..addListener(_onConvo)
@@ -473,8 +474,10 @@ class _CallingScreenState extends State<CallingScreen> {
 
   Widget _buildAvatar({
     required EdgeInsets padding,
-    Alignment alignment = Alignment.bottomCenter,
+    Alignment alignment = const Alignment(0, 0.15),
     bool anchorBottom = false,
+    bool cover = false,
+    double scale = 0.92,
   }) {
     // DB `tutors.rive_cdn_url` → CDN only (Mindcoach gibi). Yerel .riv yok.
     final cdnRaw = widget.riveCdnUrl?.trim();
@@ -495,6 +498,9 @@ class _CallingScreenState extends State<CallingScreen> {
         talking: _conversation.avatarTalking,
         fallbackImage: widget.imagePath,
         fallbackRivePath: rivFallback,
+        fit: cover ? rive.Fit.cover : rive.Fit.contain,
+        alignment: alignment,
+        scale: scale,
         lipsyncViseme: _conversation.avatarTalking
             ? (_conversation.hasLipsyncTrack
                 ? _conversation.currentViseme
@@ -511,18 +517,18 @@ class _CallingScreenState extends State<CallingScreen> {
       return _buildMicRow(darkChrome: true);
     }
     final listening = _conversation.listening;
-    final busy = _conversation.busy;
+    final transcribing = _conversation.transcribing;
+    final speaking = _conversation.speaking;
     return ChatSessionActionBar(
       listening: listening,
-      busy: busy,
+      busy: speaking || transcribing,
+      micBusy: transcribing,
       messageActive: _textComposeOn,
       hintActive: _hintsOn,
       hintLoading: _hintLoading,
       onMessage: _toggleTextCompose,
       onHint: () => unawaited(_toggleHint()),
-      onMicPointerDown: (_) => unawaited(_conversation.startListening()),
-      onMicPointerUp: (_) => unawaited(_conversation.stopListening()),
-      onPointerCancel: (_) => unawaited(_conversation.stopListening()),
+      onMicTap: () => unawaited(_conversation.toggleMic()),
     );
   }
 
@@ -583,7 +589,9 @@ class _CallingScreenState extends State<CallingScreen> {
 
   Widget _buildMicRow({required bool darkChrome}) {
     final listening = _conversation.listening;
-    final busy = _conversation.busy;
+    final transcribing = _conversation.transcribing;
+    final speaking = _conversation.speaking;
+    final micLocked = speaking || transcribing;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -615,11 +623,10 @@ class _CallingScreenState extends State<CallingScreen> {
         ),
         const SizedBox(width: 28),
         _MicButton(
-          active: listening || !busy,
           listening: listening,
-          busy: busy,
-          onPressStart: () => unawaited(_conversation.startListening()),
-          onPressEnd: () => unawaited(_conversation.stopListening()),
+          transcribing: transcribing,
+          disabled: micLocked && !listening,
+          onToggle: () => unawaited(_conversation.toggleMic()),
         ),
         const SizedBox(width: 28),
         _ControlCircle(
@@ -813,11 +820,13 @@ class _CallingScreenState extends State<CallingScreen> {
                             Align(
                               alignment: Alignment.bottomCenter,
                               child: SizedBox(
-                                height: 300,
+                                height: 385,
                                 width: double.infinity,
                                 child: _buildAvatar(
                                   padding: EdgeInsets.zero,
                                   anchorBottom: false,
+                                  alignment: const Alignment(0, 0.1),
+                                  scale: 1.22,
                                 ),
                               ),
                             ),
@@ -885,10 +894,10 @@ class _CallingScreenState extends State<CallingScreen> {
                     const SizedBox(height: 8),
                   ],
                   if (listening) ...[
-                    const Text(
-                      'Basılı tut — konuş — bırak',
+                    Text(
+                      AppText.current.tutorPage.calling.tapToSpeakHint,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -912,24 +921,42 @@ class _CallingScreenState extends State<CallingScreen> {
     );
   }
 
-  /// Tam ekran calling (eski layout).
+  /// Tam ekran calling — Figma Teachers frame (393×852).
   Widget _buildExpanded(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
+    final size = MediaQuery.sizeOf(context);
     final listening = _conversation.listening;
+    const figmaW = 393.0;
+    const figmaH = 852.0;
+    const avatarTop = 80.0;
+    const avatarHeight = 600.0;
+    const micRowHeight = 74.0;
+    const badgeBlockHeight = 36.0;
+    const badgeGap = 14.0;
+    final controlsBottom = bottom + 12;
+    final badgeBottom = controlsBottom + micRowHeight + badgeGap;
+    final captionBottom = badgeBottom + badgeBlockHeight + 8;
 
     return Scaffold(
       backgroundColor: _sceneStart ?? const Color(0xFF1A2A4A),
       body: Stack(
         fit: StackFit.expand,
+        clipBehavior: Clip.hardEdge,
         children: [
           TutorSceneBackdrop(
             gradientStart: _sceneStart,
             gradientEnd: _sceneEnd,
           ),
-          Positioned.fill(
+          Positioned(
+            top: size.height * avatarTop / figmaH,
+            left: 0,
+            right: 0,
+            height: size.height * avatarHeight / figmaH,
             child: _buildAvatar(
-              padding: const EdgeInsets.fromLTRB(0, 8, 0, 40),
-              alignment: const Alignment(0, -0.05),
+              padding: EdgeInsets.zero,
+              cover: false,
+              alignment: const Alignment(0, 0.1),
+              scale: 1.16,
             ),
           ),
           Positioned(
@@ -954,7 +981,7 @@ class _CallingScreenState extends State<CallingScreen> {
             left: 0,
             right: 0,
             bottom: 0,
-            height: 320,
+            height: 140,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -962,7 +989,7 @@ class _CallingScreenState extends State<CallingScreen> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Color(0x00000000),
-                    Color(0x99000000),
+                    Color(0x33000000),
                   ],
                 ),
               ),
@@ -975,27 +1002,31 @@ class _CallingScreenState extends State<CallingScreen> {
               child: _buildTopBar(onDark: true),
             ),
           ),
+          if (_captionsOn)
+            Positioned(
+              left: 0,
+              right: 0,
+              top: size.height * avatarTop / figmaH +
+                  size.height * avatarHeight / figmaH * 0.54,
+              bottom: captionBottom,
+              child: _ExpandedCaptionOverlay(
+                messages: _conversation.messages,
+                onTranslateSentence: _conversation.toggleSentenceTranslation,
+                onTranslateWord: _conversation.translateText,
+              ),
+            ),
           Positioned(
             left: 20,
             right: 20,
-            bottom: bottom + 28,
+            bottom: controlsBottom,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (_captionsOn) ...[
-                  _ScrollingChat(
-                    messages: _conversation.messages,
-                    onTranslateSentence:
-                        _conversation.toggleSentenceTranslation,
-                    onTranslateWord: _conversation.translateText,
-                  ),
-                  const SizedBox(height: 12),
-                ],
                 if (listening) ...[
-                  const Text(
-                    'Basılı tut — konuş — bırak',
+                  Text(
+                    AppText.current.tutorPage.calling.tapToSpeakHint,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -1018,29 +1049,178 @@ class _CallingScreenState extends State<CallingScreen> {
                   ),
                   const SizedBox(height: 8),
                 ],
-                _GlassPill(
-                  child: Text(
-                    _displayLessonBadge,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
+                if (_buildHintCard(onDark: true) case final hint?) ...[
+                  hint,
+                  const SizedBox(height: 12),
+                ],
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: Center(
+                    child: _LessonBadgePill(label: _displayLessonBadge),
                   ),
                 ),
-                const SizedBox(height: 10),
-                _buildSpeedChip(),
-                if (_buildHintCard(onDark: true) case final hint?) ...[
-                  const SizedBox(height: 12),
-                  hint,
-                ],
-                const SizedBox(height: 18),
                 _buildSessionActionBar(darkChrome: true),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+enum _CallingBubbleLayout { list, overlayTutor, overlayUser }
+
+/// Figma Teachers: kaydırılabilir mesajlar — çene hizasından yukarı soluklaşır.
+class _ExpandedCaptionOverlay extends StatefulWidget {
+  const _ExpandedCaptionOverlay({
+    required this.messages,
+    required this.onTranslateSentence,
+    required this.onTranslateWord,
+  });
+
+  final List<CallMessage> messages;
+  final Future<void> Function(int messageIndex) onTranslateSentence;
+  final Future<String> Function(String word) onTranslateWord;
+
+  @override
+  State<_ExpandedCaptionOverlay> createState() =>
+      _ExpandedCaptionOverlayState();
+}
+
+class _ExpandedCaptionOverlayState extends State<_ExpandedCaptionOverlay> {
+  final _scrollController = ScrollController();
+
+  @override
+  void didUpdateWidget(covariant _ExpandedCaptionOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.messages.length != oldWidget.messages.length) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLatest());
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToLatest() {
+    if (!_scrollController.hasClients) return;
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.messages.isEmpty) return const SizedBox.shrink();
+
+    final w = MediaQuery.sizeOf(context).width;
+    const figmaW = 393.0;
+    final sidePad = w * 23 / figmaW;
+
+    return ShaderMask(
+      shaderCallback: (rect) {
+        return const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.transparent,
+            Colors.white,
+            Colors.white,
+          ],
+          stops: [0, 0.14, 1],
+        ).createShader(rect);
+      },
+      blendMode: BlendMode.dstIn,
+      child: ListView.builder(
+        controller: _scrollController,
+        reverse: true,
+        padding: const EdgeInsets.only(top: 4),
+        itemCount: widget.messages.length,
+        itemBuilder: (context, index) {
+          final messageIndex = widget.messages.length - 1 - index;
+          final msg = widget.messages[messageIndex];
+          final isTutor = msg.role == CallMessageRole.tutor;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: isTutor
+                ? Padding(
+                    padding: EdgeInsets.only(
+                      left: sidePad,
+                      right: w * 10 / figmaW,
+                    ),
+                    child: _CallingMessageBubble(
+                      message: msg,
+                      layout: _CallingBubbleLayout.overlayTutor,
+                      onTranslateSentence: () =>
+                          widget.onTranslateSentence(messageIndex),
+                      onTranslateWord: widget.onTranslateWord,
+                    ),
+                  )
+                : Padding(
+                    padding: EdgeInsets.only(
+                      left: w * 64 / figmaW,
+                      right: sidePad,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: w * 330 / figmaW,
+                        ),
+                        child: _CallingMessageBubble(
+                          message: msg,
+                          layout: _CallingBubbleLayout.overlayUser,
+                          onTranslateSentence: () =>
+                              widget.onTranslateSentence(messageIndex),
+                          onTranslateWord: widget.onTranslateWord,
+                        ),
+                      ),
+                    ),
+                  ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Figma Rectangle 195 — #000 @ 40%, radius 50, içerik kadar genişler.
+class _LessonBadgePill extends StatelessWidget {
+  const _LessonBadgePill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxW = MediaQuery.sizeOf(context).width - 48;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxW),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.40),
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            softWrap: true,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12,
+              height: 16 / 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1073,7 +1253,7 @@ class _CompactMessageList extends StatelessWidget {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      padding: const EdgeInsets.fromLTRB(10, 12, 10, 16),
       itemCount: messages.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
@@ -1088,73 +1268,18 @@ class _CompactMessageList extends StatelessWidget {
   }
 }
 
-/// Figma: kayan mesaj balonları (mavi %30 / beyaz %40) + kelime/cümle çeviri.
-class _ScrollingChat extends StatelessWidget {
-  const _ScrollingChat({
-    required this.messages,
-    required this.onTranslateSentence,
-    required this.onTranslateWord,
-  });
-
-  final List<CallMessage> messages;
-  final Future<void> Function(int messageIndex) onTranslateSentence;
-  final Future<String> Function(String word) onTranslateWord;
-
-  @override
-  Widget build(BuildContext context) {
-    if (messages.isEmpty) {
-      return const SizedBox(height: 120);
-    }
-
-    return SizedBox(
-      height: 200,
-      child: ShaderMask(
-        shaderCallback: (rect) {
-          return const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.transparent,
-              Colors.white,
-              Colors.white,
-            ],
-            stops: [0, 0.18, 1],
-          ).createShader(rect);
-        },
-        blendMode: BlendMode.dstIn,
-        child: ListView.builder(
-          reverse: true,
-          padding: EdgeInsets.zero,
-          itemCount: messages.length,
-          itemBuilder: (context, index) {
-            // reverse: index 0 = en yeni
-            final messageIndex = messages.length - 1 - index;
-            final msg = messages[messageIndex];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _CallingMessageBubble(
-                message: msg,
-                onTranslateSentence: () => onTranslateSentence(messageIndex),
-                onTranslateWord: onTranslateWord,
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
 class _CallingMessageBubble extends StatefulWidget {
   const _CallingMessageBubble({
     required this.message,
     required this.onTranslateSentence,
     required this.onTranslateWord,
+    this.layout = _CallingBubbleLayout.list,
   });
 
   final CallMessage message;
   final Future<void> Function() onTranslateSentence;
   final Future<String> Function(String word) onTranslateWord;
+  final _CallingBubbleLayout layout;
 
   @override
   State<_CallingMessageBubble> createState() => _CallingMessageBubbleState();
@@ -1329,26 +1454,47 @@ class _CallingMessageBubbleState extends State<_CallingMessageBubble> {
   @override
   Widget build(BuildContext context) {
     final isTutor = widget.message.role == CallMessageRole.tutor;
+    final overlayUser =
+        widget.layout == _CallingBubbleLayout.overlayUser;
+    final overlayTutor =
+        widget.layout == _CallingBubbleLayout.overlayTutor;
 
     if (!isTutor) {
+      final decoration = overlayUser
+          ? BoxDecoration(
+              color: const Color(0xFF2D46FF).withValues(alpha: 0.42),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
+                bottomRight: Radius.circular(15),
+                bottomLeft: Radius.circular(15),
+              ),
+            )
+          : BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(14),
+            );
+
       return Align(
         alignment: Alignment.centerRight,
         child: Container(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.sizeOf(context).width * 0.78,
+          constraints: overlayUser
+              ? null
+              : BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width * 0.90,
+                ),
+          padding: EdgeInsets.symmetric(
+            horizontal: overlayUser ? 14 : 12,
+            vertical: overlayUser ? 10 : 12,
           ),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(14),
-          ),
+          decoration: decoration,
           child: Text(
             widget.message.text,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Poppins',
-              fontSize: 14,
-              height: 18 / 14,
-              fontWeight: FontWeight.w400,
+              fontSize: overlayUser ? 13 : 14,
+              height: 18 / (overlayUser ? 13 : 14),
+              fontWeight: FontWeight.w500,
               color: Colors.white,
             ),
           ),
@@ -1356,25 +1502,43 @@ class _CallingMessageBubbleState extends State<_CallingMessageBubble> {
       );
     }
 
-    final baseColor = AppColors.ink;
+    final baseColor = overlayTutor ? AppColors.ink : AppColors.ink;
+
+    final bubbleDecoration = overlayTutor
+        ? BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.48),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
+              bottomRight: Radius.circular(15),
+            ),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.35),
+              width: 0.5,
+            ),
+          )
+        : chatBubbleDecoration(
+            wordSelected: _selectedWord != null,
+          );
 
     final bubble = Container(
-      padding: const EdgeInsets.all(12),
-      decoration: chatBubbleDecoration(
-        wordSelected: _selectedWord != null,
+      padding: EdgeInsets.symmetric(
+        horizontal: overlayTutor ? 14 : 12,
+        vertical: overlayTutor ? 10 : 12,
       ),
+      decoration: bubbleDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text.rich(
             TextSpan(
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 14,
-                height: 18 / 14,
-                fontWeight: FontWeight.w400,
-                color: AppColors.ink,
+                fontSize: overlayTutor ? 13 : 14,
+                height: 18 / (overlayTutor ? 13 : 14),
+                fontWeight: FontWeight.w500,
+                color: baseColor,
               ),
               children: _buildWordSpans(isTutor: true, baseColor: baseColor),
             ),
@@ -1397,13 +1561,29 @@ class _CallingMessageBubbleState extends State<_CallingMessageBubble> {
       ),
     );
 
+    if (overlayTutor) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(child: bubble),
+          const SizedBox(width: 8),
+          _CallingBubbleActions(
+            translateBusy: _sentenceBusy,
+            onTranslate: _onSentenceTap,
+            onSpeak: _onSpeak,
+            onDark: true,
+          ),
+        ],
+      );
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Flexible(
           child: Container(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.sizeOf(context).width * 0.72,
+              maxWidth: MediaQuery.sizeOf(context).width * 0.90,
             ),
             child: bubble,
           ),
@@ -1425,11 +1605,13 @@ class _CallingBubbleActions extends StatelessWidget {
     required this.translateBusy,
     required this.onTranslate,
     required this.onSpeak,
+    this.onDark = false,
   });
 
   final bool translateBusy;
   final VoidCallback onTranslate;
   final VoidCallback onSpeak;
+  final bool onDark;
 
   @override
   Widget build(BuildContext context) {
@@ -1439,15 +1621,17 @@ class _CallingBubbleActions extends StatelessWidget {
       children: [
         _CallingBubbleActionIcon(
           asset: AppAssets.translate,
-          color: AppColors.primary,
+          color: onDark ? AppColors.primary : AppColors.primary,
           onTap: translateBusy ? null : onTranslate,
           busy: translateBusy,
+          filled: onDark,
         ),
         const SizedBox(width: 6),
         _CallingBubbleActionIcon(
           asset: AppAssets.speaker,
-          color: AppColors.secondary,
+          color: onDark ? Colors.white : AppColors.secondary,
           onTap: onSpeak,
+          onDark: onDark,
         ),
       ],
     );
@@ -1460,18 +1644,29 @@ class _CallingBubbleActionIcon extends StatelessWidget {
     required this.color,
     required this.onTap,
     this.busy = false,
+    this.filled = false,
+    this.onDark = false,
   });
 
   final String asset;
   final Color color;
   final VoidCallback? onTap;
   final bool busy;
+  final bool filled;
+  final bool onDark;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
-      shape: CircleBorder(side: BorderSide(color: color, width: 1.4)),
+      color: filled ? AppColors.primary : Colors.transparent,
+      shape: CircleBorder(
+        side: BorderSide(
+          color: onDark
+              ? Colors.white.withValues(alpha: filled ? 0 : 0.55)
+              : color,
+          width: 1.4,
+        ),
+      ),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
@@ -1485,7 +1680,7 @@ class _CallingBubbleActionIcon extends StatelessWidget {
                     height: 14,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: color,
+                      color: filled ? Colors.white : color,
                     ),
                   ),
                 )
@@ -1494,7 +1689,7 @@ class _CallingBubbleActionIcon extends StatelessWidget {
                     asset,
                     width: 16,
                     height: 16,
-                    color: color,
+                    color: filled ? Colors.white : color,
                   ),
                 ),
         ),
@@ -1505,61 +1700,51 @@ class _CallingBubbleActionIcon extends StatelessWidget {
 
 class _MicButton extends StatelessWidget {
   const _MicButton({
-    required this.active,
     required this.listening,
-    required this.busy,
-    required this.onPressStart,
-    required this.onPressEnd,
+    required this.transcribing,
+    required this.disabled,
+    required this.onToggle,
   });
 
-  final bool active;
   final bool listening;
-  final bool busy;
-  final VoidCallback onPressStart;
-  final VoidCallback onPressEnd;
+  final bool transcribing;
+  final bool disabled;
+  final VoidCallback onToggle;
 
   @override
   Widget build(BuildContext context) {
     final size = listening ? 78.0 : 74.0;
-    return Listener(
-      onPointerDown: busy
-          ? null
-          : (_) {
-              onPressStart();
-            },
-      onPointerUp: busy
-          ? null
-          : (_) {
-              onPressEnd();
-            },
-      onPointerCancel: busy
-          ? null
-          : (_) {
-              onPressEnd();
-            },
+    final showSpinner = transcribing && !listening;
+    return GestureDetector(
+      onTap: disabled && !listening ? null : onToggle,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: busy
+          color: showSpinner
               ? AppColors.primary.withValues(alpha: .55)
               : listening
                   ? const Color(0xFFFF3B30)
-                  : AppColors.primary,
+                  : disabled
+                      ? AppColors.primary.withValues(alpha: .45)
+                      : AppColors.primary,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 1),
+          border: Border.all(
+            color: listening ? Colors.white : Colors.white.withValues(alpha: .9),
+            width: listening ? 2.5 : 1,
+          ),
           boxShadow: [
             BoxShadow(
               color: (listening ? const Color(0xFFFF3B30) : AppColors.primary)
-                  .withValues(alpha: .45),
-              blurRadius: 16,
+                  .withValues(alpha: listening ? .55 : .45),
+              blurRadius: listening ? 18 : 16,
               offset: const Offset(0, 6),
             ),
           ],
         ),
         alignment: Alignment.center,
-        child: busy
+        child: showSpinner
             ? const SizedBox(
                 width: 26,
                 height: 26,

@@ -44,6 +44,8 @@ class TranslationsZh with BaseTranslations<AppLocale, Translations> implements T
 	@override late final _Translations$language$zh language = _Translations$language$zh._(_root);
 	@override late final _Translations$setup$zh setup = _Translations$setup$zh._(_root);
 	@override late final _Translations$accountCreating$zh accountCreating = _Translations$accountCreating$zh._(_root);
+	@override late final _Translations$planReady$zh planReady = _Translations$planReady$zh._(_root);
+	@override late final _Translations$demoChat$zh demoChat = _Translations$demoChat$zh._(_root);
 	@override late final _Translations$previewChat$zh previewChat = _Translations$previewChat$zh._(_root);
 	@override late final _Translations$paywall$zh paywall = _Translations$paywall$zh._(_root);
 	@override late final _Translations$auth$zh auth = _Translations$auth$zh._(_root);
@@ -166,13 +168,22 @@ class _Translations$setup$zh implements Translations$setup$en {
 	@override String get goalStudying => '留学';
 	@override String get goalOther => '其他';
 	@override String get levelTitle => '你目前的语言水平是什么？';
-	@override String get levelBeginner => '初学者 — 我知道一些单词';
-	@override String get levelIntermediate => '中级 — 我能进行简单对话';
-	@override String get levelAdvanced => '高级 — 我会说但想要提高';
 	@override String get paceTitle => '你想多快提高？';
-	@override String get paceLight => '每天5-10分钟（轻松）';
-	@override String get paceRecommended => '每天15-20分钟（推荐）';
-	@override String get paceFast => '每天30分钟以上（快速见效）';
+	@override String get explanationTitle => '当你用自己的语言提问时，我们应该如何解释？';
+	@override String get explanationHint => '你可以随时在个人资料设置中更改。';
+	@override String get explanationNative => '用我的母语解释';
+	@override String get explanationEnglish => '用英语解释';
+	@override String get levelA1 => 'A1 — 我知道一些单词';
+	@override String get levelA2 => 'A2 — 我能使用简单短语';
+	@override String get levelB1 => 'B1 — 我能进行日常对话';
+	@override String get levelB2 => 'B2 — 我能在熟悉话题上流利交流';
+	@override String get levelC1 => 'C1 — 高级，我想继续提升';
+	@override String get levelC2 => 'C2 — 接近母语水平';
+	@override String get paceMin5 => '每天5分钟';
+	@override String get paceMin10 => '每天10分钟';
+	@override String get paceMin15 => '每天15分钟';
+	@override String get paceMin30 => '每天30分钟';
+	@override String get paceMin60 => '每天60分钟';
 }
 
 // Path: accountCreating
@@ -189,6 +200,78 @@ class _Translations$accountCreating$zh implements Translations$accountCreating$e
 	@override String get stepPlan => '您的计划正在最终确定';
 	@override String get optimization => '优化中';
 	@override String progress({required Object value}) => '${value}%';
+	@override String get titleLine1 => 'Building your';
+	@override String get titleLine2 => 'Account';
+	@override String get testimonialQuote => 'Week one I could barely say hello. Week three I was having full conversations with my AI tutor. I\'m not stopping now.';
+	@override String get testimonialAuthor => 'Maria, 29 — 3 months in';
+	@override String get comparisonPitch => 'Learn 600+ extra phrases about 30× faster with Lingola than studying entirely on your own.';
+	@override String get comparisonAloneCount => '400';
+	@override String get comparisonLingolaCount => '1000';
+	@override String get comparisonUnit => 'PHRASES';
+	@override String get comparisonAloneLabel => 'On your own';
+	@override String get comparisonLingolaLabel => 'Lingola';
+	@override String get fluencyPitch => 'From today to fluency — your next level is only 30 days away';
+	@override String get chartToday => 'Today';
+	@override String get chartMid => '15 Sep';
+	@override String get chartEnd => '30 Sep';
+}
+
+// Path: planReady
+class _Translations$planReady$zh implements Translations$planReady$en {
+	_Translations$planReady$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get titleLine1 => 'Your plan is';
+	@override String get titleLine2 => 'Ready!';
+	@override String get statBanner => '95% of users see results within the first 7 days';
+	@override String planTitle({required Object name}) => '${name}\'S PLAN';
+	@override String get defaultName => 'YOUR';
+	@override String get fieldCourse => 'COURSE';
+	@override String get fieldLevel => 'YOUR LEVEL';
+	@override String get fieldFocus => 'FOCUS AREA';
+	@override String get fieldDuration => 'DURATION';
+	@override String get fieldInterests => 'INTERESTS';
+	@override String get startPlan => 'Start my plan →';
+	@override String get courseEnglish => 'English';
+	@override String get courseGerman => 'German';
+	@override String get courseFrench => 'French';
+	@override String get courseItalian => 'Italian';
+	@override String get courseSpanish => 'Spanish';
+	@override String get courseJapanese => 'Japanese';
+	@override String get courseRussian => 'Russian';
+	@override String get courseTurkish => 'Turkish';
+	@override String get goalCareer => 'Career & business';
+	@override String get goalTravel => 'Travel';
+	@override String get goalLiving => 'Living abroad';
+	@override String get goalStudying => 'Studying abroad';
+	@override String get goalOther => 'Other';
+	@override String get levelA1 => 'A1';
+	@override String get levelA2 => 'A2';
+	@override String get levelB1 => 'B1';
+	@override String get levelB2 => 'B2';
+	@override String get levelC1 => 'C1';
+	@override String get levelC2 => 'C2';
+	@override String get paceMin5 => '每天5分钟';
+	@override String get paceMin10 => '每天10分钟';
+	@override String get paceMin15 => '每天15分钟';
+	@override String get paceMin30 => '每天30分钟';
+	@override String get paceMin60 => '每天60分钟';
+}
+
+// Path: demoChat
+class _Translations$demoChat$zh implements Translations$demoChat$en {
+	_Translations$demoChat$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get brand => 'Lingola';
+	@override String get lessonBadge => 'Getting to know you';
+	@override String get speed => '1x';
+	@override String get typeMessage => 'Type a message...';
+	@override String get incoming1 => 'Hi! I\'m your AI tutor. Before we start — if you\'d rather not continue in English, or if you don\'t understand something, just tell me and I\'ll switch to your language. Hope you\'re doing well! Let\'s learn a bit about you — are you working right now, or are you a student?';
 }
 
 // Path: previewChat
@@ -202,7 +285,7 @@ class _Translations$previewChat$zh implements Translations$previewChat$en {
 	@override String get lessonBadge => '课程 1：问候';
 	@override String get speed => '1x';
 	@override String get typeMessage => '输入消息...';
-	@override String get incoming1 => '嗨！欢迎来到 Lingola — 我是你的 AI 导师。准备好用英语打个招呼吗？';
+	@override String get incoming1 => '嗨！欢迎来到 Lingola — 我是你的 AI 导师。无论你的水平如何，在这里都可以安心学英语。英语里打招呼可以说 \'Hi\' 或 \'Hello\' — 试试看，用英语给我发 \'Hi!\'！';
 	@override String get outgoing1 => '嗨！我准备好练习了。';
 	@override String get incoming2Highlight => '早上好';
 	@override String get incoming2Rest => '，Emrah！我很高兴你准备好了。早上的咖啡总是建立联系的好开始。你想聊些什么？';
@@ -247,6 +330,9 @@ class _Translations$auth$zh implements Translations$auth$en {
 	@override String get continueGoogle => '继续使用Google';
 	@override String get continueApple => '继续使用Apple';
 	@override String get continueGuest => '作为访客继续';
+	@override String get or => '或';
+	@override String get alreadyHaveAccount => '已有账户？';
+	@override String get signIn => '登录';
 	@override String get legal => '通过注册Lingola，您同意我们的服务条款。了解我们如何处理您的数据，请查看我们的隐私政策和Cookies政策';
 	@override String get terms => '服务条款';
 	@override String get privacy => '隐私政策';
@@ -414,6 +500,7 @@ class _Translations$tutorPage$zh implements Translations$tutorPage$en {
 	// Translations
 	@override String get title => '导师';
 	@override String get chatWithLingola => '与Lingola聊天';
+	@override String get startChat => 'Chat';
 	@override String chatWithTutor({required Object name}) => '与${name}聊天';
 	@override String get chatHistory => '聊天记录';
 	@override String get history => '历史';
@@ -503,6 +590,33 @@ class _Translations$rolePlayPage$zh implements Translations$rolePlayPage$en {
 	@override late final _Translations$rolePlayPage$coffee$zh coffee = _Translations$rolePlayPage$coffee$zh._(_root);
 	@override late final _Translations$rolePlayPage$directions$zh directions = _Translations$rolePlayPage$directions$zh._(_root);
 	@override late final _Translations$rolePlayPage$interview$zh interview = _Translations$rolePlayPage$interview$zh._(_root);
+	@override String get customScenarios => 'Your scenarios';
+	@override String get createOwnScenario => 'Create your\nown scenario!';
+	@override String get createOwnScenarioTitle => 'Create your scenario';
+	@override String get creatingScenario => 'Creating your role play';
+	@override String get creatingScenarioSubtitle => 'Lingola is writing your scene and illustration...';
+	@override String get createFailed => 'Could not create scenario. Please try again.';
+	@override String get createFieldScenario => 'Scenario';
+	@override String get createFieldScenarioHint => 'e.g. business meeting';
+	@override String get createFieldTutorRole => 'Tutor role';
+	@override String get createFieldTutorRoleHint => 'e.g. interviewer';
+	@override String get createFieldYourRole => 'Your role';
+	@override String get createFieldYourRoleHint => 'e.g. candidate';
+	@override String get createFieldExtraInfo => 'Extra details (optional)';
+	@override String get createFieldExtraInfoHint => 'e.g. senior software developer interview at a tech company';
+	@override String get createOwnScenarioContinue => 'Continue';
+	@override String get createFieldsRequired => 'Please fill in scenario and both roles.';
+	@override String get intermediate => 'Intermediate';
+	@override String get beginnerIntermediate => 'Beginner–Intermediate';
+	@override late final _Translations$rolePlayPage$missedTrain$zh missedTrain = _Translations$rolePlayPage$missedTrain$zh._(_root);
+	@override late final _Translations$rolePlayPage$flightAttendant$zh flightAttendant = _Translations$rolePlayPage$flightAttendant$zh._(_root);
+	@override late final _Translations$rolePlayPage$trainTicket$zh trainTicket = _Translations$rolePlayPage$trainTicket$zh._(_root);
+	@override late final _Translations$rolePlayPage$restaurantReservation$zh restaurantReservation = _Translations$rolePlayPage$restaurantReservation$zh._(_root);
+	@override late final _Translations$rolePlayPage$doctorAppointment$zh doctorAppointment = _Translations$rolePlayPage$doctorAppointment$zh._(_root);
+	@override late final _Translations$rolePlayPage$shoppingClothes$zh shoppingClothes = _Translations$rolePlayPage$shoppingClothes$zh._(_root);
+	@override late final _Translations$rolePlayPage$takingTaxi$zh takingTaxi = _Translations$rolePlayPage$takingTaxi$zh._(_root);
+	@override late final _Translations$rolePlayPage$rentingApartment$zh rentingApartment = _Translations$rolePlayPage$rentingApartment$zh._(_root);
+	@override late final _Translations$rolePlayPage$birthdayParty$zh birthdayParty = _Translations$rolePlayPage$birthdayParty$zh._(_root);
 }
 
 // Path: notificationsPage
@@ -577,6 +691,28 @@ class _Translations$profilePage$zh implements Translations$profilePage$en {
 	@override String get done => '完成';
 	@override String get notifications => '通知';
 	@override String get appLanguage => '应用语言';
+	@override String get explanationLanguage => '解释语言';
+	@override String get explanationNative => '母语';
+	@override String get explanationEnglish => '英语';
+	@override String get explanationUpdateFailed => '无法更新解释语言';
+	@override String get learnInNativeLanguage => 'Learn in your native language';
+	@override String get targetLanguageLabel => 'Target language';
+	@override String get languageLevel => 'Language level';
+	@override String get nativeLanguage => 'Native language';
+	@override String get interests => 'Interests';
+	@override String get goalChipCareer => 'Career';
+	@override String get goalChipTravel => 'Travel';
+	@override String get goalChipLiving => 'Living';
+	@override String get goalChipStudying => 'Study';
+	@override String get goalChipOther => 'Other';
+	@override String get dailyGoal => 'Daily goal';
+	@override String get dailyReminder => 'Daily reminder';
+	@override String get selectNativeLanguageTitle => 'Select your native language';
+	@override String get reminderOn => 'On';
+	@override String get reminderOff => 'Off';
+	@override String get remindMe => '提醒我';
+	@override String get reminderSave => '保存';
+	@override String get reminderSaved => '提醒已保存';
 	@override String get selectLanguageTitle => '选择语言';
 	@override String get premium => '高级版';
 	@override String get passive => '被动';
@@ -620,6 +756,12 @@ class _Translations$profilePage$zh implements Translations$profilePage$en {
 	@override String get certificateTitle => '您的证书';
 	@override String certificateLevelTitle({required Object level}) => '${level} Certificate';
 	@override String get certificateOf => 'Certificate of Achievement';
+	@override String get certificatePresentedTo => 'This certificate is proudly presented to';
+	@override String certificateAchievementBody({required Object level}) => 'This achievement recognizes the successful completion of all ${level}-level lessons and learning activities, demonstrating a strong foundation in essential English communication skills.';
+	@override String certificateLevelCompleted({required Object levelName}) => 'Level Completed: ${levelName}';
+	@override String certificateDateCompleted({required Object date}) => 'Date of Completion: ${date}';
+	@override String certificateIdDisplay({required Object id}) => 'Certificate ID: ${id}';
+	@override String get certificateBrandTagline => 'Learn. Speak. Connect.';
 	@override String get certificateCertifiesThat => 'This certifies that';
 	@override String get certificatePathway => 'Lingola English Pathway';
 	@override String get certificateAwardedTo => 'Awarded to';
@@ -634,6 +776,13 @@ class _Translations$profilePage$zh implements Translations$profilePage$en {
 	@override String get certificateScanOrVisit => 'Scan the QR code or visit the link to verify authenticity.';
 	@override String get certificateVerifyHint => '任何人都可以扫描二维码来验证您的成就。';
 	@override String get certificateShare => '分享证书';
+	@override String get certificateDownload => 'Download';
+	@override String get certificateDownloadSaved => 'Certificate saved to your gallery';
+	@override String get certificateDownloadFailed => 'Could not save certificate. Please try again.';
+	@override String get certificateCreateQr => 'Create QR';
+	@override String get certificateNotAvailableTitle => '证书已锁定';
+	@override String certificateNotAvailable({required Object level}) => '您尚未完成 ${level} 级别的课程，因此还无法使用此证书。';
+	@override String get certificateNotAvailableOk => '知道了';
 	@override String get certificateShareQr => '分享二维码';
 	@override String certificateShareBody({required Object level}) => 'I earned my Lingola ${level} certificate!';
 	@override String certificateShareSubject({required Object level}) => 'Lingola ${level} Certificate';
@@ -641,6 +790,16 @@ class _Translations$profilePage$zh implements Translations$profilePage$en {
 	@override String get certificatePreviewBody => '在 Lingola 完成 CEFR 级别后，您的证书将显示在这里——包含您的姓名、级别和可供扫描验证的二维码。';
 	@override String get certificatePreviewHint => '完成级别路径以解锁您的证书';
 	@override String get certificateTapToView => '点击查看并分享您的证书';
+	@override String get settings => '设置';
+	@override String get dailyGoalValueLight => '每天5-10分钟';
+	@override String get dailyGoalValueRecommended => '每天15-20分钟';
+	@override String get dailyGoalValueFast => '每天30分钟以上';
+	@override String get settingsShare => 'Share';
+	@override String get settingsSupport => 'Support';
+	@override String get settingsAbout => 'About';
+	@override String get settingsAccount => 'Account';
+	@override String get followInstagram => 'Follow on Instagram';
+	@override String get followTikTok => 'Follow on TikTok';
 }
 
 // Path: pushNotifications
@@ -883,6 +1042,7 @@ class _Translations$tutorPage$calling$zh implements Translations$tutorPage$calli
 	@override String get toggleCaptions => '切换字幕';
 	@override String get toggleHints => '切换提示';
 	@override String get toggleMic => '切换麦克风';
+	@override String get tapToSpeakHint => '点击开始说话，再次点击结束';
 }
 
 // Path: lessonPage.levels
@@ -934,6 +1094,114 @@ class _Translations$rolePlayPage$interview$zh implements Translations$rolePlayPa
 	@override String get title => '工作面试';
 	@override String get screenplay => '介绍自己，回答常见的面试问题，谈谈你的经历，并询问关于职位和下一步的事项。';
 	@override late final _Translations$rolePlayPage$interview$chat$zh chat = _Translations$rolePlayPage$interview$chat$zh._(_root);
+}
+
+// Path: rolePlayPage.missedTrain
+class _Translations$rolePlayPage$missedTrain$zh implements Translations$rolePlayPage$missedTrain$en {
+	_Translations$rolePlayPage$missedTrain$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'You Missed Your Train';
+	@override String get screenplay => 'You missed your train and ask a station staff member for help — explain where you\'re going, find the next train, and get directions to the platform.';
+	@override late final _Translations$rolePlayPage$missedTrain$chat$zh chat = _Translations$rolePlayPage$missedTrain$chat$zh._(_root);
+}
+
+// Path: rolePlayPage.flightAttendant
+class _Translations$rolePlayPage$flightAttendant$zh implements Translations$rolePlayPage$flightAttendant$en {
+	_Translations$rolePlayPage$flightAttendant$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking to a Flight Attendant';
+	@override String get screenplay => 'You\'re a passenger on a flight. Find your seat, get help with luggage, choose food and drinks, and ask for anything you need during the flight.';
+	@override late final _Translations$rolePlayPage$flightAttendant$chat$zh chat = _Translations$rolePlayPage$flightAttendant$chat$zh._(_root);
+}
+
+// Path: rolePlayPage.trainTicket
+class _Translations$rolePlayPage$trainTicket$zh implements Translations$rolePlayPage$trainTicket$en {
+	_Translations$rolePlayPage$trainTicket$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Buying a Train Ticket';
+	@override String get screenplay => 'At a train station, tell the clerk where you\'re going, pick a departure time, choose ticket type and seat, and pay for your ticket.';
+	@override late final _Translations$rolePlayPage$trainTicket$chat$zh chat = _Translations$rolePlayPage$trainTicket$chat$zh._(_root);
+}
+
+// Path: rolePlayPage.restaurantReservation
+class _Translations$rolePlayPage$restaurantReservation$zh implements Translations$rolePlayPage$restaurantReservation$en {
+	_Translations$rolePlayPage$restaurantReservation$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Making a Restaurant Reservation';
+	@override String get screenplay => 'Call or visit a restaurant to book a table — choose the date, time, number of guests, seating preference, and confirm your reservation.';
+	@override late final _Translations$rolePlayPage$restaurantReservation$chat$zh chat = _Translations$rolePlayPage$restaurantReservation$chat$zh._(_root);
+}
+
+// Path: rolePlayPage.doctorAppointment
+class _Translations$rolePlayPage$doctorAppointment$zh implements Translations$rolePlayPage$doctorAppointment$en {
+	_Translations$rolePlayPage$doctorAppointment$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Making a Doctor\'s Appointment';
+	@override String get screenplay => 'Call a clinic to book a doctor\'s appointment — explain why you need to visit, choose a day and time, and confirm your details.';
+	@override late final _Translations$rolePlayPage$doctorAppointment$chat$zh chat = _Translations$rolePlayPage$doctorAppointment$chat$zh._(_root);
+}
+
+// Path: rolePlayPage.shoppingClothes
+class _Translations$rolePlayPage$shoppingClothes$zh implements Translations$rolePlayPage$shoppingClothes$en {
+	_Translations$rolePlayPage$shoppingClothes$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Shopping for Clothes';
+	@override String get screenplay => 'In a clothing store, tell the assistant what you\'re looking for, try items on, compare sizes and colors, and decide whether to buy.';
+	@override late final _Translations$rolePlayPage$shoppingClothes$chat$zh chat = _Translations$rolePlayPage$shoppingClothes$chat$zh._(_root);
+}
+
+// Path: rolePlayPage.takingTaxi
+class _Translations$rolePlayPage$takingTaxi$zh implements Translations$rolePlayPage$takingTaxi$en {
+	_Translations$rolePlayPage$takingTaxi$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Taking a Taxi';
+	@override String get screenplay => 'Get in a taxi in a new city, tell the driver where you\'re going, talk about the route, and pay at the end of the ride.';
+	@override late final _Translations$rolePlayPage$takingTaxi$chat$zh chat = _Translations$rolePlayPage$takingTaxi$chat$zh._(_root);
+}
+
+// Path: rolePlayPage.rentingApartment
+class _Translations$rolePlayPage$rentingApartment$zh implements Translations$rolePlayPage$rentingApartment$en {
+	_Translations$rolePlayPage$rentingApartment$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Renting an Apartment';
+	@override String get screenplay => 'Talk to a landlord about a rental apartment — ask about rent, bills, deposit, pets, parking, and arrange a viewing.';
+	@override late final _Translations$rolePlayPage$rentingApartment$chat$zh chat = _Translations$rolePlayPage$rentingApartment$chat$zh._(_root);
+}
+
+// Path: rolePlayPage.birthdayParty
+class _Translations$rolePlayPage$birthdayParty$zh implements Translations$rolePlayPage$birthdayParty$en {
+	_Translations$rolePlayPage$birthdayParty$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Planning a Birthday Party';
+	@override String get screenplay => 'Plan a birthday party with a friend — pick the venue, date, guest list, food, cake, music, and activities together.';
+	@override late final _Translations$rolePlayPage$birthdayParty$chat$zh chat = _Translations$rolePlayPage$birthdayParty$chat$zh._(_root);
 }
 
 // Path: notificationsPage.translation
@@ -1383,6 +1651,141 @@ class _Translations$rolePlayPage$interview$chat$zh implements Translations$roleP
 	@override String get botReply => '那真令人印象深刻。你对这个职位有什么问题吗？';
 }
 
+// Path: rolePlayPage.missedTrain.chat
+class _Translations$rolePlayPage$missedTrain$chat$zh implements Translations$rolePlayPage$missedTrain$chat$en {
+	_Translations$rolePlayPage$missedTrain$chat$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice what to say when you miss your train at a station. I\'ll teach a few phrases first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'Hello, where are you trying to go?';
+	@override String get outgoing1 => 'I need to get to Manchester. I think I missed my 10:15 train.';
+	@override String get incoming2Highlight => 'No problem';
+	@override String get incoming2Rest => '. Let me check the next available train for you.';
+	@override String get botReply => 'Would you prefer the fastest option or the cheapest one?';
+}
+
+// Path: rolePlayPage.flightAttendant.chat
+class _Translations$rolePlayPage$flightAttendant$chat$zh implements Translations$rolePlayPage$flightAttendant$chat$en {
+	_Translations$rolePlayPage$flightAttendant$chat$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice talking to a flight attendant on a plane — seats, luggage, meals. I\'ll explain first, then we\'ll act it out. Sound good?';
+	@override String get incoming1 => 'Hello! May I see your boarding pass, please?';
+	@override String get outgoing1 => 'Sure, here you go. I\'m in seat 14B.';
+	@override String get incoming2Highlight => 'Thank you';
+	@override String get incoming2Rest => '. Would you like some help finding your seat?';
+	@override String get botReply => 'Would you like something to drink — water, juice, coffee, or tea?';
+}
+
+// Path: rolePlayPage.trainTicket.chat
+class _Translations$rolePlayPage$trainTicket$chat$zh implements Translations$rolePlayPage$trainTicket$chat$en {
+	_Translations$rolePlayPage$trainTicket$chat$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice buying a train ticket at the counter. I\'ll teach useful phrases first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'Hello! Where would you like to go?';
+	@override String get outgoing1 => 'I\'d like to go to Edinburgh, please.';
+	@override String get incoming2Highlight => 'Great';
+	@override String get incoming2Rest => '. When would you like to travel?';
+	@override String get botReply => 'Would you like a one-way or return ticket?';
+}
+
+// Path: rolePlayPage.restaurantReservation.chat
+class _Translations$rolePlayPage$restaurantReservation$chat$zh implements Translations$rolePlayPage$restaurantReservation$chat$en {
+	_Translations$rolePlayPage$restaurantReservation$chat$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice making a restaurant reservation. I\'ll explain a few phrases first, then we\'ll act it out. Sound good?';
+	@override String get incoming1 => 'Hello! How can I help you?';
+	@override String get outgoing1 => 'Hi, I\'d like to make a reservation for dinner, please.';
+	@override String get incoming2Highlight => 'Of course';
+	@override String get incoming2Rest => '. What day would you like to come?';
+	@override String get botReply => 'How many people will be joining you?';
+}
+
+// Path: rolePlayPage.doctorAppointment.chat
+class _Translations$rolePlayPage$doctorAppointment$chat$zh implements Translations$rolePlayPage$doctorAppointment$chat$en {
+	_Translations$rolePlayPage$doctorAppointment$chat$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice making a doctor\'s appointment by phone. I\'ll teach key phrases first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'Hello! How can I help you today?';
+	@override String get outgoing1 => 'Hi, I\'d like to book an appointment with a doctor, please.';
+	@override String get incoming2Highlight => 'Sure';
+	@override String get incoming2Rest => '. Have you visited our clinic before?';
+	@override String get botReply => 'What would you like to see the doctor about?';
+}
+
+// Path: rolePlayPage.shoppingClothes.chat
+class _Translations$rolePlayPage$shoppingClothes$chat$zh implements Translations$rolePlayPage$shoppingClothes$chat$en {
+	_Translations$rolePlayPage$shoppingClothes$chat$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice shopping for clothes in a store. I\'ll explain useful phrases first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'Hello! Can I help you find something?';
+	@override String get outgoing1 => 'Yes, I\'m looking for a casual shirt for everyday wear.';
+	@override String get incoming2Highlight => 'Sure';
+	@override String get incoming2Rest => '. What size do you usually wear?';
+	@override String get botReply => 'Would you prefer something casual or more formal?';
+}
+
+// Path: rolePlayPage.takingTaxi.chat
+class _Translations$rolePlayPage$takingTaxi$chat$zh implements Translations$rolePlayPage$takingTaxi$chat$en {
+	_Translations$rolePlayPage$takingTaxi$chat$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice taking a taxi — giving your destination, chatting with the driver, and paying. I\'ll teach first, then we\'ll act it out. Ready?';
+	@override String get incoming1 => 'Hello! Where would you like to go?';
+	@override String get outgoing1 => 'The Grand Hotel on Park Street, please.';
+	@override String get incoming2Highlight => 'Got it';
+	@override String get incoming2Rest => '. Do you have the exact address?';
+	@override String get botReply => 'Would you prefer the fastest route?';
+}
+
+// Path: rolePlayPage.rentingApartment.chat
+class _Translations$rolePlayPage$rentingApartment$chat$zh implements Translations$rolePlayPage$rentingApartment$chat$en {
+	_Translations$rolePlayPage$rentingApartment$chat$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice talking to a landlord about renting an apartment. I\'ll explain key phrases first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'Hello! Are you interested in renting the apartment?';
+	@override String get outgoing1 => 'Yes, I\'d like to know more about it, please.';
+	@override String get incoming2Highlight => 'Great';
+	@override String get incoming2Rest => '. When are you looking to move in?';
+	@override String get botReply => 'Do you need a furnished or unfurnished apartment?';
+}
+
+// Path: rolePlayPage.birthdayParty.chat
+class _Translations$rolePlayPage$birthdayParty$chat$zh implements Translations$rolePlayPage$birthdayParty$chat$en {
+	_Translations$rolePlayPage$birthdayParty$chat$zh._(this._root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice planning a birthday party with a friend. I\'ll teach useful phrases first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'So, whose birthday are we planning?';
+	@override String get outgoing1 => 'It\'s for my friend Emma — her birthday is next month.';
+	@override String get incoming2Highlight => 'Nice';
+	@override String get incoming2Rest => '! When should we have the party?';
+	@override String get botReply => 'Would you rather have the party at home or at a restaurant?';
+}
+
 // Path: profilePage.faqItems.supportedLanguages
 class _Translations$profilePage$faqItems$supportedLanguages$zh implements Translations$profilePage$faqItems$supportedLanguages$en {
 	_Translations$profilePage$faqItems$supportedLanguages$zh._(this._root);
@@ -1573,13 +1976,22 @@ extension on TranslationsZh {
 			'setup.goalStudying' => '留学',
 			'setup.goalOther' => '其他',
 			'setup.levelTitle' => '你目前的语言水平是什么？',
-			'setup.levelBeginner' => '初学者 — 我知道一些单词',
-			'setup.levelIntermediate' => '中级 — 我能进行简单对话',
-			'setup.levelAdvanced' => '高级 — 我会说但想要提高',
 			'setup.paceTitle' => '你想多快提高？',
-			'setup.paceLight' => '每天5-10分钟（轻松）',
-			'setup.paceRecommended' => '每天15-20分钟（推荐）',
-			'setup.paceFast' => '每天30分钟以上（快速见效）',
+			'setup.explanationTitle' => '当你用自己的语言提问时，我们应该如何解释？',
+			'setup.explanationHint' => '你可以随时在个人资料设置中更改。',
+			'setup.explanationNative' => '用我的母语解释',
+			'setup.explanationEnglish' => '用英语解释',
+			'setup.levelA1' => 'A1 — 我知道一些单词',
+			'setup.levelA2' => 'A2 — 我能使用简单短语',
+			'setup.levelB1' => 'B1 — 我能进行日常对话',
+			'setup.levelB2' => 'B2 — 我能在熟悉话题上流利交流',
+			'setup.levelC1' => 'C1 — 高级，我想继续提升',
+			'setup.levelC2' => 'C2 — 接近母语水平',
+			'setup.paceMin5' => '每天5分钟',
+			'setup.paceMin10' => '每天10分钟',
+			'setup.paceMin15' => '每天15分钟',
+			'setup.paceMin30' => '每天30分钟',
+			'setup.paceMin60' => '每天60分钟',
 			'accountCreating.title' => '正在创建您的个人账户',
 			'accountCreating.stepContent' => '内容正在创建中',
 			'accountCreating.stepDialogues' => '对话正在准备中',
@@ -1587,11 +1999,65 @@ extension on TranslationsZh {
 			'accountCreating.stepPlan' => '您的计划正在最终确定',
 			'accountCreating.optimization' => '优化中',
 			'accountCreating.progress' => ({required Object value}) => '${value}%',
+			'accountCreating.titleLine1' => 'Building your',
+			'accountCreating.titleLine2' => 'Account',
+			'accountCreating.testimonialQuote' => 'Week one I could barely say hello. Week three I was having full conversations with my AI tutor. I\'m not stopping now.',
+			'accountCreating.testimonialAuthor' => 'Maria, 29 — 3 months in',
+			'accountCreating.comparisonPitch' => 'Learn 600+ extra phrases about 30× faster with Lingola than studying entirely on your own.',
+			'accountCreating.comparisonAloneCount' => '400',
+			'accountCreating.comparisonLingolaCount' => '1000',
+			'accountCreating.comparisonUnit' => 'PHRASES',
+			'accountCreating.comparisonAloneLabel' => 'On your own',
+			'accountCreating.comparisonLingolaLabel' => 'Lingola',
+			'accountCreating.fluencyPitch' => 'From today to fluency — your next level is only 30 days away',
+			'accountCreating.chartToday' => 'Today',
+			'accountCreating.chartMid' => '15 Sep',
+			'accountCreating.chartEnd' => '30 Sep',
+			'planReady.titleLine1' => 'Your plan is',
+			'planReady.titleLine2' => 'Ready!',
+			'planReady.statBanner' => '95% of users see results within the first 7 days',
+			'planReady.planTitle' => ({required Object name}) => '${name}\'S PLAN',
+			'planReady.defaultName' => 'YOUR',
+			'planReady.fieldCourse' => 'COURSE',
+			'planReady.fieldLevel' => 'YOUR LEVEL',
+			'planReady.fieldFocus' => 'FOCUS AREA',
+			'planReady.fieldDuration' => 'DURATION',
+			'planReady.fieldInterests' => 'INTERESTS',
+			'planReady.startPlan' => 'Start my plan →',
+			'planReady.courseEnglish' => 'English',
+			'planReady.courseGerman' => 'German',
+			'planReady.courseFrench' => 'French',
+			'planReady.courseItalian' => 'Italian',
+			'planReady.courseSpanish' => 'Spanish',
+			'planReady.courseJapanese' => 'Japanese',
+			'planReady.courseRussian' => 'Russian',
+			'planReady.courseTurkish' => 'Turkish',
+			'planReady.goalCareer' => 'Career & business',
+			'planReady.goalTravel' => 'Travel',
+			'planReady.goalLiving' => 'Living abroad',
+			'planReady.goalStudying' => 'Studying abroad',
+			'planReady.goalOther' => 'Other',
+			'planReady.levelA1' => 'A1',
+			'planReady.levelA2' => 'A2',
+			'planReady.levelB1' => 'B1',
+			'planReady.levelB2' => 'B2',
+			'planReady.levelC1' => 'C1',
+			'planReady.levelC2' => 'C2',
+			'planReady.paceMin5' => '每天5分钟',
+			'planReady.paceMin10' => '每天10分钟',
+			'planReady.paceMin15' => '每天15分钟',
+			'planReady.paceMin30' => '每天30分钟',
+			'planReady.paceMin60' => '每天60分钟',
+			'demoChat.brand' => 'Lingola',
+			'demoChat.lessonBadge' => 'Getting to know you',
+			'demoChat.speed' => '1x',
+			'demoChat.typeMessage' => 'Type a message...',
+			'demoChat.incoming1' => 'Hi! I\'m your AI tutor. Before we start — if you\'d rather not continue in English, or if you don\'t understand something, just tell me and I\'ll switch to your language. Hope you\'re doing well! Let\'s learn a bit about you — are you working right now, or are you a student?',
 			'previewChat.brand' => 'Lingola',
 			'previewChat.lessonBadge' => '课程 1：问候',
 			'previewChat.speed' => '1x',
 			'previewChat.typeMessage' => '输入消息...',
-			'previewChat.incoming1' => '嗨！欢迎来到 Lingola — 我是你的 AI 导师。准备好用英语打个招呼吗？',
+			'previewChat.incoming1' => '嗨！欢迎来到 Lingola — 我是你的 AI 导师。无论你的水平如何，在这里都可以安心学英语。英语里打招呼可以说 \'Hi\' 或 \'Hello\' — 试试看，用英语给我发 \'Hi!\'！',
 			'previewChat.outgoing1' => '嗨！我准备好练习了。',
 			'previewChat.incoming2Highlight' => '早上好',
 			'previewChat.incoming2Rest' => '，Emrah！我很高兴你准备好了。早上的咖啡总是建立联系的好开始。你想聊些什么？',
@@ -1618,6 +2084,9 @@ extension on TranslationsZh {
 			'auth.continueGoogle' => '继续使用Google',
 			'auth.continueApple' => '继续使用Apple',
 			'auth.continueGuest' => '作为访客继续',
+			'auth.or' => '或',
+			'auth.alreadyHaveAccount' => '已有账户？',
+			'auth.signIn' => '登录',
 			'auth.legal' => '通过注册Lingola，您同意我们的服务条款。了解我们如何处理您的数据，请查看我们的隐私政策和Cookies政策',
 			'auth.terms' => '服务条款',
 			'auth.privacy' => '隐私政策',
@@ -1733,6 +2202,7 @@ extension on TranslationsZh {
 			'placeholder.body' => ({required Object tab}) => '我们正在为你准备一个专注的 ${tab} 体验。',
 			'tutorPage.title' => '导师',
 			'tutorPage.chatWithLingola' => '与Lingola聊天',
+			'tutorPage.startChat' => 'Chat',
 			'tutorPage.chatWithTutor' => ({required Object name}) => '与${name}聊天',
 			'tutorPage.chatHistory' => '聊天记录',
 			'tutorPage.history' => '历史',
@@ -1802,6 +2272,7 @@ extension on TranslationsZh {
 			'tutorPage.calling.toggleCaptions' => '切换字幕',
 			'tutorPage.calling.toggleHints' => '切换提示',
 			'tutorPage.calling.toggleMic' => '切换麦克风',
+			'tutorPage.calling.tapToSpeakHint' => '点击开始说话，再次点击结束',
 			'lessonPage.title' => '继续学习',
 			'lessonPage.profile' => '个人资料',
 			'lessonPage.language' => '目标语言',
@@ -1945,6 +2416,8 @@ extension on TranslationsZh {
 			'lessonPage.levels.b1.lessons.15' => '个人成就',
 			'lessonPage.levels.b1.lessons.16' => '最喜欢的电影',
 			'lessonPage.levels.b1.lessons.17' => '新闻快讯',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.b1.lessons.18' => '幸福',
 			'lessonPage.levels.b1.lessons.19' => '忙碌的一周',
 			'lessonPage.levels.b1.lessons.20' => '我成长的地方',
@@ -2013,8 +2486,6 @@ extension on TranslationsZh {
 			'lessonPage.levels.c1.lessons.0' => '文化规范',
 			'lessonPage.levels.c1.lessons.1' => '社交媒体的影响',
 			'lessonPage.levels.c1.lessons.2' => '职业选择',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.c1.lessons.3' => '加速表现',
 			'lessonPage.levels.c1.lessons.4' => '发明',
 			'lessonPage.levels.c1.lessons.5' => '时间旅行',
@@ -2093,6 +2564,96 @@ extension on TranslationsZh {
 			'rolePlayPage.interview.chat.incoming2Highlight' => '太好了',
 			'rolePlayPage.interview.chat.incoming2Rest' => '。告诉我一个你引以为豪的最近项目。',
 			'rolePlayPage.interview.chat.botReply' => '那真令人印象深刻。你对这个职位有什么问题吗？',
+			'rolePlayPage.customScenarios' => 'Your scenarios',
+			'rolePlayPage.createOwnScenario' => 'Create your\nown scenario!',
+			'rolePlayPage.createOwnScenarioTitle' => 'Create your scenario',
+			'rolePlayPage.creatingScenario' => 'Creating your role play',
+			'rolePlayPage.creatingScenarioSubtitle' => 'Lingola is writing your scene and illustration...',
+			'rolePlayPage.createFailed' => 'Could not create scenario. Please try again.',
+			'rolePlayPage.createFieldScenario' => 'Scenario',
+			'rolePlayPage.createFieldScenarioHint' => 'e.g. business meeting',
+			'rolePlayPage.createFieldTutorRole' => 'Tutor role',
+			'rolePlayPage.createFieldTutorRoleHint' => 'e.g. interviewer',
+			'rolePlayPage.createFieldYourRole' => 'Your role',
+			'rolePlayPage.createFieldYourRoleHint' => 'e.g. candidate',
+			'rolePlayPage.createFieldExtraInfo' => 'Extra details (optional)',
+			'rolePlayPage.createFieldExtraInfoHint' => 'e.g. senior software developer interview at a tech company',
+			'rolePlayPage.createOwnScenarioContinue' => 'Continue',
+			'rolePlayPage.createFieldsRequired' => 'Please fill in scenario and both roles.',
+			'rolePlayPage.intermediate' => 'Intermediate',
+			'rolePlayPage.beginnerIntermediate' => 'Beginner–Intermediate',
+			'rolePlayPage.missedTrain.title' => 'You Missed Your Train',
+			'rolePlayPage.missedTrain.screenplay' => 'You missed your train and ask a station staff member for help — explain where you\'re going, find the next train, and get directions to the platform.',
+			'rolePlayPage.missedTrain.chat.briefing' => 'Hi! Today we\'ll practice what to say when you miss your train at a station. I\'ll teach a few phrases first, then we\'ll role-play. Ready?',
+			'rolePlayPage.missedTrain.chat.incoming1' => 'Hello, where are you trying to go?',
+			'rolePlayPage.missedTrain.chat.outgoing1' => 'I need to get to Manchester. I think I missed my 10:15 train.',
+			'rolePlayPage.missedTrain.chat.incoming2Highlight' => 'No problem',
+			'rolePlayPage.missedTrain.chat.incoming2Rest' => '. Let me check the next available train for you.',
+			'rolePlayPage.missedTrain.chat.botReply' => 'Would you prefer the fastest option or the cheapest one?',
+			'rolePlayPage.flightAttendant.title' => 'Talking to a Flight Attendant',
+			'rolePlayPage.flightAttendant.screenplay' => 'You\'re a passenger on a flight. Find your seat, get help with luggage, choose food and drinks, and ask for anything you need during the flight.',
+			'rolePlayPage.flightAttendant.chat.briefing' => 'Hi! Today we\'ll practice talking to a flight attendant on a plane — seats, luggage, meals. I\'ll explain first, then we\'ll act it out. Sound good?',
+			'rolePlayPage.flightAttendant.chat.incoming1' => 'Hello! May I see your boarding pass, please?',
+			'rolePlayPage.flightAttendant.chat.outgoing1' => 'Sure, here you go. I\'m in seat 14B.',
+			'rolePlayPage.flightAttendant.chat.incoming2Highlight' => 'Thank you',
+			'rolePlayPage.flightAttendant.chat.incoming2Rest' => '. Would you like some help finding your seat?',
+			'rolePlayPage.flightAttendant.chat.botReply' => 'Would you like something to drink — water, juice, coffee, or tea?',
+			'rolePlayPage.trainTicket.title' => 'Buying a Train Ticket',
+			'rolePlayPage.trainTicket.screenplay' => 'At a train station, tell the clerk where you\'re going, pick a departure time, choose ticket type and seat, and pay for your ticket.',
+			'rolePlayPage.trainTicket.chat.briefing' => 'Hi! Today we\'ll practice buying a train ticket at the counter. I\'ll teach useful phrases first, then we\'ll role-play. Ready?',
+			'rolePlayPage.trainTicket.chat.incoming1' => 'Hello! Where would you like to go?',
+			'rolePlayPage.trainTicket.chat.outgoing1' => 'I\'d like to go to Edinburgh, please.',
+			'rolePlayPage.trainTicket.chat.incoming2Highlight' => 'Great',
+			'rolePlayPage.trainTicket.chat.incoming2Rest' => '. When would you like to travel?',
+			'rolePlayPage.trainTicket.chat.botReply' => 'Would you like a one-way or return ticket?',
+			'rolePlayPage.restaurantReservation.title' => 'Making a Restaurant Reservation',
+			'rolePlayPage.restaurantReservation.screenplay' => 'Call or visit a restaurant to book a table — choose the date, time, number of guests, seating preference, and confirm your reservation.',
+			'rolePlayPage.restaurantReservation.chat.briefing' => 'Hi! Today we\'ll practice making a restaurant reservation. I\'ll explain a few phrases first, then we\'ll act it out. Sound good?',
+			'rolePlayPage.restaurantReservation.chat.incoming1' => 'Hello! How can I help you?',
+			'rolePlayPage.restaurantReservation.chat.outgoing1' => 'Hi, I\'d like to make a reservation for dinner, please.',
+			'rolePlayPage.restaurantReservation.chat.incoming2Highlight' => 'Of course',
+			'rolePlayPage.restaurantReservation.chat.incoming2Rest' => '. What day would you like to come?',
+			'rolePlayPage.restaurantReservation.chat.botReply' => 'How many people will be joining you?',
+			'rolePlayPage.doctorAppointment.title' => 'Making a Doctor\'s Appointment',
+			'rolePlayPage.doctorAppointment.screenplay' => 'Call a clinic to book a doctor\'s appointment — explain why you need to visit, choose a day and time, and confirm your details.',
+			'rolePlayPage.doctorAppointment.chat.briefing' => 'Hi! Today we\'ll practice making a doctor\'s appointment by phone. I\'ll teach key phrases first, then we\'ll role-play. Ready?',
+			'rolePlayPage.doctorAppointment.chat.incoming1' => 'Hello! How can I help you today?',
+			'rolePlayPage.doctorAppointment.chat.outgoing1' => 'Hi, I\'d like to book an appointment with a doctor, please.',
+			'rolePlayPage.doctorAppointment.chat.incoming2Highlight' => 'Sure',
+			'rolePlayPage.doctorAppointment.chat.incoming2Rest' => '. Have you visited our clinic before?',
+			'rolePlayPage.doctorAppointment.chat.botReply' => 'What would you like to see the doctor about?',
+			'rolePlayPage.shoppingClothes.title' => 'Shopping for Clothes',
+			'rolePlayPage.shoppingClothes.screenplay' => 'In a clothing store, tell the assistant what you\'re looking for, try items on, compare sizes and colors, and decide whether to buy.',
+			'rolePlayPage.shoppingClothes.chat.briefing' => 'Hi! Today we\'ll practice shopping for clothes in a store. I\'ll explain useful phrases first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.shoppingClothes.chat.incoming1' => 'Hello! Can I help you find something?',
+			'rolePlayPage.shoppingClothes.chat.outgoing1' => 'Yes, I\'m looking for a casual shirt for everyday wear.',
+			'rolePlayPage.shoppingClothes.chat.incoming2Highlight' => 'Sure',
+			'rolePlayPage.shoppingClothes.chat.incoming2Rest' => '. What size do you usually wear?',
+			'rolePlayPage.shoppingClothes.chat.botReply' => 'Would you prefer something casual or more formal?',
+			'rolePlayPage.takingTaxi.title' => 'Taking a Taxi',
+			'rolePlayPage.takingTaxi.screenplay' => 'Get in a taxi in a new city, tell the driver where you\'re going, talk about the route, and pay at the end of the ride.',
+			'rolePlayPage.takingTaxi.chat.briefing' => 'Hi! Today we\'ll practice taking a taxi — giving your destination, chatting with the driver, and paying. I\'ll teach first, then we\'ll act it out. Ready?',
+			'rolePlayPage.takingTaxi.chat.incoming1' => 'Hello! Where would you like to go?',
+			'rolePlayPage.takingTaxi.chat.outgoing1' => 'The Grand Hotel on Park Street, please.',
+			'rolePlayPage.takingTaxi.chat.incoming2Highlight' => 'Got it',
+			'rolePlayPage.takingTaxi.chat.incoming2Rest' => '. Do you have the exact address?',
+			'rolePlayPage.takingTaxi.chat.botReply' => 'Would you prefer the fastest route?',
+			'rolePlayPage.rentingApartment.title' => 'Renting an Apartment',
+			'rolePlayPage.rentingApartment.screenplay' => 'Talk to a landlord about a rental apartment — ask about rent, bills, deposit, pets, parking, and arrange a viewing.',
+			'rolePlayPage.rentingApartment.chat.briefing' => 'Hi! Today we\'ll practice talking to a landlord about renting an apartment. I\'ll explain key phrases first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.rentingApartment.chat.incoming1' => 'Hello! Are you interested in renting the apartment?',
+			'rolePlayPage.rentingApartment.chat.outgoing1' => 'Yes, I\'d like to know more about it, please.',
+			'rolePlayPage.rentingApartment.chat.incoming2Highlight' => 'Great',
+			'rolePlayPage.rentingApartment.chat.incoming2Rest' => '. When are you looking to move in?',
+			'rolePlayPage.rentingApartment.chat.botReply' => 'Do you need a furnished or unfurnished apartment?',
+			'rolePlayPage.birthdayParty.title' => 'Planning a Birthday Party',
+			'rolePlayPage.birthdayParty.screenplay' => 'Plan a birthday party with a friend — pick the venue, date, guest list, food, cake, music, and activities together.',
+			'rolePlayPage.birthdayParty.chat.briefing' => 'Hi! Today we\'ll practice planning a birthday party with a friend. I\'ll teach useful phrases first, then we\'ll role-play. Ready?',
+			'rolePlayPage.birthdayParty.chat.incoming1' => 'So, whose birthday are we planning?',
+			'rolePlayPage.birthdayParty.chat.outgoing1' => 'It\'s for my friend Emma — her birthday is next month.',
+			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Nice',
+			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! When should we have the party?',
+			'rolePlayPage.birthdayParty.chat.botReply' => 'Would you rather have the party at home or at a restaurant?',
 			'notificationsPage.title' => '通知',
 			'notificationsPage.deleteConfirmTitle' => '确定吗？',
 			'notificationsPage.deleteConfirmBody' => '此通知将被删除。',
@@ -2160,6 +2721,28 @@ extension on TranslationsZh {
 			'profilePage.done' => '完成',
 			'profilePage.notifications' => '通知',
 			'profilePage.appLanguage' => '应用语言',
+			'profilePage.explanationLanguage' => '解释语言',
+			'profilePage.explanationNative' => '母语',
+			'profilePage.explanationEnglish' => '英语',
+			'profilePage.explanationUpdateFailed' => '无法更新解释语言',
+			'profilePage.learnInNativeLanguage' => 'Learn in your native language',
+			'profilePage.targetLanguageLabel' => 'Target language',
+			'profilePage.languageLevel' => 'Language level',
+			'profilePage.nativeLanguage' => 'Native language',
+			'profilePage.interests' => 'Interests',
+			'profilePage.goalChipCareer' => 'Career',
+			'profilePage.goalChipTravel' => 'Travel',
+			'profilePage.goalChipLiving' => 'Living',
+			'profilePage.goalChipStudying' => 'Study',
+			'profilePage.goalChipOther' => 'Other',
+			'profilePage.dailyGoal' => 'Daily goal',
+			'profilePage.dailyReminder' => 'Daily reminder',
+			'profilePage.selectNativeLanguageTitle' => 'Select your native language',
+			'profilePage.reminderOn' => 'On',
+			'profilePage.reminderOff' => 'Off',
+			'profilePage.remindMe' => '提醒我',
+			'profilePage.reminderSave' => '保存',
+			'profilePage.reminderSaved' => '提醒已保存',
 			'profilePage.selectLanguageTitle' => '选择语言',
 			'profilePage.premium' => '高级版',
 			'profilePage.passive' => '被动',
@@ -2228,6 +2811,12 @@ extension on TranslationsZh {
 			'profilePage.certificateTitle' => '您的证书',
 			'profilePage.certificateLevelTitle' => ({required Object level}) => '${level} Certificate',
 			'profilePage.certificateOf' => 'Certificate of Achievement',
+			'profilePage.certificatePresentedTo' => 'This certificate is proudly presented to',
+			'profilePage.certificateAchievementBody' => ({required Object level}) => 'This achievement recognizes the successful completion of all ${level}-level lessons and learning activities, demonstrating a strong foundation in essential English communication skills.',
+			'profilePage.certificateLevelCompleted' => ({required Object levelName}) => 'Level Completed: ${levelName}',
+			'profilePage.certificateDateCompleted' => ({required Object date}) => 'Date of Completion: ${date}',
+			'profilePage.certificateIdDisplay' => ({required Object id}) => 'Certificate ID: ${id}',
+			'profilePage.certificateBrandTagline' => 'Learn. Speak. Connect.',
 			'profilePage.certificateCertifiesThat' => 'This certifies that',
 			'profilePage.certificatePathway' => 'Lingola English Pathway',
 			'profilePage.certificateAwardedTo' => 'Awarded to',
@@ -2242,6 +2831,13 @@ extension on TranslationsZh {
 			'profilePage.certificateScanOrVisit' => 'Scan the QR code or visit the link to verify authenticity.',
 			'profilePage.certificateVerifyHint' => '任何人都可以扫描二维码来验证您的成就。',
 			'profilePage.certificateShare' => '分享证书',
+			'profilePage.certificateDownload' => 'Download',
+			'profilePage.certificateDownloadSaved' => 'Certificate saved to your gallery',
+			'profilePage.certificateDownloadFailed' => 'Could not save certificate. Please try again.',
+			'profilePage.certificateCreateQr' => 'Create QR',
+			'profilePage.certificateNotAvailableTitle' => '证书已锁定',
+			'profilePage.certificateNotAvailable' => ({required Object level}) => '您尚未完成 ${level} 级别的课程，因此还无法使用此证书。',
+			'profilePage.certificateNotAvailableOk' => '知道了',
 			'profilePage.certificateShareQr' => '分享二维码',
 			'profilePage.certificateShareBody' => ({required Object level}) => 'I earned my Lingola ${level} certificate!',
 			'profilePage.certificateShareSubject' => ({required Object level}) => 'Lingola ${level} Certificate',
@@ -2249,6 +2845,16 @@ extension on TranslationsZh {
 			'profilePage.certificatePreviewBody' => '在 Lingola 完成 CEFR 级别后，您的证书将显示在这里——包含您的姓名、级别和可供扫描验证的二维码。',
 			'profilePage.certificatePreviewHint' => '完成级别路径以解锁您的证书',
 			'profilePage.certificateTapToView' => '点击查看并分享您的证书',
+			'profilePage.settings' => '设置',
+			'profilePage.dailyGoalValueLight' => '每天5-10分钟',
+			'profilePage.dailyGoalValueRecommended' => '每天15-20分钟',
+			'profilePage.dailyGoalValueFast' => '每天30分钟以上',
+			'profilePage.settingsShare' => 'Share',
+			'profilePage.settingsSupport' => 'Support',
+			'profilePage.settingsAbout' => 'About',
+			'profilePage.settingsAccount' => 'Account',
+			'profilePage.followInstagram' => 'Follow on Instagram',
+			'profilePage.followTikTok' => 'Follow on TikTok',
 			'pushNotifications.title' => 'Lingola',
 			'pushNotifications.h2.0' => '看起来你休息了一会儿。',
 			'pushNotifications.h2.1' => '有时间来学习一个单词吗？',

@@ -47,11 +47,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
     }
   }
 
-  Future<bool> _confirmAndDelete(TutorChatSessionDto session) async {
-    final name = _displayName(session);
-    final confirmed = await _confirmDelete(name);
-    if (!confirmed || !mounted) return false;
-
+  Future<bool> _deleteSession(TutorChatSessionDto session) async {
     try {
       await TutorChatApiService.deleteSession(session.id);
       if (!mounted) return true;
@@ -70,44 +66,6 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
       );
       return false;
     }
-  }
-
-  Future<bool> _confirmDelete(String name) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Sohbeti sil',
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        content: Text(
-          '"$name" sohbetini silmek istediğinize emin misiniz?',
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            height: 1.4,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Vazgeç'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFE53935),
-            ),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sil'),
-          ),
-        ],
-      ),
-    );
-    return ok == true;
   }
 
   String _displayName(TutorChatSessionDto session) {
@@ -248,7 +206,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                       Dismissible(
                         key: ValueKey(session.id),
                         direction: DismissDirection.endToStart,
-                        confirmDismiss: (_) => _confirmAndDelete(session),
+                        confirmDismiss: (_) => _deleteSession(session),
                         onDismissed: (_) {
                           setState(() {
                             _sessions = _sessions

@@ -103,6 +103,8 @@ abstract final class SessionStore {
         'authProvider': user.authProvider,
         'isGuest': user.isGuest,
         'notificationsEnabled': user.notificationsEnabled,
+        'dailyReminderHour': user.dailyReminderHour,
+        'dailyReminderMinute': user.dailyReminderMinute,
         'appLocale': user.appLocale,
         'subscriptionStatus': user.subscriptionStatus,
         'deletionRequestedAt': user.deletionRequestedAt?.toUtc().toIso8601String(),
@@ -114,6 +116,7 @@ abstract final class SessionStore {
             'goal': user.onboarding!.goal,
             'level': user.onboarding!.level,
             'pace': user.onboarding!.pace,
+            'explanationLanguage': user.onboarding!.explanationLanguage,
           },
       };
 }

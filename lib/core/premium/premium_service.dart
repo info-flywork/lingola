@@ -51,6 +51,10 @@ abstract final class PremiumService {
   }
 
   static Future<void> syncIdentity(AppUser user) async {
+    if (user.isDeletionPending) {
+      await logOut();
+      return;
+    }
     try {
       await Purchases.logIn(user.id);
     } on MissingPluginException {
@@ -63,19 +67,18 @@ abstract final class PremiumService {
     }
     syncFromUser(user);
     await refreshFromRevenueCat();
-    if (!isPremium) {
-      await _tryRestorePurchases();
-    }
   }
 
-  /// App Store / Play aboneliği başka RC kimliğinde kalmışsa geri yükle.
-  static Future<void> _tryRestorePurchases() async {
+  /// Yalnızca kullanıcı paywall'da "Restore" dediğinde çağır.
+  static Future<bool> restorePurchases() async {
     try {
       await Purchases.restorePurchases();
-      await refreshFromRevenueCat();
+      return await refreshFromRevenueCat();
     } on MissingPluginException {
-      // ignore
-    } catch (_) {}
+      return _backendPremium;
+    } catch (_) {
+      return _backendPremium;
+    }
   }
 
   static Future<void> logOut() async {

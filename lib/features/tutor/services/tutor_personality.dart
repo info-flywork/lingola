@@ -1,3 +1,5 @@
+import '../../../core/i18n/native_language.dart';
+
 /// Hoca karakter üslubu — backend `tutor-personality.js` ile uyumlu.
 abstract final class TutorPersonality {
   static String _slug(String? raw) => (raw ?? '').trim().toLowerCase();
@@ -78,10 +80,48 @@ Do NOT laugh or joke when nothing was funny.''';
   static bool _isFantasy(String slug) =>
       {'lingola', 'santa', 'zephyrion', 'vaelen', 'ukrath', 'elrion'}.contains(slug);
 
+  static String _nativeLanguageName(String? code) {
+    return switch (NativeLanguageResolver.normalize(code, fallback: 'tr')) {
+      'tr' => 'Turkish',
+      'de' => 'German',
+      'es' => 'Spanish',
+      'fr' => 'French',
+      'it' => 'Italian',
+      'pt' => 'Portuguese',
+      'ru' => 'Russian',
+      'ja' => 'Japanese',
+      'hi' => 'Hindi',
+      'zh' => 'Chinese',
+      _ => 'their native language',
+    };
+  }
+
+  static String explanationLanguageBlock({
+    String? explanationLanguage,
+    String? nativeLanguageCode,
+  }) {
+    final native = _nativeLanguageName(nativeLanguageCode);
+    if (explanationLanguage == 'english') {
+      return '''
+- The learner prefers explanations in English only.
+- Even if they write in $native, explain in simple clear English (A1–A2).
+- Speech-to-text may garble short English attempts (e.g. "hay" for "Hi"). Infer their intended English phrase charitably — never echo offensive mis-transcriptions.
+- When teaching greetings, always show correct spelling: Hi, Hello, Hey — never Hay or homophone misspellings.''';
+    }
+    return '''
+- The learner prefers explanations in $native when they ask in $native.
+- If they write in $native, reply in $native to explain, encourage, or answer — then gently invite them back to English practice in the same reply.
+- For English practice parts, keep using simple spoken English.
+- Speech-to-text may garble English attempts; infer intent charitably (e.g. "hay" meant "Hi").
+- When correcting, show exact spelling: Hi, Hello, Hey — never Hay.''';
+  }
+
   /// Serbest konuşma (Tutor sekmesi → Start Talk) için sistem prompt.
   static String freeTalkSystemPrompt({
     required String? tutorSlug,
     String? learnerFirstName,
+    String? explanationLanguage,
+    String? nativeLanguageCode,
   }) {
     final slug = _slug(tutorSlug);
     final display = slug.isEmpty
@@ -93,11 +133,15 @@ ${_lockRule(slug)}
 ${_flavorRule(slug)}
 ${_addressingRule(learnerFirstName)}
 ${_reactionRule(slug)}
+${explanationLanguageBlock(
+      explanationLanguage: explanationLanguage,
+      nativeLanguageCode: nativeLanguageCode,
+    )}
 Natural spoken English (A1–B1): contractions, 2–3 phrase variants when teaching, not stiff textbook-only lines.
 Rules:
 - EVERY reply must sound like this character — voice, word choice, and attitude. Not a generic human tutor.
 - Keep replies short: 1–3 sentences.
-- Gently correct by modeling a natural phrase.
+- Gently correct by modeling a natural phrase with correct spelling.
 - Ask one short follow-up to keep practice going.
 - No markdown, no bullet lists.''';
   }

@@ -1,12 +1,69 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/auth/auth_service.dart';
+import '../../core/constants/cefr_levels.dart';
+import '../../core/constants/daily_pace.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import 'onboarding_draft.dart';
-import 'post_onboarding_screens.dart';
+import 'onboarding_demo_chat_screen.dart';
+
+class ExplanationLanguageSetupScreen extends StatefulWidget {
+  const ExplanationLanguageSetupScreen({super.key, required this.draft});
+
+  final OnboardingDraft draft;
+
+  @override
+  State<ExplanationLanguageSetupScreen> createState() =>
+      _ExplanationLanguageSetupScreenState();
+}
+
+class _ExplanationLanguageSetupScreenState
+    extends State<ExplanationLanguageSetupScreen> {
+  late int _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    final mode = widget.draft.explanationLanguage;
+    final index = OnboardingDraft.explanationLanguages.indexOf(mode);
+    _selected = index >= 0 ? index : 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = AppText.current;
+    final options = [
+      (text.setup.explanationNative, null),
+      (text.setup.explanationEnglish, null),
+    ];
+    return _SetupQuestionScaffold(
+      step: 2,
+      totalSteps: 5,
+      title: text.setup.explanationTitle,
+      subtitle: text.setup.explanationHint,
+      options: options,
+      selectedIndex: _selected,
+      centerOptions: true,
+      mutedUnselectedLabels: true,
+      onSelect: (index) => setState(() => _selected = index),
+      onBack: () => Navigator.of(context).maybePop(),
+      onContinue: () {
+        widget.draft.setExplanationLanguageIndex(_selected);
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => GoalSetupScreen(draft: widget.draft),
+          ),
+        );
+      },
+    );
+  }
+}
 
 class GoalSetupScreen extends StatefulWidget {
   const GoalSetupScreen({super.key, required this.draft});
@@ -18,7 +75,15 @@ class GoalSetupScreen extends StatefulWidget {
 }
 
 class _GoalSetupScreenState extends State<GoalSetupScreen> {
-  int _selected = 1;
+  late int _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    final goal = widget.draft.goal ?? 'career';
+    final index = OnboardingDraft.goals.indexOf(goal);
+    _selected = index >= 0 ? index : 0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +96,8 @@ class _GoalSetupScreenState extends State<GoalSetupScreen> {
       (text.setup.goalOther, 'assets/images/onboardingGoals/other.svg'),
     ];
     return _SetupQuestionScaffold(
-      step: 2,
+      step: 3,
+      totalSteps: 5,
       title: text.setup.goalTitle,
       options: options,
       selectedIndex: _selected,
@@ -61,21 +127,32 @@ class LevelSetupScreen extends StatefulWidget {
 }
 
 class _LevelSetupScreenState extends State<LevelSetupScreen> {
-  int _selected = 1;
+  late int _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = CefrLevels.indexOf(widget.draft.level);
+  }
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
+    final levelLabels = [
+      text.setup.levelA1,
+      text.setup.levelA2,
+      text.setup.levelB1,
+      text.setup.levelB2,
+      text.setup.levelC1,
+      text.setup.levelC2,
+    ];
     final options = [
-      (text.setup.levelBeginner, 'assets/images/onboardingLevel/beginner.svg'),
-      (
-        text.setup.levelIntermediate,
-        'assets/images/onboardingLevel/intermediate.svg',
-      ),
-      (text.setup.levelAdvanced, 'assets/images/onboardingLevel/advanced.svg'),
+      for (var i = 0; i < levelLabels.length; i++)
+        ('${CefrLevels.emojis[i]} ${levelLabels[i]}', null),
     ];
     return _SetupQuestionScaffold(
-      step: 3,
+      step: 4,
+      totalSteps: 5,
       title: text.setup.levelTitle,
       options: options,
       selectedIndex: _selected,
@@ -105,24 +182,44 @@ class PaceSetupScreen extends StatefulWidget {
 }
 
 class _PaceSetupScreenState extends State<PaceSetupScreen> {
-  int _selected = 1;
+  late int _selected;
+  var _continuing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final pace = DailyPace.normalize(widget.draft.pace);
+    _selected = DailyPace.indexOf(pace);
+  }
+
+  Future<void> _finishSetup() async {
+    if (_continuing) return;
+    setState(() => _continuing = true);
+    widget.draft.setPaceIndex(_selected);
+    unawaited(
+      AuthService.syncOnboardingDraft(widget.draft).catchError((_) {}),
+    );
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => OnboardingDemoChatScreen(draft: widget.draft),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
     final options = [
-      (text.setup.paceLight, 'assets/images/onboardingfaststep/light.svg'),
-      (
-        text.setup.paceRecommended,
-        'assets/images/onboardingfaststep/recommended.svg',
-      ),
-      (
-        text.setup.paceFast,
-        'assets/images/onboardingfaststep/fastresults.svg',
-      ),
+      for (var i = 0; i < DailyPace.values.length; i++)
+        (
+          '${DailyPace.emojis[i]} ${DailyPace.label(text, DailyPace.values[i])}',
+          null,
+        ),
     ];
     return _SetupQuestionScaffold(
-      step: 4,
+      step: 5,
+      totalSteps: 5,
       title: text.setup.paceTitle,
       options: options,
       selectedIndex: _selected,
@@ -130,14 +227,7 @@ class _PaceSetupScreenState extends State<PaceSetupScreen> {
       mutedUnselectedLabels: true,
       onSelect: (index) => setState(() => _selected = index),
       onBack: () => Navigator.of(context).maybePop(),
-      onContinue: () {
-        widget.draft.setPaceIndex(_selected);
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(
-            builder: (_) => AccountCreatingScreen(draft: widget.draft),
-          ),
-        );
-      },
+      onContinue: () => unawaited(_finishSetup()),
     );
   }
 }
@@ -145,19 +235,23 @@ class _PaceSetupScreenState extends State<PaceSetupScreen> {
 class _SetupQuestionScaffold extends StatelessWidget {
   const _SetupQuestionScaffold({
     required this.step,
+    required this.totalSteps,
     required this.title,
     required this.options,
     required this.selectedIndex,
     required this.onSelect,
     required this.onBack,
     required this.onContinue,
+    this.subtitle,
     this.centerOptions = false,
     this.mutedUnselectedLabels = false,
   });
 
   final int step;
+  final int totalSteps;
   final String title;
-  final List<(String, String)> options;
+  final String? subtitle;
+  final List<(String, String?)> options;
   final int selectedIndex;
   final ValueChanged<int> onSelect;
   final VoidCallback onBack;
@@ -182,7 +276,7 @@ class _SetupQuestionScaffold extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: Text(
-                  text.language.step(current: step, total: 4),
+                  text.language.step(current: step, total: totalSteps),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: AppColors.secondary,
@@ -197,7 +291,7 @@ class _SetupQuestionScaffold extends StatelessWidget {
                   borderRadius: BorderRadius.circular(999),
                   child: LinearProgressIndicator(
                     minHeight: 13,
-                    value: step / 4,
+                    value: step / totalSteps,
                     color: AppColors.primary,
                     backgroundColor: AppColors.border,
                   ),
@@ -218,6 +312,19 @@ class _SetupQuestionScaffold extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
+                      if (subtitle != null && subtitle!.trim().isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          subtitle!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: AppColors.secondary,
+                            fontSize: 14,
+                            height: 20 / 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 28),
                       for (var i = 0; i < options.length; i++) ...[
                         if (i > 0) const SizedBox(height: 12),
@@ -288,7 +395,7 @@ class _OptionIcon extends StatelessWidget {
 class _OptionTile extends StatelessWidget {
   const _OptionTile({
     required this.label,
-    required this.iconAsset,
+    this.iconAsset,
     required this.selected,
     required this.onTap,
     this.centered = false,
@@ -296,7 +403,7 @@ class _OptionTile extends StatelessWidget {
   });
 
   final String label;
-  final String iconAsset;
+  final String? iconAsset;
   final bool selected;
   final VoidCallback onTap;
   final bool centered;
@@ -340,26 +447,29 @@ class _OptionTile extends StatelessWidget {
           child: centered
               ? LayoutBuilder(
                   builder: (context, constraints) {
-                    // Figma: icon+yazı grubu ortada, aralarında 8px
+                    final hasIcon =
+                        iconAsset != null && iconAsset!.trim().isNotEmpty;
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _OptionIcon(
-                          assetPath: iconAsset,
-                          selected: selected,
-                        ),
-                        const SizedBox(width: 8),
+                        if (hasIcon) ...[
+                          _OptionIcon(
+                            assetPath: iconAsset!,
+                            selected: selected,
+                          ),
+                          const SizedBox(width: 8),
+                        ],
                         ConstrainedBox(
                           constraints: BoxConstraints(
-                            maxWidth: (constraints.maxWidth - 32)
+                            maxWidth: (constraints.maxWidth - (hasIcon ? 32 : 0))
                                 .clamp(0, constraints.maxWidth),
                           ),
                           child: Text(
                             label,
                             style: labelStyle,
                             textAlign: TextAlign.center,
-                            maxLines: 1,
-                            softWrap: false,
+                            maxLines: hasIcon ? 1 : 2,
+                            softWrap: !hasIcon,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -369,8 +479,10 @@ class _OptionTile extends StatelessWidget {
                 )
               : Row(
                   children: [
-                    _OptionIcon(assetPath: iconAsset, selected: selected),
-                    const SizedBox(width: 14),
+                    if (iconAsset != null && iconAsset!.trim().isNotEmpty) ...[
+                      _OptionIcon(assetPath: iconAsset!, selected: selected),
+                      const SizedBox(width: 14),
+                    ],
                     Expanded(
                       child: Text(
                         label,

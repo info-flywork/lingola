@@ -89,6 +89,10 @@ abstract final class AppAssets {
   static const profileAvatar = 'assets/images/home/profile_avatar.svg';
   static const profileSettings =
       'assets/images/profilIcons/profilesettings.svg';
+  static const profileSettingsGear =
+      'assets/images/profilIcons/newProfileIcons/settings.svg';
+  static const profileEditPen =
+      'assets/images/profilIcons/newProfileIcons/editPen.png';
   static const profileLangFlag =
       'assets/images/profilIcons/profileLangFlag.svg';
   static const profileCrown = 'assets/images/profilIcons/crownProfile.svg';
@@ -123,12 +127,45 @@ abstract final class AppAssets {
   static const profileUnlimitedVideo =
       'assets/images/profilIcons/unlimitedVideo.svg';
   static const profileAccessAll = 'assets/images/profilIcons/accessAll.svg';
+  static const profileInstagram = 'assets/images/profilIcons/instagram.png';
+  static const profileTiktok = 'assets/images/profilIcons/tiktok.png';
   static const profileDiscount = 'assets/images/profilIcons/discount.svg';
   static const profileChain = 'assets/images/profilIcons/chain.svg';
   static const profileLock = 'assets/images/profilIcons/lock.svg';
+  static const profileTargetLang =
+      'assets/images/profilIcons/newProfileIcons/targetLang.svg';
+  static const profileLangLevel =
+      'assets/images/profilIcons/newProfileIcons/langLevel.svg';
+  static const profileMotherTongue =
+      'assets/images/profilIcons/newProfileIcons/motherTongue.svg';
+  static const profileHobbies =
+      'assets/images/profilIcons/newProfileIcons/hobbies.svg';
+  static const profileDailyTarget =
+      'assets/images/profilIcons/newProfileIcons/dailyTarget.svg';
+  static const profileDailyReminder =
+      'assets/images/profilIcons/newProfileIcons/dailyReminder.svg';
+
+  // —— Onboarding goal icons (profile interests sheet) ——
+  static const goalCareer = 'assets/images/onboardingGoals/career.svg';
+  static const goalTravel = 'assets/images/onboardingGoals/plane.svg';
+  static const goalLivingAbroad =
+      'assets/images/onboardingGoals/livingabroad.svg';
+  static const goalStudyingAbroad =
+      'assets/images/onboardingGoals/studyingAbroad.svg';
+  static const goalOther = 'assets/images/onboardingGoals/other.svg';
 
   // —— Certificate ——
   static const flyworkLogo = 'assets/images/certificate/flywork_logo.png';
+  static const certificateDownload = 'assets/images/certificate/download.svg';
+  static const certificateA1Starter = 'assets/images/certificate/a1_starter.png';
+  static const certificateA2Basic = 'assets/images/certificate/a2_basic.png';
+  static const certificateB1Intermediate =
+      'assets/images/certificate/b1_intermediate.png';
+  static const certificateB2UpperIntermediate =
+      'assets/images/certificate/b2_upper_intermediate.png';
+  static const certificateC1Advanced =
+      'assets/images/certificate/c1_advanced.png';
+  static const certificateC2Expert = 'assets/images/certificate/c2_expert.png';
   static const profileNotification =
       'assets/images/home/notification_icon.svg';
   static const notificationTrash =
@@ -145,12 +182,28 @@ abstract final class AppAssets {
   static const premiumDiamond = 'assets/images/home/premium_diamond.png';
   static const homeStar = 'assets/images/home/star_small.svg';
   static const homeArrowCircle = 'assets/images/home/arrow_circle.svg';
+  static const homeArrowDown = 'assets/images/home/arrow_down.svg';
 
   // —— Role Play ——
   static const rolePlayCoffee = 'assets/images/roleplay/orderingcoffe.png';
   static const rolePlayDirections =
       'assets/images/roleplay/askingdirection.png';
   static const rolePlayInterview = 'assets/images/roleplay/jobinterview.png';
+  static const rolePlayMissedTrain = 'assets/images/roleplay/missedtrain.png';
+  static const rolePlayFlightAttendant =
+      'assets/images/roleplay/flightattendant.png';
+  static const rolePlayTrainTicket = 'assets/images/roleplay/trainticket.png';
+  static const rolePlayRestaurantReservation =
+      'assets/images/roleplay/restaurantreservation.png';
+  static const rolePlayDoctorAppointment =
+      'assets/images/roleplay/doctorappointment.png';
+  static const rolePlayShoppingClothes =
+      'assets/images/roleplay/shoppingclothes.png';
+  static const rolePlayTakingTaxi = 'assets/images/roleplay/takingtaxi.png';
+  static const rolePlayRentingApartment =
+      'assets/images/roleplay/rentingapartment.png';
+  static const rolePlayBirthdayParty =
+      'assets/images/roleplay/birthdayparty.png';
   static const rolePlayScreenplay = 'assets/images/roleplay/screenplay.svg';
   static const rolePlayResize =
       'assets/images/roleplay/kucultmebuyutme.svg';

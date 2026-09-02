@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart' as rive;
 
+import '../../../core/rive/rive_native_bootstrap.dart';
 import '../../../core/rive/rive_preload_service.dart';
 import '../../../widgets/home_asset.dart';
 
@@ -19,6 +20,7 @@ class TutorRiveAvatar extends StatefulWidget {
     this.fallbackRivePath,
     this.fit = rive.Fit.contain,
     this.alignment = const Alignment(0, 0.15),
+    this.scale = 0.92,
     this.lipsyncViseme,
     this.loadingBackgroundColor,
     this.anchorBottom = false,
@@ -33,6 +35,8 @@ class TutorRiveAvatar extends StatefulWidget {
   final String? fallbackRivePath;
   final rive.Fit fit;
   final Alignment alignment;
+  /// Rive yüklendiğinde ek küçültme — tam ekranda omuzların kesilmemesi için.
+  final double scale;
   final double? lipsyncViseme;
   final Color? loadingBackgroundColor;
   /// Yarım ekran calling: avatar alt kenarı sohbet alanına yapışsın.
@@ -143,6 +147,7 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   Future<void> _resolveLoader(String url) async {
     final gen = ++_resolveGen;
     _activeUrl = url;
+    await RiveNativeBootstrap.ensureInitialized();
     if (mounted) {
       setState(() {
         _fileLoader = null;
@@ -525,9 +530,9 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       fit: _effectiveFit,
       alignment: _effectiveAlignment,
     );
-    if (widget.anchorBottom) return riveWidget;
+    if (widget.anchorBottom || widget.scale >= 0.999) return riveWidget;
     return Transform.scale(
-      scale: 0.92,
+      scale: widget.scale,
       alignment: Alignment.center,
       child: riveWidget,
     );

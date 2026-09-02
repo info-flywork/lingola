@@ -30,6 +30,9 @@ abstract final class TutorVoiceIds {
   /// Diego (özel erkek ses)
   static const diego = 'PIGsltMj3gFMR34aFDI3';
 
+  /// Lingola robot (onboarding + role play)
+  static const lingola = 'JAATlCsz6GCH2vUjFcLg';
+
   /// Kalan erkek hocalar (varsayılan)
   static const male = 'sJ8GED3d0sN1d0bmD6mH';
 
@@ -46,18 +49,20 @@ abstract final class TutorVoiceIds {
     'vaelen',
   };
 
-  /// Önce DB/API `voice_id`; yoksa slug fallback.
+  /// Önce DB/API `voice_id`; yoksa slug fallback. Lingola her zaman robot sesi.
   static String resolve(String? slug, {String? preferred}) {
+    final key = (slug ?? '').trim().toLowerCase();
+    if (key == 'lingola') return lingola;
+
     final fromDb = preferred?.trim();
     if (fromDb != null && fromDb.isNotEmpty) return fromDb;
 
-    final key = (slug ?? '').trim().toLowerCase();
     return switch (key) {
       'santa' => santa,
       'zephyrion' => zephyrion,
       'ukrath' => ukrath,
       'diego' => diego,
-      'lingola' || 'elrion' => male,
+      'elrion' => male,
       _ when _femaleSlugs.contains(key) => female,
       _ when key.isNotEmpty => male,
       _ => female,

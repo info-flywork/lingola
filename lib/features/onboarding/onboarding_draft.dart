@@ -1,4 +1,6 @@
 import '../../core/i18n/app_locale_sync.dart';
+import '../../core/constants/cefr_levels.dart';
+import '../../core/constants/daily_pace.dart';
 
 /// Onboarding cevapları — ekranlar arası taşınır, auth sırasında API'ye gider.
 /// Dil kodları açık string (12+ dil); UI enum'a kilitlenmez.
@@ -6,9 +8,10 @@ class OnboardingDraft {
   OnboardingDraft({
     this.nativeLanguageCode = 'tr',
     this.targetLanguageCode = 'en',
-    this.goal,
-    this.level,
-    this.pace,
+    this.goal = 'career',
+    this.level = CefrLevels.defaultLevel,
+    this.pace = DailyPace.defaultPace,
+    this.explanationLanguage = 'native',
     String? appLocale,
   }) : appLocale = appLocale ?? AppLocaleSync.deviceLocaleCode();
 
@@ -17,6 +20,7 @@ class OnboardingDraft {
   String? goal;
   String? level;
   String? pace;
+  String explanationLanguage;
 
   /// Uygulama UI dili — ilk kurulumda telefon dili (destek yoksa en).
   String appLocale;
@@ -29,8 +33,9 @@ class OnboardingDraft {
     'other',
   ];
 
-  static const levels = ['beginner', 'intermediate', 'advanced'];
-  static const paces = ['light', 'recommended', 'fast'];
+  static const levels = CefrLevels.values;
+  static const paces = DailyPace.values;
+  static const explanationLanguages = ['native', 'english'];
 
   void setGoalIndex(int index) {
     if (index >= 0 && index < goals.length) goal = goals[index];
@@ -44,11 +49,18 @@ class OnboardingDraft {
     if (index >= 0 && index < paces.length) pace = paces[index];
   }
 
+  void setExplanationLanguageIndex(int index) {
+    if (index >= 0 && index < explanationLanguages.length) {
+      explanationLanguage = explanationLanguages[index];
+    }
+  }
+
   Map<String, dynamic> toApiJson() => {
         'nativeLanguageCode': nativeLanguageCode,
         'targetLanguageCode': targetLanguageCode,
-        if (goal != null) 'goal': goal,
-        if (level != null) 'level': level,
-        if (pace != null) 'pace': pace,
+        'explanationLanguage': explanationLanguage,
+        'goal': goal,
+        'level': CefrLevels.forApi(level),
+        'pace': DailyPace.normalize(pace),
       };
 }

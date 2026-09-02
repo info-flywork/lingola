@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../../core/auth/api_client.dart';
+import '../../../core/auth/session_store.dart';
 import '../../../core/i18n/native_language.dart';
 import '../../../core/i18n/word_translation_cache.dart';
 
@@ -28,13 +29,34 @@ Rules:
 - Stay in character as a warm tutor.
 ''';
 
-  Future<String> transcribe(File audioFile) async {
+  Future<String> transcribe(
+    File audioFile, {
+    String? languageCode,
+    String? nativeLanguageCode,
+  }) async {
     final bytes = await audioFile.readAsBytes();
+    if (bytes.length < 800) {
+      throw StateError('Ses kaydı alınamadı — tekrar dene');
+    }
+    final native = nativeLanguageCode ??
+        SessionStore.currentUser?.onboarding?.nativeLanguageCode ??
+        NativeLanguageResolver.resolve();
+    final lowerPath = audioFile.path.toLowerCase();
+    final contentType = lowerPath.endsWith('.wav')
+        ? 'audio/wav'
+        : lowerPath.endsWith('.mp3')
+            ? 'audio/mpeg'
+            : lowerPath.endsWith('.webm')
+                ? 'audio/webm'
+                : 'audio/m4a';
     final json = await ApiClient.post(
       '/ai/transcribe',
       body: {
         'audioBase64': base64Encode(bytes),
-        'contentType': 'audio/m4a',
+        'contentType': contentType,
+        if (languageCode != null && languageCode.trim().isNotEmpty)
+          'language': NativeLanguageResolver.normalize(languageCode),
+        'nativeLanguageCode': NativeLanguageResolver.normalize(native),
       },
     );
     return (json['text'] as String?)?.trim() ?? '';

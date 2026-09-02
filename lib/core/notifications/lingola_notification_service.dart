@@ -7,6 +7,8 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../auth/app_user.dart';
+import '../auth/session_store.dart';
 import '../constants/app_text.dart';
 import '../../features/notifications/notification_inbox_store.dart';
 import 'notification_activity_store.dart';
@@ -25,6 +27,7 @@ abstract final class LingolaNotificationService {
 
   static const _channelId = 'lingola_reengagement';
   static const _eveningLessonId = 2100;
+  static const _dailyReminderId = 2200;
   static const _ids = <int, Duration>{
     2002: Duration(hours: 2),
     2004: Duration(hours: 4),
@@ -92,6 +95,16 @@ abstract final class LingolaNotificationService {
     await cancelAll();
     await NotificationInboxStore.replacePending([]);
 
+    final user = await _loadCachedUser();
+    if (user != null &&
+        user.notificationsEnabled &&
+        user.dailyReminderHour >= 0) {
+      await _scheduleDailyReminder(
+        hour: user.dailyReminderHour,
+        minute: user.dailyReminderMinute,
+      );
+    }
+
     final snapshot = await NotificationActivityStore.buildSnapshot();
     final now = tz.TZDateTime.now(tz.local);
 
@@ -129,10 +142,12 @@ abstract final class LingolaNotificationService {
       await _plugin.cancel(id);
     }
     await _plugin.cancel(_eveningLessonId);
+    await _plugin.cancel(_dailyReminderId);
   }
 
   static String typeForId(int id) {
     return switch (id) {
+      _dailyReminderId => 'practice',
       2004 || 2100 => 'lesson',
       2024 => 'streak',
       2002 || 2008 => 'practice',
@@ -142,6 +157,7 @@ abstract final class LingolaNotificationService {
 
   static String iconAssetForId(int id) {
     return switch (id) {
+      _dailyReminderId => 'assets/images/notifications/icon_translation.svg',
       2024 || 2004 || 2100 => 'assets/images/notifications/icon_stories.svg',
       _ => 'assets/images/notifications/icon_translation.svg',
     };
@@ -149,9 +165,42 @@ abstract final class LingolaNotificationService {
 
   static String iconBgForId(int id) {
     return switch (id) {
+      _dailyReminderId => '#1A2D46FF',
       2024 || 2004 || 2100 => '#1A34C759',
       _ => '#1A2D46FF',
     };
+  }
+
+  static Future<AppUser?> _loadCachedUser() async {
+    return SessionStore.loadCachedUser();
+  }
+
+  static Future<void> _scheduleDailyReminder({
+    required int hour,
+    required int minute,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var when = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour.clamp(0, 23),
+      (minute.clamp(0, 59) ~/ 15) * 15,
+    );
+    if (!when.isAfter(now)) {
+      when = when.add(const Duration(days: 1));
+    }
+    when = _adjustForQuietHours(when);
+
+    final practice = AppText.current.notificationsPage.practice;
+    await _schedule(
+      id: _dailyReminderId,
+      when: when,
+      title: practice.title,
+      body: practice.body,
+      repeatDaily: true,
+    );
   }
 
   static _ScheduledNotification _contentForSlot(
@@ -269,6 +318,7 @@ abstract final class LingolaNotificationService {
     required tz.TZDateTime when,
     required String title,
     required String body,
+    bool repeatDaily = false,
   }) async {
     final push = AppText.current.pushNotifications;
     final type = typeForId(id);
@@ -304,6 +354,8 @@ abstract final class LingolaNotificationService {
       when,
       NotificationDetails(android: androidDetails, iOS: iosDetails),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents:
+          repeatDaily ? DateTimeComponents.time : null,
       payload: payload,
     );
 

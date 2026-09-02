@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'dart:math' as math;
 
-/// Dudaklar sesten hafif önde bitsin (kuyrukta ağız açık kalmasın).
-const kVisemeLatencySec = -0.04;
+/// Playback pozisyonu ile viseme timeline hizası (0 = birebir).
+const kVisemeLatencySec = 0.0;
 
-/// Timeline okuma hızı (>1 = dudaklar sese göre biraz daha çabuk ilerler).
-const kLipsyncTimelineBoost = 1.07;
+/// 1.0 = dudaklar ses ile aynı hızda; >1 dudakları erken bitirir.
+const kLipsyncTimelineBoost = 1.0;
 
 /// Aynı ağız şekli en az bu kadar tutulsun — harf-harf titreme olmasın.
 const kMinVisemeHoldSec = 0.11;
@@ -192,7 +192,7 @@ List<VisemeCue> scaleVisemesToAudioDuration(
     if (c.endSec > trackEnd) trackEnd = c.endSec;
   }
   if (trackEnd < 0.05) return cues;
-  final target = (audioDurationSec - 0.08).clamp(0.2, audioDurationSec);
+  final target = audioDurationSec.clamp(0.2, audioDurationSec);
   final scale = target / trackEnd;
   if (scale >= 0.92 && scale <= 1.12) return coalesceVisemes(cues);
   return coalesceVisemes([
@@ -224,26 +224,19 @@ double visemeAt(
   return 0;
 }
 
-/// Dudaklar ses bitmeden ~0.35–0.45 sn önce dursun (TTS kuyruk sessizliği).
+/// Dudak timeline bitişi — mümkünse ses süresiyle aynı.
 double effectiveSpeechEndSec({
   required List<VisemeCue> visemes,
   double? audioDurationSec,
 }) {
+  if (audioDurationSec != null && audioDurationSec > 0) {
+    return audioDurationSec;
+  }
   var lastMouth = 0.0;
   for (final cue in visemes) {
     if (cue.visemeNum != 0) lastMouth = cue.endSec;
   }
-
-  var end = lastMouth;
-  if (audioDurationSec != null && audioDurationSec > 0) {
-    final lipStop =
-        (audioDurationSec - 0.2).clamp(0.0, audioDurationSec).toDouble();
-    end = lastMouth > 0 ? (lastMouth < lipStop ? lastMouth : lipStop) : lipStop;
-  }
-  if (end > 0) {
-    end = (end - 0.12).clamp(0.0, end).toDouble();
-  }
-  return end;
+  return lastMouth;
 }
 
 /// Bu andan sonra açılacak ağız var mı?

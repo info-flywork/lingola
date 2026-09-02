@@ -34,11 +34,22 @@ class TutorChatSessionDto {
   }
 }
 
+class TutorChatOpenSessionResult {
+  const TutorChatOpenSessionResult({
+    required this.session,
+    required this.created,
+  });
+
+  final TutorChatSessionDto session;
+  final bool created;
+}
+
 class TutorChatTutorDto {
   const TutorChatTutorDto({
     required this.id,
     required this.slug,
     required this.nameKey,
+    this.voiceId,
     this.imageCdnUrl,
     this.localImagePath,
   });
@@ -46,6 +57,7 @@ class TutorChatTutorDto {
   final String id;
   final String slug;
   final String nameKey;
+  final String? voiceId;
   final String? imageCdnUrl;
   final String? localImagePath;
 
@@ -54,6 +66,7 @@ class TutorChatTutorDto {
       id: json['id'] as String? ?? '',
       slug: json['slug'] as String? ?? '',
       nameKey: json['nameKey'] as String? ?? '',
+      voiceId: json['voiceId'] as String?,
       imageCdnUrl: json['imageCdnUrl'] as String?,
       localImagePath: json['localImagePath'] as String?,
     );
@@ -98,12 +111,16 @@ abstract final class TutorChatApiService {
   static Future<({
     TutorChatSessionDto session,
     List<TutorChatMessageDto> messages,
+    String? tutorVoiceId,
   })> openPreviewSession({
     String? tutorId,
     String? tutorSlug,
     String? title,
     String? openingMessage,
     String? kind,
+    String? nativeLanguageCode,
+    String? targetLanguageCode,
+    String? explanationLanguage,
   }) async {
     final data = await ApiClient.post(
       '/chat/preview/sessions',
@@ -114,6 +131,12 @@ abstract final class TutorChatApiService {
         if (openingMessage != null && openingMessage.isNotEmpty)
           'openingMessage': openingMessage,
         if (kind != null && kind.isNotEmpty) 'kind': kind,
+        if (nativeLanguageCode != null && nativeLanguageCode.isNotEmpty)
+          'nativeLanguageCode': nativeLanguageCode,
+        if (targetLanguageCode != null && targetLanguageCode.isNotEmpty)
+          'targetLanguageCode': targetLanguageCode,
+        if (explanationLanguage != null && explanationLanguage.isNotEmpty)
+          'explanationLanguage': explanationLanguage,
       },
     );
     if (data.isEmpty) {
@@ -130,9 +153,14 @@ abstract final class TutorChatApiService {
             .map(TutorChatMessageDto.fromJson)
             .toList(growable: false)
         : const <TutorChatMessageDto>[];
+    final tutor = data['tutor'];
+    final tutorVoiceId = tutor is Map<String, dynamic>
+        ? tutor['voiceId'] as String?
+        : null;
     return (
       session: TutorChatSessionDto.fromJson(session),
       messages: messages,
+      tutorVoiceId: tutorVoiceId,
     );
   }
 
@@ -165,7 +193,7 @@ abstract final class TutorChatApiService {
     await ApiClient.post('/chat/preview/sessions/$sessionId/claim', auth: true);
   }
 
-  static Future<TutorChatSessionDto> openSession({
+  static Future<TutorChatOpenSessionResult> openSession({
     String? tutorId,
     String? tutorSlug,
     bool forceNew = false,
@@ -192,7 +220,10 @@ abstract final class TutorChatApiService {
     if (session is! Map<String, dynamic>) {
       throw ApiException('Invalid chat session response');
     }
-    return TutorChatSessionDto.fromJson(session);
+    return TutorChatOpenSessionResult(
+      session: TutorChatSessionDto.fromJson(session),
+      created: json['created'] == true,
+    );
   }
 
   static Future<List<TutorChatSessionDto>> listSessions({int limit = 30}) async {

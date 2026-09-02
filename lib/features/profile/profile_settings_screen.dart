@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/auth/app_user.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/auth/session_store.dart';
+import '../../core/premium/premium_service.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/errors/api_error_localizer.dart';
@@ -12,15 +12,88 @@ import '../../core/theme/app_theme.dart';
 import '../../i18n/strings.g.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
+import '../onboarding/onboarding_flow.dart';
 
-class ProfileSettingsScreen extends StatefulWidget {
-  const ProfileSettingsScreen({super.key});
+/// Galeriden profil fotoğrafı seçip yükler. Başarılı olursa `true` döner.
+Future<bool> pickAndUploadProfileAvatar(BuildContext context) async {
+  final text = AppText.current.profilePage;
+  final picker = ImagePicker();
+  final file = await picker.pickImage(
+    source: ImageSource.gallery,
+    maxWidth: 1024,
+    maxHeight: 1024,
+    imageQuality: 85,
+  );
+  if (file == null) return false;
 
-  @override
-  State<ProfileSettingsScreen> createState() => _ProfileSettingsScreenState();
+  try {
+    final bytes = await file.readAsBytes();
+    final path = file.path.toLowerCase();
+    final mime = path.endsWith('.png')
+        ? 'image/png'
+        : path.endsWith('.webp')
+            ? 'image/webp'
+            : 'image/jpeg';
+    await AuthService.uploadAvatar(
+      bytes: bytes,
+      contentType: mime,
+    );
+    if (!context.mounted) return false;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text.profilePhotoUpdated)),
+    );
+    return true;
+  } catch (err) {
+    if (!context.mounted) return false;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(ApiErrorLocalizer.message(err))),
+    );
+    return false;
+  }
 }
 
-class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
+Future<void> showProfileDeleteAccountSheet(BuildContext context) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: .45),
+    builder: (sheetContext) {
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
+        ),
+        child: const _DeleteAccountSheet(),
+      );
+    },
+  );
+}
+
+Future<bool?> showProfileEditSheet(BuildContext context) {
+  return showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: .45),
+    builder: (sheetContext) {
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
+        ),
+        child: const _ProfileEditSheet(),
+      );
+    },
+  );
+}
+
+class _ProfileEditSheet extends StatefulWidget {
+  const _ProfileEditSheet();
+
+  @override
+  State<_ProfileEditSheet> createState() => _ProfileEditSheetState();
+}
+
+class _ProfileEditSheetState extends State<_ProfileEditSheet> {
   static const _deleteRed = Color(0xFFEF3F3F);
   static const _fieldRadius = 10.0;
 
@@ -97,7 +170,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(text.profileSaved)),
       );
-      Navigator.of(context).maybePop(true);
+      Navigator.of(context).pop(true);
     } catch (err) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -110,39 +183,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
   Future<void> _pickAndUploadAvatar() async {
     if (_uploadingAvatar || _loading) return;
-    final text = AppText.current.profilePage;
-    final picker = ImagePicker();
-    final file = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
-    );
-    if (file == null) return;
-
     setState(() => _uploadingAvatar = true);
     try {
-      final bytes = await file.readAsBytes();
-      final path = file.path.toLowerCase();
-      final mime = path.endsWith('.png')
-          ? 'image/png'
-          : path.endsWith('.webp')
-              ? 'image/webp'
-              : 'image/jpeg';
-      final user = await AuthService.uploadAvatar(
-        bytes: bytes,
-        contentType: mime,
-      );
-      if (!mounted) return;
-      setState(() => _hydrateFrom(user));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(text.profilePhotoUpdated)),
-      );
-    } catch (err) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ApiErrorLocalizer.message(err))),
-      );
+      final ok = await pickAndUploadProfileAvatar(context);
+      if (!mounted || !ok) return;
+      setState(() => _hydrateFrom(SessionStore.currentUser));
     } finally {
       if (mounted) setState(() => _uploadingAvatar = false);
     }
@@ -216,69 +261,56 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   }
 
   Future<void> _showDeleteAccountSheet(BuildContext context) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: .45),
-      builder: (sheetContext) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
-          ),
-          child: const _DeleteAccountSheet(),
-        );
-      },
-    );
+    await showProfileDeleteAccountSheet(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.profilePage;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: AppColors.surface,
-      ),
-      child: Scaffold(
-        backgroundColor: AppColors.surface,
-        body: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const HomeAsset(
-                        AppAssets.backArrow,
-                        width: 24,
-                        height: 24,
-                      ),
-                      tooltip: AppText.current.common.back,
-                    ),
-                    Text(
-                      text.profileSettings,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        height: 24 / 16,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                  ],
-                ),
+    return SafeArea(
+      top: false,
+      child: Container(
+        width: double.infinity,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.92,
+        ),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              width: 33,
+              height: 5,
+              decoration: BoxDecoration(
+                color: AppColors.secondary,
+                borderRadius: BorderRadius.circular(50),
               ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              text.profileSettings,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 18,
+                height: 24 / 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Column(
                   children: [
-                    const SizedBox(height: 8),
                     Center(child: _buildAvatar()),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 24),
                     _LabeledField(
                       label: text.fullName,
                       child: _InputBox(
@@ -341,13 +373,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Column(
-                  children: [
+                    const SizedBox(height: 8),
                     Material(
                       color: Colors.transparent,
                       child: InkWell(
@@ -384,16 +410,18 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    PrimaryButton(
-                      label: _saving ? '…' : text.save,
-                      onPressed: _onSave,
-                    ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + bottomInset),
+              child: PrimaryButton(
+                label: _saving ? '…' : text.save,
+                onPressed: _onSave,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -460,11 +488,10 @@ class _DeleteAccountSheet extends StatefulWidget {
   State<_DeleteAccountSheet> createState() => _DeleteAccountSheetState();
 }
 
-enum _DeleteStep { survey, offer, confirm, farewell }
+enum _DeleteStep { survey, offer, farewell }
 
 class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
   static const _border = Color(0x0D000000);
-  static const _iconOrangeBg = Color(0xFFFFF0E6);
 
   static const _reasonCodes = <String>[
     'ai_characters',
@@ -488,6 +515,27 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
   }
 
   void _close() => Navigator.of(context).pop();
+
+  Future<void> _finishAfterDeletion() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await AuthService.logout();
+      if (!mounted) return;
+      final rootNav = Navigator.of(context, rootNavigator: true);
+      rootNav.pop();
+      rootNav.pushAndRemoveUntil(
+        MaterialPageRoute<void>(builder: (_) => const SplashScreen()),
+        (_) => false,
+      );
+    } catch (err) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not sign out: $err')),
+      );
+      setState(() => _busy = false);
+    }
+  }
 
   Future<void> _acceptOffer(String offerType) async {
     if (_busy) return;
@@ -532,6 +580,7 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
         message: _messageController.text,
       );
       if (!mounted) return;
+      await PremiumService.logOut();
       setState(() {
         _accessUntilLabel = AuthService.formatAccessDate(result.accessUntil);
         _step = _DeleteStep.farewell;
@@ -573,11 +622,9 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
         if (_selectedIndex == null) return;
         setState(() => _step = _DeleteStep.offer);
       case _DeleteStep.offer:
-        setState(() => _step = _DeleteStep.confirm);
-      case _DeleteStep.confirm:
         await _confirmDeletion();
       case _DeleteStep.farewell:
-        _close();
+        await _finishAfterDeletion();
     }
   }
 
@@ -617,7 +664,6 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
                 child: switch (_step) {
                   _DeleteStep.survey => _buildSurvey(text),
                   _DeleteStep.offer => _buildOffer(text),
-                  _DeleteStep.confirm => _buildConfirm(text),
                   _DeleteStep.farewell => _buildFarewell(text),
                 },
               ),
@@ -638,8 +684,6 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
                       onPressed: () => _acceptOffer('monthly_plan'),
                     ),
                     const SizedBox(height: 10),
-                  ],
-                  if (_step == _DeleteStep.confirm) ...[
                     PrimaryButton(
                       label: text.acceptDiscountCta,
                       onPressed: () => _acceptOffer('discount_60'),
@@ -649,7 +693,7 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
                   if (isFarewell)
                     SecondaryButton(
                       label: text.done,
-                      onPressed: _close,
+                      onPressed: _finishAfterDeletion,
                     )
                   else
                     Row(
@@ -898,112 +942,6 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
     );
   }
 
-  Widget _buildConfirm(Translations$profilePage$en text) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SheetHeader(
-          title: text.confirmTitle,
-          body: text.confirmBody,
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: _border),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const _WhatYoullKeepTitle(),
-                    const SizedBox(height: 10),
-                    _FeatureAssetRow(
-                      asset: AppAssets.profileUnlimitedCharacter,
-                      label: text.loseCharacters,
-                    ),
-                    const SizedBox(height: 8),
-                    _FeatureAssetRow(
-                      asset: AppAssets.profileUnlimitedVideo,
-                      label: text.loseVideo,
-                    ),
-                    const SizedBox(height: 8),
-                    _FeatureAssetRow(
-                      asset: AppAssets.profileAccessAll,
-                      label: text.loseCourses,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: _border),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      alignment: Alignment.center,
-                      child: const HomeAsset(
-                        AppAssets.profileDiscount,
-                        width: 24,
-                        height: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            text.discountTitle,
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 13,
-                              height: 17 / 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.ink,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            text.discountSubtitle,
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12,
-                              height: 16 / 12,
-                              fontWeight: FontWeight.w400,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildFarewell(Translations$profilePage$en text) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1188,47 +1126,6 @@ class _KeepCheckRow extends StatelessWidget {
           AppAssets.profileDeleteAccountTik,
           width: 17,
           height: 17,
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12,
-              height: 16 / 12,
-              fontWeight: FontWeight.w500,
-              color: AppColors.ink,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _FeatureAssetRow extends StatelessWidget {
-  const _FeatureAssetRow({
-    required this.asset,
-    required this.label,
-  });
-
-  final String asset;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: _DeleteAccountSheetState._iconOrangeBg,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          alignment: Alignment.center,
-          child: HomeAsset(asset, width: 20, height: 20),
         ),
         const SizedBox(width: 10),
         Expanded(

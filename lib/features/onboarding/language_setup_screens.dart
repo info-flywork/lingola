@@ -12,6 +12,7 @@ import '../../widgets/app_widgets.dart';
 import 'language_flag.dart';
 import 'onboarding_draft.dart';
 import 'setup_question_screens.dart';
+import 'target_language_options.dart';
 
 class LanguageSetupScreen extends StatefulWidget {
   const LanguageSetupScreen({super.key, this.draft});
@@ -52,13 +53,15 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
   }
 
   List<_SheetLanguage> _targetSheetLanguages() {
-    final text = AppText.current;
-    return [
-      _SheetLanguage('en', text.language.english),
-      _SheetLanguage('de', text.targetLanguage.german, comingSoon: true),
-      _SheetLanguage('it', text.targetLanguage.italian, comingSoon: true),
-      _SheetLanguage('fr', text.language.french, comingSoon: true),
-    ];
+    return targetLanguageOptions(AppText.current)
+        .map(
+          (item) => _SheetLanguage(
+            item.code,
+            item.label,
+            comingSoon: item.comingSoon,
+          ),
+        )
+        .toList();
   }
 
   List<_SheetLanguage> _nativeSheetLanguages() {
@@ -135,7 +138,7 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                 child: Text(
-                  text.language.step(current: 1, total: 4),
+                  text.language.step(current: 1, total: 5),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: AppColors.secondary,
@@ -150,7 +153,7 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                   borderRadius: BorderRadius.circular(999),
                   child: const LinearProgressIndicator(
                     minHeight: 13,
-                    value: .25,
+                    value: .2,
                     color: AppColors.primary,
                     backgroundColor: AppColors.border,
                   ),
@@ -254,7 +257,8 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                       _draft.appLocale = _appLocaleFromNative(_nativeCode);
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (_) => GoalSetupScreen(draft: _draft),
+                          builder: (_) =>
+                              ExplanationLanguageSetupScreen(draft: _draft),
                         ),
                       );
                     },
@@ -388,12 +392,12 @@ class _LanguagePickerSheet extends StatelessWidget {
             constraints: BoxConstraints(
               maxHeight: MediaQuery.sizeOf(context).height * .72,
             ),
+            clipBehavior: Clip.antiAlias,
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 10),
                 Container(
@@ -404,10 +408,10 @@ class _LanguagePickerSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(99),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
-                  child: SizedBox(
-                    height: 34,
+                Material(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
                     child: Row(
                       children: [
                         Expanded(
@@ -425,6 +429,11 @@ class _LanguagePickerSheet extends StatelessWidget {
                         IconButton(
                           tooltip: text.common.close,
                           onPressed: () => Navigator.of(context).pop(),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 40,
+                            minHeight: 40,
+                          ),
                           icon: const Icon(
                             Icons.close_rounded,
                             color: Color(0xFFACACAC),
@@ -435,11 +444,10 @@ class _LanguagePickerSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-                Flexible(
+                Expanded(
                   child: ListView(
-                    clipBehavior: Clip.none,
-                    padding: EdgeInsets.fromLTRB(16, 10, 16, 16 + bottom),
-                    shrinkWrap: true,
+                    clipBehavior: Clip.hardEdge,
+                    padding: EdgeInsets.fromLTRB(16, 4, 16, 16 + bottom),
                     children: [
                       for (final item in activeLanguages)
                         Padding(
@@ -450,54 +458,57 @@ class _LanguagePickerSheet extends StatelessWidget {
                             onTap: () => Navigator.of(context).pop(item),
                           ),
                         ),
-                      // Coming soon yalnızca Target language sheet'te
                       if (targetMode && comingSoonLanguages.isNotEmpty)
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Column(
-                              children: [
-                                for (final item in comingSoonLanguages)
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: _LanguageSheetRow(
-                                      item: item,
-                                      selected: false,
-                                      disabled: true,
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            alignment: Alignment.center,
+                            children: [
+                              Column(
+                                children: [
+                                  for (final item in comingSoonLanguages)
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 10),
+                                      child: _LanguageSheetRow(
+                                        item: item,
+                                        selected: false,
+                                        disabled: true,
+                                      ),
                                     ),
+                                ],
+                              ),
+                              IgnorePointer(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                    vertical: 10,
                                   ),
-                              ],
-                            ),
-                            IgnorePointer(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 18,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary,
-                                  borderRadius: BorderRadius.circular(999),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primary
-                                          .withValues(alpha: .18),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(999),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.primary
+                                            .withValues(alpha: .18),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    text.language.comingSoonBadge,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      height: 18 / 14,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                  ],
-                                ),
-                                child: Text(
-                                  text.language.comingSoonBadge,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    height: 18 / 14,
-                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                     ],
                   ),

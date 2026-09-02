@@ -3,6 +3,7 @@ import '../../../core/constants/app_text.dart';
 import '../../../core/rive/rive_preload_service.dart';
 import '../../../i18n/strings.g.dart';
 import '../../lesson/lesson_api_service.dart';
+import '../../lesson/lesson_curriculum.dart';
 import '../../tutor/services/tutor_api_service.dart';
 
 enum HomePathNodeStatus { locked, active, completed, unlocked }
@@ -35,12 +36,29 @@ class HomePathPreviewNode {
     required this.label,
     required this.labelColor,
     required this.showStars,
+    required this.status,
+    required this.slug,
+    required this.a1Index,
+    this.hasNotes = false,
+    this.tutorId,
+    this.tutorSlug,
+    this.cefrLevel,
   });
 
   final String asset;
   final String label;
   final int labelColor; // ARGB via Color.value on caller side
   final bool showStars;
+  final HomePathNodeStatus status;
+  final String slug;
+  final int a1Index;
+  final bool hasNotes;
+  final String? tutorId;
+  final String? tutorSlug;
+  final String? cefrLevel;
+
+  bool get canOpen =>
+      status != HomePathNodeStatus.locked && slug.isNotEmpty;
 }
 
 class HomeTutorCarouselItem {
@@ -86,11 +104,11 @@ abstract final class HomeDataService {
 
   /// Home learning path preview slots — Figma layout order, not catalog order.
   static const _previewSlots = <({String asset, int a1Index})>[
-    (asset: 'assets/images/home/node_introductions.svg', a1Index: 1),
-    (asset: 'assets/images/home/node_greetings.svg', a1Index: 0),
-    (asset: 'assets/images/home/node_jobs.svg', a1Index: 2),
-    (asset: 'assets/images/home/node_favorite_room.svg', a1Index: 3),
-    (asset: 'assets/images/home/node_daily_routine.svg', a1Index: 4),
+    (asset: 'assets/learningPath/a1/introduction.svg', a1Index: 1),
+    (asset: 'assets/learningPath/a1/greetings.svg', a1Index: 0),
+    (asset: 'assets/learningPath/a1/jobs.svg', a1Index: 2),
+    (asset: 'assets/learningPath/a1/favoriteroom.svg', a1Index: 3),
+    (asset: 'assets/learningPath/a1/dailyroutine.svg', a1Index: 4),
   ];
 
   static Future<HomeRemoteData?> fetch() async {
@@ -199,12 +217,22 @@ abstract final class HomeDataService {
         HomePathNodeStatus.unlocked => 0xFF8A8A8A,
         HomePathNodeStatus.locked => 0xFF8A8A8A,
       };
+      final slug = lesson != null && lesson.slug.isNotEmpty
+          ? lesson.slug
+          : (LessonCurriculum.slugAt('a1', slot.a1Index) ?? '');
       return HomePathPreviewNode(
         asset: slot.asset,
         label: label,
         labelColor: labelColor,
         showStars: status == HomePathNodeStatus.completed ||
             status == HomePathNodeStatus.active,
+        status: status,
+        slug: slug,
+        a1Index: slot.a1Index,
+        hasNotes: lesson?.hasNotes ?? false,
+        tutorId: lesson?.tutorId,
+        tutorSlug: lesson?.tutorSlug,
+        cefrLevel: lesson?.cefrLevel ?? 'a1',
       );
     }).toList();
   }
@@ -212,7 +240,12 @@ abstract final class HomeDataService {
   static HomePathNodeStatus _nodeStatus(LessonNodeDto? lesson) {
     if (lesson == null) return HomePathNodeStatus.locked;
     if (lesson.isCompleted) return HomePathNodeStatus.completed;
-    if (lesson.isAvailable) return HomePathNodeStatus.active;
+    if (lesson.isAvailable) {
+      final engaged = lesson.elapsedSeconds > 0 ||
+          (lesson.startedAt != null && lesson.startedAt!.isNotEmpty);
+      if (!engaged) return HomePathNodeStatus.unlocked;
+      return HomePathNodeStatus.active;
+    }
     if (lesson.isUnlocked) return HomePathNodeStatus.unlocked;
     return HomePathNodeStatus.locked;
   }

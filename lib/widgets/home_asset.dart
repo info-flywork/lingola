@@ -25,11 +25,36 @@ class HomeAsset extends StatelessWidget {
   bool get _isNetwork =>
       path.startsWith('http://') || path.startsWith('https://');
 
+  /// Figma export — SVG içinde gömülü PNG; flutter_svg render edemez.
+  static const _embeddedRasterSvgPrefixes = [
+    'assets/images/profilIcons/newProfileIcons/',
+  ];
+
+  String? get _companionPngPath {
+    if (!_isSvg) return null;
+    return path.replaceFirst(RegExp(r'\.svg$', caseSensitive: false), '.png');
+  }
+
+  bool get _useCompanionPng =>
+      _companionPngPath != null &&
+      _embeddedRasterSvgPrefixes.any((prefix) => path.startsWith(prefix));
+
   static bool _isFinitePositive(double? v) =>
       v != null && v.isFinite && v > 0;
 
   @override
   Widget build(BuildContext context) {
+    if (_useCompanionPng) {
+      return HomeAsset(
+        _companionPngPath!,
+        width: width,
+        height: height,
+        fit: fit,
+        alignment: alignment,
+        color: color,
+      );
+    }
+
     final dpr = MediaQuery.maybeDevicePixelRatioOf(context) ?? 2.0;
 
     if (_isSvg) {
@@ -42,20 +67,25 @@ class HomeAsset extends StatelessWidget {
         colorFilter: color == null
             ? null
             : ColorFilter.mode(color!, BlendMode.srcIn),
-        placeholderBuilder: (_) => _placeholder(),
-        errorBuilder: (_, _, _) => _placeholder(),
+        placeholderBuilder: (_) => _buildSvgFallback(context),
+        errorBuilder: (_, _, _) => _buildSvgFallback(context),
       );
     }
 
-    // Layout için infinity OK; cacheWidth sadece sonlu genişlikte hesaplanır.
-    final int? cacheWidth;
-    if (_isFinitePositive(width)) {
-      cacheWidth = (width! * dpr).round().clamp(1, 1600);
-    } else if (width == null) {
-      cacheWidth = (420 * dpr).round().clamp(1, 1600);
-    } else {
-      cacheWidth = null;
-    }
+    final bool skipCacheResize =
+        _isFinitePositive(width) && width! <= 32 && _isFinitePositive(height) && height! <= 32;
+
+    final int? cacheWidth = skipCacheResize
+        ? null
+        : _isFinitePositive(width)
+        ? (width! * dpr).round().clamp(1, 2048)
+        : width == null
+        ? (420 * dpr).round().clamp(1, 2048)
+        : null;
+
+    final int? cacheHeight = skipCacheResize || !_isFinitePositive(height)
+        ? null
+        : (height! * dpr).round().clamp(1, 2048);
 
     if (_isNetwork) {
       return Image.network(
@@ -65,6 +95,7 @@ class HomeAsset extends StatelessWidget {
         fit: fit,
         alignment: alignment,
         cacheWidth: cacheWidth,
+        cacheHeight: cacheHeight,
         filterQuality: FilterQuality.high,
         isAntiAlias: true,
         errorBuilder: (_, _, _) => _placeholder(),
@@ -78,10 +109,26 @@ class HomeAsset extends StatelessWidget {
       fit: fit,
       alignment: alignment,
       cacheWidth: cacheWidth,
+      cacheHeight: cacheHeight,
       filterQuality: FilterQuality.high,
       isAntiAlias: true,
       errorBuilder: (_, _, _) => _placeholder(),
     );
+  }
+
+  Widget _buildSvgFallback(BuildContext context) {
+    final png = _companionPngPath;
+    if (png != null) {
+      return HomeAsset(
+        png,
+        width: width,
+        height: height,
+        fit: fit,
+        alignment: alignment,
+        color: color,
+      );
+    }
+    return _placeholder();
   }
 
   Widget _placeholder() {

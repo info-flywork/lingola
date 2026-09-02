@@ -1,6 +1,7 @@
 import '../../features/onboarding/onboarding_draft.dart';
 import '../../features/onboarding/services/onboarding_preview_chat_store.dart';
 import '../../features/tutor/services/tutor_chat_api_service.dart';
+import '../constants/cefr_levels.dart';
 import '../i18n/app_locale_sync.dart';
 import '../premium/premium_service.dart';
 import 'dart:convert';
@@ -185,11 +186,76 @@ abstract final class AuthService {
     return _persistUserOnly(json);
   }
 
+  static Future<AppUser> updateOnboarding({
+    String? explanationLanguage,
+    String? targetLanguageCode,
+    String? nativeLanguageCode,
+    String? goal,
+    String? level,
+    String? pace,
+  }) async {
+    final body = <String, dynamic>{};
+    if (explanationLanguage != null) {
+      body['explanationLanguage'] = explanationLanguage;
+    }
+    if (targetLanguageCode != null) {
+      body['targetLanguageCode'] = targetLanguageCode;
+    }
+    if (nativeLanguageCode != null) {
+      body['nativeLanguageCode'] = nativeLanguageCode;
+    }
+    if (goal != null) body['goal'] = goal;
+    if (level != null) body['level'] = CefrLevels.forApi(level);
+    if (pace != null) body['pace'] = pace;
+    final json = await ApiClient.patch(
+      '/auth/me/onboarding',
+      body: body,
+      auth: true,
+    );
+    return _persistUserOnly(json);
+  }
+
+  static Future<AppUser> syncOnboardingDraft(OnboardingDraft draft) async {
+    final json = await ApiClient.patch(
+      '/auth/me/onboarding',
+      auth: true,
+      body: draft.toApiJson(),
+    );
+    return _persistUserOnly(json);
+  }
+
+  static Future<void> saveDemoPersonalization({
+    required List<Map<String, String>> messages,
+  }) async {
+    await ApiClient.post(
+      '/auth/me/onboarding/personalization',
+      auth: true,
+      body: {'messages': messages},
+    );
+  }
+
   static Future<AppUser> setNotificationsEnabled(bool enabled) async {
     final json = await ApiClient.patch(
       '/auth/me/notifications',
       auth: true,
       body: {'notificationsEnabled': enabled},
+    );
+    return _persistUserOnly(json);
+  }
+
+  static Future<AppUser> updateDailyReminder({
+    required bool enabled,
+    required int hour,
+    required int minute,
+  }) async {
+    final json = await ApiClient.patch(
+      '/auth/me/notifications',
+      auth: true,
+      body: {
+        'notificationsEnabled': enabled,
+        'reminderHour': hour,
+        'reminderMinute': minute,
+      },
     );
     return _persistUserOnly(json);
   }

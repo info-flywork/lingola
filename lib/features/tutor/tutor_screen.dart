@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rive/rive.dart' as rive;
 
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
@@ -12,14 +14,17 @@ import '../../core/premium/premium_service.dart';
 import '../../core/rive/rive_preload_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
+import '../lesson/lesson_tutor_choice.dart';
 import 'chat_history_screen.dart';
 import 'chat_screen.dart';
 import 'calling_screen.dart';
 import 'services/tutor_api_service.dart';
 import 'services/tutor_tts_service.dart';
+import 'services/viseme_cue.dart';
 import 'tutor_filter.dart';
 import 'tutor_filter_sheet.dart';
 import 'tutor_scene_theme.dart';
+import 'widgets/tutor_rive_avatar.dart';
 
 class TutorScreen extends StatefulWidget {
   const TutorScreen({super.key});
@@ -41,7 +46,7 @@ class _TutorScreenState extends State<TutorScreen> {
   }
 
   List<_TutorData> _tutorsFor(dynamic text) =>
-      _remoteTutors ?? _localTutorCards(text);
+      _remoteTutors ?? _TutorScreenState._localTutorCards(text);
 
   List<_TutorData> _visibleTutors(dynamic text) {
     final all = _tutorsFor(text);
@@ -152,7 +157,7 @@ class _TutorScreenState extends State<TutorScreen> {
       }
       final text = AppText.current.tutorPage;
       final mapped = remote
-          .map((dto) => _mapRemoteTutor(dto, text))
+          .map((dto) => _TutorScreenState._mapRemoteTutor(dto, text))
           .whereType<_TutorData>()
           .toList();
       setState(() {
@@ -170,7 +175,7 @@ class _TutorScreenState extends State<TutorScreen> {
     }
   }
 
-  _TutorData? _mapRemoteTutor(TutorDto dto, dynamic text) {
+  static _TutorData? _mapRemoteTutor(TutorDto dto, dynamic text) {
     final image = dto.imagePath;
     if (image == null || image.isEmpty) return null;
     final tags = text.tags;
@@ -324,16 +329,19 @@ class _TutorScreenState extends State<TutorScreen> {
         : _resolvedFocus(tutors);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
+      value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
         systemNavigationBarColor: AppColors.surface,
       ),
       child: ColoredBox(
         color: AppColors.surface,
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(
-              child: _TutorHero(
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _PinnedTutorHeroDelegate(
+                topInset: MediaQuery.paddingOf(context).top,
                 text: text,
                 tutor: focused,
                 onChat: () => _openChat(focused),
@@ -577,7 +585,7 @@ class _TutorScreenState extends State<TutorScreen> {
   }
 
   /// Local fallback — bundled assets stay in the app (never delete).
-  List<_TutorData> _localTutorCards(dynamic text) {
+  static List<_TutorData> _localTutorCards(dynamic text) {
     final tags = text.tags;
     return [
       _TutorData(
@@ -780,6 +788,497 @@ class _TutorScreenState extends State<TutorScreen> {
   }
 }
 
+/// Ders başlatmadan önce eğitmen seçimi — Tutor sekmesiyle aynı arayüz.
+class LessonTutorPickerScreen extends StatefulWidget {
+  const LessonTutorPickerScreen({super.key, required this.lessonTitle});
+
+  final String lessonTitle;
+
+  @override
+  State<LessonTutorPickerScreen> createState() =>
+      _LessonTutorPickerScreenState();
+}
+
+class _LessonTutorPickerScreenState extends State<LessonTutorPickerScreen> {
+  List<TutorDto> _rawTutors = const [];
+  List<_TutorData>? _remoteTutors;
+  var _loadingRemote = true;
+  _TutorData? _focusedTutor;
+  TutorFilter _filter = TutorFilter.empty;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRemoteTutors();
+  }
+
+  List<_TutorData> _tutorsFor(dynamic text) =>
+      _remoteTutors ?? _TutorScreenState._localTutorCards(text);
+
+  List<_TutorData> _visibleTutors(dynamic text) {
+    final all = _tutorsFor(text);
+    if (!_filter.isActive) return all;
+    return all
+        .where(
+          (t) => _filter.matches(
+            tutorTagKeys: t.filterTagKeys,
+            tutorFlagAsset: t.flagAsset,
+          ),
+        )
+        .toList();
+  }
+
+  void _applyFilter(TutorFilter filter, dynamic text) {
+    final visible = _visibleTutorsFrom(all: _tutorsFor(text), filter: filter);
+    setState(() {
+      _filter = filter;
+      final focused = _focusedTutor;
+      if (focused != null &&
+          visible.any((t) => t.identity == focused.identity)) {
+        return;
+      }
+      _focusedTutor = visible.isNotEmpty ? visible.first : null;
+    });
+  }
+
+  List<_TutorData> _visibleTutorsFrom({
+    required List<_TutorData> all,
+    required TutorFilter filter,
+  }) {
+    if (!filter.isActive) return all;
+    return all
+        .where(
+          (t) => filter.matches(
+            tutorTagKeys: t.filterTagKeys,
+            tutorFlagAsset: t.flagAsset,
+          ),
+        )
+        .toList();
+  }
+
+  _TutorData _resolvedFocus(List<_TutorData> tutors, dynamic text) {
+    final focused = _focusedTutor;
+    if (focused != null &&
+        tutors.any((t) => t.identity == focused.identity)) {
+      return focused;
+    }
+    return tutors.isNotEmpty
+        ? tutors.first
+        : _TutorScreenState._fallbackLingola(text: text);
+  }
+
+  void _focusTutor(_TutorData tutor) {
+    if (_focusedTutor?.identity == tutor.identity) return;
+    setState(() => _focusedTutor = tutor);
+  }
+
+  TutorDto? _dtoFor(_TutorData tutor) {
+    for (final dto in _rawTutors) {
+      if (dto.id == tutor.id || dto.slug == tutor.slug) return dto;
+    }
+    final slug = tutor.slug?.trim();
+    if (slug == null || slug.isEmpty) return null;
+    return TutorDto(
+      id: tutor.id ?? slug,
+      slug: slug,
+      nameKey: slug,
+      tagKeys: tutor.filterTagKeys,
+      voiceId: tutor.voiceId,
+      localImagePath: tutor.image,
+      localRivePath: tutor.riveAsset,
+      flagAssetPath: tutor.flagAsset,
+    );
+  }
+
+  void _confirm(String mode) {
+    final focused = _focusedTutor;
+    if (focused == null) return;
+    final dto = _dtoFor(focused);
+    if (dto == null) return;
+    Navigator.of(context).pop(LessonTutorChoice(tutor: dto, mode: mode));
+  }
+
+  Future<void> _loadRemoteTutors() async {
+    try {
+      final remote = await TutorApiService.fetchTutors();
+      if (!mounted) return;
+      if (remote.isEmpty) {
+        setState(() => _loadingRemote = false);
+        return;
+      }
+      final text = AppText.current.tutorPage;
+      final mapped = remote
+          .map((dto) => _TutorScreenState._mapRemoteTutor(dto, text))
+          .whereType<_TutorData>()
+          .toList();
+      setState(() {
+        _rawTutors = remote;
+        _remoteTutors = mapped;
+        _focusedTutor ??= mapped.isNotEmpty ? mapped.first : null;
+        _loadingRemote = false;
+      });
+      RivePreloadService.preloadMany([
+        AppAssets.tutorLingolaRivCdn,
+        ...mapped.map((t) => t.riveCdnUrl),
+      ]);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingRemote = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = AppText.current.tutorPage;
+    final lessonText = AppText.current.lessonPage;
+    final tutors = _visibleTutors(text);
+    final focused = tutors.isEmpty
+        ? _TutorScreenState._fallbackLingola(text: text)
+        : _resolvedFocus(tutors, text);
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.white,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.surface,
+        bottomNavigationBar: ColoredBox(
+          color: Colors.white,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              10,
+              16,
+              MediaQuery.viewPaddingOf(context).bottom + 6,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _LessonPickerActionButton(
+                    label: lessonText.chatInstead,
+                    filled: false,
+                    onPressed: _focusedTutor == null
+                        ? null
+                        : () => _confirm('chat'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _LessonPickerActionButton(
+                    label: lessonText.startTalk,
+                    filled: true,
+                    onPressed: _focusedTutor == null
+                        ? null
+                        : () => _confirm('talk'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        body: CustomScrollView(
+          slivers: [
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _PinnedTutorHeroDelegate(
+                topInset: MediaQuery.paddingOf(context).top,
+                text: text,
+                tutor: focused,
+                onChat: () {},
+                showChatAction: false,
+                leading: Material(
+                  color: const Color(0x80000000),
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => Navigator.of(context).maybePop(),
+                    child: const SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: Icon(
+                        Icons.arrow_back_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            lessonText.pickTutorTitle,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 24,
+                              height: 30 / 24,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.lessonTitle,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              height: 20 / 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_loadingRemote && _remoteTutors == null)
+                      const Padding(
+                        padding: EdgeInsets.only(right: 10, top: 4),
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    Material(
+                      color: Colors.white,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () async {
+                          final result = await showTutorFilterSheet(
+                            context,
+                            initial: _filter,
+                          );
+                          if (result == null || !mounted) return;
+                          _applyFilter(result, text);
+                        },
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _filter.isActive
+                                  ? AppColors.primary
+                                  : Colors.black.withValues(alpha: .10),
+                              width: _filter.isActive ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              const HomeAsset(
+                                AppAssets.tutorFilter,
+                                width: 20,
+                                height: 20,
+                              ),
+                              if (_filter.isActive)
+                                const Positioned(
+                                  top: 6,
+                                  right: 6,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: SizedBox(width: 7, height: 7),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (_filter.isActive)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Material(
+                      color: AppColors.primaryTint05,
+                      borderRadius: BorderRadius.circular(999),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(999),
+                        onTap: () => _applyFilter(TutorFilter.empty, text),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.filter_alt_off_rounded,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                text.clearFilter,
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              sliver: tutors.isEmpty
+                  ? SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Text(
+                          LocaleSettings.currentLocale == AppLocale.tr
+                              ? 'Seçilen filtrelere uygun eğitmen bulunamadı.'
+                              : 'No tutors match these filters.',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            color: AppColors.secondary,
+                          ),
+                        ),
+                      ),
+                    )
+                  : SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                        childAspectRatio: 194 / 282,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final tutor = tutors[index];
+                          final selected =
+                              tutor.identity == focused.identity;
+                          return TutorCard(
+                            name: tutor.name,
+                            imagePath: tutor.image,
+                            tags: tutor.tags,
+                            theme: tutor.theme,
+                            selected: selected,
+                            onHoverChanged: (hovering) {
+                              if (hovering) _focusTutor(tutor);
+                            },
+                            onSelect: () => _focusTutor(tutor),
+                            onStartTalk: () {
+                              _focusTutor(tutor);
+                              _confirm('talk');
+                            },
+                          );
+                        },
+                        childCount: tutors.length,
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LessonPickerActionButton extends StatelessWidget {
+  const _LessonPickerActionButton({
+    required this.label,
+    required this.filled,
+    required this.onPressed,
+  });
+
+  final String label;
+  final bool filled;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final shadow = filled
+        ? AppColors.darkShadow
+        : AppColors.secondaryButtonShadow;
+    final child = filled
+        ? FilledButton(
+            onPressed: onPressed,
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: AppColors.primary.withValues(alpha: .45),
+              disabledForegroundColor: Colors.white.withValues(alpha: .8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              textStyle: AppTextStyles.primaryButton,
+            ),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          )
+        : OutlinedButton(
+            onPressed: onPressed,
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.primary,
+              disabledBackgroundColor: Colors.white,
+              disabledForegroundColor: AppColors.primary.withValues(alpha: .45),
+              side: BorderSide(color: shadow, width: 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              textStyle: AppTextStyles.primaryButton.copyWith(
+                color: AppColors.primary,
+              ),
+            ),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: shadow,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      padding: const EdgeInsets.only(bottom: 2),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: child,
+      ),
+    );
+  }
+}
+
 class TutorCardTheme {
   const TutorCardTheme({
     required this.gradientStart,
@@ -845,6 +1344,14 @@ class _TutorData {
 
   String get identity => id ?? slug ?? name;
 
+  String get heroRiveUrl {
+    final cdn = riveCdnUrl?.trim();
+    if (cdn != null && cdn.isNotEmpty) return cdn;
+    final s = slug?.trim();
+    if (s != null && s.isNotEmpty) return AppAssets.tutorRiveCdn(s);
+    return AppAssets.tutorLingolaRivCdn;
+  }
+
   List<String> get filterTagKeys {
     if (tagKeys.isNotEmpty) return tagKeys;
     final s = slug;
@@ -853,16 +1360,71 @@ class _TutorData {
   }
 }
 
-class _TutorHero extends StatefulWidget {
-  const _TutorHero({
+class _PinnedTutorHeroDelegate extends SliverPersistentHeaderDelegate {
+  _PinnedTutorHeroDelegate({
+    required this.topInset,
     required this.text,
     required this.tutor,
     required this.onChat,
+    this.showChatAction = true,
+    this.leading,
+  });
+
+  final double topInset;
+  final dynamic text;
+  final _TutorData tutor;
+  final VoidCallback onChat;
+  final bool showChatAction;
+  final Widget? leading;
+
+  @override
+  double get minExtent => topInset + 280;
+
+  @override
+  double get maxExtent => topInset + 280;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return _TutorHero(
+      key: ValueKey(tutor.identity),
+      text: text,
+      tutor: tutor,
+      topInset: topInset,
+      onChat: onChat,
+      showChatAction: showChatAction,
+      leading: leading,
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _PinnedTutorHeroDelegate oldDelegate) {
+    return oldDelegate.topInset != topInset ||
+        oldDelegate.tutor.identity != tutor.identity ||
+        oldDelegate.showChatAction != showChatAction;
+  }
+}
+
+class _TutorHero extends StatefulWidget {
+  const _TutorHero({
+    super.key,
+    required this.text,
+    required this.tutor,
+    required this.topInset,
+    required this.onChat,
+    this.showChatAction = true,
+    this.leading,
   });
 
   final dynamic text;
   final _TutorData tutor;
+  final double topInset;
   final VoidCallback onChat;
+  final bool showChatAction;
+  final Widget? leading;
 
   @override
   State<_TutorHero> createState() => _TutorHeroState();
@@ -873,6 +1435,12 @@ class _TutorHeroState extends State<_TutorHero> {
   final _tts = TutorTtsService();
   var _playbackRate = 1.0;
   var _speaking = false;
+  double? _lipsyncViseme;
+  List<VisemeCue> _visemeTrack = const [];
+  double? _speechEndSec;
+  Timer? _lipsyncPollTimer;
+  var _currentViseme = 0.0;
+  DateTime? _lastVisemeAppliedAt;
 
   static const _rates = [0.5, 1.0, 1.5, 2.0];
 
@@ -885,36 +1453,139 @@ class _TutorHeroState extends State<_TutorHero> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _player.onPlayerComplete.listen((_) {
+      if (_speaking) _finishSpeaking();
+    });
+  }
+
+  @override
   void dispose() {
+    _stopLipsyncPoll();
     _player.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant _TutorHero oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.tutor.identity != widget.tutor.identity) {
+      unawaited(_player.stop());
+      _finishSpeaking();
+    }
+  }
+
+  void _stopLipsyncPoll() {
+    _lipsyncPollTimer?.cancel();
+    _lipsyncPollTimer = null;
+  }
+
+  void _finishSpeaking() {
+    _stopLipsyncPoll();
+    if (!mounted) return;
+    setState(() {
+      _speaking = false;
+      _lipsyncViseme = null;
+      _visemeTrack = const [];
+      _speechEndSec = null;
+      _currentViseme = 0;
+      _lastVisemeAppliedAt = null;
+    });
+  }
+
+  void _startLipsyncPoll() {
+    _lipsyncPollTimer?.cancel();
+    _lipsyncPollTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
+      if (!_speaking || !mounted) {
+        _stopLipsyncPoll();
+        return;
+      }
+      unawaited(_pollLipsyncTick());
+    });
+  }
+
+  Future<void> _pollLipsyncTick() async {
+    if (!_speaking || !mounted) return;
+
+    Duration? pos;
+    try {
+      pos = await _player.getCurrentPosition();
+    } catch (_) {
+      return;
+    }
+    final t = (pos?.inMilliseconds ?? 0) / 1000.0;
+
+    final lipEnd = _speechEndSec;
+    if (lipEnd != null && lipEnd > 0 && t >= lipEnd) {
+      _finishSpeaking();
+      return;
+    }
+
+    if (_visemeTrack.isEmpty) return;
+
+    final next = visemeAt(
+      _visemeTrack,
+      t,
+      cutOffSec: lipEnd,
+      latencySec: kVisemeLatencySec,
+    );
+    if (next == _currentViseme) return;
+
+    final rate = _playbackRate <= 0 ? 1.0 : _playbackRate;
+    final gapMs = (kMinVisemeGapMs / rate).round().clamp(40, kMinVisemeGapMs);
+    final now = DateTime.now();
+    final last = _lastVisemeAppliedAt;
+    if (next != 0 &&
+        last != null &&
+        now.difference(last).inMilliseconds < gapMs) {
+      return;
+    }
+
+    _currentViseme = next;
+    _lastVisemeAppliedAt = now;
+    setState(() => _lipsyncViseme = next);
   }
 
   Future<void> _speakPreview() async {
     if (_speaking) {
       await _player.stop();
-      if (mounted) setState(() => _speaking = false);
+      _finishSpeaking();
       return;
     }
-    setState(() => _speaking = true);
+
     try {
-      final file = await _tts.synthesizeToFile(
+      final speech = await _tts.synthesizeForLipsync(
         "Hi, I'm ${widget.tutor.name}. Let's practice English together.",
         voiceId: TutorVoiceIds.resolve(
           widget.tutor.slug,
           preferred: widget.tutor.voiceId,
         ),
+        tutorSlug: widget.tutor.slug,
       );
+      if (!mounted) return;
+
+      _visemeTrack = coalesceVisemes(speech.visemes);
+      _speechEndSec = effectiveSpeechEndSec(visemes: _visemeTrack);
+      _currentViseme = 0;
+      _lastVisemeAppliedAt = null;
+
       await _player.setPlaybackRate(_playbackRate);
-      await _player.play(DeviceFileSource(file.path));
-      await _player.onPlayerComplete.first;
+      await _player.play(DeviceFileSource(speech.file.path));
+      if (!mounted) return;
+
+      // Dudaklar ses başladıktan sonra — TTS beklerken animasyon yok.
+      setState(() {
+        _speaking = true;
+        _lipsyncViseme = 0;
+      });
+      _startLipsyncPoll();
     } catch (_) {
       if (!mounted) return;
+      _finishSpeaking();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppText.current.common.genericError)),
       );
-    } finally {
-      if (mounted) setState(() => _speaking = false);
     }
   }
 
@@ -931,8 +1602,8 @@ class _TutorHeroState extends State<_TutorHero> {
   Widget build(BuildContext context) {
     final text = widget.text;
     final tutor = widget.tutor;
-    final topInset = MediaQuery.paddingOf(context).top;
-    final chatLabel = text.chatWithTutor(name: tutor.name) as String;
+    final topInset = widget.topInset;
+    final chatLabel = text.startChat as String;
     return SizedBox(
       height: topInset + 280,
       width: double.infinity,
@@ -940,6 +1611,12 @@ class _TutorHeroState extends State<_TutorHero> {
         fit: StackFit.expand,
         children: [
           const _TutorHeroBackdrop(),
+          if (widget.leading != null)
+            Positioned(
+              left: 8,
+              top: topInset + 4,
+              child: widget.leading!,
+            ),
           Positioned(
             left: 0,
             right: 0,
@@ -950,15 +1627,19 @@ class _TutorHeroState extends State<_TutorHero> {
               children: [
                 Align(
                   alignment: Alignment.bottomCenter,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 280),
-                    child: HomeAsset(
-                      tutor.image,
+                  child: SizedBox(
+                    width: 240,
+                    height: 260,
+                    child: TutorRiveAvatar(
                       key: ValueKey(tutor.identity),
-                      width: 220,
-                      height: 220,
-                      fit: BoxFit.contain,
-                      alignment: const Alignment(0, -0.2),
+                      assetPath: tutor.heroRiveUrl,
+                      talking: _speaking,
+                      lipsyncViseme: _speaking ? _lipsyncViseme : null,
+                      fallbackImage: tutor.image,
+                      fallbackRivePath: AppAssets.tutorLingolaRivCdn,
+                      loadingBackgroundColor: Colors.transparent,
+                      anchorBottom: true,
+                      fit: rive.Fit.contain,
                     ),
                   ),
                 ),
@@ -1003,45 +1684,46 @@ class _TutorHeroState extends State<_TutorHero> {
                     ],
                   ),
                 ),
-                Positioned(
-                  right: 16,
-                  bottom: 20,
-                  child: Material(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(999),
-                    child: InkWell(
-                      onTap: widget.onChat,
+                if (widget.showChatAction)
+                  Positioned(
+                    right: 16,
+                    bottom: 20,
+                    child: Material(
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.circular(999),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const HomeAsset(
-                              AppAssets.chatActionMessage,
-                              width: 21,
-                              height: 21,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              chatLabel,
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                      child: InkWell(
+                        onTap: widget.onChat,
+                        borderRadius: BorderRadius.circular(999),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const HomeAsset(
+                                AppAssets.chatActionMessage,
+                                width: 21,
+                                height: 21,
                                 color: Colors.white,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Text(
+                                chatLabel,
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -1061,7 +1743,7 @@ class _TutorHeroBackdrop extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const ColoredBox(color: AppColors.surface),
+          const ColoredBox(color: Color(0xFF2D46FF)),
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/constants/app_assets.dart';
@@ -11,6 +10,8 @@ import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
 import 'certificate_api_service.dart';
 import 'certificate_copy.dart';
+import 'certificate_image_export.dart';
+import 'certificate_level_assets.dart';
 import 'certificate_qr_share.dart';
 
 /// Tam ekran sertifika görünümü — kazanılmış veya önizleme modu.
@@ -34,6 +35,8 @@ class _CertificateScreenState extends State<CertificateScreen> {
   late CertificatesSummaryDto _summary;
   late bool _loading;
   late String _selectedLevel;
+  final _exportKey = GlobalKey();
+  var _downloading = false;
   var _sharingQr = false;
 
   @override
@@ -44,7 +47,7 @@ class _CertificateScreenState extends State<CertificateScreen> {
     _selectedLevel = widget.initialLevel ??
         widget.summary?.primary?.cefrLevel ??
         widget.summary?.highestLevel ??
-        '';
+        'A1';
     if (widget.summary == null) {
       _load();
     }
@@ -77,7 +80,79 @@ class _CertificateScreenState extends State<CertificateScreen> {
 
   bool get _hasCertificate => _summary.certificates.isNotEmpty;
 
+  bool get _canUseCertificate {
+    final cert = _activeCert;
+    if (cert == null) return false;
+    return cert.cefrLevel == _selectedLevel;
+  }
+
+  String get _levelCode =>
+      _selectedLevel.isNotEmpty ? _selectedLevel : 'A1';
+
+  Future<void> _showCertificateLocked() async {
+    final text = AppText.current.profilePage;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          text.certificateNotAvailableTitle,
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          text.certificateNotAvailable(level: _levelCode),
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+            height: 21 / 14,
+          ),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(text.certificateNotAvailableOk),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _download() async {
+    if (_downloading) return;
+    if (!_canUseCertificate) {
+      _showCertificateLocked();
+      return;
+    }
+    setState(() => _downloading = true);
+    final text = AppText.current.profilePage;
+    try {
+      final ok = await CertificateImageExport.saveToGallery(
+        boundaryKey: _exportKey,
+        fileName:
+            'lingola_certificate_${_selectedLevel.toLowerCase()}_${DateTime.now().millisecondsSinceEpoch}',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ok ? text.certificateDownloadSaved : text.certificateDownloadFailed,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _downloading = false);
+    }
+  }
+
   Future<void> _share() async {
+    if (!_canUseCertificate) {
+      _showCertificateLocked();
+      return;
+    }
     final cert = _activeCert;
     if (cert == null) return;
     final text = CertificateCopy.page;
@@ -88,6 +163,10 @@ class _CertificateScreenState extends State<CertificateScreen> {
   }
 
   Future<void> _shareQr() async {
+    if (!_canUseCertificate) {
+      _showCertificateLocked();
+      return;
+    }
     final cert = _activeCert;
     if (cert == null || _sharingQr) return;
     final text = CertificateCopy.page;
@@ -120,12 +199,12 @@ class _CertificateScreenState extends State<CertificateScreen> {
         systemNavigationBarColor: AppColors.surface,
       ),
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.white,
         body: SafeArea(
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                 child: Row(
                   children: [
                     IconButton(
@@ -137,15 +216,24 @@ class _CertificateScreenState extends State<CertificateScreen> {
                       ),
                       tooltip: AppText.current.common.back,
                     ),
-                    Text(
-                      text.certificateTitle,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        height: 24 / 16,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.ink,
-                      ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: _downloading ? null : _download,
+                      icon: _downloading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.ink,
+                              ),
+                            )
+                          : const HomeAsset(
+                              AppAssets.certificateDownload,
+                              width: 24,
+                              height: 24,
+                            ),
+                      tooltip: text.certificateDownload,
                     ),
                   ],
                 ),
@@ -159,7 +247,7 @@ class _CertificateScreenState extends State<CertificateScreen> {
               else
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                     children: [
                       if (_hasCertificate && _summary.certificates.length > 1)
                         _LevelChips(
@@ -170,45 +258,30 @@ class _CertificateScreenState extends State<CertificateScreen> {
                           onSelected: (lv) =>
                               setState(() => _selectedLevel = lv),
                         ),
-                      CertificateCard(
-                        displayName: widget.displayName,
-                        certificate: _activeCert,
-                        preview: !_hasCertificate,
+                      RepaintBoundary(
+                        key: _exportKey,
+                        child: ColoredBox(
+                          color: Colors.white,
+                          child: CertificateAchievementView(
+                            displayName: widget.displayName,
+                            certificate: _activeCert,
+                            preview: !_hasCertificate,
+                            level: _selectedLevel.isNotEmpty
+                                ? _selectedLevel
+                                : 'A1',
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 20),
-                      if (!_hasCertificate)
-                        Text(
-                          text.certificatePreviewBody,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            height: 22 / 14,
-                            color: AppColors.secondary,
-                          ),
-                        )
-                      else ...[
-                        PrimaryButton(
-                          label: text.certificateShare,
-                          onPressed: _share,
-                        ),
-                        const SizedBox(height: 10),
-                        SecondaryButton(
-                          label: text.certificateShareQr,
-                          onPressed: _sharingQr ? () {} : _shareQr,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          text.certificateVerifyHint,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            height: 18 / 12,
-                            color: AppColors.secondary,
-                          ),
-                        ),
-                      ],
+                      const SizedBox(height: 24),
+                      PrimaryButton(
+                        label: text.certificateShare,
+                        onPressed: _share,
+                      ),
+                      const SizedBox(height: 10),
+                      SecondaryButton(
+                        label: text.certificateCreateQr,
+                        onPressed: _sharingQr ? () {} : _shareQr,
+                      ),
                     ],
                   ),
                 ),
@@ -220,460 +293,166 @@ class _CertificateScreenState extends State<CertificateScreen> {
   }
 }
 
-/// Resmi Lingola sertifikası — uluslararası sertifika düzeni.
-class CertificateCard extends StatelessWidget {
-  const CertificateCard({
+/// Figma sertifika düzeni — başlık, rozet ve tamamlanma bilgileri.
+class CertificateAchievementView extends StatelessWidget {
+  const CertificateAchievementView({
     super.key,
     required this.displayName,
+    required this.level,
     this.certificate,
     this.preview = false,
   });
 
   final String displayName;
+  final String level;
   final CertificateDto? certificate;
   final bool preview;
 
-  static const _navyFrame = Color(0xFF1A2A5E);
-  static const _paper = Color(0xFFFFFEFF);
+  static String _formatDate(DateTime? date) {
+    if (date == null) return '—';
+    final formatted =
+        DateFormat('dd MMM yyyy', 'en_US').format(date.toLocal());
+    final parts = formatted.split(' ');
+    if (parts.length == 3) {
+      return '${parts[0]} ${parts[1].toUpperCase()} ${parts[2]}';
+    }
+    return formatted.toUpperCase();
+  }
+
+  String get _certId {
+    final token = certificate?.verifyToken;
+    if (token != null && token.isNotEmpty) return token;
+    return CertificateLevelAssets.defaultCertificateId(level);
+  }
 
   @override
   Widget build(BuildContext context) {
     final text = CertificateCopy.page;
-    final level = preview ? 'A1' : (certificate?.cefrLevel ?? 'A1');
-    final showLevel = !preview && certificate != null;
+    final levelName = CertificateLevelAssets.levelLabel(level);
     final name = displayName.isEmpty ? 'Lingola Learner' : displayName;
-    final date = certificate?.issuedAt;
-    final dateLabel = date != null
-        ? DateFormat('dd MMMM yyyy', 'en_US').format(date.toLocal())
-        : '—';
-    final certId = certificate?.verifyToken.isNotEmpty == true
-        ? certificate!.verifyToken
-        : '—';
+    final dateLabel = preview
+        ? _formatDate(DateTime.now())
+        : _formatDate(certificate?.issuedAt);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: _paper,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: _navyFrame, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(2),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: CustomPaint(painter: _CertificateSidePatternPainter()),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 20, 18, 16),
-              child: Column(
-                children: [
-                  _LingolaBrandRow(),
-                  const SizedBox(height: 16),
-                  Text(
-                    text.certificateLevelTitle(level: level),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 22,
-                      height: 1.2,
-                      fontWeight: FontWeight.w600,
-                      fontStyle: FontStyle.italic,
-                      color: AppColors.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    text.certificateOf,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 11,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.secondary.withValues(alpha: 0.95),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    text.certificateCertifiesThat,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      color: AppColors.secondary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    name,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 28,
-                      height: 1.15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ink,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    text.certificateCompletedDetail,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 11,
-                      height: 1.55,
-                      color: AppColors.secondary,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    text.certificateLevelLine(level: level),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      height: 1.4,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _GoldSeal(locked: !showLevel),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text(
-                              dateLabel,
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.ink,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              text.certificateDateOfCompletion,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 9,
-                                color: AppColors.secondary,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Container(
-                              width: 80,
-                              height: 1,
-                              color: AppColors.border,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Lingola',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 9,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary.withValues(alpha: 0.85),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      if (showLevel && certificate != null)
-                        _VerifyQrBox(
-                          certificateId: certId,
-                          verifyUrl: certificate!.verifyUrl,
-                        )
-                      else
-                        _VerifyQrBox.preview(),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(height: 1, color: AppColors.border),
-                  const SizedBox(height: 10),
-                  const _FlyworkFooter(),
-                  if (showLevel) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      '${text.certificateIdLabel}: $certId',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 9,
-                        letterSpacing: 0.3,
-                        color: AppColors.secondary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LingolaBrandRow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
     return Column(
       children: [
-        ShaderMask(
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [Color(0xFF000845), AppColors.primary],
-          ).createShader(bounds),
-          child: const Text(
-            'Lingola',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
         Text(
-          CertificateCopy.page.certificatePathway,
+          text.certificateOf.toUpperCase(),
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontFamily: 'Poppins',
-            fontSize: 10,
-            letterSpacing: 0.8,
-            fontWeight: FontWeight.w500,
-            color: AppColors.secondary,
+            fontSize: 20,
+            height: 24 / 20,
+            fontWeight: FontWeight.w600,
+            color: AppColors.ink,
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _GoldSeal extends StatelessWidget {
-  const _GoldSeal({required this.locked});
-
-  final bool locked;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: locked
-            ? null
-            : const RadialGradient(
-                colors: [Color(0xFFF5DF7A), Color(0xFFD4AF37)],
-              ),
-        color: locked ? const Color(0xFFF5F6FA) : null,
-        border: Border.all(
-          color: locked ? AppColors.border : const Color(0xFFB8941F),
-          width: 2,
-        ),
-      ),
-      child: Icon(
-        locked ? Icons.lock_outline_rounded : Icons.verified_rounded,
-        color: locked ? AppColors.secondary : Colors.white,
-        size: 26,
-      ),
-    );
-  }
-}
-
-class _VerifyQrBox extends StatelessWidget {
-  const _VerifyQrBox({
-    required this.certificateId,
-    required this.verifyUrl,
-  });
-
-  const _VerifyQrBox.preview()
-      : certificateId = '—',
-        verifyUrl = null;
-
-  final String certificateId;
-  final String? verifyUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = CertificateCopy.page;
-    final url = verifyUrl;
-
-    return Container(
-      width: 108,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: const Color(0xFFE0E3EF)),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Column(
-        children: [
-          Text(
-            text.certificateIdLabel.toUpperCase(),
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 7,
-              letterSpacing: 0.6,
-              fontWeight: FontWeight.w600,
-              color: AppColors.secondary,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            certificateId.length > 12
-                ? '${certificateId.substring(0, 12)}…'
-                : certificateId,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 7,
-              color: AppColors.ink,
-            ),
-          ),
-          const SizedBox(height: 6),
-          if (url != null)
-            QrImageView(
-              data: url,
-              version: QrVersions.auto,
-              size: 72,
-              backgroundColor: Colors.white,
-              eyeStyle: const QrEyeStyle(
-                eyeShape: QrEyeShape.square,
-                color: AppColors.ink,
-              ),
-              dataModuleStyle: const QrDataModuleStyle(
-                dataModuleShape: QrDataModuleShape.square,
-                color: AppColors.primary,
-              ),
-            )
-          else
-            Container(
-              width: 72,
-              height: 72,
-              alignment: Alignment.center,
-              color: const Color(0xFFF5F6FA),
-              child: Icon(
-                Icons.qr_code_2_rounded,
-                size: 36,
-                color: AppColors.secondary.withValues(alpha: 0.35),
-              ),
-            ),
-          const SizedBox(height: 4),
-          Text(
-            text.certificateVerifyAuthenticity,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 6.5,
-              letterSpacing: 0.4,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FlyworkFooter extends StatelessWidget {
-  const _FlyworkFooter();
-
-  @override
-  Widget build(BuildContext context) {
-    final providedBy = CertificateCopy.page.certificateProvidedBy;
-
-    return Column(
-      children: [
+        const SizedBox(height: 12),
         Text(
-          providedBy,
+          text.certificatePresentedTo,
+          textAlign: TextAlign.center,
           style: const TextStyle(
             fontFamily: 'Poppins',
-            fontSize: 10,
-            color: AppColors.secondary,
+            fontSize: 14,
+            height: 18 / 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.ink,
           ),
         ),
-        const SizedBox(height: 6),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              AppAssets.flyworkLogo,
-              height: 22,
-              fit: BoxFit.contain,
-              errorBuilder: (_, _, _) => Image.network(
-                'https://lingola.b-cdn.net/branding/flywork-logo.png',
-                height: 22,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(width: 6),
-            const Text(
-              'flywork',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF78CAD2),
-                letterSpacing: -0.3,
-              ),
-            ),
-          ],
+        const SizedBox(height: 8),
+        Text(
+          name,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 18,
+            height: 24 / 18,
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          text.certificateAchievementBody(level: level),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 12,
+            height: 18 / 12,
+            fontWeight: FontWeight.w500,
+            color: AppColors.ink.withValues(alpha: 0.65),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Image.asset(
+          CertificateLevelAssets.badgeAsset(level),
+          width: double.infinity,
+          fit: BoxFit.contain,
+        ),
+        const SizedBox(height: 20),
+        Text(
+          text.certificateLevelCompleted(levelName: levelName),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 16,
+            height: 20 / 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.ink,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          text.certificateDateCompleted(date: dateLabel),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 16,
+            height: 20 / 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.ink,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          text.certificateIdDisplay(id: _certId),
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 16,
+            height: 20 / 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.ink,
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Lingola',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 16,
+            height: 20 / 16,
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          text.certificateBrandTagline,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 16,
+            height: 20 / 16,
+            fontWeight: FontWeight.w500,
+            fontStyle: FontStyle.italic,
+            color: AppColors.ink,
+          ),
         ),
       ],
     );
   }
-}
-
-class _CertificateSidePatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.primary.withValues(alpha: 0.04)
-      ..style = PaintingStyle.fill;
-
-    for (var i = 0; i < 8; i++) {
-      final y = i * (size.height / 7);
-      canvas.drawPath(
-        Path()
-          ..moveTo(0, y)
-          ..lineTo(28, y + 18)
-          ..lineTo(0, y + 36)
-          ..close(),
-        paint,
-      );
-      canvas.drawPath(
-        Path()
-          ..moveTo(size.width, y)
-          ..lineTo(size.width - 28, y + 18)
-          ..lineTo(size.width, y + 36)
-          ..close(),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _LevelChips extends StatelessWidget {
@@ -690,7 +469,7 @@ class _LevelChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Wrap(
         spacing: 8,
         runSpacing: 8,

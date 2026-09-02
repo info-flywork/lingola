@@ -7,7 +7,11 @@ class RolePlayScenarioDto {
     required this.imageAsset,
     required this.minutes,
     required this.levelKey,
+    this.title,
+    this.screenplay,
+    this.openingMessage,
     this.sectionKey,
+    this.isCustom = false,
     this.progressPercent = 0,
     this.elapsedSeconds = 0,
     this.sessionId,
@@ -17,10 +21,14 @@ class RolePlayScenarioDto {
 
   final String id;
   final String titleKey;
+  final String? title;
+  final String? screenplay;
+  final String? openingMessage;
   final String imageAsset;
   final String? sectionKey;
   final int minutes;
   final String levelKey;
+  final bool isCustom;
   final double progressPercent;
   final int elapsedSeconds;
   final String? sessionId;
@@ -31,10 +39,14 @@ class RolePlayScenarioDto {
     return RolePlayScenarioDto(
       id: json['id'] as String? ?? '',
       titleKey: json['titleKey'] as String? ?? json['id'] as String? ?? '',
+      title: json['title'] as String?,
+      screenplay: json['screenplay'] as String?,
+      openingMessage: json['openingMessage'] as String?,
       imageAsset: json['imageAsset'] as String? ?? '',
       sectionKey: json['sectionKey'] as String?,
       minutes: (json['minutes'] as num?)?.toInt() ?? 8,
       levelKey: json['levelKey'] as String? ?? 'beginner',
+      isCustom: json['isCustom'] == true,
       progressPercent: (json['progressPercent'] as num?)?.toDouble() ?? 0,
       elapsedSeconds: (json['elapsedSeconds'] as num?)?.toInt() ?? 0,
       sessionId: json['sessionId'] as String?,
@@ -79,6 +91,34 @@ abstract final class RolePlayApiService {
         .whereType<Map<String, dynamic>>()
         .map(RolePlayScenarioDto.fromJson)
         .toList();
+  }
+
+  static Future<RolePlayScenarioDto> generateCustomScenario({
+    required String scenario,
+    required String tutorRole,
+    required String userRole,
+    String? extraInfo,
+    String? nativeLanguageCode,
+    String? levelKey,
+  }) async {
+    final json = await ApiClient.post(
+      '/roleplay/scenarios/custom/generate',
+      auth: true,
+      body: {
+        'scenario': scenario,
+        'tutorRole': tutorRole,
+        'userRole': userRole,
+        if (extraInfo != null && extraInfo.isNotEmpty) 'extraInfo': extraInfo,
+        if (nativeLanguageCode != null && nativeLanguageCode.isNotEmpty)
+          'nativeLanguageCode': nativeLanguageCode,
+        if (levelKey != null && levelKey.isNotEmpty) 'levelKey': levelKey,
+      },
+    );
+    final created = json['scenario'];
+    if (created is! Map<String, dynamic>) {
+      throw ApiException('Invalid custom role play response');
+    }
+    return RolePlayScenarioDto.fromJson(created);
   }
 
   static Future<RolePlayProgressDto> saveProgress({

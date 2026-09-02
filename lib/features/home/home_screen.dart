@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/auth/auth_service.dart';
 import '../../core/auth/app_user.dart';
@@ -8,8 +9,6 @@ import '../../core/auth/session_store.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
-import '../../core/i18n/app_locale_sync.dart';
-import '../../i18n/strings.g.dart';
 import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
@@ -38,6 +37,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   HomeRemoteData? _remoteData = HomeDataService.cached;
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -50,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _scrollController.dispose();
     NotificationsUnreadStore.unreadCount.removeListener(_onUnreadChanged);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -89,6 +90,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     await _loadRemoteData();
   }
 
+  Future<void> _onPathNodeTap(HomePathPreviewNode node) async {
+    MainShell.goToLessons(context);
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    if (!mounted) return;
+    await LessonScreen.openLessonFromHome(
+      slug: node.slug,
+      label: node.label,
+      status: _statusKey(node.status),
+      a1Index: node.a1Index,
+      hasNotes: node.hasNotes,
+      tutorId: node.tutorId,
+      tutorSlug: node.tutorSlug,
+      cefrLevel: node.cefrLevel,
+    );
+    if (!mounted) return;
+    await _loadRemoteData();
+  }
+
+  static String _statusKey(HomePathNodeStatus status) {
+    return switch (status) {
+      HomePathNodeStatus.completed => 'completed',
+      HomePathNodeStatus.active => 'available',
+      HomePathNodeStatus.unlocked => 'unlocked',
+      HomePathNodeStatus.locked => 'locked',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
@@ -97,11 +125,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return ColoredBox(
       color: AppColors.surface,
       child: CustomScrollView(
+        controller: _scrollController,
         slivers: [
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 // Beyaz sheet: SADECE Good Morning / Today's Practice (+ ikonlar).
                 // Continue Conversation ASLA burada değil — #F5F6FA zeminde.
                 Container(
@@ -132,6 +161,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   action: text.home.allLessons,
                   scrollLabel: text.home.scroll,
                   pathNodes: _remoteData?.pathNodes,
+                  onPathNodeTap: _onPathNodeTap,
                 ),
                 const SizedBox(height: 16),
                 _LiveLessonSection(
@@ -177,11 +207,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   child: _LibraryBanner(),
                 ),
                 const SizedBox(height: 24),
-              ],
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
@@ -192,12 +222,14 @@ class _LearningPathSection extends StatelessWidget {
     required this.action,
     required this.scrollLabel,
     this.pathNodes,
+    this.onPathNodeTap,
   });
 
   final String title;
   final String action;
   final String scrollLabel;
   final List<HomePathPreviewNode>? pathNodes;
+  final ValueChanged<HomePathPreviewNode>? onPathNodeTap;
 
   @override
   Widget build(BuildContext context) {
@@ -217,8 +249,9 @@ class _LearningPathSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: _LearningPathMap(
-            onNodeTap: goLessons,
+            onNodeTap: onPathNodeTap,
             nodes: pathNodes,
+            onFallbackTap: goLessons,
           ),
         ),
         const SizedBox(height: 8),
@@ -451,30 +484,30 @@ class _HomeHeaderState extends State<_HomeHeader> {
                   const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () async {
-                      final user = SessionStore.currentUser;
+                      final initial =
+                          effective?.onboarding?.targetLanguageCode ?? 'en';
                       final code = await Navigator.of(context).push<String>(
                         MaterialPageRoute(
                           builder: (_) => SelectLanguageScreen(
-                            initialCode: user?.appLocale ?? 'en',
+                            initialCode: initial,
+                            kind: LanguagePickerKind.targetLanguage,
                           ),
                         ),
                       );
-                      if (code == null || code.isEmpty) return;
-                      await AppLocaleSync.applyCode(code);
+                      if (code == null || code.isEmpty || code == initial) {
+                        return;
+                      }
                       try {
-                        await AuthService.updateProfile(appLocale: code);
+                        await AuthService.updateOnboarding(
+                          targetLanguageCode: code,
+                        );
                       } catch (_) {}
                     },
-                    child: ValueListenableBuilder<AppLocale>(
-                      valueListenable: AppLocaleSync.localeChanges,
-                      builder: (context, locale, _) {
-                        return _TopIconBadge(
-                          child: LanguageFlag.badge(
-                            locale.languageCode,
-                            size: 22,
-                          ),
-                        );
-                      },
+                    child: _TopIconBadge(
+                      child: LanguageFlag.badge(
+                        effective?.onboarding?.targetLanguageCode ?? 'en',
+                        size: 22,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -822,9 +855,14 @@ class _LinkPill extends StatelessWidget {
 }
 
 class _LearningPathMap extends StatelessWidget {
-  const _LearningPathMap({this.onNodeTap, this.nodes});
+  const _LearningPathMap({
+    this.onNodeTap,
+    this.onFallbackTap,
+    this.nodes,
+  });
 
-  final VoidCallback? onNodeTap;
+  final ValueChanged<HomePathPreviewNode>? onNodeTap;
+  final VoidCallback? onFallbackTap;
   final List<HomePathPreviewNode>? nodes;
 
   static const _designWidth = 398.0;
@@ -838,12 +876,20 @@ class _LearningPathMap extends StatelessWidget {
     (left: 278, top: 297, side: _PathLabelSide.left),
   ];
 
-  static const _fallbackAssets = <String>[
-    'assets/images/home/node_introductions.svg',
-    'assets/images/home/node_greetings.svg',
-    'assets/images/home/node_jobs.svg',
-    'assets/images/home/node_favorite_room.svg',
-    'assets/images/home/node_daily_routine.svg',
+  static const _fallbackIcons = <String>[
+    'assets/learningPath/a1/introduction.svg',
+    'assets/learningPath/a1/greetings.svg',
+    'assets/learningPath/a1/jobs.svg',
+    'assets/learningPath/a1/favoriteroom.svg',
+    'assets/learningPath/a1/dailyroutine.svg',
+  ];
+
+  static const _fallbackStatuses = <HomePathNodeStatus>[
+    HomePathNodeStatus.unlocked,
+    HomePathNodeStatus.unlocked,
+    HomePathNodeStatus.locked,
+    HomePathNodeStatus.locked,
+    HomePathNodeStatus.locked,
   ];
 
   @override
@@ -886,23 +932,25 @@ class _LearningPathMap extends StatelessWidget {
                       left: _layout[i].left,
                       top: _layout[i].top,
                       child: _PathNode(
-                        asset: labels != null
-                            ? labels[i].asset
-                            : _fallbackAssets[i],
-                        label: labels != null
-                            ? labels[i].label
-                            : _fallbackLabel(text, i),
-                        labelColor: Color(
-                          labels != null
-                              ? labels[i].labelColor
-                              : _fallbackColor(i),
+                          iconAsset: labels != null
+                              ? labels[i].asset
+                              : _fallbackIcons[i],
+                          label: labels != null
+                              ? labels[i].label
+                              : _fallbackLabel(text, i),
+                          labelColor: Color(
+                            labels != null
+                                ? labels[i].labelColor
+                                : _fallbackColor(i),
+                          ),
+                          labelSide: _layout[i].side,
+                          status: labels != null
+                              ? labels[i].status
+                              : _fallbackStatuses[i],
+                          onTap: labels != null && onNodeTap != null
+                              ? () => onNodeTap!(labels[i])
+                              : onFallbackTap,
                         ),
-                        labelSide: _layout[i].side,
-                        showStars: labels != null
-                            ? labels[i].showStars
-                            : i < 2,
-                        onTap: onNodeTap,
-                      ),
                     ),
                   Positioned(
                     left: 0,
@@ -944,11 +992,7 @@ class _LearningPathMap extends StatelessWidget {
   }
 
   static int _fallbackColor(int index) {
-    return switch (index) {
-      0 => AppColors.primary.toARGB32(),
-      1 => AppColors.ink.toARGB32(),
-      _ => AppColors.secondary.toARGB32(),
-    };
+    return AppColors.secondary.toARGB32();
   }
 }
 
@@ -956,25 +1000,36 @@ enum _PathLabelSide { left, right, below }
 
 class _PathNode extends StatelessWidget {
   const _PathNode({
-    required this.asset,
+    required this.iconAsset,
     required this.label,
     required this.labelColor,
     required this.labelSide,
-    this.showStars = false,
+    required this.status,
     this.onTap,
   });
 
-  final String asset;
+  final String iconAsset;
   final String label;
   final Color labelColor;
   final _PathLabelSide labelSide;
-  final bool showStars;
+  final HomePathNodeStatus status;
   final VoidCallback? onTap;
 
   static const _nodeSize = 63.0;
 
+  bool get _showStars =>
+      status == HomePathNodeStatus.completed ||
+      status == HomePathNodeStatus.active;
+
   @override
   Widget build(BuildContext context) {
+    final isLocked = status == HomePathNodeStatus.locked;
+    final isMuted =
+        status == HomePathNodeStatus.locked ||
+        status == HomePathNodeStatus.unlocked;
+    final circle = isMuted ? const Color(0xFFDBDBDB) : AppColors.primary;
+    final iconColor = isMuted ? const Color(0xFF656565) : Colors.white;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -985,9 +1040,62 @@ class _PathNode extends StatelessWidget {
           clipBehavior: Clip.none,
           alignment: Alignment.center,
           children: [
-            HomeAsset(asset, width: _nodeSize, height: _nodeSize, fit: BoxFit.contain),
-            if (showStars)
-              // Figma: yıldızlar icon’a daha yakın (-10 overlap)
+            Container(
+              width: _nodeSize,
+              height: _nodeSize,
+              decoration: BoxDecoration(
+                color: circle,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 3),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .18),
+                    blurRadius: 4,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              child: SvgPicture.asset(
+                iconAsset,
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+                colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+                placeholderBuilder: (_) =>
+                    const SizedBox(width: 28, height: 28),
+              ),
+            ),
+            if (status == HomePathNodeStatus.completed)
+              Positioned(
+                right: -4,
+                bottom: -4,
+                child: Container(
+                  width: 23,
+                  height: 23,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF34C759),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    size: 13,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            if (isLocked)
+              Positioned(
+                right: -6,
+                bottom: -2,
+                child: SvgPicture.asset(
+                  'assets/learningPath/a1/badge_lock.svg',
+                  width: 30,
+                  height: 30,
+                ),
+              ),
+            if (_showStars)
               const Positioned(
                 top: -13,
                 left: (63 - 39) / 2,

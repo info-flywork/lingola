@@ -45,6 +45,8 @@ class TranslationsTr with BaseTranslations<AppLocale, Translations> implements T
 	@override late final _Translations$language$tr language = _Translations$language$tr._(_root);
 	@override late final _Translations$setup$tr setup = _Translations$setup$tr._(_root);
 	@override late final _Translations$accountCreating$tr accountCreating = _Translations$accountCreating$tr._(_root);
+	@override late final _Translations$planReady$tr planReady = _Translations$planReady$tr._(_root);
+	@override late final _Translations$demoChat$tr demoChat = _Translations$demoChat$tr._(_root);
 	@override late final _Translations$previewChat$tr previewChat = _Translations$previewChat$tr._(_root);
 	@override late final _Translations$paywall$tr paywall = _Translations$paywall$tr._(_root);
 	@override late final _Translations$auth$tr auth = _Translations$auth$tr._(_root);
@@ -156,7 +158,7 @@ class _Translations$language$tr implements Translations$language$en {
 
 	// Translations
 	@override String step({required Object current, required Object total}) => 'Adım ${current} / ${total}';
-	@override String get title => 'Ne hakkında konuşmak istersin?';
+	@override String get title => 'Hangi dili öğrenmek istiyorsun?';
 	@override String get nativeSection => 'Anadilim';
 	@override String get nativeField => 'Ana dil';
 	@override String get nativeName => 'Türkçe';
@@ -187,13 +189,22 @@ class _Translations$setup$tr implements Translations$setup$en {
 	@override String get goalStudying => 'Yurt Dışında Eğitim';
 	@override String get goalOther => 'Diğer';
 	@override String get levelTitle => 'Mevcut dil seviyen nedir?';
-	@override String get levelBeginner => 'Başlangıç — Birkaç kelime biliyorum';
-	@override String get levelIntermediate => 'Orta — Basit sohbetler yapabiliyorum';
-	@override String get levelAdvanced => 'İleri — Konuşabiliyorum ama geliştirmek istiyorum';
+	@override String get levelA1 => 'A1 — Birkaç kelime biliyorum';
+	@override String get levelA2 => 'A2 — Basit ifadeler kullanabiliyorum';
+	@override String get levelB1 => 'B1 — Günlük konuşmalar yapabiliyorum';
+	@override String get levelB2 => 'B2 — Tanıdık konularda akıcı iletişim kurabiliyorum';
+	@override String get levelC1 => 'C1 — İleri düzey, geliştirmek istiyorum';
+	@override String get levelC2 => 'C2 — Ana dil seviyesine yakın';
 	@override String get paceTitle => 'Ne kadar hızlı gelişmek istiyorsun?';
-	@override String get paceLight => 'Günde 5-10 dk (hafif)';
-	@override String get paceRecommended => 'Günde 15-20 dk (önerilen)';
-	@override String get paceFast => 'Günde 30+ dk (hızlı sonuçlar)';
+	@override String get explanationTitle => 'Kendi dilinde sorduğun sorulara nasıl açıklama yapalım?';
+	@override String get explanationHint => 'Bunu istediğin zaman profil ayarlarından değiştirebilirsin.';
+	@override String get explanationNative => 'Anadilimde açıkla';
+	@override String get explanationEnglish => 'İngilizce açıkla';
+	@override String get paceMin5 => '5 dk/gün';
+	@override String get paceMin10 => '10 dk/gün';
+	@override String get paceMin15 => '15 dk/gün';
+	@override String get paceMin30 => '30 dk/gün';
+	@override String get paceMin60 => '60 dk/gün';
 }
 
 // Path: accountCreating
@@ -204,12 +215,84 @@ class _Translations$accountCreating$tr implements Translations$accountCreating$e
 
 	// Translations
 	@override String get title => 'Kişisel Hesabın Oluşturuluyor';
+	@override String get titleLine1 => 'Building your';
+	@override String get titleLine2 => 'Account';
+	@override String get testimonialQuote => 'Week one I could barely say hello. Week three I was having full conversations with my AI tutor. I\'m not stopping now.';
+	@override String get testimonialAuthor => 'Maria, 29 — 3 months in';
 	@override String get stepContent => 'İçerik oluşturuluyor';
 	@override String get stepDialogues => 'Diyaloglar hazırlanıyor';
 	@override String get stepLessons => 'Dersler optimize ediliyor';
 	@override String get stepPlan => 'Planın son şekli veriliyor';
 	@override String get optimization => 'Optimizasyon';
 	@override String progress({required Object value}) => '${value}%';
+	@override String get comparisonPitch => 'Lingola ile kendi başınıza öğrenmekten 30 kat daha hızlı bir şekilde 600 fazla ifadeyi öğrenin';
+	@override String get comparisonAloneCount => '400';
+	@override String get comparisonLingolaCount => '1000';
+	@override String get comparisonUnit => 'İFADE';
+	@override String get comparisonAloneLabel => 'Tek başına';
+	@override String get comparisonLingolaLabel => 'Lingola';
+	@override String get fluencyPitch => 'Bugünden akıcılığa, bir sonraki seviyeniz sadece 30 gün uzakta';
+	@override String get chartToday => 'Today';
+	@override String get chartMid => '15 Sep';
+	@override String get chartEnd => '30 Sep';
+}
+
+// Path: planReady
+class _Translations$planReady$tr implements Translations$planReady$en {
+	_Translations$planReady$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get titleLine1 => 'Your plan is';
+	@override String get titleLine2 => 'Ready!';
+	@override String get statBanner => 'Kullanıcıların %95\'i ilk 7 gün içinde sonuç alıyor';
+	@override String planTitle({required Object name}) => '${name}\'İN PLANI';
+	@override String get defaultName => 'SENİN';
+	@override String get fieldCourse => 'KURS';
+	@override String get fieldLevel => 'SEVİYENİZ';
+	@override String get fieldFocus => 'ODAK ALANI';
+	@override String get fieldDuration => 'SÜRE';
+	@override String get fieldInterests => 'İLGİ ALANLARI';
+	@override String get startPlan => 'Start my plan →';
+	@override String get courseEnglish => 'İngilizce';
+	@override String get courseGerman => 'Almanca';
+	@override String get courseFrench => 'Fransızca';
+	@override String get courseItalian => 'İtalyanca';
+	@override String get courseSpanish => 'İspanyolca';
+	@override String get courseJapanese => 'Japonca';
+	@override String get courseRussian => 'Rusça';
+	@override String get courseTurkish => 'Türkçe';
+	@override String get goalCareer => 'Kariyer ve İş';
+	@override String get goalTravel => 'Seyahat';
+	@override String get goalLiving => 'Yurt Dışında Yaşamak';
+	@override String get goalStudying => 'Yurt Dışında Eğitim';
+	@override String get goalOther => 'Diğer';
+	@override String get levelA1 => 'A1';
+	@override String get levelA2 => 'A2';
+	@override String get levelB1 => 'B1';
+	@override String get levelB2 => 'B2';
+	@override String get levelC1 => 'C1';
+	@override String get levelC2 => 'C2';
+	@override String get paceMin5 => '5 dk/gün';
+	@override String get paceMin10 => '10 dk/gün';
+	@override String get paceMin15 => '15 dk/gün';
+	@override String get paceMin30 => '30 dk/gün';
+	@override String get paceMin60 => '60 dk/gün';
+}
+
+// Path: demoChat
+class _Translations$demoChat$tr implements Translations$demoChat$en {
+	_Translations$demoChat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get brand => 'Lingola';
+	@override String get lessonBadge => 'Seni tanıyalım';
+	@override String get speed => '1x';
+	@override String get typeMessage => 'Mesaj yaz...';
+	@override String get incoming1 => 'Merhaba! Ben senin AI eğitmeninim. Başlamadan önce — İngilizce devam etmek istemiyorsan veya bir şeyi anlamazsan bana söyle, dilini değiştiririm. Umarım iyisindir! Hadi seninle ilgili birkaç şey konuşalım — şu an çalışıyor musun, yoksa öğrenci misin?';
 }
 
 // Path: previewChat
@@ -223,7 +306,7 @@ class _Translations$previewChat$tr implements Translations$previewChat$en {
 	@override String get lessonBadge => 'Ders 1: Selamlaşmalar';
 	@override String get speed => '1x';
 	@override String get typeMessage => 'Bir mesaj yaz...';
-	@override String get incoming1 => 'Merhaba! Lingola\'ya hoş geldin — Ben senin AI eğitmeninim. İngilizce\'de hızlı bir merhaba denemeye hazır mısın?';
+	@override String get incoming1 => 'Merhaba! Lingola\'ya hoş geldin — ben senin AI eğitmeninim. Seviyen ne olursa olsun merak etme; burada kendini güvende hissederek İngilizce öğreneceksin. İngilizcede \'merhaba\' demek için \'Hi\' veya \'Hello\' dersin — hadi dene, bana İngilizce \'Hi!\' yaz!';
 	@override String get outgoing1 => 'Merhaba! Pratik yapmaya hazırım.';
 	@override String get incoming2Highlight => 'Günaydın';
 	@override String get incoming2Rest => ', Emrah! Hazır hissetmene sevindim. Bir sabah kahvesi her zaman bir bağlantı kurmaya harika bir başlangıçtır. Ne hakkında konuşmak istersin?';
@@ -268,6 +351,9 @@ class _Translations$auth$tr implements Translations$auth$en {
 	@override String get continueGoogle => 'Google ile Devam Et';
 	@override String get continueApple => 'Apple ile Devam Et';
 	@override String get continueGuest => 'Misafir Olarak Devam Et';
+	@override String get or => 'veya';
+	@override String get alreadyHaveAccount => 'Zaten hesabın var mı?';
+	@override String get signIn => 'Giriş yap';
 	@override String get legal => 'Lingola\'ya kaydolarak, Hizmet Şartlarımızı kabul etmiş olursunuz. Verilerinizi nasıl işlediğimizi Gizlilik Politikasında ve Çerez Politikası\'nda öğrenin.';
 	@override String get terms => 'Hizmet Şartları';
 	@override String get privacy => 'Gizlilik Politikası';
@@ -435,6 +521,7 @@ class _Translations$tutorPage$tr implements Translations$tutorPage$en {
 	// Translations
 	@override String get title => 'Eğitmen';
 	@override String get chatWithLingola => 'Lingola ile Sohbet Et';
+	@override String get startChat => 'Sohbet et';
 	@override String chatWithTutor({required Object name}) => '${name} ile Sohbet Et';
 	@override String get chatHistory => 'Sohbet Geçmişi';
 	@override String get history => 'Geçmiş';
@@ -473,7 +560,7 @@ class _Translations$lessonPage$tr implements Translations$lessonPage$en {
 	@override String get locked => 'Kilitlendi';
 	@override String get pickTutorTitle => 'Öğretmeninizi seçin';
 	@override String get startTalk => 'Derse başla';
-	@override String get chatInstead => 'Bunun yerine sohbet et';
+	@override String get chatInstead => 'Sohbet et';
 	@override String get lockedHint => 'Bu dersi açmak için önceki dersi tamamlayın.';
 	@override String get levelLockedTitle => 'Seviye kilitli';
 	@override String levelLockedBody({required Object userLevel, required Object lessonLevel}) => 'İngilizce seviyeniz ${userLevel} olduğu için ${lessonLevel} derslerini önceki yolu tamamlamadan açamazsınız.';
@@ -518,12 +605,39 @@ class _Translations$rolePlayPage$tr implements Translations$rolePlayPage$en {
 	@override String progressCompleted({required Object value}) => '%${value} tamamlandı';
 	@override String minutes({required Object value}) => '${value} Dak';
 	@override String get beginner => 'Yeni Başlayan';
+	@override String get intermediate => 'Orta';
+	@override String get beginnerIntermediate => 'Başlangıç–Orta';
 	@override String get screenplay => 'SENARYO';
 	@override String get dailyInteractions => 'Günlük Etkileşimler';
 	@override String get business => 'İş';
+	@override String get customScenarios => 'Senaryoların';
+	@override String get createOwnScenario => 'Kendi senaryonu\noluştur!';
+	@override String get createOwnScenarioTitle => 'Kendi senaryonu oluştur';
+	@override String get createFieldScenario => 'Senaryo';
+	@override String get createFieldScenarioHint => 'örn. iş toplantısı';
+	@override String get createFieldTutorRole => 'Eğitmen Rolü';
+	@override String get createFieldTutorRoleHint => 'örn. mülakat yapan';
+	@override String get createFieldYourRole => 'Senin Rolün';
+	@override String get createFieldYourRoleHint => 'örn. aday';
+	@override String get createFieldExtraInfo => 'Ek Bilgiler (İsteğe bağlı)';
+	@override String get createFieldExtraInfoHint => 'örn. bir teknoloji şirketinde kıdemli yazılımcı pozisyonu için mülakat';
+	@override String get createOwnScenarioContinue => 'Devam Et';
+	@override String get createFieldsRequired => 'Lütfen senaryo ve her iki rol alanını doldur.';
+	@override String get creatingScenario => 'Rol oyunun oluşturuluyor';
+	@override String get creatingScenarioSubtitle => 'Lingola senaryonu ve görselini hazırlıyor...';
+	@override String get createFailed => 'Senaryo oluşturulamadı. Lütfen tekrar dene.';
 	@override late final _Translations$rolePlayPage$coffee$tr coffee = _Translations$rolePlayPage$coffee$tr._(_root);
 	@override late final _Translations$rolePlayPage$directions$tr directions = _Translations$rolePlayPage$directions$tr._(_root);
 	@override late final _Translations$rolePlayPage$interview$tr interview = _Translations$rolePlayPage$interview$tr._(_root);
+	@override late final _Translations$rolePlayPage$missedTrain$tr missedTrain = _Translations$rolePlayPage$missedTrain$tr._(_root);
+	@override late final _Translations$rolePlayPage$flightAttendant$tr flightAttendant = _Translations$rolePlayPage$flightAttendant$tr._(_root);
+	@override late final _Translations$rolePlayPage$trainTicket$tr trainTicket = _Translations$rolePlayPage$trainTicket$tr._(_root);
+	@override late final _Translations$rolePlayPage$restaurantReservation$tr restaurantReservation = _Translations$rolePlayPage$restaurantReservation$tr._(_root);
+	@override late final _Translations$rolePlayPage$doctorAppointment$tr doctorAppointment = _Translations$rolePlayPage$doctorAppointment$tr._(_root);
+	@override late final _Translations$rolePlayPage$shoppingClothes$tr shoppingClothes = _Translations$rolePlayPage$shoppingClothes$tr._(_root);
+	@override late final _Translations$rolePlayPage$takingTaxi$tr takingTaxi = _Translations$rolePlayPage$takingTaxi$tr._(_root);
+	@override late final _Translations$rolePlayPage$rentingApartment$tr rentingApartment = _Translations$rolePlayPage$rentingApartment$tr._(_root);
+	@override late final _Translations$rolePlayPage$birthdayParty$tr birthdayParty = _Translations$rolePlayPage$birthdayParty$tr._(_root);
 }
 
 // Path: pushNotifications
@@ -624,6 +738,13 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get dayStreak => 'Gün Serisi!';
 	@override String get accountSettings => 'Hesap Ayarları';
 	@override String get general => 'Genel';
+	@override String get settingsShare => 'Paylaş';
+	@override String get settingsSupport => 'Destek';
+	@override String get settingsAbout => 'Hakkında';
+	@override String get settingsAccount => 'Hesap';
+	@override String get followInstagram => 'Instagram\'da Takip Et';
+	@override String get followTikTok => 'TikTok\'ta Takip Et';
+	@override String get settings => 'Ayarlar';
 	@override String get profileSettings => 'Profil Ayarları';
 	@override String get fullName => 'Tam İsim';
 	@override String get email => 'E-posta';
@@ -668,6 +789,31 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get done => 'TAMAM';
 	@override String get notifications => 'Bildirimler';
 	@override String get appLanguage => 'Uygulama Dili';
+	@override String get explanationLanguage => 'Açıklama Dili';
+	@override String get explanationNative => 'Anadil';
+	@override String get explanationEnglish => 'İngilizce';
+	@override String get explanationUpdateFailed => 'Açıklama dili güncellenemedi';
+	@override String get learnInNativeLanguage => 'Ana Dilinde Öğren';
+	@override String get targetLanguageLabel => 'Hedef Dil';
+	@override String get languageLevel => 'Dil Seviyesi';
+	@override String get nativeLanguage => 'Ana Dilim';
+	@override String get interests => 'İlgi Alanları';
+	@override String get goalChipCareer => 'Kariyer';
+	@override String get goalChipTravel => 'Seyahat';
+	@override String get goalChipLiving => 'Yaşam';
+	@override String get goalChipStudying => 'Eğitim';
+	@override String get goalChipOther => 'Diğer';
+	@override String get dailyGoal => 'Günlük Hedef';
+	@override String get dailyGoalValueLight => 'Günlük 5-10 dk';
+	@override String get dailyGoalValueRecommended => 'Günlük 15-20 dk';
+	@override String get dailyGoalValueFast => 'Günlük 30+ dk';
+	@override String get dailyReminder => 'Günlük Hatırlatma';
+	@override String get selectNativeLanguageTitle => 'Ana dilini seç';
+	@override String get reminderOn => 'Açık';
+	@override String get reminderOff => 'Kapalı';
+	@override String get remindMe => 'Beni Hatırlat';
+	@override String get reminderSave => 'Kaydet';
+	@override String get reminderSaved => 'Hatırlatma kaydedildi';
 	@override String get selectLanguageTitle => 'Dil Seç';
 	@override String get premium => 'Premium';
 	@override String get passive => 'Pasif';
@@ -704,6 +850,12 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get certificateTitle => 'Sertifikanız';
 	@override String certificateLevelTitle({required Object level}) => '${level} Sertifikası';
 	@override String get certificateOf => 'Başarı Sertifikası';
+	@override String get certificatePresentedTo => 'This certificate is proudly presented to';
+	@override String certificateAchievementBody({required Object level}) => 'This achievement recognizes the successful completion of all ${level}-level lessons and learning activities, demonstrating a strong foundation in essential English communication skills.';
+	@override String certificateLevelCompleted({required Object levelName}) => 'Level Completed: ${levelName}';
+	@override String certificateDateCompleted({required Object date}) => 'Date of Completion: ${date}';
+	@override String certificateIdDisplay({required Object id}) => 'Certificate ID: ${id}';
+	@override String get certificateBrandTagline => 'Learn. Speak. Connect.';
 	@override String get certificateCertifiesThat => 'Bu belge, aşağıda adı geçen kişinin';
 	@override String get certificatePathway => 'Lingola İngilizce Yolu';
 	@override String get certificateAwardedTo => 'Verilen kişi';
@@ -718,6 +870,13 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get certificateScanOrVisit => 'QR kodu tarayın veya bağlantıyı ziyaret ederek doğrulayın.';
 	@override String get certificateVerifyHint => 'QR kodu tarayan herkes başarınızı doğrulayabilir.';
 	@override String get certificateShare => 'Sertifikayı Paylaş';
+	@override String get certificateDownload => 'İndir';
+	@override String get certificateDownloadSaved => 'Sertifika galeriye kaydedildi';
+	@override String get certificateDownloadFailed => 'Sertifika kaydedilemedi. Lütfen tekrar deneyin.';
+	@override String get certificateCreateQr => 'QR Oluştur';
+	@override String get certificateNotAvailableTitle => 'Sertifika kilitli';
+	@override String certificateNotAvailable({required Object level}) => 'Henüz ${level} derslerinizi tamamlamadığınız için bu belgeyi kullanamazsınız.';
+	@override String get certificateNotAvailableOk => 'Anladım';
 	@override String get certificateShareQr => 'QR Kodunu Paylaş';
 	@override String certificateShareBody({required Object level}) => 'Lingola ${level} sertifikamı kazandım!';
 	@override String certificateShareSubject({required Object level}) => 'Lingola ${level} Sertifikası';
@@ -755,7 +914,7 @@ class _Translations$onboarding$slide2$tr implements Translations$onboarding$slid
 	@override String get priceLingola => '\$9.99 / yıl';
 	@override String get versus => 'VS';
 	@override String get scheduled => 'Planlı';
-	@override String get anytime => 'İstediğin Zaman';
+	@override String get anytime => 'Her Zaman';
 	@override String get stressful => 'Stresli';
 	@override String get noPressure => 'Baskı Yok';
 	@override String get price => 'Fiyat';
@@ -883,6 +1042,7 @@ class _Translations$tutorPage$calling$tr implements Translations$tutorPage$calli
 	@override String get toggleCaptions => 'Altyazıları aç/kapat';
 	@override String get toggleHints => 'İpuçlarını aç/kapat';
 	@override String get toggleMic => 'Mikrofonu aç/kapat';
+	@override String get tapToSpeakHint => 'Konuşmak için dokun, bitirmek için tekrar dokun';
 }
 
 // Path: lessonPage.levels
@@ -934,6 +1094,114 @@ class _Translations$rolePlayPage$interview$tr implements Translations$rolePlayPa
 	@override String get title => 'İş Görüşmesi';
 	@override String get screenplay => 'Kendini tanıt, yaygın iş görüşmesi sorularını yanıtla, deneyimlerinden bahset ve rol ile sonraki adımlar hakkında sorular sor.';
 	@override late final _Translations$rolePlayPage$interview$chat$tr chat = _Translations$rolePlayPage$interview$chat$tr._(_root);
+}
+
+// Path: rolePlayPage.missedTrain
+class _Translations$rolePlayPage$missedTrain$tr implements Translations$rolePlayPage$missedTrain$en {
+	_Translations$rolePlayPage$missedTrain$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Trenini Kaçırdın';
+	@override String get screenplay => 'Trenini kaçırdın ve istasyon görevlisinden yardım iste — nereye gideceğini söyle, bir sonraki treni bul ve perona yön tarifi al.';
+	@override late final _Translations$rolePlayPage$missedTrain$chat$tr chat = _Translations$rolePlayPage$missedTrain$chat$tr._(_root);
+}
+
+// Path: rolePlayPage.flightAttendant
+class _Translations$rolePlayPage$flightAttendant$tr implements Translations$rolePlayPage$flightAttendant$en {
+	_Translations$rolePlayPage$flightAttendant$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Uçuş Hostesiyle Konuşma';
+	@override String get screenplay => 'Uçakta yolcusun. Koltuğunu bul, bagajınla ilgili yardım al, yemek ve içecek seç, uçuş sırasında ihtiyaçlarını dile getir.';
+	@override late final _Translations$rolePlayPage$flightAttendant$chat$tr chat = _Translations$rolePlayPage$flightAttendant$chat$tr._(_root);
+}
+
+// Path: rolePlayPage.trainTicket
+class _Translations$rolePlayPage$trainTicket$tr implements Translations$rolePlayPage$trainTicket$en {
+	_Translations$rolePlayPage$trainTicket$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Tren Bileti Alma';
+	@override String get screenplay => 'Tren istasyonunda gişeye git, nereye gideceğini söyle, kalkış saatini seç, bilet türünü ve koltuğunu belirle, bileti öde.';
+	@override late final _Translations$rolePlayPage$trainTicket$chat$tr chat = _Translations$rolePlayPage$trainTicket$chat$tr._(_root);
+}
+
+// Path: rolePlayPage.restaurantReservation
+class _Translations$rolePlayPage$restaurantReservation$tr implements Translations$rolePlayPage$restaurantReservation$en {
+	_Translations$rolePlayPage$restaurantReservation$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Restoranda Rezervasyon Yapma';
+	@override String get screenplay => 'Akşam yemeği için restoranda masa ayırt — tarih, saat, kişi sayısı ve masa tercihini belirle, rezervasyonunu onayla.';
+	@override late final _Translations$rolePlayPage$restaurantReservation$chat$tr chat = _Translations$rolePlayPage$restaurantReservation$chat$tr._(_root);
+}
+
+// Path: rolePlayPage.doctorAppointment
+class _Translations$rolePlayPage$doctorAppointment$tr implements Translations$rolePlayPage$doctorAppointment$en {
+	_Translations$rolePlayPage$doctorAppointment$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Doktor Randevusu Alma';
+	@override String get screenplay => 'Bir kliniği arayarak doktor randevusu al — ziyaret nedenini açıkla, uygun gün ve saati seç, bilgilerini onayla.';
+	@override late final _Translations$rolePlayPage$doctorAppointment$chat$tr chat = _Translations$rolePlayPage$doctorAppointment$chat$tr._(_root);
+}
+
+// Path: rolePlayPage.shoppingClothes
+class _Translations$rolePlayPage$shoppingClothes$tr implements Translations$rolePlayPage$shoppingClothes$en {
+	_Translations$rolePlayPage$shoppingClothes$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Kıyafet Alışverişi';
+	@override String get screenplay => 'Bir mağazada ne aradığını söyle, ürünleri dene, beden ve renk seçeneklerini karşılaştır, alıp almama kararını ver.';
+	@override late final _Translations$rolePlayPage$shoppingClothes$chat$tr chat = _Translations$rolePlayPage$shoppingClothes$chat$tr._(_root);
+}
+
+// Path: rolePlayPage.takingTaxi
+class _Translations$rolePlayPage$takingTaxi$tr implements Translations$rolePlayPage$takingTaxi$en {
+	_Translations$rolePlayPage$takingTaxi$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Taksiye Binme';
+	@override String get screenplay => 'Yeni bir şehirde taksiye bin, gideceğin yeri söyle, rota hakkında konuş, yolculuk sonunda ödeme yap.';
+	@override late final _Translations$rolePlayPage$takingTaxi$chat$tr chat = _Translations$rolePlayPage$takingTaxi$chat$tr._(_root);
+}
+
+// Path: rolePlayPage.rentingApartment
+class _Translations$rolePlayPage$rentingApartment$tr implements Translations$rolePlayPage$rentingApartment$en {
+	_Translations$rolePlayPage$rentingApartment$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Daire Kiralama';
+	@override String get screenplay => 'Ev sahibiyle kiralık daire hakkında konuş — kira, faturalar, depozito, evcil hayvan, otopark sor ve görüşme ayarla.';
+	@override late final _Translations$rolePlayPage$rentingApartment$chat$tr chat = _Translations$rolePlayPage$rentingApartment$chat$tr._(_root);
+}
+
+// Path: rolePlayPage.birthdayParty
+class _Translations$rolePlayPage$birthdayParty$tr implements Translations$rolePlayPage$birthdayParty$en {
+	_Translations$rolePlayPage$birthdayParty$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Doğum Günü Partisi Planlama';
+	@override String get screenplay => 'Bir arkadaşınla doğum günü partisi planla — mekan, tarih, davetli listesi, yemek, pasta, müzik ve aktiviteleri birlikte belirle.';
+	@override late final _Translations$rolePlayPage$birthdayParty$chat$tr chat = _Translations$rolePlayPage$birthdayParty$chat$tr._(_root);
 }
 
 // Path: notificationsPage.translation
@@ -1383,6 +1651,141 @@ class _Translations$rolePlayPage$interview$chat$tr implements Translations$roleP
 	@override String get botReply => 'Bu etkileyici. Rol hakkında ne gibi soruların var?';
 }
 
+// Path: rolePlayPage.missedTrain.chat
+class _Translations$rolePlayPage$missedTrain$chat$tr implements Translations$rolePlayPage$missedTrain$chat$en {
+	_Translations$rolePlayPage$missedTrain$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün istasyonda trenini kaçırdığında ne söyleyeceğini pratik edeceğiz. Önce birkaç ifade öğreteceğim, sonra canlandıracağız. Hazır mısın?';
+	@override String get incoming1 => 'Merhaba, nereye gitmeye çalışıyorsunuz?';
+	@override String get outgoing1 => 'Manchester\'a gitmem gerekiyor. Sanırım 10:15 trenimi kaçırdım.';
+	@override String get incoming2Highlight => 'Sorun değil';
+	@override String get incoming2Rest => '. Bir sonraki uygun treni kontrol edeyim.';
+	@override String get botReply => 'En hızlı seçeneği mi yoksa en ucuz olanı mı tercih edersiniz?';
+}
+
+// Path: rolePlayPage.flightAttendant.chat
+class _Translations$rolePlayPage$flightAttendant$chat$tr implements Translations$rolePlayPage$flightAttendant$chat$en {
+	_Translations$rolePlayPage$flightAttendant$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün uçakta bir hostesle konuşmayı pratik edeceğiz — koltuk, bagaj, yemek. Önce açıklayacağım, sonra canlandıracağız. Nasıl, iyi mi?';
+	@override String get incoming1 => 'Merhaba! Biniş kartınızı görebilir miyim, lütfen?';
+	@override String get outgoing1 => 'Tabii, buyurun. 14B koltuğundayım.';
+	@override String get incoming2Highlight => 'Teşekkürler';
+	@override String get incoming2Rest => '. Koltuğunuzu bulmanıza yardım ister misiniz?';
+	@override String get botReply => 'Bir şeyler içmek ister misiniz — su, meyve suyu, kahve veya çay?';
+}
+
+// Path: rolePlayPage.trainTicket.chat
+class _Translations$rolePlayPage$trainTicket$chat$tr implements Translations$rolePlayPage$trainTicket$chat$en {
+	_Translations$rolePlayPage$trainTicket$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün gişeden tren bileti almayı pratik edeceğiz. Önce faydalı ifadeleri öğreteceğim, sonra canlandıracağız. Hazır mısın?';
+	@override String get incoming1 => 'Merhaba! Nereye gitmek istersiniz?';
+	@override String get outgoing1 => 'Edinburgh\'a gitmek istiyorum, lütfen.';
+	@override String get incoming2Highlight => 'Harika';
+	@override String get incoming2Rest => '. Ne zaman seyahat etmek istersiniz?';
+	@override String get botReply => 'Tek yön mü yoksa gidiş-dönüş mü istersiniz?';
+}
+
+// Path: rolePlayPage.restaurantReservation.chat
+class _Translations$rolePlayPage$restaurantReservation$chat$tr implements Translations$rolePlayPage$restaurantReservation$chat$en {
+	_Translations$rolePlayPage$restaurantReservation$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün restoranda rezervasyon yapmayı pratik edeceğiz. Önce birkaç ifade öğreteceğim, sonra canlandıracağız. Nasıl, iyi mi?';
+	@override String get incoming1 => 'Merhaba! Size nasıl yardımcı olabilirim?';
+	@override String get outgoing1 => 'Merhaba, akşam yemeği için rezervasyon yapmak istiyorum.';
+	@override String get incoming2Highlight => 'Tabii ki';
+	@override String get incoming2Rest => '. Hangi gün gelmek istersiniz?';
+	@override String get botReply => 'Kaç kişi olacaksınız?';
+}
+
+// Path: rolePlayPage.doctorAppointment.chat
+class _Translations$rolePlayPage$doctorAppointment$chat$tr implements Translations$rolePlayPage$doctorAppointment$chat$en {
+	_Translations$rolePlayPage$doctorAppointment$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün telefonla doktor randevusu almayı pratik edeceğiz. Önce anahtar ifadeleri öğreteceğim, sonra canlandıracağız. Hazır mısın?';
+	@override String get incoming1 => 'Merhaba! Bugün size nasıl yardımcı olabilirim?';
+	@override String get outgoing1 => 'Merhaba, bir doktor randevusu almak istiyorum.';
+	@override String get incoming2Highlight => 'Tabii';
+	@override String get incoming2Rest => '. Daha önce kliniğimize gelmiş miydiniz?';
+	@override String get botReply => 'Doktora ne için gelmek istiyorsunuz?';
+}
+
+// Path: rolePlayPage.shoppingClothes.chat
+class _Translations$rolePlayPage$shoppingClothes$chat$tr implements Translations$rolePlayPage$shoppingClothes$chat$en {
+	_Translations$rolePlayPage$shoppingClothes$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün bir mağazada kıyafet alışverişini pratik edeceğiz. Önce faydalı ifadeleri öğreteceğim, sonra canlandıracağız. Nasıl, iyi mi?';
+	@override String get incoming1 => 'Merhaba! Bir şey bulmanıza yardım edebilir miyim?';
+	@override String get outgoing1 => 'Evet, günlük giyim için rahat bir gömlek arıyorum.';
+	@override String get incoming2Highlight => 'Tabii';
+	@override String get incoming2Rest => '. Genelde hangi bedeni giyiyorsunuz?';
+	@override String get botReply => 'Gündelik mi yoksa daha resmi bir şey mi tercih edersiniz?';
+}
+
+// Path: rolePlayPage.takingTaxi.chat
+class _Translations$rolePlayPage$takingTaxi$chat$tr implements Translations$rolePlayPage$takingTaxi$chat$en {
+	_Translations$rolePlayPage$takingTaxi$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün taksiye binmeyi pratik edeceğiz — varış noktası, şoförle sohbet ve ödeme. Önce öğreteceğim, sonra canlandıracağız. Hazır mısın?';
+	@override String get incoming1 => 'Merhaba! Nereye gitmek istersiniz?';
+	@override String get outgoing1 => 'Park Caddesi\'ndeki Grand Hotel, lütfen.';
+	@override String get incoming2Highlight => 'Anladım';
+	@override String get incoming2Rest => '. Tam adresiniz var mı?';
+	@override String get botReply => 'En hızlı rotayı mı tercih edersiniz?';
+}
+
+// Path: rolePlayPage.rentingApartment.chat
+class _Translations$rolePlayPage$rentingApartment$chat$tr implements Translations$rolePlayPage$rentingApartment$chat$en {
+	_Translations$rolePlayPage$rentingApartment$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün ev sahibiyle daire kiralama hakkında konuşmayı pratik edeceğiz. Önce anahtar ifadeleri öğreteceğim, sonra canlandıracağız. Nasıl, iyi mi?';
+	@override String get incoming1 => 'Merhaba! Daireyi kiralamakla ilgileniyor musunuz?';
+	@override String get outgoing1 => 'Evet, hakkında daha fazla bilgi almak istiyorum.';
+	@override String get incoming2Highlight => 'Harika';
+	@override String get incoming2Rest => '. Ne zaman taşınmayı düşünüyorsunuz?';
+	@override String get botReply => 'Eşyalı mı yoksa eşyasız bir daire mi arıyorsunuz?';
+}
+
+// Path: rolePlayPage.birthdayParty.chat
+class _Translations$rolePlayPage$birthdayParty$chat$tr implements Translations$rolePlayPage$birthdayParty$chat$en {
+	_Translations$rolePlayPage$birthdayParty$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün bir arkadaşınla doğum günü partisi planlamayı pratik edeceğiz. Önce faydalı ifadeleri öğreteceğim, sonra canlandıracağız. Hazır mısın?';
+	@override String get incoming1 => 'Peki, kimin doğum gününü planlıyoruz?';
+	@override String get outgoing1 => 'Arkadaşım Emma için — doğum günü gelecek ay.';
+	@override String get incoming2Highlight => 'Güzel';
+	@override String get incoming2Rest => '! Partiyi ne zaman yapalım?';
+	@override String get botReply => 'Evde mi yoksa restoranda mı yapmayı tercih edersin?';
+}
+
 // Path: profilePage.faqItems.supportedLanguages
 class _Translations$profilePage$faqItems$supportedLanguages$tr implements Translations$profilePage$faqItems$supportedLanguages$en {
 	_Translations$profilePage$faqItems$supportedLanguages$tr._(this._root);
@@ -1540,7 +1943,7 @@ extension on TranslationsTr {
 			'onboarding.slide2.priceLingola' => '\$9.99 / yıl',
 			'onboarding.slide2.versus' => 'VS',
 			'onboarding.slide2.scheduled' => 'Planlı',
-			'onboarding.slide2.anytime' => 'İstediğin Zaman',
+			'onboarding.slide2.anytime' => 'Her Zaman',
 			'onboarding.slide2.stressful' => 'Stresli',
 			'onboarding.slide2.noPressure' => 'Baskı Yok',
 			'onboarding.slide2.price' => 'Fiyat',
@@ -1563,7 +1966,7 @@ extension on TranslationsTr {
 			'targetLanguage.turkish' => 'Türkçe',
 			'targetLanguage.hindi' => 'Hintçe',
 			'language.step' => ({required Object current, required Object total}) => 'Adım ${current} / ${total}',
-			'language.title' => 'Ne hakkında konuşmak istersin?',
+			'language.title' => 'Hangi dili öğrenmek istiyorsun?',
 			'language.nativeSection' => 'Anadilim',
 			'language.nativeField' => 'Ana dil',
 			'language.nativeName' => 'Türkçe',
@@ -1585,25 +1988,88 @@ extension on TranslationsTr {
 			'setup.goalStudying' => 'Yurt Dışında Eğitim',
 			'setup.goalOther' => 'Diğer',
 			'setup.levelTitle' => 'Mevcut dil seviyen nedir?',
-			'setup.levelBeginner' => 'Başlangıç — Birkaç kelime biliyorum',
-			'setup.levelIntermediate' => 'Orta — Basit sohbetler yapabiliyorum',
-			'setup.levelAdvanced' => 'İleri — Konuşabiliyorum ama geliştirmek istiyorum',
+			'setup.levelA1' => 'A1 — Birkaç kelime biliyorum',
+			'setup.levelA2' => 'A2 — Basit ifadeler kullanabiliyorum',
+			'setup.levelB1' => 'B1 — Günlük konuşmalar yapabiliyorum',
+			'setup.levelB2' => 'B2 — Tanıdık konularda akıcı iletişim kurabiliyorum',
+			'setup.levelC1' => 'C1 — İleri düzey, geliştirmek istiyorum',
+			'setup.levelC2' => 'C2 — Ana dil seviyesine yakın',
 			'setup.paceTitle' => 'Ne kadar hızlı gelişmek istiyorsun?',
-			'setup.paceLight' => 'Günde 5-10 dk (hafif)',
-			'setup.paceRecommended' => 'Günde 15-20 dk (önerilen)',
-			'setup.paceFast' => 'Günde 30+ dk (hızlı sonuçlar)',
+			'setup.explanationTitle' => 'Kendi dilinde sorduğun sorulara nasıl açıklama yapalım?',
+			'setup.explanationHint' => 'Bunu istediğin zaman profil ayarlarından değiştirebilirsin.',
+			'setup.explanationNative' => 'Anadilimde açıkla',
+			'setup.explanationEnglish' => 'İngilizce açıkla',
+			'setup.paceMin5' => '5 dk/gün',
+			'setup.paceMin10' => '10 dk/gün',
+			'setup.paceMin15' => '15 dk/gün',
+			'setup.paceMin30' => '30 dk/gün',
+			'setup.paceMin60' => '60 dk/gün',
 			'accountCreating.title' => 'Kişisel Hesabın Oluşturuluyor',
+			'accountCreating.titleLine1' => 'Building your',
+			'accountCreating.titleLine2' => 'Account',
+			'accountCreating.testimonialQuote' => 'Week one I could barely say hello. Week three I was having full conversations with my AI tutor. I\'m not stopping now.',
+			'accountCreating.testimonialAuthor' => 'Maria, 29 — 3 months in',
 			'accountCreating.stepContent' => 'İçerik oluşturuluyor',
 			'accountCreating.stepDialogues' => 'Diyaloglar hazırlanıyor',
 			'accountCreating.stepLessons' => 'Dersler optimize ediliyor',
 			'accountCreating.stepPlan' => 'Planın son şekli veriliyor',
 			'accountCreating.optimization' => 'Optimizasyon',
 			'accountCreating.progress' => ({required Object value}) => '${value}%',
+			'accountCreating.comparisonPitch' => 'Lingola ile kendi başınıza öğrenmekten 30 kat daha hızlı bir şekilde 600 fazla ifadeyi öğrenin',
+			'accountCreating.comparisonAloneCount' => '400',
+			'accountCreating.comparisonLingolaCount' => '1000',
+			'accountCreating.comparisonUnit' => 'İFADE',
+			'accountCreating.comparisonAloneLabel' => 'Tek başına',
+			'accountCreating.comparisonLingolaLabel' => 'Lingola',
+			'accountCreating.fluencyPitch' => 'Bugünden akıcılığa, bir sonraki seviyeniz sadece 30 gün uzakta',
+			'accountCreating.chartToday' => 'Today',
+			'accountCreating.chartMid' => '15 Sep',
+			'accountCreating.chartEnd' => '30 Sep',
+			'planReady.titleLine1' => 'Your plan is',
+			'planReady.titleLine2' => 'Ready!',
+			'planReady.statBanner' => 'Kullanıcıların %95\'i ilk 7 gün içinde sonuç alıyor',
+			'planReady.planTitle' => ({required Object name}) => '${name}\'İN PLANI',
+			'planReady.defaultName' => 'SENİN',
+			'planReady.fieldCourse' => 'KURS',
+			'planReady.fieldLevel' => 'SEVİYENİZ',
+			'planReady.fieldFocus' => 'ODAK ALANI',
+			'planReady.fieldDuration' => 'SÜRE',
+			'planReady.fieldInterests' => 'İLGİ ALANLARI',
+			'planReady.startPlan' => 'Start my plan →',
+			'planReady.courseEnglish' => 'İngilizce',
+			'planReady.courseGerman' => 'Almanca',
+			'planReady.courseFrench' => 'Fransızca',
+			'planReady.courseItalian' => 'İtalyanca',
+			'planReady.courseSpanish' => 'İspanyolca',
+			'planReady.courseJapanese' => 'Japonca',
+			'planReady.courseRussian' => 'Rusça',
+			'planReady.courseTurkish' => 'Türkçe',
+			'planReady.goalCareer' => 'Kariyer ve İş',
+			'planReady.goalTravel' => 'Seyahat',
+			'planReady.goalLiving' => 'Yurt Dışında Yaşamak',
+			'planReady.goalStudying' => 'Yurt Dışında Eğitim',
+			'planReady.goalOther' => 'Diğer',
+			'planReady.levelA1' => 'A1',
+			'planReady.levelA2' => 'A2',
+			'planReady.levelB1' => 'B1',
+			'planReady.levelB2' => 'B2',
+			'planReady.levelC1' => 'C1',
+			'planReady.levelC2' => 'C2',
+			'planReady.paceMin5' => '5 dk/gün',
+			'planReady.paceMin10' => '10 dk/gün',
+			'planReady.paceMin15' => '15 dk/gün',
+			'planReady.paceMin30' => '30 dk/gün',
+			'planReady.paceMin60' => '60 dk/gün',
+			'demoChat.brand' => 'Lingola',
+			'demoChat.lessonBadge' => 'Seni tanıyalım',
+			'demoChat.speed' => '1x',
+			'demoChat.typeMessage' => 'Mesaj yaz...',
+			'demoChat.incoming1' => 'Merhaba! Ben senin AI eğitmeninim. Başlamadan önce — İngilizce devam etmek istemiyorsan veya bir şeyi anlamazsan bana söyle, dilini değiştiririm. Umarım iyisindir! Hadi seninle ilgili birkaç şey konuşalım — şu an çalışıyor musun, yoksa öğrenci misin?',
 			'previewChat.brand' => 'Lingola',
 			'previewChat.lessonBadge' => 'Ders 1: Selamlaşmalar',
 			'previewChat.speed' => '1x',
 			'previewChat.typeMessage' => 'Bir mesaj yaz...',
-			'previewChat.incoming1' => 'Merhaba! Lingola\'ya hoş geldin — Ben senin AI eğitmeninim. İngilizce\'de hızlı bir merhaba denemeye hazır mısın?',
+			'previewChat.incoming1' => 'Merhaba! Lingola\'ya hoş geldin — ben senin AI eğitmeninim. Seviyen ne olursa olsun merak etme; burada kendini güvende hissederek İngilizce öğreneceksin. İngilizcede \'merhaba\' demek için \'Hi\' veya \'Hello\' dersin — hadi dene, bana İngilizce \'Hi!\' yaz!',
 			'previewChat.outgoing1' => 'Merhaba! Pratik yapmaya hazırım.',
 			'previewChat.incoming2Highlight' => 'Günaydın',
 			'previewChat.incoming2Rest' => ', Emrah! Hazır hissetmene sevindim. Bir sabah kahvesi her zaman bir bağlantı kurmaya harika bir başlangıçtır. Ne hakkında konuşmak istersin?',
@@ -1630,6 +2096,9 @@ extension on TranslationsTr {
 			'auth.continueGoogle' => 'Google ile Devam Et',
 			'auth.continueApple' => 'Apple ile Devam Et',
 			'auth.continueGuest' => 'Misafir Olarak Devam Et',
+			'auth.or' => 'veya',
+			'auth.alreadyHaveAccount' => 'Zaten hesabın var mı?',
+			'auth.signIn' => 'Giriş yap',
 			'auth.legal' => 'Lingola\'ya kaydolarak, Hizmet Şartlarımızı kabul etmiş olursunuz. Verilerinizi nasıl işlediğimizi Gizlilik Politikasında ve Çerez Politikası\'nda öğrenin.',
 			'auth.terms' => 'Hizmet Şartları',
 			'auth.privacy' => 'Gizlilik Politikası',
@@ -1745,6 +2214,7 @@ extension on TranslationsTr {
 			'placeholder.body' => ({required Object tab}) => 'Senin için odaklanmış bir ${tab} deneyimi hazırlıyoruz.',
 			'tutorPage.title' => 'Eğitmen',
 			'tutorPage.chatWithLingola' => 'Lingola ile Sohbet Et',
+			'tutorPage.startChat' => 'Sohbet et',
 			'tutorPage.chatWithTutor' => ({required Object name}) => '${name} ile Sohbet Et',
 			'tutorPage.chatHistory' => 'Sohbet Geçmişi',
 			'tutorPage.history' => 'Geçmiş',
@@ -1814,6 +2284,7 @@ extension on TranslationsTr {
 			'tutorPage.calling.toggleCaptions' => 'Altyazıları aç/kapat',
 			'tutorPage.calling.toggleHints' => 'İpuçlarını aç/kapat',
 			'tutorPage.calling.toggleMic' => 'Mikrofonu aç/kapat',
+			'tutorPage.calling.tapToSpeakHint' => 'Konuşmak için dokun, bitirmek için tekrar dokun',
 			'lessonPage.title' => 'Öğrenmeye Devam Et',
 			'lessonPage.profile' => 'Profil',
 			'lessonPage.language' => 'Hedef dil',
@@ -1821,7 +2292,7 @@ extension on TranslationsTr {
 			'lessonPage.locked' => 'Kilitlendi',
 			'lessonPage.pickTutorTitle' => 'Öğretmeninizi seçin',
 			'lessonPage.startTalk' => 'Derse başla',
-			'lessonPage.chatInstead' => 'Bunun yerine sohbet et',
+			'lessonPage.chatInstead' => 'Sohbet et',
 			'lessonPage.lockedHint' => 'Bu dersi açmak için önceki dersi tamamlayın.',
 			'lessonPage.levelLockedTitle' => 'Seviye kilitli',
 			'lessonPage.levelLockedBody' => ({required Object userLevel, required Object lessonLevel}) => 'İngilizce seviyeniz ${userLevel} olduğu için ${lessonLevel} derslerini önceki yolu tamamlamadan açamazsınız.',
@@ -1945,6 +2416,8 @@ extension on TranslationsTr {
 			'lessonPage.levels.b1.lessons.3' => 'Gelecek planları',
 			'lessonPage.levels.b1.lessons.4' => 'Etkinlik planlama',
 			'lessonPage.levels.b1.lessons.5' => 'Hedefler ve planlar',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.b1.lessons.6' => 'Tarihi olaylar',
 			'lessonPage.levels.b1.lessons.7' => 'Teknoloji',
 			'lessonPage.levels.b1.lessons.8' => 'Asla ama asla',
@@ -2013,8 +2486,6 @@ extension on TranslationsTr {
 			'lessonPage.levels.b2.lessons.13' => 'Çevresel sorunlar',
 			'lessonPage.levels.b2.lessons.14' => 'Bunu çözebiliriz',
 			'lessonPage.levels.b2.lessons.15' => 'Gizemler ve suçlar',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.b2.lessons.16' => 'Olası gelecekler',
 			'lessonPage.levels.b2.lessons.17' => 'İş planları',
 			'lessonPage.levels.b2.lessons.18' => 'Toplantı kararları',
@@ -2078,9 +2549,27 @@ extension on TranslationsTr {
 			'rolePlayPage.progressCompleted' => ({required Object value}) => '%${value} tamamlandı',
 			'rolePlayPage.minutes' => ({required Object value}) => '${value} Dak',
 			'rolePlayPage.beginner' => 'Yeni Başlayan',
+			'rolePlayPage.intermediate' => 'Orta',
+			'rolePlayPage.beginnerIntermediate' => 'Başlangıç–Orta',
 			'rolePlayPage.screenplay' => 'SENARYO',
 			'rolePlayPage.dailyInteractions' => 'Günlük Etkileşimler',
 			'rolePlayPage.business' => 'İş',
+			'rolePlayPage.customScenarios' => 'Senaryoların',
+			'rolePlayPage.createOwnScenario' => 'Kendi senaryonu\noluştur!',
+			'rolePlayPage.createOwnScenarioTitle' => 'Kendi senaryonu oluştur',
+			'rolePlayPage.createFieldScenario' => 'Senaryo',
+			'rolePlayPage.createFieldScenarioHint' => 'örn. iş toplantısı',
+			'rolePlayPage.createFieldTutorRole' => 'Eğitmen Rolü',
+			'rolePlayPage.createFieldTutorRoleHint' => 'örn. mülakat yapan',
+			'rolePlayPage.createFieldYourRole' => 'Senin Rolün',
+			'rolePlayPage.createFieldYourRoleHint' => 'örn. aday',
+			'rolePlayPage.createFieldExtraInfo' => 'Ek Bilgiler (İsteğe bağlı)',
+			'rolePlayPage.createFieldExtraInfoHint' => 'örn. bir teknoloji şirketinde kıdemli yazılımcı pozisyonu için mülakat',
+			'rolePlayPage.createOwnScenarioContinue' => 'Devam Et',
+			'rolePlayPage.createFieldsRequired' => 'Lütfen senaryo ve her iki rol alanını doldur.',
+			'rolePlayPage.creatingScenario' => 'Rol oyunun oluşturuluyor',
+			'rolePlayPage.creatingScenarioSubtitle' => 'Lingola senaryonu ve görselini hazırlıyor...',
+			'rolePlayPage.createFailed' => 'Senaryo oluşturulamadı. Lütfen tekrar dene.',
 			'rolePlayPage.coffee.title' => 'Kahve Dükkanında Sipariş Verme',
 			'rolePlayPage.coffee.screenplay' => 'Favori içeceğini sipariş et, boyutlar ve ekler hakkında sorular sor, toplamını onayla ve kahveni tezgahın üzerinden al.',
 			'rolePlayPage.coffee.chat.briefing' => 'Merhaba! Bugün bir kahve dükkanında sipariş vermeyi pratik edeceğiz — selam, boyutlar, ekler. Önce biraz açıklama yapacağım, sonra canlandıracağız. Nasıl, iyi mi?',
@@ -2105,6 +2594,78 @@ extension on TranslationsTr {
 			'rolePlayPage.interview.chat.incoming2Highlight' => 'Harika',
 			'rolePlayPage.interview.chat.incoming2Rest' => '. Gurur duyduğun bir projeden bahset.',
 			'rolePlayPage.interview.chat.botReply' => 'Bu etkileyici. Rol hakkında ne gibi soruların var?',
+			'rolePlayPage.missedTrain.title' => 'Trenini Kaçırdın',
+			'rolePlayPage.missedTrain.screenplay' => 'Trenini kaçırdın ve istasyon görevlisinden yardım iste — nereye gideceğini söyle, bir sonraki treni bul ve perona yön tarifi al.',
+			'rolePlayPage.missedTrain.chat.briefing' => 'Merhaba! Bugün istasyonda trenini kaçırdığında ne söyleyeceğini pratik edeceğiz. Önce birkaç ifade öğreteceğim, sonra canlandıracağız. Hazır mısın?',
+			'rolePlayPage.missedTrain.chat.incoming1' => 'Merhaba, nereye gitmeye çalışıyorsunuz?',
+			'rolePlayPage.missedTrain.chat.outgoing1' => 'Manchester\'a gitmem gerekiyor. Sanırım 10:15 trenimi kaçırdım.',
+			'rolePlayPage.missedTrain.chat.incoming2Highlight' => 'Sorun değil',
+			'rolePlayPage.missedTrain.chat.incoming2Rest' => '. Bir sonraki uygun treni kontrol edeyim.',
+			'rolePlayPage.missedTrain.chat.botReply' => 'En hızlı seçeneği mi yoksa en ucuz olanı mı tercih edersiniz?',
+			'rolePlayPage.flightAttendant.title' => 'Uçuş Hostesiyle Konuşma',
+			'rolePlayPage.flightAttendant.screenplay' => 'Uçakta yolcusun. Koltuğunu bul, bagajınla ilgili yardım al, yemek ve içecek seç, uçuş sırasında ihtiyaçlarını dile getir.',
+			'rolePlayPage.flightAttendant.chat.briefing' => 'Merhaba! Bugün uçakta bir hostesle konuşmayı pratik edeceğiz — koltuk, bagaj, yemek. Önce açıklayacağım, sonra canlandıracağız. Nasıl, iyi mi?',
+			'rolePlayPage.flightAttendant.chat.incoming1' => 'Merhaba! Biniş kartınızı görebilir miyim, lütfen?',
+			'rolePlayPage.flightAttendant.chat.outgoing1' => 'Tabii, buyurun. 14B koltuğundayım.',
+			'rolePlayPage.flightAttendant.chat.incoming2Highlight' => 'Teşekkürler',
+			'rolePlayPage.flightAttendant.chat.incoming2Rest' => '. Koltuğunuzu bulmanıza yardım ister misiniz?',
+			'rolePlayPage.flightAttendant.chat.botReply' => 'Bir şeyler içmek ister misiniz — su, meyve suyu, kahve veya çay?',
+			'rolePlayPage.trainTicket.title' => 'Tren Bileti Alma',
+			'rolePlayPage.trainTicket.screenplay' => 'Tren istasyonunda gişeye git, nereye gideceğini söyle, kalkış saatini seç, bilet türünü ve koltuğunu belirle, bileti öde.',
+			'rolePlayPage.trainTicket.chat.briefing' => 'Merhaba! Bugün gişeden tren bileti almayı pratik edeceğiz. Önce faydalı ifadeleri öğreteceğim, sonra canlandıracağız. Hazır mısın?',
+			'rolePlayPage.trainTicket.chat.incoming1' => 'Merhaba! Nereye gitmek istersiniz?',
+			'rolePlayPage.trainTicket.chat.outgoing1' => 'Edinburgh\'a gitmek istiyorum, lütfen.',
+			'rolePlayPage.trainTicket.chat.incoming2Highlight' => 'Harika',
+			'rolePlayPage.trainTicket.chat.incoming2Rest' => '. Ne zaman seyahat etmek istersiniz?',
+			'rolePlayPage.trainTicket.chat.botReply' => 'Tek yön mü yoksa gidiş-dönüş mü istersiniz?',
+			'rolePlayPage.restaurantReservation.title' => 'Restoranda Rezervasyon Yapma',
+			'rolePlayPage.restaurantReservation.screenplay' => 'Akşam yemeği için restoranda masa ayırt — tarih, saat, kişi sayısı ve masa tercihini belirle, rezervasyonunu onayla.',
+			'rolePlayPage.restaurantReservation.chat.briefing' => 'Merhaba! Bugün restoranda rezervasyon yapmayı pratik edeceğiz. Önce birkaç ifade öğreteceğim, sonra canlandıracağız. Nasıl, iyi mi?',
+			'rolePlayPage.restaurantReservation.chat.incoming1' => 'Merhaba! Size nasıl yardımcı olabilirim?',
+			'rolePlayPage.restaurantReservation.chat.outgoing1' => 'Merhaba, akşam yemeği için rezervasyon yapmak istiyorum.',
+			'rolePlayPage.restaurantReservation.chat.incoming2Highlight' => 'Tabii ki',
+			'rolePlayPage.restaurantReservation.chat.incoming2Rest' => '. Hangi gün gelmek istersiniz?',
+			'rolePlayPage.restaurantReservation.chat.botReply' => 'Kaç kişi olacaksınız?',
+			'rolePlayPage.doctorAppointment.title' => 'Doktor Randevusu Alma',
+			'rolePlayPage.doctorAppointment.screenplay' => 'Bir kliniği arayarak doktor randevusu al — ziyaret nedenini açıkla, uygun gün ve saati seç, bilgilerini onayla.',
+			'rolePlayPage.doctorAppointment.chat.briefing' => 'Merhaba! Bugün telefonla doktor randevusu almayı pratik edeceğiz. Önce anahtar ifadeleri öğreteceğim, sonra canlandıracağız. Hazır mısın?',
+			'rolePlayPage.doctorAppointment.chat.incoming1' => 'Merhaba! Bugün size nasıl yardımcı olabilirim?',
+			'rolePlayPage.doctorAppointment.chat.outgoing1' => 'Merhaba, bir doktor randevusu almak istiyorum.',
+			'rolePlayPage.doctorAppointment.chat.incoming2Highlight' => 'Tabii',
+			'rolePlayPage.doctorAppointment.chat.incoming2Rest' => '. Daha önce kliniğimize gelmiş miydiniz?',
+			'rolePlayPage.doctorAppointment.chat.botReply' => 'Doktora ne için gelmek istiyorsunuz?',
+			'rolePlayPage.shoppingClothes.title' => 'Kıyafet Alışverişi',
+			'rolePlayPage.shoppingClothes.screenplay' => 'Bir mağazada ne aradığını söyle, ürünleri dene, beden ve renk seçeneklerini karşılaştır, alıp almama kararını ver.',
+			'rolePlayPage.shoppingClothes.chat.briefing' => 'Merhaba! Bugün bir mağazada kıyafet alışverişini pratik edeceğiz. Önce faydalı ifadeleri öğreteceğim, sonra canlandıracağız. Nasıl, iyi mi?',
+			'rolePlayPage.shoppingClothes.chat.incoming1' => 'Merhaba! Bir şey bulmanıza yardım edebilir miyim?',
+			'rolePlayPage.shoppingClothes.chat.outgoing1' => 'Evet, günlük giyim için rahat bir gömlek arıyorum.',
+			'rolePlayPage.shoppingClothes.chat.incoming2Highlight' => 'Tabii',
+			'rolePlayPage.shoppingClothes.chat.incoming2Rest' => '. Genelde hangi bedeni giyiyorsunuz?',
+			'rolePlayPage.shoppingClothes.chat.botReply' => 'Gündelik mi yoksa daha resmi bir şey mi tercih edersiniz?',
+			'rolePlayPage.takingTaxi.title' => 'Taksiye Binme',
+			'rolePlayPage.takingTaxi.screenplay' => 'Yeni bir şehirde taksiye bin, gideceğin yeri söyle, rota hakkında konuş, yolculuk sonunda ödeme yap.',
+			'rolePlayPage.takingTaxi.chat.briefing' => 'Merhaba! Bugün taksiye binmeyi pratik edeceğiz — varış noktası, şoförle sohbet ve ödeme. Önce öğreteceğim, sonra canlandıracağız. Hazır mısın?',
+			'rolePlayPage.takingTaxi.chat.incoming1' => 'Merhaba! Nereye gitmek istersiniz?',
+			'rolePlayPage.takingTaxi.chat.outgoing1' => 'Park Caddesi\'ndeki Grand Hotel, lütfen.',
+			'rolePlayPage.takingTaxi.chat.incoming2Highlight' => 'Anladım',
+			'rolePlayPage.takingTaxi.chat.incoming2Rest' => '. Tam adresiniz var mı?',
+			'rolePlayPage.takingTaxi.chat.botReply' => 'En hızlı rotayı mı tercih edersiniz?',
+			'rolePlayPage.rentingApartment.title' => 'Daire Kiralama',
+			'rolePlayPage.rentingApartment.screenplay' => 'Ev sahibiyle kiralık daire hakkında konuş — kira, faturalar, depozito, evcil hayvan, otopark sor ve görüşme ayarla.',
+			'rolePlayPage.rentingApartment.chat.briefing' => 'Merhaba! Bugün ev sahibiyle daire kiralama hakkında konuşmayı pratik edeceğiz. Önce anahtar ifadeleri öğreteceğim, sonra canlandıracağız. Nasıl, iyi mi?',
+			'rolePlayPage.rentingApartment.chat.incoming1' => 'Merhaba! Daireyi kiralamakla ilgileniyor musunuz?',
+			'rolePlayPage.rentingApartment.chat.outgoing1' => 'Evet, hakkında daha fazla bilgi almak istiyorum.',
+			'rolePlayPage.rentingApartment.chat.incoming2Highlight' => 'Harika',
+			'rolePlayPage.rentingApartment.chat.incoming2Rest' => '. Ne zaman taşınmayı düşünüyorsunuz?',
+			'rolePlayPage.rentingApartment.chat.botReply' => 'Eşyalı mı yoksa eşyasız bir daire mi arıyorsunuz?',
+			'rolePlayPage.birthdayParty.title' => 'Doğum Günü Partisi Planlama',
+			'rolePlayPage.birthdayParty.screenplay' => 'Bir arkadaşınla doğum günü partisi planla — mekan, tarih, davetli listesi, yemek, pasta, müzik ve aktiviteleri birlikte belirle.',
+			'rolePlayPage.birthdayParty.chat.briefing' => 'Merhaba! Bugün bir arkadaşınla doğum günü partisi planlamayı pratik edeceğiz. Önce faydalı ifadeleri öğreteceğim, sonra canlandıracağız. Hazır mısın?',
+			'rolePlayPage.birthdayParty.chat.incoming1' => 'Peki, kimin doğum gününü planlıyoruz?',
+			'rolePlayPage.birthdayParty.chat.outgoing1' => 'Arkadaşım Emma için — doğum günü gelecek ay.',
+			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Güzel',
+			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! Partiyi ne zaman yapalım?',
+			'rolePlayPage.birthdayParty.chat.botReply' => 'Evde mi yoksa restoranda mı yapmayı tercih edersin?',
 			'pushNotifications.title' => 'Lingola',
 			'pushNotifications.h2.0' => 'Kısa bir ara verdin galiba.',
 			'pushNotifications.h2.1' => 'Bir kelime kadar vaktin var mı?',
@@ -2170,6 +2731,13 @@ extension on TranslationsTr {
 			'profilePage.dayStreak' => 'Gün Serisi!',
 			'profilePage.accountSettings' => 'Hesap Ayarları',
 			'profilePage.general' => 'Genel',
+			'profilePage.settingsShare' => 'Paylaş',
+			'profilePage.settingsSupport' => 'Destek',
+			'profilePage.settingsAbout' => 'Hakkında',
+			'profilePage.settingsAccount' => 'Hesap',
+			'profilePage.followInstagram' => 'Instagram\'da Takip Et',
+			'profilePage.followTikTok' => 'TikTok\'ta Takip Et',
+			'profilePage.settings' => 'Ayarlar',
 			'profilePage.profileSettings' => 'Profil Ayarları',
 			'profilePage.fullName' => 'Tam İsim',
 			'profilePage.email' => 'E-posta',
@@ -2219,6 +2787,31 @@ extension on TranslationsTr {
 			'profilePage.done' => 'TAMAM',
 			'profilePage.notifications' => 'Bildirimler',
 			'profilePage.appLanguage' => 'Uygulama Dili',
+			'profilePage.explanationLanguage' => 'Açıklama Dili',
+			'profilePage.explanationNative' => 'Anadil',
+			'profilePage.explanationEnglish' => 'İngilizce',
+			'profilePage.explanationUpdateFailed' => 'Açıklama dili güncellenemedi',
+			'profilePage.learnInNativeLanguage' => 'Ana Dilinde Öğren',
+			'profilePage.targetLanguageLabel' => 'Hedef Dil',
+			'profilePage.languageLevel' => 'Dil Seviyesi',
+			'profilePage.nativeLanguage' => 'Ana Dilim',
+			'profilePage.interests' => 'İlgi Alanları',
+			'profilePage.goalChipCareer' => 'Kariyer',
+			'profilePage.goalChipTravel' => 'Seyahat',
+			'profilePage.goalChipLiving' => 'Yaşam',
+			'profilePage.goalChipStudying' => 'Eğitim',
+			'profilePage.goalChipOther' => 'Diğer',
+			'profilePage.dailyGoal' => 'Günlük Hedef',
+			'profilePage.dailyGoalValueLight' => 'Günlük 5-10 dk',
+			'profilePage.dailyGoalValueRecommended' => 'Günlük 15-20 dk',
+			'profilePage.dailyGoalValueFast' => 'Günlük 30+ dk',
+			'profilePage.dailyReminder' => 'Günlük Hatırlatma',
+			'profilePage.selectNativeLanguageTitle' => 'Ana dilini seç',
+			'profilePage.reminderOn' => 'Açık',
+			'profilePage.reminderOff' => 'Kapalı',
+			'profilePage.remindMe' => 'Beni Hatırlat',
+			'profilePage.reminderSave' => 'Kaydet',
+			'profilePage.reminderSaved' => 'Hatırlatma kaydedildi',
 			'profilePage.selectLanguageTitle' => 'Dil Seç',
 			'profilePage.premium' => 'Premium',
 			'profilePage.passive' => 'Pasif',
@@ -2280,6 +2873,12 @@ extension on TranslationsTr {
 			'profilePage.certificateTitle' => 'Sertifikanız',
 			'profilePage.certificateLevelTitle' => ({required Object level}) => '${level} Sertifikası',
 			'profilePage.certificateOf' => 'Başarı Sertifikası',
+			'profilePage.certificatePresentedTo' => 'This certificate is proudly presented to',
+			'profilePage.certificateAchievementBody' => ({required Object level}) => 'This achievement recognizes the successful completion of all ${level}-level lessons and learning activities, demonstrating a strong foundation in essential English communication skills.',
+			'profilePage.certificateLevelCompleted' => ({required Object levelName}) => 'Level Completed: ${levelName}',
+			'profilePage.certificateDateCompleted' => ({required Object date}) => 'Date of Completion: ${date}',
+			'profilePage.certificateIdDisplay' => ({required Object id}) => 'Certificate ID: ${id}',
+			'profilePage.certificateBrandTagline' => 'Learn. Speak. Connect.',
 			'profilePage.certificateCertifiesThat' => 'Bu belge, aşağıda adı geçen kişinin',
 			'profilePage.certificatePathway' => 'Lingola İngilizce Yolu',
 			'profilePage.certificateAwardedTo' => 'Verilen kişi',
@@ -2294,6 +2893,13 @@ extension on TranslationsTr {
 			'profilePage.certificateScanOrVisit' => 'QR kodu tarayın veya bağlantıyı ziyaret ederek doğrulayın.',
 			'profilePage.certificateVerifyHint' => 'QR kodu tarayan herkes başarınızı doğrulayabilir.',
 			'profilePage.certificateShare' => 'Sertifikayı Paylaş',
+			'profilePage.certificateDownload' => 'İndir',
+			'profilePage.certificateDownloadSaved' => 'Sertifika galeriye kaydedildi',
+			'profilePage.certificateDownloadFailed' => 'Sertifika kaydedilemedi. Lütfen tekrar deneyin.',
+			'profilePage.certificateCreateQr' => 'QR Oluştur',
+			'profilePage.certificateNotAvailableTitle' => 'Sertifika kilitli',
+			'profilePage.certificateNotAvailable' => ({required Object level}) => 'Henüz ${level} derslerinizi tamamlamadığınız için bu belgeyi kullanamazsınız.',
+			'profilePage.certificateNotAvailableOk' => 'Anladım',
 			'profilePage.certificateShareQr' => 'QR Kodunu Paylaş',
 			'profilePage.certificateShareBody' => ({required Object level}) => 'Lingola ${level} sertifikamı kazandım!',
 			'profilePage.certificateShareSubject' => ({required Object level}) => 'Lingola ${level} Sertifikası',

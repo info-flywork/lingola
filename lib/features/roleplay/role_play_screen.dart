@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
 import 'role_play_api_service.dart';
+import 'create_roleplay_screen.dart';
 import 'role_play_chat_screen.dart';
 
 class RolePlayScreen extends StatefulWidget {
@@ -18,7 +19,7 @@ class RolePlayScreen extends StatefulWidget {
 }
 
 class _RolePlayScreenState extends State<RolePlayScreen> {
-  List<_RolePlayScenario>? _remoteScenarios;
+  List<RolePlayScenarioDto>? _remoteDtos;
 
   @override
   void initState() {
@@ -29,57 +30,175 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
   Future<void> _loadScenarios() async {
     try {
       final remote = await RolePlayApiService.fetchScenarios();
-      if (!mounted || remote.isEmpty) return;
-      final text = AppText.current;
-      final mapped = remote
-          .map((dto) => _mapScenario(dto, text))
-          .whereType<_RolePlayScenario>()
-          .toList();
-      if (mapped.isEmpty) return;
-      setState(() => _remoteScenarios = mapped);
+      if (!mounted) return;
+      setState(() => _remoteDtos = remote);
     } catch (_) {
-      // Yerel katalog korunur.
+      // Yerel katalog korunur; ilerleme/özel senaryolar yüklenemez.
     }
   }
 
   List<_RolePlayScenario> _scenariosFor(dynamic text) {
-    return _remoteScenarios ?? _fallbackScenarios(text);
+    final base = _fallbackScenarios(text);
+    final remote = _remoteDtos;
+    if (remote == null || remote.isEmpty) return base;
+
+    final remoteById = {
+      for (final dto in remote.where((d) => !d.isCustom)) dto.id: dto,
+    };
+
+    final custom = remote
+        .where((dto) => dto.isCustom)
+        .map((dto) => _mapScenario(dto, text))
+        .whereType<_RolePlayScenario>()
+        .toList();
+
+    final localIds = base.map((s) => s.id).toSet();
+    final mergedStatic = base.map((scenario) {
+      final dto = remoteById[scenario.id];
+      if (dto == null) return scenario;
+      final progress = dto.progressPercent > 0.001
+          ? dto.progressPercent.clamp(0.0, 1.0)
+          : scenario.progress;
+      return _RolePlayScenario(
+        id: scenario.id,
+        title: scenario.title,
+        image: scenario.image,
+        progress: progress,
+        sessionId: dto.sessionId ?? scenario.sessionId,
+        minutes: scenario.minutes,
+        level: scenario.level,
+        screenplay: scenario.screenplay,
+        section: scenario.section,
+      );
+    }).toList();
+
+    // Backend uygulamadan önde ise (deploy sonrası) ek statik senaryolar.
+    final extraStatic = remote
+        .where((dto) => !dto.isCustom && !localIds.contains(dto.id))
+        .map((dto) => _mapScenario(dto, text))
+        .whereType<_RolePlayScenario>()
+        .toList();
+
+    return [...custom, ...mergedStatic, ...extraStatic];
   }
 
   static List<_RolePlayScenario> _fallbackScenarios(dynamic text) {
-    return [
-      _RolePlayScenario(
-        id: 'coffee',
-        title: text.rolePlayPage.coffee.title,
-        image: AppAssets.rolePlayCoffee,
-        progress: 0.6,
-        minutes: 8,
-        level: text.rolePlayPage.beginner,
-        screenplay: text.rolePlayPage.coffee.screenplay,
-      ),
-      _RolePlayScenario(
-        id: 'directions',
-        title: text.rolePlayPage.directions.title,
-        image: AppAssets.rolePlayDirections,
-        minutes: 8,
-        level: text.rolePlayPage.beginner,
-        screenplay: text.rolePlayPage.directions.screenplay,
-        section: text.rolePlayPage.dailyInteractions,
-      ),
-      _RolePlayScenario(
-        id: 'interview',
-        title: text.rolePlayPage.interview.title,
-        image: AppAssets.rolePlayInterview,
-        minutes: 8,
-        level: text.rolePlayPage.beginner,
-        screenplay: text.rolePlayPage.interview.screenplay,
-        section: text.rolePlayPage.business,
-      ),
-    ];
+    final page = text.rolePlayPage;
+    return _staticCatalog
+        .map((item) {
+          final title = _titleFor(page, item.id);
+          final screenplay = _screenplayFor(page, item.id);
+          if (title == null || screenplay == null) return null;
+          return _RolePlayScenario(
+            id: item.id,
+            title: title,
+            image: _imageFor(item.id),
+            progress: item.id == 'coffee' ? 0.6 : null,
+            minutes: item.minutes,
+            level: _levelFor(page, item.levelKey),
+            screenplay: screenplay,
+            section: item.sectionKey != null
+                ? _sectionFor(page, item.sectionKey)
+                : null,
+          );
+        })
+        .whereType<_RolePlayScenario>()
+        .toList();
   }
+
+  static const _staticCatalog = [
+    _StaticScenarioMeta(id: 'coffee', minutes: 8, levelKey: 'beginner'),
+    _StaticScenarioMeta(
+      id: 'directions',
+      minutes: 8,
+      levelKey: 'beginner',
+      sectionKey: 'dailyInteractions',
+    ),
+    _StaticScenarioMeta(
+      id: 'missedTrain',
+      minutes: 5,
+      levelKey: 'beginner',
+      sectionKey: 'dailyInteractions',
+    ),
+    _StaticScenarioMeta(
+      id: 'flightAttendant',
+      minutes: 6,
+      levelKey: 'beginner',
+      sectionKey: 'dailyInteractions',
+    ),
+    _StaticScenarioMeta(
+      id: 'trainTicket',
+      minutes: 6,
+      levelKey: 'beginner',
+      sectionKey: 'dailyInteractions',
+    ),
+    _StaticScenarioMeta(
+      id: 'restaurantReservation',
+      minutes: 6,
+      levelKey: 'beginner',
+      sectionKey: 'dailyInteractions',
+    ),
+    _StaticScenarioMeta(
+      id: 'doctorAppointment',
+      minutes: 6,
+      levelKey: 'beginner',
+      sectionKey: 'dailyInteractions',
+    ),
+    _StaticScenarioMeta(
+      id: 'shoppingClothes',
+      minutes: 6,
+      levelKey: 'beginner',
+      sectionKey: 'dailyInteractions',
+    ),
+    _StaticScenarioMeta(
+      id: 'takingTaxi',
+      minutes: 6,
+      levelKey: 'beginner',
+      sectionKey: 'dailyInteractions',
+    ),
+    _StaticScenarioMeta(
+      id: 'birthdayParty',
+      minutes: 7,
+      levelKey: 'beginnerIntermediate',
+      sectionKey: 'dailyInteractions',
+    ),
+    _StaticScenarioMeta(
+      id: 'rentingApartment',
+      minutes: 7,
+      levelKey: 'intermediate',
+      sectionKey: 'dailyInteractions',
+    ),
+    _StaticScenarioMeta(
+      id: 'interview',
+      minutes: 8,
+      levelKey: 'beginner',
+      sectionKey: 'business',
+    ),
+  ];
 
   static _RolePlayScenario? _mapScenario(RolePlayScenarioDto dto, dynamic text) {
     final page = text.rolePlayPage;
+    if (dto.isCustom) {
+      final title = dto.title?.trim();
+      final screenplay = dto.screenplay?.trim();
+      if (title == null || title.isEmpty || screenplay == null || screenplay.isEmpty) {
+        return null;
+      }
+      return _RolePlayScenario(
+        id: dto.id,
+        title: title,
+        image: dto.imageAsset.isNotEmpty ? dto.imageAsset : AppAssets.rolePlayCoffee,
+        progress: dto.progressPercent > 0.001 ? dto.progressPercent.clamp(0, 1) : null,
+        sessionId: dto.sessionId,
+        minutes: dto.minutes,
+        level: _levelFor(page, dto.levelKey),
+        screenplay: screenplay,
+        section: null,
+        isCustom: true,
+        openingMessage: dto.openingMessage,
+      );
+    }
+
     final title = _titleFor(page, dto.titleKey);
     final screenplay = _screenplayFor(page, dto.titleKey);
     if (title == null || screenplay == null) return null;
@@ -90,7 +209,7 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
       progress: dto.progressPercent > 0.001 ? dto.progressPercent.clamp(0, 1) : null,
       sessionId: dto.sessionId,
       minutes: dto.minutes,
-      level: page.beginner as String,
+      level: _levelFor(page, dto.levelKey),
       screenplay: screenplay,
       section: _sectionFor(page, dto.sectionKey),
     );
@@ -101,6 +220,15 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
       'coffee' => page.coffee.title as String?,
       'directions' => page.directions.title as String?,
       'interview' => page.interview.title as String?,
+      'missedTrain' => page.missedTrain.title as String?,
+      'flightAttendant' => page.flightAttendant.title as String?,
+      'trainTicket' => page.trainTicket.title as String?,
+      'restaurantReservation' => page.restaurantReservation.title as String?,
+      'doctorAppointment' => page.doctorAppointment.title as String?,
+      'shoppingClothes' => page.shoppingClothes.title as String?,
+      'takingTaxi' => page.takingTaxi.title as String?,
+      'rentingApartment' => page.rentingApartment.title as String?,
+      'birthdayParty' => page.birthdayParty.title as String?,
       _ => null,
     };
   }
@@ -110,6 +238,15 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
       'coffee' => page.coffee.screenplay as String?,
       'directions' => page.directions.screenplay as String?,
       'interview' => page.interview.screenplay as String?,
+      'missedTrain' => page.missedTrain.screenplay as String?,
+      'flightAttendant' => page.flightAttendant.screenplay as String?,
+      'trainTicket' => page.trainTicket.screenplay as String?,
+      'restaurantReservation' => page.restaurantReservation.screenplay as String?,
+      'doctorAppointment' => page.doctorAppointment.screenplay as String?,
+      'shoppingClothes' => page.shoppingClothes.screenplay as String?,
+      'takingTaxi' => page.takingTaxi.screenplay as String?,
+      'rentingApartment' => page.rentingApartment.screenplay as String?,
+      'birthdayParty' => page.birthdayParty.screenplay as String?,
       _ => null,
     };
   }
@@ -122,11 +259,28 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
     };
   }
 
+  static String _levelFor(dynamic page, String levelKey) {
+    return switch (levelKey) {
+      'intermediate' => page.intermediate as String,
+      'beginnerIntermediate' => page.beginnerIntermediate as String,
+      _ => page.beginner as String,
+    };
+  }
+
   static String _imageFor(String id) {
     return switch (id) {
       'coffee' => AppAssets.rolePlayCoffee,
       'directions' => AppAssets.rolePlayDirections,
       'interview' => AppAssets.rolePlayInterview,
+      'missedTrain' => AppAssets.rolePlayMissedTrain,
+      'flightAttendant' => AppAssets.rolePlayFlightAttendant,
+      'trainTicket' => AppAssets.rolePlayTrainTicket,
+      'restaurantReservation' => AppAssets.rolePlayRestaurantReservation,
+      'doctorAppointment' => AppAssets.rolePlayDoctorAppointment,
+      'shoppingClothes' => AppAssets.rolePlayShoppingClothes,
+      'takingTaxi' => AppAssets.rolePlayTakingTaxi,
+      'rentingApartment' => AppAssets.rolePlayRentingApartment,
+      'birthdayParty' => AppAssets.rolePlayBirthdayParty,
       _ => AppAssets.rolePlayCoffee,
     };
   }
@@ -134,7 +288,11 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
-    final scenarios = _scenariosFor(text);
+    final allScenarios = _scenariosFor(text);
+    final customScenarios =
+        allScenarios.where((scenario) => scenario.isCustom).toList();
+    final staticScenarios =
+        allScenarios.where((scenario) => !scenario.isCustom).toList();
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -169,7 +327,31 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              for (final scenario in scenarios) ...[
+              _CreateRolePlayCard(
+                onTap: () => _openCreate(context),
+              ),
+              const SizedBox(height: 12),
+              if (customScenarios.isNotEmpty) ...[
+                Text(
+                  text.rolePlayPage.customScenarios,
+                  style: const TextStyle(
+                    color: AppColors.ink,
+                    fontFamily: 'Poppins',
+                    fontSize: 16,
+                    height: 20 / 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                for (final scenario in customScenarios) ...[
+                  _RolePlayCard(
+                    scenario: scenario,
+                    onTap: () => _openDetail(context, scenario),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ],
+              for (final scenario in staticScenarios) ...[
                 if (scenario.section != null) ...[
                   const SizedBox(height: 10),
                   Text(
@@ -197,6 +379,18 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
     );
   }
 
+  Future<void> _openCreate(BuildContext context) async {
+    if (!await PremiumService.requirePremium(context)) return;
+    if (!context.mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => const CreateRolePlayScreen(),
+      ),
+    );
+    if (!mounted) return;
+    await _loadScenarios();
+  }
+
   Future<void> _openDetail(
     BuildContext context,
     _RolePlayScenario scenario,
@@ -211,15 +405,20 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
         scenario: scenario,
         onGetStarted: () async {
           Navigator.of(sheetContext).pop();
+          final english = rolePlayEnglishContent(
+            scenarioId: scenario.id,
+            title: scenario.title,
+            openingMessage: scenario.openingMessage,
+          );
           await Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (_) => RolePlayChatScreen(
-                scenarioId: switch (scenario.id) {
-                  'coffee' => RolePlayScenarioId.coffee,
-                  'interview' => RolePlayScenarioId.interview,
-                  _ => RolePlayScenarioId.directions,
-                },
+                scenarioId: scenario.id,
                 sessionId: scenario.sessionId,
+                titleEn: english.titleEn,
+                openingEn: english.openingEn,
+                lessonBadge: english.badge,
+                isCustom: scenario.isCustom,
               ),
             ),
           );
@@ -242,6 +441,8 @@ class _RolePlayScenario {
     this.progress,
     this.sessionId,
     this.section,
+    this.isCustom = false,
+    this.openingMessage,
   });
 
   final String id;
@@ -253,6 +454,155 @@ class _RolePlayScenario {
   final String level;
   final String screenplay;
   final String? section;
+  final bool isCustom;
+  final String? openingMessage;
+}
+
+class _CreateRolePlayCard extends StatelessWidget {
+  const _CreateRolePlayCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  static const _avatarSize = 44.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = AppText.current.rolePlayPage.createOwnScenario;
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFE8EEFF)),
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 108,
+                height: _avatarSize,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _AvatarBubble(
+                      left: 0,
+                      image: AppAssets.rolePlayCoffee,
+                    ),
+                    _AvatarBubble(
+                      left: 28,
+                      image: AppAssets.rolePlayDirections,
+                    ),
+                    Positioned(
+                      left: 56,
+                      child: CustomPaint(
+                        painter: _DashedCirclePainter(),
+                        child: SizedBox(
+                          width: _avatarSize,
+                          height: _avatarSize,
+                          child: const Center(
+                            child: Icon(
+                              Icons.add,
+                              size: 22,
+                              color: Color(0xFF8A8A8A),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  text,
+                  style: const TextStyle(
+                    color: AppColors.ink,
+                    fontFamily: 'Poppins',
+                    fontSize: 15,
+                    height: 20 / 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.ink,
+                size: 24,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashedCirclePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFBFC6D4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    const dash = 4.0;
+    const gap = 3.0;
+    final radius = size.width / 2 - 1;
+    final center = Offset(size.width / 2, size.height / 2);
+    final circumference = 2 * 3.141592653589793 * radius;
+    final count = (circumference / (dash + gap)).floor();
+    for (var i = 0; i < count; i++) {
+      final start = -3.141592653589793 / 2 + (2 * 3.141592653589793 / count) * i;
+      final sweep = (2 * 3.141592653589793 / count) * (dash / (dash + gap));
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        start,
+        sweep,
+        false,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _AvatarBubble extends StatelessWidget {
+  const _AvatarBubble({
+    required this.left,
+    required this.image,
+  });
+
+  final double left;
+  final String image;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: left,
+      child: Container(
+        width: _CreateRolePlayCard._avatarSize,
+        height: _CreateRolePlayCard._avatarSize,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+        ),
+        child: ClipOval(
+          child: HomeAsset(
+            image,
+            width: _CreateRolePlayCard._avatarSize,
+            height: _CreateRolePlayCard._avatarSize,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _RolePlayCard extends StatelessWidget {
@@ -553,4 +903,18 @@ class _RolePlayDetailSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+class _StaticScenarioMeta {
+  const _StaticScenarioMeta({
+    required this.id,
+    required this.minutes,
+    required this.levelKey,
+    this.sectionKey,
+  });
+
+  final String id;
+  final int minutes;
+  final String levelKey;
+  final String? sectionKey;
 }

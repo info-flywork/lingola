@@ -7,6 +7,8 @@ class AppUser {
     required this.authProvider,
     required this.isGuest,
     required this.notificationsEnabled,
+    this.dailyReminderHour = 15,
+    this.dailyReminderMinute = 0,
     required this.appLocale,
     required this.subscriptionStatus,
     this.deletionRequestedAt,
@@ -21,6 +23,8 @@ class AppUser {
   final String authProvider;
   final bool isGuest;
   final bool notificationsEnabled;
+  final int dailyReminderHour;
+  final int dailyReminderMinute;
   final String appLocale;
   final String subscriptionStatus;
   final DateTime? deletionRequestedAt;
@@ -40,6 +44,8 @@ class AppUser {
       authProvider: json['authProvider'] as String? ?? 'guest',
       isGuest: json['isGuest'] as bool? ?? true,
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+      dailyReminderHour: _parseReminderHour(json['dailyReminderHour']),
+      dailyReminderMinute: _parseReminderMinute(json['dailyReminderMinute']),
       appLocale: json['appLocale'] as String? ?? 'en',
       subscriptionStatus: json['subscriptionStatus'] as String? ?? 'free',
       deletionRequestedAt: _parseDate(json['deletionRequestedAt']),
@@ -55,10 +61,25 @@ class AppUser {
     return null;
   }
 
+  static int _parseReminderHour(dynamic raw) {
+    final n = raw is num ? raw.toInt() : int.tryParse('$raw');
+    if (n == null) return 15;
+    return n.clamp(0, 23);
+  }
+
+  static int _parseReminderMinute(dynamic raw) {
+    final n = raw is num ? raw.toInt() : int.tryParse('$raw');
+    if (n == null) return 0;
+    final clamped = n.clamp(0, 59);
+    return clamped - (clamped % 15);
+  }
+
   AppUser copyWith({
     String? displayName,
     String? avatarUrl,
     bool? notificationsEnabled,
+    int? dailyReminderHour,
+    int? dailyReminderMinute,
     String? appLocale,
     String? subscriptionStatus,
     DateTime? deletionRequestedAt,
@@ -73,6 +94,8 @@ class AppUser {
       authProvider: authProvider,
       isGuest: isGuest,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      dailyReminderHour: dailyReminderHour ?? this.dailyReminderHour,
+      dailyReminderMinute: dailyReminderMinute ?? this.dailyReminderMinute,
       appLocale: appLocale ?? this.appLocale,
       subscriptionStatus: subscriptionStatus ?? this.subscriptionStatus,
       deletionRequestedAt:
@@ -92,6 +115,7 @@ class UserOnboarding {
     this.goal,
     this.level,
     this.pace,
+    this.explanationLanguage = 'native',
   });
 
   final String nativeLanguageCode;
@@ -99,6 +123,9 @@ class UserOnboarding {
   final String? goal;
   final String? level;
   final String? pace;
+  final String explanationLanguage;
+
+  bool get explainInNativeLanguage => explanationLanguage != 'english';
 
   factory UserOnboarding.fromJson(Map<String, dynamic> json) {
     return UserOnboarding(
@@ -107,6 +134,23 @@ class UserOnboarding {
       goal: json['goal'] as String?,
       level: json['level'] as String?,
       pace: json['pace'] as String?,
+      explanationLanguage:
+          json['explanationLanguage'] as String? ?? 'native',
+    );
+  }
+
+  UserOnboarding copyWith({
+    String? nativeLanguageCode,
+    String? targetLanguageCode,
+    String? explanationLanguage,
+  }) {
+    return UserOnboarding(
+      nativeLanguageCode: nativeLanguageCode ?? this.nativeLanguageCode,
+      targetLanguageCode: targetLanguageCode ?? this.targetLanguageCode,
+      goal: goal,
+      level: level,
+      pace: pace,
+      explanationLanguage: explanationLanguage ?? this.explanationLanguage,
     );
   }
 }

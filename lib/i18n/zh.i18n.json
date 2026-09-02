@@ -88,13 +88,22 @@
     "goalStudying": "留学",
     "goalOther": "其他",
     "levelTitle": "你目前的语言水平是什么？",
-    "levelBeginner": "初学者 — 我知道一些单词",
-    "levelIntermediate": "中级 — 我能进行简单对话",
-    "levelAdvanced": "高级 — 我会说但想要提高",
     "paceTitle": "你想多快提高？",
-    "paceLight": "每天5-10分钟（轻松）",
-    "paceRecommended": "每天15-20分钟（推荐）",
-    "paceFast": "每天30分钟以上（快速见效）"
+    "explanationTitle": "当你用自己的语言提问时，我们应该如何解释？",
+    "explanationHint": "你可以随时在个人资料设置中更改。",
+    "explanationNative": "用我的母语解释",
+    "explanationEnglish": "用英语解释",
+    "levelA1": "A1 — 我知道一些单词",
+    "levelA2": "A2 — 我能使用简单短语",
+    "levelB1": "B1 — 我能进行日常对话",
+    "levelB2": "B2 — 我能在熟悉话题上流利交流",
+    "levelC1": "C1 — 高级，我想继续提升",
+    "levelC2": "C2 — 接近母语水平",
+    "paceMin5": "每天5分钟",
+    "paceMin10": "每天10分钟",
+    "paceMin15": "每天15分钟",
+    "paceMin30": "每天30分钟",
+    "paceMin60": "每天60分钟"
   },
   "accountCreating": {
     "title": "正在创建您的个人账户",
@@ -103,14 +112,72 @@
     "stepLessons": "课程正在优化中",
     "stepPlan": "您的计划正在最终确定",
     "optimization": "优化中",
-    "progress": "$value%"
+    "progress": "$value%",
+    "titleLine1": "Building your",
+    "titleLine2": "Account",
+    "testimonialQuote": "Week one I could barely say hello. Week three I was having full conversations with my AI tutor. I'm not stopping now.",
+    "testimonialAuthor": "Maria, 29 — 3 months in",
+    "comparisonPitch": "Learn 600+ extra phrases about 30× faster with Lingola than studying entirely on your own.",
+    "comparisonAloneCount": "400",
+    "comparisonLingolaCount": "1000",
+    "comparisonUnit": "PHRASES",
+    "comparisonAloneLabel": "On your own",
+    "comparisonLingolaLabel": "Lingola",
+    "fluencyPitch": "From today to fluency — your next level is only 30 days away",
+    "chartToday": "Today",
+    "chartMid": "15 Sep",
+    "chartEnd": "30 Sep"
+  },
+  "planReady": {
+    "titleLine1": "Your plan is",
+    "titleLine2": "Ready!",
+    "statBanner": "95% of users see results within the first 7 days",
+    "planTitle": "$name'S PLAN",
+    "defaultName": "YOUR",
+    "fieldCourse": "COURSE",
+    "fieldLevel": "YOUR LEVEL",
+    "fieldFocus": "FOCUS AREA",
+    "fieldDuration": "DURATION",
+    "fieldInterests": "INTERESTS",
+    "startPlan": "Start my plan →",
+    "courseEnglish": "English",
+    "courseGerman": "German",
+    "courseFrench": "French",
+    "courseItalian": "Italian",
+    "courseSpanish": "Spanish",
+    "courseJapanese": "Japanese",
+    "courseRussian": "Russian",
+    "courseTurkish": "Turkish",
+    "goalCareer": "Career & business",
+    "goalTravel": "Travel",
+    "goalLiving": "Living abroad",
+    "goalStudying": "Studying abroad",
+    "goalOther": "Other",
+    "levelA1": "A1",
+    "levelA2": "A2",
+    "levelB1": "B1",
+    "levelB2": "B2",
+    "levelC1": "C1",
+    "levelC2": "C2",
+    "paceMin5": "每天5分钟",
+    "paceMin10": "每天10分钟",
+    "paceMin15": "每天15分钟",
+    "paceMin30": "每天30分钟",
+    "paceMin60": "每天60分钟"
+  },
+  "demoChat": {
+    "brand": "Lingola",
+    "lessonBadge": "Getting to know you",
+    "speed": "1x",
+    "typeMessage": "Type a message...",
+    "incoming1": "Hi! I'm your AI tutor. Before we start — if you'd rather not continue in English, or if you don't understand something, just tell me and I'll switch to your language. Hope you're doing well! Let's learn a bit about you — are you working right now, or are you a student?"
   },
   "previewChat": {
     "brand": "Lingola",
     "lessonBadge": "课程 1：问候",
     "speed": "1x",
     "typeMessage": "输入消息...",
-    "incoming1": "嗨！欢迎来到 Lingola — 我是你的 AI 导师。准备好用英语打个招呼吗？",
+    "incoming1": "嗨！欢迎来到 Lingola — 我是你的 AI 导师。无论你的水平如何，在这里都可以安心学英语。英语里打招呼可以说 'Hi' 或 'Hello' — 试试看，用英语给我发 'Hi!'！",
     "outgoing1": "嗨！我准备好练习了。",
     "incoming2Highlight": "早上好",
     "incoming2Rest": "，Emrah！我很高兴你准备好了。早上的咖啡总是建立联系的好开始。你想聊些什么？",
@@ -141,6 +208,9 @@
     "continueGoogle": "继续使用Google",
     "continueApple": "继续使用Apple",
     "continueGuest": "作为访客继续",
+    "or": "或",
+    "alreadyHaveAccount": "已有账户？",
+    "signIn": "登录",
     "legal": "通过注册Lingola，您同意我们的服务条款。了解我们如何处理您的数据，请查看我们的隐私政策和Cookies政策",
     "terms": "服务条款",
     "privacy": "隐私政策",
@@ -272,6 +342,7 @@
   "tutorPage": {
     "title": "导师",
     "chatWithLingola": "与Lingola聊天",
+    "startChat": "Chat",
     "chatWithTutor": "与$name聊天",
     "chatHistory": "聊天记录",
     "history": "历史",
@@ -347,7 +418,8 @@
       "close": "结束通话",
       "toggleCaptions": "切换字幕",
       "toggleHints": "切换提示",
-      "toggleMic": "切换麦克风"
+      "toggleMic": "切换麦克风",
+      "tapToSpeakHint": "点击开始说话，再次点击结束"
     }
   },
   "lessonPage": {
@@ -679,6 +751,132 @@
         "incoming2Rest": "。告诉我一个你引以为豪的最近项目。",
         "botReply": "那真令人印象深刻。你对这个职位有什么问题吗？"
       }
+    },
+    "customScenarios": "Your scenarios",
+    "createOwnScenario": "Create your\nown scenario!",
+    "createOwnScenarioTitle": "Create your scenario",
+    "creatingScenario": "Creating your role play",
+    "creatingScenarioSubtitle": "Lingola is writing your scene and illustration...",
+    "createFailed": "Could not create scenario. Please try again.",
+    "createFieldScenario": "Scenario",
+    "createFieldScenarioHint": "e.g. business meeting",
+    "createFieldTutorRole": "Tutor role",
+    "createFieldTutorRoleHint": "e.g. interviewer",
+    "createFieldYourRole": "Your role",
+    "createFieldYourRoleHint": "e.g. candidate",
+    "createFieldExtraInfo": "Extra details (optional)",
+    "createFieldExtraInfoHint": "e.g. senior software developer interview at a tech company",
+    "createOwnScenarioContinue": "Continue",
+    "createFieldsRequired": "Please fill in scenario and both roles.",
+    "intermediate": "Intermediate",
+    "beginnerIntermediate": "Beginner–Intermediate",
+    "missedTrain": {
+      "title": "You Missed Your Train",
+      "screenplay": "You missed your train and ask a station staff member for help — explain where you're going, find the next train, and get directions to the platform.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice what to say when you miss your train at a station. I'll teach a few phrases first, then we'll role-play. Ready?",
+        "incoming1": "Hello, where are you trying to go?",
+        "outgoing1": "I need to get to Manchester. I think I missed my 10:15 train.",
+        "incoming2Highlight": "No problem",
+        "incoming2Rest": ". Let me check the next available train for you.",
+        "botReply": "Would you prefer the fastest option or the cheapest one?"
+      }
+    },
+    "flightAttendant": {
+      "title": "Talking to a Flight Attendant",
+      "screenplay": "You're a passenger on a flight. Find your seat, get help with luggage, choose food and drinks, and ask for anything you need during the flight.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice talking to a flight attendant on a plane — seats, luggage, meals. I'll explain first, then we'll act it out. Sound good?",
+        "incoming1": "Hello! May I see your boarding pass, please?",
+        "outgoing1": "Sure, here you go. I'm in seat 14B.",
+        "incoming2Highlight": "Thank you",
+        "incoming2Rest": ". Would you like some help finding your seat?",
+        "botReply": "Would you like something to drink — water, juice, coffee, or tea?"
+      }
+    },
+    "trainTicket": {
+      "title": "Buying a Train Ticket",
+      "screenplay": "At a train station, tell the clerk where you're going, pick a departure time, choose ticket type and seat, and pay for your ticket.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice buying a train ticket at the counter. I'll teach useful phrases first, then we'll role-play. Ready?",
+        "incoming1": "Hello! Where would you like to go?",
+        "outgoing1": "I'd like to go to Edinburgh, please.",
+        "incoming2Highlight": "Great",
+        "incoming2Rest": ". When would you like to travel?",
+        "botReply": "Would you like a one-way or return ticket?"
+      }
+    },
+    "restaurantReservation": {
+      "title": "Making a Restaurant Reservation",
+      "screenplay": "Call or visit a restaurant to book a table — choose the date, time, number of guests, seating preference, and confirm your reservation.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice making a restaurant reservation. I'll explain a few phrases first, then we'll act it out. Sound good?",
+        "incoming1": "Hello! How can I help you?",
+        "outgoing1": "Hi, I'd like to make a reservation for dinner, please.",
+        "incoming2Highlight": "Of course",
+        "incoming2Rest": ". What day would you like to come?",
+        "botReply": "How many people will be joining you?"
+      }
+    },
+    "doctorAppointment": {
+      "title": "Making a Doctor's Appointment",
+      "screenplay": "Call a clinic to book a doctor's appointment — explain why you need to visit, choose a day and time, and confirm your details.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice making a doctor's appointment by phone. I'll teach key phrases first, then we'll role-play. Ready?",
+        "incoming1": "Hello! How can I help you today?",
+        "outgoing1": "Hi, I'd like to book an appointment with a doctor, please.",
+        "incoming2Highlight": "Sure",
+        "incoming2Rest": ". Have you visited our clinic before?",
+        "botReply": "What would you like to see the doctor about?"
+      }
+    },
+    "shoppingClothes": {
+      "title": "Shopping for Clothes",
+      "screenplay": "In a clothing store, tell the assistant what you're looking for, try items on, compare sizes and colors, and decide whether to buy.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice shopping for clothes in a store. I'll explain useful phrases first, then we'll role-play. Sound good?",
+        "incoming1": "Hello! Can I help you find something?",
+        "outgoing1": "Yes, I'm looking for a casual shirt for everyday wear.",
+        "incoming2Highlight": "Sure",
+        "incoming2Rest": ". What size do you usually wear?",
+        "botReply": "Would you prefer something casual or more formal?"
+      }
+    },
+    "takingTaxi": {
+      "title": "Taking a Taxi",
+      "screenplay": "Get in a taxi in a new city, tell the driver where you're going, talk about the route, and pay at the end of the ride.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice taking a taxi — giving your destination, chatting with the driver, and paying. I'll teach first, then we'll act it out. Ready?",
+        "incoming1": "Hello! Where would you like to go?",
+        "outgoing1": "The Grand Hotel on Park Street, please.",
+        "incoming2Highlight": "Got it",
+        "incoming2Rest": ". Do you have the exact address?",
+        "botReply": "Would you prefer the fastest route?"
+      }
+    },
+    "rentingApartment": {
+      "title": "Renting an Apartment",
+      "screenplay": "Talk to a landlord about a rental apartment — ask about rent, bills, deposit, pets, parking, and arrange a viewing.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice talking to a landlord about renting an apartment. I'll explain key phrases first, then we'll role-play. Sound good?",
+        "incoming1": "Hello! Are you interested in renting the apartment?",
+        "outgoing1": "Yes, I'd like to know more about it, please.",
+        "incoming2Highlight": "Great",
+        "incoming2Rest": ". When are you looking to move in?",
+        "botReply": "Do you need a furnished or unfurnished apartment?"
+      }
+    },
+    "birthdayParty": {
+      "title": "Planning a Birthday Party",
+      "screenplay": "Plan a birthday party with a friend — pick the venue, date, guest list, food, cake, music, and activities together.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice planning a birthday party with a friend. I'll teach useful phrases first, then we'll role-play. Ready?",
+        "incoming1": "So, whose birthday are we planning?",
+        "outgoing1": "It's for my friend Emma — her birthday is next month.",
+        "incoming2Highlight": "Nice",
+        "incoming2Rest": "! When should we have the party?",
+        "botReply": "Would you rather have the party at home or at a restaurant?"
+      }
     }
   },
   "notificationsPage": {
@@ -765,6 +963,28 @@
     "done": "完成",
     "notifications": "通知",
     "appLanguage": "应用语言",
+    "explanationLanguage": "解释语言",
+    "explanationNative": "母语",
+    "explanationEnglish": "英语",
+    "explanationUpdateFailed": "无法更新解释语言",
+    "learnInNativeLanguage": "Learn in your native language",
+    "targetLanguageLabel": "Target language",
+    "languageLevel": "Language level",
+    "nativeLanguage": "Native language",
+    "interests": "Interests",
+    "goalChipCareer": "Career",
+    "goalChipTravel": "Travel",
+    "goalChipLiving": "Living",
+    "goalChipStudying": "Study",
+    "goalChipOther": "Other",
+    "dailyGoal": "Daily goal",
+    "dailyReminder": "Daily reminder",
+    "selectNativeLanguageTitle": "Select your native language",
+    "reminderOn": "On",
+    "reminderOff": "Off",
+    "remindMe": "提醒我",
+    "reminderSave": "保存",
+    "reminderSaved": "提醒已保存",
     "selectLanguageTitle": "选择语言",
     "premium": "高级版",
     "passive": "被动",
@@ -857,6 +1077,12 @@
     "certificateTitle": "您的证书",
     "certificateLevelTitle": "$level Certificate",
     "certificateOf": "Certificate of Achievement",
+    "certificatePresentedTo": "This certificate is proudly presented to",
+    "certificateAchievementBody": "This achievement recognizes the successful completion of all $level-level lessons and learning activities, demonstrating a strong foundation in essential English communication skills.",
+    "certificateLevelCompleted": "Level Completed: $levelName",
+    "certificateDateCompleted": "Date of Completion: $date",
+    "certificateIdDisplay": "Certificate ID: $id",
+    "certificateBrandTagline": "Learn. Speak. Connect.",
     "certificateCertifiesThat": "This certifies that",
     "certificatePathway": "Lingola English Pathway",
     "certificateAwardedTo": "Awarded to",
@@ -871,13 +1097,30 @@
     "certificateScanOrVisit": "Scan the QR code or visit the link to verify authenticity.",
     "certificateVerifyHint": "任何人都可以扫描二维码来验证您的成就。",
     "certificateShare": "分享证书",
+    "certificateDownload": "Download",
+    "certificateDownloadSaved": "Certificate saved to your gallery",
+    "certificateDownloadFailed": "Could not save certificate. Please try again.",
+    "certificateCreateQr": "Create QR",
+    "certificateNotAvailableTitle": "证书已锁定",
+    "certificateNotAvailable": "您尚未完成 $level 级别的课程，因此还无法使用此证书。",
+    "certificateNotAvailableOk": "知道了",
     "certificateShareQr": "分享二维码",
     "certificateShareBody": "I earned my Lingola $level certificate!",
     "certificateShareSubject": "Lingola $level Certificate",
     "certificateProvidedBy": "Certificate provided by",
     "certificatePreviewBody": "在 Lingola 完成 CEFR 级别后，您的证书将显示在这里——包含您的姓名、级别和可供扫描验证的二维码。",
     "certificatePreviewHint": "完成级别路径以解锁您的证书",
-    "certificateTapToView": "点击查看并分享您的证书"
+    "certificateTapToView": "点击查看并分享您的证书",
+    "settings": "设置",
+    "dailyGoalValueLight": "每天5-10分钟",
+    "dailyGoalValueRecommended": "每天15-20分钟",
+    "dailyGoalValueFast": "每天30分钟以上",
+    "settingsShare": "Share",
+    "settingsSupport": "Support",
+    "settingsAbout": "About",
+    "settingsAccount": "Account",
+    "followInstagram": "Follow on Instagram",
+    "followTikTok": "Follow on TikTok"
   },
   "pushNotifications": {
     "title": "Lingola",

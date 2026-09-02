@@ -7,11 +7,19 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
 import '../onboarding/language_flag.dart';
+import '../onboarding/target_language_options.dart';
+
+enum LanguagePickerKind { appLocale, targetLanguage, nativeLanguage }
 
 class SelectLanguageScreen extends StatefulWidget {
-  const SelectLanguageScreen({super.key, this.initialCode = 'tr'});
+  const SelectLanguageScreen({
+    super.key,
+    this.initialCode = 'tr',
+    this.kind = LanguagePickerKind.appLocale,
+  });
 
   final String initialCode;
+  final LanguagePickerKind kind;
 
   @override
   State<SelectLanguageScreen> createState() => _SelectLanguageScreenState();
@@ -28,27 +36,59 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
     _selectedCode = widget.initialCode;
   }
 
-  List<({String code, String label})> _languages() {
+  List<({String code, String label, bool comingSoon})> _languages() {
     final t = AppText.current;
+    if (widget.kind == LanguagePickerKind.targetLanguage) {
+      return targetLanguageOptions(t)
+          .map(
+            (item) => (
+              code: item.code,
+              label: item.label,
+              comingSoon: item.comingSoon,
+            ),
+          )
+          .toList();
+    }
+    if (widget.kind == LanguagePickerKind.nativeLanguage) {
+      return [
+        (code: 'en', label: t.language.english, comingSoon: false),
+        (code: 'de', label: t.targetLanguage.german, comingSoon: false),
+        (code: 'it', label: t.targetLanguage.italian, comingSoon: false),
+        (code: 'fr', label: t.language.french, comingSoon: false),
+        (code: 'tr', label: t.targetLanguage.turkish, comingSoon: false),
+        (code: 'jp', label: t.language.japanese, comingSoon: false),
+        (code: 'es', label: t.language.spanish, comingSoon: false),
+        (code: 'ru', label: t.language.russian, comingSoon: false),
+        (code: 'hi', label: t.targetLanguage.hindi, comingSoon: false),
+        (code: 'pt', label: t.targetLanguage.portuguese, comingSoon: false),
+        (code: 'zh', label: t.targetLanguage.simplifiedChinese, comingSoon: false),
+      ];
+    }
     return [
-      (code: 'en', label: t.language.english),
-      (code: 'de', label: t.targetLanguage.german),
-      (code: 'it', label: t.targetLanguage.italian),
-      (code: 'fr', label: t.language.french),
-      (code: 'tr', label: t.targetLanguage.turkish),
-      (code: 'jp', label: t.language.japanese),
-      (code: 'es', label: t.language.spanish),
-      (code: 'ru', label: t.language.russian),
-      (code: 'hi', label: t.targetLanguage.hindi),
-      (code: 'pt', label: t.targetLanguage.portuguese),
-      (code: 'zh', label: t.targetLanguage.simplifiedChinese),
+      (code: 'en', label: t.language.english, comingSoon: false),
+      (code: 'de', label: t.targetLanguage.german, comingSoon: false),
+      (code: 'it', label: t.targetLanguage.italian, comingSoon: false),
+      (code: 'fr', label: t.language.french, comingSoon: false),
+      (code: 'tr', label: t.targetLanguage.turkish, comingSoon: false),
+      (code: 'jp', label: t.language.japanese, comingSoon: false),
+      (code: 'es', label: t.language.spanish, comingSoon: false),
+      (code: 'ru', label: t.language.russian, comingSoon: false),
+      (code: 'hi', label: t.targetLanguage.hindi, comingSoon: false),
+      (code: 'pt', label: t.targetLanguage.portuguese, comingSoon: false),
+      (code: 'zh', label: t.targetLanguage.simplifiedChinese, comingSoon: false),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    final text = AppText.current.profilePage;
+    final text = AppText.current;
     final languages = _languages();
+    final title = switch (widget.kind) {
+      LanguagePickerKind.targetLanguage => text.targetLanguage.title,
+      LanguagePickerKind.nativeLanguage =>
+        text.profilePage.selectNativeLanguageTitle,
+      LanguagePickerKind.appLocale => text.profilePage.selectLanguageTitle,
+    };
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -74,7 +114,7 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
                       tooltip: AppText.current.common.back,
                     ),
                     Text(
-                      text.selectLanguageTitle,
+                      title,
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
@@ -94,32 +134,39 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
                   itemBuilder: (context, index) {
                     final item = languages[index];
                     final selected = item.code == _selectedCode;
+                    final disabled = item.comingSoon;
                     return Material(
-                      color: selected
-                          ? AppColors.primaryTint10
-                          : Colors.white,
+                      color: disabled
+                          ? const Color(0xFFF7F7F8)
+                          : selected
+                              ? AppColors.primaryTint10
+                              : Colors.white,
                       borderRadius: BorderRadius.circular(10),
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
-                        onTap: () =>
-                            setState(() => _selectedCode = item.code),
+                        onTap: disabled
+                            ? null
+                            : () => setState(() => _selectedCode = item.code),
                         child: Container(
                           height: 54,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: selected
+                              color: selected && !disabled
                                   ? AppColors.primary
                                   : AppColors.border,
                             ),
                           ),
                           child: Row(
                             children: [
-                              LanguageFlag(
-                                item.code,
-                                width: 39,
-                                height: 30,
+                              Opacity(
+                                opacity: disabled ? 0.45 : 1,
+                                child: LanguageFlag(
+                                  item.code,
+                                  width: 39,
+                                  height: 30,
+                                ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -130,12 +177,35 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
                                     fontSize: 14,
                                     height: 18 / 14,
                                     fontWeight: FontWeight.w600,
-                                    color: selected
-                                        ? AppColors.primary
-                                        : _labelMuted,
+                                    color: disabled
+                                        ? _labelMuted.withValues(alpha: 0.55)
+                                        : selected
+                                            ? AppColors.primary
+                                            : _labelMuted,
                                   ),
                                 ),
                               ),
+                              if (disabled)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    text.language.comingSoonBadge,
+                                    style: const TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 11,
+                                      height: 14 / 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -147,7 +217,7 @@ class _SelectLanguageScreenState extends State<SelectLanguageScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: PrimaryButton(
-                  label: text.save,
+                  label: text.profilePage.save,
                   onPressed: () => Navigator.of(context).pop(_selectedCode),
                 ),
               ),

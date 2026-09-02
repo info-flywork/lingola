@@ -10,6 +10,7 @@ import 'tutor_tts_service.dart';
 import 'viseme_cue.dart';
 import '../../../core/auth/auth_service.dart';
 import '../../../core/auth/session_store.dart';
+import '../../../core/config/app_env.dart';
 
 enum CallMessageRole { tutor, user }
 
@@ -52,8 +53,16 @@ class CallingConversationController extends ChangeNotifier {
     this.lessonMode = false,
   })  : _chat = chat ?? OpenAiChatService(),
         _tts = tts ?? TutorTtsService(),
-        _player = player ?? AudioPlayer() {
-    _mic = mic ?? HoldToSpeakService(whisper: _chat);
+        _player = player ?? AudioPlayer(),
+        _resolvedVoiceId =
+            TutorVoiceIds.resolve(tutorSlug, preferred: voiceId) {
+    _mic = mic ??
+        HoldToSpeakService(
+          whisper: _chat,
+          multilingual: true,
+          nativeLanguageCode:
+              SessionStore.currentUser?.onboarding?.nativeLanguageCode,
+        );
     _playerCompleteSub = _player.onPlayerComplete.listen((_) {
       if (_suppressPlayerComplete) return;
       _finishSpeaking();
@@ -72,11 +81,15 @@ class CallingConversationController extends ChangeNotifier {
   late final HoldToSpeakService _mic;
   final AudioPlayer _player;
   final String? voiceId;
+  final String _resolvedVoiceId;
   final String? openingLine;
   final String? systemPrompt;
   final String? tutorSlug;
   /// Ders oturumu: kullanıcı/hoca bitirmek istediğinde özet ekranına git.
   final bool lessonMode;
+
+  /// Çözümlenmiş ElevenLabs voice ID (Lingola dahil).
+  String get resolvedVoiceId => _resolvedVoiceId;
 
   StreamSubscription<void>? _playerCompleteSub;
   StreamSubscription<Duration>? _playerPositionSub;
@@ -88,6 +101,7 @@ class CallingConversationController extends ChangeNotifier {
 
   var _busy = false;
   var _listening = false;
+  var _micStarting = false;
   var _speaking = false;
   String? _error;
   List<VisemeCue> _visemeTrack = const [];
@@ -107,6 +121,7 @@ class CallingConversationController extends ChangeNotifier {
   var _awaitingInactivityConfirm = false;
   var _closingSession = false;
   DateTime? _lastUserSpeechAt;
+  DateTime? _lastTutorSpeechEndedAt;
   late final DateTime _callStartedAt = DateTime.now();
   var _disposed = false;
   var _suppressPlayerComplete = false;
@@ -124,10 +139,15 @@ class CallingConversationController extends ChangeNotifier {
 
   static const _maxNudges = 2;
   static const playbackRates = <double>[0.5, 1.0, 1.5, 2.0];
+  /// Hoca konuştuktan sonra kullanıcı cevap vermezse "still there".
+  static const _idleNudgeDelay = Duration(seconds: 15);
+  static const _idleNudgeRepeatDelay = Duration(seconds: 20);
   static const _userInactivityTimeout = Duration(minutes: 2);
+  static const _lessonFirstReplyGrace = Duration(minutes: 3);
   static const _inactivityConfirmTimeout = Duration(seconds: 40);
 
   bool get busy => _busy;
+  bool get transcribing => _busy;
   bool get listening => _listening;
   bool get speaking => _speaking;
   String? get error => _error;
@@ -201,13 +221,13 @@ class CallingConversationController extends ChangeNotifier {
     }
 
     final audioEnd = _audioDurationSec;
-    if (audioEnd != null && audioEnd > 0 && t >= audioEnd - 0.12) {
+    if (audioEnd != null && audioEnd > 0 && t >= audioEnd - 0.03) {
       _finishSpeaking();
       return;
     }
 
     final lipEnd = _speechEndSec;
-    if (lipEnd != null && lipEnd > 0 && t >= lipEnd) {
+    if (lipEnd != null && lipEnd > 0 && t >= lipEnd - 0.03) {
       _finishSpeaking();
       return;
     }
@@ -218,7 +238,6 @@ class CallingConversationController extends ChangeNotifier {
       _visemeTrack,
       t,
       cutOffSec: lipEnd,
-      latencySec: kVisemeLatencySec,
     );
 
     if (next != 0) {
@@ -226,11 +245,14 @@ class CallingConversationController extends ChangeNotifier {
       _silenceCloseTimer?.cancel();
       _silenceCloseTimer = null;
     } else if (_hadOpenMouth && !hasUpcomingMouth(_visemeTrack, t)) {
-      // Son hece bitti, önde ağız yok → hemen kapat (TTS kuyruk sessizliği).
-      _silenceCloseTimer?.cancel();
-      _silenceCloseTimer = Timer(const Duration(milliseconds: 50), () {
-        if (_speaking && !_disposed) _finishSpeaking();
-      });
+      // Sadece ses gerçekten bittiyse kapat — erken kapanmayı önle.
+      final end = _audioDurationSec ?? lipEnd;
+      if (end != null && t >= end - 0.05) {
+        _silenceCloseTimer?.cancel();
+        _silenceCloseTimer = Timer(const Duration(milliseconds: 40), () {
+          if (_speaking && !_disposed) _finishSpeaking();
+        });
+      }
     }
 
     if (next == _currentViseme) return;
@@ -306,6 +328,7 @@ class CallingConversationController extends ChangeNotifier {
       unawaited(_player.stop());
     }
     _notify();
+    _lastTutorSpeechEndedAt = DateTime.now();
     _scheduleIdleNudge();
     if (!_awaitingInactivityConfirm && !_closingSession) {
       _armUserInactivityWatch();
@@ -335,13 +358,12 @@ class CallingConversationController extends ChangeNotifier {
   }
 
   Future<void> start() async {
-    // Cihaz STT'yi açılışta ısıt — ilk mic bırakışında ağ Whisper'a düşmesin.
+    // Multilingual mod: cihaz STT yok, Whisper TR/EN algılar.
     unawaited(_mic.warmUp());
     await _preparePlaybackSession();
     notifyListeners();
     await _tutorSay(openingLine ?? _defaultOpeningLine);
-    if (!_speaking) _scheduleIdleNudge();
-    _armUserInactivityWatch();
+    // Nudge / inactivity — _finishSpeaking içinde planlanır.
   }
 
   void _cancelIdleNudge() {
@@ -351,17 +373,24 @@ class CallingConversationController extends ChangeNotifier {
 
   void _scheduleIdleNudge() {
     _cancelIdleNudge();
-    if (_disposed || _userHasSpoken || _nudgeCount >= _maxNudges) return;
-    if (_listening || _busy || _speaking) return;
-    final delay = Duration(seconds: _nudgeCount == 0 ? 7 : 10);
-    _idleNudgeTimer = Timer(delay, () {
+    if (_disposed || _nudgeCount >= _maxNudges) return;
+    if (_listening || _busy || _speaking || _awaitingInactivityConfirm) return;
+
+    final anchor = _lastTutorSpeechEndedAt;
+    if (anchor == null) return;
+
+    final target = _nudgeCount == 0 ? _idleNudgeDelay : _idleNudgeRepeatDelay;
+    var remaining = target - DateTime.now().difference(anchor);
+    if (remaining.isNegative) remaining = Duration.zero;
+
+    _idleNudgeTimer = Timer(remaining, () {
       unawaited(_maybeNudge());
     });
   }
 
   Future<void> _maybeNudge() async {
-    if (_disposed || _userHasSpoken || _listening || _busy || _speaking) {
-      if (!_disposed && !_userHasSpoken) _scheduleIdleNudge();
+    if (_disposed || _listening || _busy || _speaking) {
+      if (!_disposed) _scheduleIdleNudge();
       return;
     }
     if (_nudgeCount >= _maxNudges) return;
@@ -410,6 +439,17 @@ class CallingConversationController extends ChangeNotifier {
     return lines[index.clamp(0, lines.length - 1)];
   }
 
+  String _speechNotUnderstoodLine() {
+    return switch ((tutorSlug ?? '').toLowerCase()) {
+      'zephyrion' => "I couldn't hear you clearly. Try again — a little louder.",
+      'vaelen' => "Your voice didn't reach me. Speak a bit clearer, if you can.",
+      'elrion' => "The forest didn't catch that. Try once more, clearly.",
+      'santa' => "Ho ho — I didn't catch that. Try again, nice and clear!",
+      _ =>
+        "Sorry, I didn't catch that. Could you speak a little clearer and try again?",
+    };
+  }
+
   Future<void> _preparePlaybackSession() async {
     try {
       await _player.setReleaseMode(ReleaseMode.stop);
@@ -437,7 +477,7 @@ class CallingConversationController extends ChangeNotifier {
 
   /// Basılı tutunca dinle; bırakınca cihaz STT (anında) veya Whisper.
   Future<void> startListening() async {
-    if (_busy || _listening) return;
+    if (_busy || _listening || _micStarting) return;
     _cancelIdleNudge();
 
     await _player.stop();
@@ -447,32 +487,53 @@ class CallingConversationController extends ChangeNotifier {
     _currentViseme = 0;
     _speechEndSec = null;
     _audioDurationSec = null;
+
+    _micStarting = true;
+    _listening = true;
+    _error = null;
     _notify();
-    await Future<void>.delayed(const Duration(milliseconds: 80));
 
     try {
-      // warmUp bitmemiş olabilir — ilk turda da dene.
       await _mic.warmUp();
+      if (!_micStarting) {
+        _listening = false;
+        unawaited(_mic.cancel());
+        _notify();
+        return;
+      }
       await _mic.start();
-      _error = null;
-      _listening = true;
-      notifyListeners();
+      if (!_micStarting) {
+        _listening = false;
+        unawaited(_mic.cancel());
+        _notify();
+        return;
+      }
+      _micStarting = false;
+      _notify();
     } catch (e) {
+      _micStarting = false;
       _listening = false;
       _error = e.toString().contains('Mikrofon')
           ? 'Mikrofon izni gerekli. Ayarlardan izin ver.'
           : 'Kayıt başlatılamadı: $e';
-      notifyListeners();
+      _notify();
       _scheduleIdleNudge();
     }
   }
 
   Future<void> stopListening() async {
+    if (_micStarting) {
+      _micStarting = false;
+      _listening = false;
+      unawaited(_mic.cancel());
+      _notify();
+      return;
+    }
     if (!_listening || _busy) return;
     await _stopAndTranscribe();
   }
 
-  /// Eski toggle API — UI hold kullanır.
+  /// Dokun → kayıt; tekrar dokun → gönder.
   Future<void> toggleMic() async {
     if (_listening) {
       await stopListening();
@@ -490,7 +551,14 @@ class CallingConversationController extends ChangeNotifier {
     try {
       final text = (await _mic.stopAndGetText()).trim();
       if (text.isEmpty) {
-        _error = 'Ses anlaşılamadı — daha net / yakından konuş.';
+        _busy = false;
+        _listening = false;
+        _error = null;
+        notifyListeners();
+        unawaited(_tutorSay(_speechNotUnderstoodLine()));
+        if (!_userHasSpoken) {
+          _scheduleIdleNudge();
+        }
         return;
       }
       debugPrint(
@@ -500,7 +568,9 @@ class CallingConversationController extends ChangeNotifier {
       _error = null;
       transcribed = text;
     } catch (e) {
-      _error = e.toString();
+      debugPrint('Mic transcribe failed: $e');
+      _error = null;
+      unawaited(_tutorSay(_speechNotUnderstoodLine()));
     } finally {
       _busy = false;
       _listening = false;
@@ -523,6 +593,7 @@ class CallingConversationController extends ChangeNotifier {
   Future<void> _onUserSpeech(String text) async {
     _userHasSpoken = true;
     _lastUserSpeechAt = DateTime.now();
+    _nudgeCount = 0;
     _cancelIdleNudge();
     _clearInactivityConfirmWatch();
     if (_awaitingInactivityConfirm) {
@@ -706,12 +777,26 @@ class CallingConversationController extends ChangeNotifier {
     return first;
   }
 
-  String get _effectiveSystemPrompt =>
-      systemPrompt ??
-      TutorPersonality.freeTalkSystemPrompt(
-        tutorSlug: tutorSlug,
-        learnerFirstName: _learnerFirstName,
-      );
+  String get _effectiveSystemPrompt {
+    final onboarding = SessionStore.currentUser?.onboarding;
+    final base = systemPrompt ??
+        TutorPersonality.freeTalkSystemPrompt(
+          tutorSlug: tutorSlug,
+          learnerFirstName: _learnerFirstName,
+          explanationLanguage: onboarding?.explanationLanguage,
+          nativeLanguageCode: onboarding?.nativeLanguageCode,
+        );
+    if (!lessonMode) return base;
+    return '''
+$base
+
+CRITICAL — English LESSON (voice call):
+- Reply in simple English only. You are teaching English, not conversing in Turkish.
+- All examples must be in English (e.g. "My name is Ahmet", never "Benim adım Ahmet").
+- If the learner writes in Turkish, answer briefly in English ("Yes, I hear you!") then give ONE English phrase to try.
+- One question at a time. Wait for their answer before a new topic or nudge.
+- Do not stack multiple greetings or "still there" messages.''';
+  }
 
   String get _defaultOpeningLine => TutorPersonality.freeTalkOpening(
         tutorSlug: tutorSlug,
@@ -723,9 +808,13 @@ class CallingConversationController extends ChangeNotifier {
     if (_disposed || _awaitingInactivityConfirm || _awaitingExtensionReply) {
       return;
     }
-    final anchor = _lastUserSpeechAt ?? _callStartedAt;
+    final anchor =
+        _lastUserSpeechAt ?? _lastTutorSpeechEndedAt ?? _callStartedAt;
+    final timeout = lessonMode && _lastUserSpeechAt == null
+        ? _lessonFirstReplyGrace
+        : _userInactivityTimeout;
     final elapsed = DateTime.now().difference(anchor);
-    var remaining = _userInactivityTimeout - elapsed;
+    var remaining = timeout - elapsed;
     if (remaining.isNegative) remaining = Duration.zero;
     _inactivityTimer = Timer(remaining, () {
       unawaited(_onUserInactivityTimeout());
@@ -1002,8 +1091,13 @@ class CallingConversationController extends ChangeNotifier {
       final speech = await _tts
           .synthesizeForLipsync(
             text,
-            voiceId: voiceId,
-            modelId: TutorTtsService.flashModel,
+            voiceId: _resolvedVoiceId,
+            tutorSlug: tutorSlug,
+            modelId: _resolvedVoiceId == TutorVoiceIds.lingola
+                ? 'eleven_multilingual_v2'
+                : TutorTtsService.flashModel,
+            nativeLanguageCode:
+                SessionStore.currentUser?.onboarding?.nativeLanguageCode,
           )
           .timeout(const Duration(seconds: 45));
       _suppressPlayerComplete = true;
@@ -1018,7 +1112,6 @@ class CallingConversationController extends ChangeNotifier {
       _audioDurationSec = null;
       _currentViseme = 0;
       _lastVisemeAppliedAt = null;
-      _lipsActive = true;
       _hadOpenMouth = false;
       await _player.setPlaybackRate(_playbackRate);
       await _player
@@ -1026,6 +1119,7 @@ class CallingConversationController extends ChangeNotifier {
           .timeout(const Duration(seconds: 8));
       _suppressPlayerComplete = false;
       _speaking = true;
+      _lipsActive = true;
       _notify();
       unawaited(_resolveSpeechEnd(speech));
       _startLipsyncPoll();

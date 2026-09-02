@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../bootstrap/app_bootstrap.dart';
 import '../config/firebase_options.dart';
 
 class FirebaseAuthResult {
@@ -40,6 +41,7 @@ abstract final class FirebaseAuthGateway {
   }
 
   static Future<FirebaseAuthResult> signInWithGoogle() async {
+    await AppBootstrap.ensureFirebase();
     await ensureGoogleInitialized();
     final account = await GoogleSignIn.instance.authenticate();
     final googleIdToken = account.authentication.idToken;
@@ -69,6 +71,7 @@ abstract final class FirebaseAuthGateway {
   }
 
   static Future<FirebaseAuthResult> signInWithApple() async {
+    await AppBootstrap.ensureFirebase();
     final rawNonce = _randomNonce();
     final nonce = _sha256ofString(rawNonce);
 

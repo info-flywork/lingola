@@ -47,27 +47,6 @@ class _LessonNotesScreenState extends State<LessonNotesScreen>
 
   Future<void> _delete(BuildContext context) async {
     final text = AppText.current.lessonPage;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(text.deleteNotes),
-        content: Text(text.deleteNotesConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(text.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              text.delete,
-              style: const TextStyle(color: Color(0xFFB71C1C)),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (ok != true || !context.mounted) return;
     try {
       await LessonApiService.deleteNotes(notes.slug);
       if (!context.mounted) return;

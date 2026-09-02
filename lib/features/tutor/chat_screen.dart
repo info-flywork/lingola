@@ -192,7 +192,7 @@ class _ChatScreenState extends State<ChatScreen> {
           _loading = false;
         });
       } else {
-        final session = await TutorChatApiService.openSession(
+        final result = await TutorChatApiService.openSession(
           tutorId: widget.tutorId,
           tutorSlug: widget.tutorSlug,
           forceNew: widget.forceNew,
@@ -201,10 +201,10 @@ class _ChatScreenState extends State<ChatScreen> {
           lessonSlug: widget.lessonSlug,
           kind: widget.kind,
         );
-        final messages = await TutorChatApiService.listMessages(session.id);
+        final messages = await TutorChatApiService.listMessages(result.session.id);
         if (!mounted) return;
         setState(() {
-          _sessionId = session.id;
+          _sessionId = result.session.id;
           _messages
             ..clear()
             ..addAll(messages);

@@ -6,14 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/auth/auth_service.dart';
-import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
-import '../../widgets/home_asset.dart';
 import '../shell/main_shell.dart';
-import 'language_setup_screens.dart';
 import 'onboarding_draft.dart';
+import 'post_onboarding_screens.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -24,49 +22,35 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   Timer? _timer;
-  /// 0 = app icon, 1 = büyük koala
-  int _step = 0;
   Future<bool>? _sessionCheck;
 
   @override
   void initState() {
     super.initState();
     _sessionCheck = _hasValidSession();
-    _armTimer();
+    _timer = Timer(const Duration(milliseconds: 1600), () async {
+      if (!mounted) return;
+
+      final signedIn = await (_sessionCheck ?? _hasValidSession());
+      if (!mounted) return;
+
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder<void>(
+          pageBuilder: (_, _, _) => signedIn
+              ? const MainShell()
+              : const OnboardingScreen(),
+          transitionsBuilder: (_, animation, _, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 420),
+        ),
+      );
+    });
   }
 
   Future<bool> _hasValidSession() async {
     final user = await AuthService.restoreSession();
     return user != null;
-  }
-
-  void _armTimer() {
-    _timer?.cancel();
-    _timer = Timer(
-      Duration(milliseconds: _step == 0 ? 1500 : 1600),
-      () async {
-        if (!mounted) return;
-        if (_step == 0) {
-          setState(() => _step = 1);
-          _armTimer();
-          return;
-        }
-
-        final signedIn = await (_sessionCheck ?? _hasValidSession());
-        if (!mounted) return;
-
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder<void>(
-            pageBuilder: (_, _, _) =>
-                signedIn ? const MainShell() : const OnboardingScreen(),
-            transitionsBuilder: (_, animation, _, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 420),
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -84,70 +68,15 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 480),
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          child: _step == 0
-              ? const _DesignSurface(
-                  key: ValueKey('icon-surface'),
-                  fit: BoxFit.fitWidth,
-                  child: _IconSplashVisual(),
-                )
-              : const _KoalaSplashVisual(key: ValueKey('koala')),
-        ),
+        body: const _KoalaSplashVisual(),
       ),
-    );
-  }
-}
-
-class _IconSplashVisual extends StatelessWidget {
-  const _IconSplashVisual();
-
-  @override
-  Widget build(BuildContext context) {
-    final text = AppText.current;
-    // Figma: icon 178×178 @ (134, 265); Lingola Quicksand Bold 64 altında.
-    return Stack(
-      clipBehavior: Clip.hardEdge,
-      children: [
-        const Positioned.fill(child: _OnboardingBackground()),
-        const Positioned(
-          left: 126,
-          top: 265,
-          width: 178,
-          height: 178,
-          child: LocalPicture(
-            'lingolaAppIcon.png',
-            fit: BoxFit.contain,
-            width: 178,
-            height: 178,
-          ),
-        ),
-        Positioned(
-          top: 463,
-          left: 0,
-          right: 0,
-          child: Text(
-            text.app.name,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontFamily: 'Quicksand',
-              fontSize: 64,
-              height: 1,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
 
 /// Figma’daki gibi belden kesik koala — kesik kenar ekranın dibine yapışır.
 class _KoalaSplashVisual extends StatelessWidget {
-  const _KoalaSplashVisual({super.key});
+  const _KoalaSplashVisual();
 
   /// Layer 1 / koala.png kaynak oranı (belden kesik export).
   static const _assetW = 802.0;
@@ -285,41 +214,126 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final _controller = PageController();
-  int _page = 0;
+  static const _pageCount = 3;
+  // Sonsuz ileri döngü: asla geri sıçrama / jumpToPage yok.
+  static const _itemCount = 6000;
+  static const _initialPage = 3000;
 
-  void _continue() {
-    if (_page < 2) {
-      _controller.nextPage(
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutCubic,
-      );
-      return;
+  final _pageController = PageController(initialPage: _initialPage);
+  var _page = 0;
+  var _textOpacity = 1.0;
+  var _textAnimDuration = _pageAnimationDuration;
+  Timer? _autoAdvanceTimer;
+
+  static const _autoAdvanceDelay = Duration(seconds: 3);
+  static const _pageAnimationDuration = Duration(milliseconds: 1200);
+  static const _textFadeInDuration = Duration(milliseconds: 500);
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleAutoAdvance();
+  }
+
+  void _scheduleAutoAdvance() {
+    _autoAdvanceTimer?.cancel();
+    _autoAdvanceTimer = Timer(_autoAdvanceDelay, () {
+      if (!mounted) return;
+      _autoAdvance();
+    });
+  }
+
+  void _onPageChanged(int index) {
+    final logicalPage = index % _pageCount;
+    setState(() {
+      _page = logicalPage;
+      _textAnimDuration = _textFadeInDuration;
+      _textOpacity = 0.0;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => _textOpacity = 1.0);
+    });
+    _scheduleAutoAdvance();
+  }
+
+  Future<void> _animateToNextPage() async {
+    if (!_pageController.hasClients) return;
+
+    _autoAdvanceTimer?.cancel();
+    setState(() {
+      _textAnimDuration = _pageAnimationDuration;
+      _textOpacity = 0.0;
+    });
+
+    final current = _pageController.page!.round();
+    if (current >= _itemCount - 1) {
+      _pageController.jumpToPage(_initialPage);
     }
+
+    await _pageController.nextPage(
+      duration: _pageAnimationDuration,
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  void _autoAdvance() {
+    unawaited(_animateToNextPage());
+  }
+
+  void _onContinuePressed() {
+    _autoAdvanceTimer?.cancel();
+    _goToAuth();
+  }
+
+  void _goToAuth() {
+    _autoAdvanceTimer?.cancel();
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => LanguageSetupScreen(draft: OnboardingDraft()),
+        builder: (_) => AuthScreen(draft: OnboardingDraft()),
       ),
     );
   }
 
-  void _goBack() {
-    if (_page <= 0) return;
-    _controller.previousPage(
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeOutCubic,
-    );
+  Widget _visualForPage(int page) {
+    return switch (page % _pageCount) {
+      0 => const _SpeakerVisual(),
+      1 => const _TutorComparison(),
+      _ => const _PlanVisual(),
+    };
+  }
+
+  ({String title, String body}) _copyForPage(int page) {
+    final text = AppText.current;
+    return switch (page) {
+      0 => (
+          title: text.onboarding.slide1.title,
+          body: text.onboarding.slide1.body,
+        ),
+      1 => (
+          title: text.onboarding.slide2.title,
+          body: text.onboarding.slide2.body,
+        ),
+      _ => (
+          title: text.onboarding.slide3.title,
+          body: text.onboarding.slide3.body,
+        ),
+    };
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _autoAdvanceTimer?.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
+    final copy = _copyForPage(_page);
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
@@ -328,146 +342,71 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Scaffold(
         backgroundColor: AppColors.primary,
         body: Semantics(
-          label: text.onboarding.pageA11y(current: _page + 1, total: 3),
-          child: PageView(
-            controller: _controller,
-            onPageChanged: (value) => setState(() => _page = value),
-            children: [
-              _OnboardingPage(
-                pageIndex: 0,
-                title: text.onboarding.slide1.title,
-                body: text.onboarding.slide1.body,
-                visual: const _SpeakerVisual(),
-                onContinue: _continue,
-              ),
-              _OnboardingPage(
-                pageIndex: 1,
-                title: text.onboarding.slide2.title,
-                body: text.onboarding.slide2.body,
-                visual: const _TutorComparison(),
-                onContinue: _continue,
-                onBack: _goBack,
-              ),
-              _OnboardingPage(
-                pageIndex: 2,
-                title: text.onboarding.slide3.title,
-                body: text.onboarding.slide3.body,
-                visual: const _PlanVisual(),
-                onContinue: _continue,
-                onBack: _goBack,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OnboardingPage extends StatelessWidget {
-  const _OnboardingPage({
-    required this.pageIndex,
-    required this.title,
-    required this.body,
-    required this.visual,
-    required this.onContinue,
-    this.onBack,
-  });
-
-  final int pageIndex;
-  final String title;
-  final String body;
-  final Widget visual;
-  final VoidCallback onContinue;
-  final VoidCallback? onBack;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = AppText.current;
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
-    // Figma: beyaz kart mavi gradient üzerinde yüzer; kartın altında mavi şerit kalır.
-    return ColoredBox(
-      color: AppColors.primary,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned.fill(
-            child: _DesignSurface(
-              child: Stack(
-                clipBehavior: Clip.hardEdge,
-                children: [
-                  const Positioned.fill(child: _OnboardingBackground()),
-                  Positioned.fill(child: visual),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 16 + bottomInset,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.onboardingTitle,
+          label: text.onboarding.pageA11y(current: _page + 1, total: _pageCount),
+          child: ColoredBox(
+            color: AppColors.primary,
+            child: Column(
+              children: [
+                Expanded(
+                  child: _DesignSurface(
+                    child: Stack(
+                      clipBehavior: Clip.hardEdge,
+                      children: [
+                        const Positioned.fill(
+                          child: _OnboardingBackground(),
+                        ),
+                        PageView.builder(
+                          controller: _pageController,
+                          physics: const NeverScrollableScrollPhysics(),
+                          onPageChanged: _onPageChanged,
+                          itemCount: _itemCount,
+                          itemBuilder: (context, index) =>
+                              _visualForPage(index),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      body,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.onboardingBody,
-                    ),
-                    const SizedBox(height: 20),
-                    _PageDots(activeIndex: pageIndex),
-                    const SizedBox(height: 20),
-                    PrimaryButton(
-                      label: text.common.continueLabel,
-                      onPressed: onContinue,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-          // Sol üst geri ikonu (yazı "Back" değil).
-          if (onBack != null)
-            Positioned(
-              top: MediaQuery.paddingOf(context).top + 8,
-              left: 12,
-              child: Material(
-                color: Colors.black.withValues(alpha: .28),
-                shape: const CircleBorder(),
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: onBack,
-                  child: const SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: Center(
-                      child: HomeAsset(
-                        AppAssets.backArrow,
-                        width: 18,
-                        height: 18,
-                        color: Colors.white,
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + bottomInset),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(minHeight: 176),
+                            child: AnimatedOpacity(
+                              opacity: _textOpacity,
+                              duration: _textAnimDuration,
+                              curve: Curves.easeInOut,
+                              child: _OnboardingCopyBlock(
+                                title: copy.title,
+                                body: copy.body,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          _PageDots(activeIndex: _page),
+                          const SizedBox(height: 20),
+                          PrimaryButton(
+                            label: text.common.continueLabel,
+                            onPressed: _onContinuePressed,
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-        ],
+          ),
+        ),
       ),
     );
   }
@@ -593,7 +532,7 @@ class _TutorComparison extends StatelessWidget {
   const _TutorComparison();
 
   static const _cardTop = 116.0;
-  static const _cardHeight = 362.0;
+  static const _cardHeight = 370.0;
   static const _cardInset = 27.0;
   static const _cardWidth = 142.0;
 
@@ -608,6 +547,7 @@ class _TutorComparison extends StatelessWidget {
           width: _cardWidth,
           height: _cardHeight,
           child: _TutorCard(
+            height: _cardHeight,
             image: 'tutors/realTutor.png',
             name: text.onboarding.slide2.realTutor,
             values: [
@@ -623,6 +563,7 @@ class _TutorComparison extends StatelessWidget {
           width: _cardWidth,
           height: _cardHeight,
           child: _TutorCard(
+            height: _cardHeight,
             image: 'tutors/lingolaTutor.png',
             name: text.onboarding.slide2.lingola,
             values: [
@@ -708,12 +649,14 @@ class _VsDivider extends StatelessWidget {
 
 class _TutorCard extends StatelessWidget {
   const _TutorCard({
+    required this.height,
     required this.image,
     required this.name,
     required this.values,
     this.highlighted = false,
   });
 
+  final double height;
   final String image;
   final String name;
   final List<String> values;
@@ -732,7 +675,7 @@ class _TutorCard extends StatelessWidget {
 
     return Container(
       width: 142,
-      height: 362,
+      height: height,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: highlighted ? const Color(0xFFFCFCFE) : const Color(0x33FFFFFF),
@@ -753,23 +696,23 @@ class _TutorCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             name,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Poppins',
               color: highlighted ? AppColors.primary : _muted,
-              fontSize: 20,
-              height: 24 / 20,
+              fontSize: 18,
+              height: 22 / 18,
               fontWeight: FontWeight.w600,
-              letterSpacing: 20 * -0.02,
+              letterSpacing: 18 * -0.02,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           for (var index = 0; index < values.length; index++) ...[
-            if (index > 0) const SizedBox(height: 10),
+            if (index > 0) const SizedBox(height: 8),
             const Divider(height: 1, thickness: 1, color: Color(0x33000000)),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
               labels[index].toUpperCase(),
               textAlign: TextAlign.center,
@@ -784,7 +727,7 @@ class _TutorCard extends StatelessWidget {
             ),
             Text(
               values[index],
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -794,10 +737,10 @@ class _TutorCard extends StatelessWidget {
                     : highlighted
                         ? AppColors.primary
                         : _muted,
-                fontSize: 16,
-                height: 20 / 16,
+                fontSize: 14,
+                height: 18 / 14,
                 fontWeight: FontWeight.w600,
-                letterSpacing: 16 * -0.02,
+                letterSpacing: 14 * -0.02,
               ),
             ),
           ],
@@ -1020,6 +963,39 @@ class _PlanNode extends StatelessWidget {
   }
 }
 
+class _OnboardingCopyBlock extends StatelessWidget {
+  const _OnboardingCopyBlock({
+    required this.title,
+    required this.body,
+  });
+
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.onboardingTitle,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            body,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.onboardingBody,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PageDots extends StatelessWidget {
   const _PageDots({required this.activeIndex});
 
@@ -1034,16 +1010,21 @@ class _PageDots extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(
           3,
-          (index) => Container(
-            width: index == activeIndex ? 8 : 6,
-            height: index == activeIndex ? 8 : 6,
-            decoration: BoxDecoration(
-              color: index == activeIndex
-                  ? AppColors.primary
-                  : const Color(0xFFD7DCFF),
-              shape: BoxShape.circle,
-            ),
-          ),
+          (index) {
+            final active = index == activeIndex;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOutCubic,
+              width: active ? 8 : 6,
+              height: active ? 8 : 6,
+              decoration: BoxDecoration(
+                color: active
+                    ? AppColors.primary
+                    : const Color(0xFFD7DCFF),
+                shape: BoxShape.circle,
+              ),
+            );
+          },
         ),
       ),
     );

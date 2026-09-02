@@ -31,16 +31,29 @@ class TutorTtsService {
   Future<TutorSpeechAudio> synthesizeForLipsync(
     String text, {
     String? voiceId,
+    String? tutorSlug,
     String modelId = 'eleven_multilingual_v2',
+    String? nativeLanguageCode,
+    String targetLanguageCode = 'en',
   }) async {
-    final key = _cacheKey(text, voiceId: voiceId, modelId: modelId);
+    final key = _cacheKey(
+      text,
+      voiceId: voiceId,
+      tutorSlug: tutorSlug,
+      modelId: modelId,
+      nativeLanguageCode: nativeLanguageCode,
+      targetLanguageCode: targetLanguageCode,
+    );
     final inFlight = _pendingLipsync[key];
     if (inFlight != null) return inFlight;
 
     final future = _synthesizeLipsync(
       text,
       voiceId: voiceId,
+      tutorSlug: tutorSlug,
       modelId: modelId,
+      nativeLanguageCode: nativeLanguageCode,
+      targetLanguageCode: targetLanguageCode,
       key: key,
     );
     _pendingLipsync[key] = future;
@@ -65,7 +78,10 @@ class TutorTtsService {
     String text, {
     required String key,
     String? voiceId,
+    String? tutorSlug,
     required String modelId,
+    String? nativeLanguageCode,
+    String targetLanguageCode = 'en',
   }) async {
     final audioPath = await _cachePath(key);
     final visemePath = await _visemeCachePath(key);
@@ -97,8 +113,11 @@ class TutorTtsService {
       '/ai/tts/lipsync',
       body: {
         'text': text.trim(),
-        'voiceId': _resolveVoiceId(voiceId),
+        'voiceId': _resolveVoiceId(voiceId, tutorSlug: tutorSlug),
         'modelId': modelId,
+        if (nativeLanguageCode != null && nativeLanguageCode.isNotEmpty)
+          'nativeLanguageCode': nativeLanguageCode,
+        'targetLanguageCode': targetLanguageCode,
       },
     );
 
@@ -138,8 +157,15 @@ class TutorTtsService {
     return TutorSpeechAudio(file: audioFile, visemes: cues);
   }
 
-  String _resolveVoiceId(String? voiceId) {
-    if (voiceId != null && voiceId.trim().isNotEmpty) return voiceId.trim();
+  String _resolveVoiceId(String? voiceId, {String? tutorSlug}) {
+    final slug = (tutorSlug ?? '').trim().toLowerCase();
+    if (slug == 'lingola') return TutorVoiceIds.lingola;
+
+    final trimmed = voiceId?.trim();
+    if (trimmed != null && trimmed.isNotEmpty) {
+      if (trimmed == TutorVoiceIds.lingola) return TutorVoiceIds.lingola;
+      return trimmed;
+    }
     return TutorVoiceIds.female;
   }
 
@@ -169,10 +195,18 @@ class TutorTtsService {
     );
   }
 
-  /// Cache’i ses/model değişince invalid et.
-  String _cacheKey(String text, {String? voiceId, required String modelId}) {
-    final voice = _resolveVoiceId(voiceId);
-    final raw = 'lipsync|v6|$voice|$modelId|${text.trim()}';
+  String _cacheKey(
+    String text, {
+    String? voiceId,
+    String? tutorSlug,
+    required String modelId,
+    String? nativeLanguageCode,
+    String targetLanguageCode = 'en',
+  }) {
+    final voice = _resolveVoiceId(voiceId, tutorSlug: tutorSlug);
+    final native = nativeLanguageCode?.trim() ?? '';
+    final raw =
+        'lipsync|v10|$voice|$modelId|$native|$targetLanguageCode|${text.trim()}';
     return sha1.convert(utf8.encode(raw)).toString();
   }
 

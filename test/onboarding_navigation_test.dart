@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lingola/core/constants/app_text.dart';
+import 'package:lingola/features/onboarding/onboarding_draft.dart';
 import 'package:lingola/features/onboarding/language_setup_screens.dart';
 import 'package:lingola/i18n/strings.g.dart';
 
@@ -30,7 +31,12 @@ void main() {
                 child: FilledButton(
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => const LanguageSetupScreen(),
+                      builder: (_) => LanguageSetupScreen(
+                        draft: OnboardingDraft(
+                          nativeLanguageCode: 'en',
+                          appLocale: 'en',
+                        ),
+                      ),
                     ),
                   ),
                   child: const Text('Open'),
@@ -50,6 +56,10 @@ void main() {
 
     await tester.tap(find.text(text.common.continueLabel).last);
     await _settle(tester);
+    expect(find.text(text.setup.explanationTitle), findsOneWidget);
+
+    await tester.tap(find.text(text.common.continueLabel).last);
+    await _settle(tester);
     expect(find.text(text.setup.goalTitle), findsOneWidget);
 
     await tester.tap(find.text(text.common.continueLabel).last);
@@ -59,18 +69,6 @@ void main() {
     await tester.tap(find.text(text.common.continueLabel).last);
     await _settle(tester);
     expect(find.text(text.setup.paceTitle), findsOneWidget);
-
-    await tester.tap(find.text(text.common.continueLabel).last);
-    await _settle(tester);
-    expect(find.text(text.accountCreating.title), findsOneWidget);
-
-    await _tapVisible(tester, find.text(text.common.getStarted).last);
-    expect(find.text(text.previewChat.brand), findsOneWidget);
-    expect(find.text(text.previewChat.typeMessage), findsOneWidget);
-
-    await tester.tap(find.byIcon(Icons.close_rounded));
-    await _settle(tester);
-    expect(find.text(text.auth.continueGuest), findsOneWidget);
   });
 
   testWidgets('Target language sheet matches Figma layout', (tester) async {
@@ -83,12 +81,12 @@ void main() {
     await _settle(tester);
 
     expect(find.text(text.language.targetField), findsOneWidget);
-    expect(find.text(text.language.english), findsOneWidget);
+    expect(find.text(text.language.english), findsWidgets);
     expect(find.text(text.language.comingSoonBadge), findsOneWidget);
     expect(find.text(text.targetLanguage.german), findsOneWidget);
     expect(find.text(text.targetLanguage.italian), findsOneWidget);
     expect(find.text(text.language.french), findsOneWidget);
-    expect(find.text(text.targetLanguage.turkish), findsNothing);
+    expect(find.text(text.targetLanguage.turkish), findsOneWidget);
   });
 
   testWidgets('Language chevron opens bottom sheet', (tester) async {

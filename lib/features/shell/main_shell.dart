@@ -97,6 +97,7 @@ class _MainShellState extends State<MainShell> {
           child: Scaffold(
             backgroundColor: AppColors.surface,
             body: SafeArea(
+              top: _index != 1,
               bottom: false,
               child: IndexedStack(
                 index: _index,
