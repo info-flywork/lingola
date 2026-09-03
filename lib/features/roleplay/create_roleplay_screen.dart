@@ -41,7 +41,7 @@ class _CreateRolePlayScreenState extends State<CreateRolePlayScreen>
     _extraController = TextEditingController();
     _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 9000),
+      duration: const Duration(milliseconds: 28000),
     );
   }
 

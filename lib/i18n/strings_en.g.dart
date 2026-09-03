@@ -1361,6 +1361,9 @@ class Translations$rolePlayPage$en {
 	late final Translations$rolePlayPage$takingTaxi$en takingTaxi = Translations$rolePlayPage$takingTaxi$en._(_root);
 	late final Translations$rolePlayPage$rentingApartment$en rentingApartment = Translations$rolePlayPage$rentingApartment$en._(_root);
 	late final Translations$rolePlayPage$birthdayParty$en birthdayParty = Translations$rolePlayPage$birthdayParty$en._(_root);
+
+	/// en: 'Could not delete scenario. Please try again.'
+	String get deleteFailed => 'Could not delete scenario. Please try again.';
 }
 
 // Path: pushNotifications
@@ -4211,6 +4214,7 @@ extension on Translations {
 			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Nice',
 			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! When should we have the party?',
 			'rolePlayPage.birthdayParty.chat.botReply' => 'Would you rather have the party at home or at a restaurant?',
+			'rolePlayPage.deleteFailed' => 'Could not delete scenario. Please try again.',
 			'pushNotifications.title' => 'Lingola',
 			'pushNotifications.h2.0' => 'Looks like you took a short break.',
 			'pushNotifications.h2.1' => 'Got a moment for one word?',

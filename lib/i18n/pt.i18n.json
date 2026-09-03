@@ -877,7 +877,8 @@
         "incoming2Rest": "! When should we have the party?",
         "botReply": "Would you rather have the party at home or at a restaurant?"
       }
-    }
+    },
+    "deleteFailed": "Não foi possível apagar o cenário. Tenta novamente."
   },
   "notificationsPage": {
     "title": "Notificações",

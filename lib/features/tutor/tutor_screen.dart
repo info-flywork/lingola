@@ -1452,12 +1452,21 @@ class _TutorHeroState extends State<_TutorHero> {
     return '1x';
   }
 
+  String get _previewLine =>
+      "Hi, I'm ${widget.tutor.name}. Let's practice English together.";
+
+  String? get _previewVoiceId => TutorVoiceIds.resolve(
+        widget.tutor.slug,
+        preferred: widget.tutor.voiceId,
+      );
+
   @override
   void initState() {
     super.initState();
     _player.onPlayerComplete.listen((_) {
       if (_speaking) _finishSpeaking();
     });
+    unawaited(_prefetchPreview());
   }
 
   @override
@@ -1473,7 +1482,19 @@ class _TutorHeroState extends State<_TutorHero> {
     if (oldWidget.tutor.identity != widget.tutor.identity) {
       unawaited(_player.stop());
       _finishSpeaking();
+      unawaited(_prefetchPreview());
     }
+  }
+
+  Future<void> _prefetchPreview() async {
+    try {
+      await _tts.synthesizeForLipsync(
+        _previewLine,
+        voiceId: _previewVoiceId,
+        tutorSlug: widget.tutor.slug,
+        modelId: TutorTtsService.flashModel,
+      );
+    } catch (_) {}
   }
 
   void _stopLipsyncPoll() {
@@ -1556,12 +1577,10 @@ class _TutorHeroState extends State<_TutorHero> {
 
     try {
       final speech = await _tts.synthesizeForLipsync(
-        "Hi, I'm ${widget.tutor.name}. Let's practice English together.",
-        voiceId: TutorVoiceIds.resolve(
-          widget.tutor.slug,
-          preferred: widget.tutor.voiceId,
-        ),
+        _previewLine,
+        voiceId: _previewVoiceId,
         tutorSlug: widget.tutor.slug,
+        modelId: TutorTtsService.flashModel,
       );
       if (!mounted) return;
 

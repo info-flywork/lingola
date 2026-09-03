@@ -20,6 +20,7 @@ class RolePlayScreen extends StatefulWidget {
 
 class _RolePlayScreenState extends State<RolePlayScreen> {
   List<RolePlayScenarioDto>? _remoteDtos;
+  String? _openSwipeId;
 
   @override
   void initState() {
@@ -187,7 +188,7 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
       return _RolePlayScenario(
         id: dto.id,
         title: title,
-        image: dto.imageAsset.isNotEmpty ? dto.imageAsset : AppAssets.rolePlayCoffee,
+      image: dto.imageAsset.isNotEmpty ? dto.imageAsset : '',
         progress: dto.progressPercent > 0.001 ? dto.progressPercent.clamp(0, 1) : null,
         sessionId: dto.sessionId,
         minutes: dto.minutes,
@@ -344,9 +345,24 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
                 ),
                 const SizedBox(height: 10),
                 for (final scenario in customScenarios) ...[
-                  _RolePlayCard(
-                    scenario: scenario,
-                    onTap: () => _openDetail(context, scenario),
+                  _RolePlaySwipeRow(
+                    isOpen: _openSwipeId == scenario.id,
+                    onOpenChanged: (open) {
+                      setState(() {
+                        _openSwipeId = open ? scenario.id : null;
+                      });
+                    },
+                    onDeleteTap: () => _deleteCustom(scenario),
+                    child: _RolePlayCard(
+                      scenario: scenario,
+                      onTap: () {
+                        if (_openSwipeId == scenario.id) {
+                          setState(() => _openSwipeId = null);
+                          return;
+                        }
+                        _openDetail(context, scenario);
+                      },
+                    ),
                   ),
                   const SizedBox(height: 12),
                 ],
@@ -377,6 +393,26 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _deleteCustom(_RolePlayScenario scenario) async {
+    final previous = _remoteDtos;
+    setState(() {
+      _remoteDtos = [
+        for (final dto in _remoteDtos ?? const <RolePlayScenarioDto>[])
+          if (dto.id != scenario.id) dto,
+      ];
+      if (_openSwipeId == scenario.id) _openSwipeId = null;
+    });
+    try {
+      await RolePlayApiService.deleteCustomScenario(scenario.id);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _remoteDtos = previous);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppText.current.rolePlayPage.deleteFailed)),
+      );
+    }
   }
 
   Future<void> _openCreate(BuildContext context) async {
@@ -601,6 +637,98 @@ class _AvatarBubble extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _RolePlaySwipeRow extends StatefulWidget {
+  const _RolePlaySwipeRow({
+    required this.child,
+    required this.isOpen,
+    required this.onOpenChanged,
+    required this.onDeleteTap,
+  });
+
+  final Widget child;
+  final bool isOpen;
+  final ValueChanged<bool> onOpenChanged;
+  final VoidCallback onDeleteTap;
+
+  @override
+  State<_RolePlaySwipeRow> createState() => _RolePlaySwipeRowState();
+}
+
+class _RolePlaySwipeRowState extends State<_RolePlaySwipeRow> {
+  static const _actionW = 44.0;
+  static const _gap = 8.0;
+  static const _reveal = _actionW + _gap;
+
+  double _dx = 0;
+
+  @override
+  void didUpdateWidget(covariant _RolePlaySwipeRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isOpen && _dx > -_reveal + 0.5) {
+      setState(() => _dx = -_reveal);
+    } else if (!widget.isOpen && _dx < -0.5) {
+      setState(() => _dx = 0);
+    }
+  }
+
+  void _settle(double velocity) {
+    final shouldOpen = velocity < -200 || _dx < -_reveal / 2;
+    final next = shouldOpen ? -_reveal : 0.0;
+    setState(() => _dx = next);
+    widget.onOpenChanged(shouldOpen);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.centerRight,
+      children: [
+        Positioned(
+          right: 0,
+          top: 0,
+          bottom: 0,
+          child: Center(
+            child: Material(
+              color: const Color(0x33FF0014),
+              borderRadius: BorderRadius.circular(8),
+              child: InkWell(
+                onTap: widget.onDeleteTap,
+                borderRadius: BorderRadius.circular(8),
+                child: const SizedBox(
+                  width: _actionW,
+                  height: _actionW,
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: HomeAsset(
+                      AppAssets.notificationTrash,
+                      width: 24,
+                      height: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        GestureDetector(
+          onHorizontalDragUpdate: (details) {
+            setState(() {
+              _dx = (_dx + details.delta.dx).clamp(-_reveal, 0.0);
+            });
+          },
+          onHorizontalDragEnd: (details) {
+            _settle(details.primaryVelocity ?? 0);
+          },
+          child: Transform.translate(
+            offset: Offset(_dx, 0),
+            child: widget.child,
+          ),
+        ),
+      ],
     );
   }
 }

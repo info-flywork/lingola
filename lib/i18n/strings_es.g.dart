@@ -617,6 +617,7 @@ class _Translations$rolePlayPage$es implements Translations$rolePlayPage$en {
 	@override late final _Translations$rolePlayPage$takingTaxi$es takingTaxi = _Translations$rolePlayPage$takingTaxi$es._(_root);
 	@override late final _Translations$rolePlayPage$rentingApartment$es rentingApartment = _Translations$rolePlayPage$rentingApartment$es._(_root);
 	@override late final _Translations$rolePlayPage$birthdayParty$es birthdayParty = _Translations$rolePlayPage$birthdayParty$es._(_root);
+	@override String get deleteFailed => 'No se pudo eliminar el escenario. Inténtalo de nuevo.';
 }
 
 // Path: notificationsPage
@@ -2654,6 +2655,7 @@ extension on TranslationsEs {
 			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Nice',
 			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! When should we have the party?',
 			'rolePlayPage.birthdayParty.chat.botReply' => 'Would you rather have the party at home or at a restaurant?',
+			'rolePlayPage.deleteFailed' => 'No se pudo eliminar el escenario. Inténtalo de nuevo.',
 			'notificationsPage.title' => 'Notificaciones',
 			'notificationsPage.deleteConfirmTitle' => '¿Estás seguro?',
 			'notificationsPage.deleteConfirmBody' => 'Esta notificación se eliminará.',

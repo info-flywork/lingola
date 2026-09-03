@@ -617,6 +617,7 @@ class _Translations$rolePlayPage$ru implements Translations$rolePlayPage$en {
 	@override late final _Translations$rolePlayPage$takingTaxi$ru takingTaxi = _Translations$rolePlayPage$takingTaxi$ru._(_root);
 	@override late final _Translations$rolePlayPage$rentingApartment$ru rentingApartment = _Translations$rolePlayPage$rentingApartment$ru._(_root);
 	@override late final _Translations$rolePlayPage$birthdayParty$ru birthdayParty = _Translations$rolePlayPage$birthdayParty$ru._(_root);
+	@override String get deleteFailed => 'Не удалось удалить сценарий. Попробуйте ещё раз.';
 }
 
 // Path: notificationsPage
@@ -2654,6 +2655,7 @@ extension on TranslationsRu {
 			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Nice',
 			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! When should we have the party?',
 			'rolePlayPage.birthdayParty.chat.botReply' => 'Would you rather have the party at home or at a restaurant?',
+			'rolePlayPage.deleteFailed' => 'Не удалось удалить сценарий. Попробуйте ещё раз.',
 			'notificationsPage.title' => 'Уведомления',
 			'notificationsPage.deleteConfirmTitle' => 'Вы уверены?',
 			'notificationsPage.deleteConfirmBody' => 'Это уведомление будет удалено.',

@@ -877,7 +877,8 @@
         "incoming2Rest": "! When should we have the party?",
         "botReply": "Would you rather have the party at home or at a restaurant?"
       }
-    }
+    },
+    "deleteFailed": "无法删除场景，请重试。"
   },
   "notificationsPage": {
     "title": "通知",

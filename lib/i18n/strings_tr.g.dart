@@ -638,6 +638,7 @@ class _Translations$rolePlayPage$tr implements Translations$rolePlayPage$en {
 	@override late final _Translations$rolePlayPage$takingTaxi$tr takingTaxi = _Translations$rolePlayPage$takingTaxi$tr._(_root);
 	@override late final _Translations$rolePlayPage$rentingApartment$tr rentingApartment = _Translations$rolePlayPage$rentingApartment$tr._(_root);
 	@override late final _Translations$rolePlayPage$birthdayParty$tr birthdayParty = _Translations$rolePlayPage$birthdayParty$tr._(_root);
+	@override String get deleteFailed => 'Senaryo silinemedi. Lütfen tekrar dene.';
 }
 
 // Path: pushNotifications
@@ -2666,6 +2667,7 @@ extension on TranslationsTr {
 			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Güzel',
 			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! Partiyi ne zaman yapalım?',
 			'rolePlayPage.birthdayParty.chat.botReply' => 'Evde mi yoksa restoranda mı yapmayı tercih edersin?',
+			'rolePlayPage.deleteFailed' => 'Senaryo silinemedi. Lütfen tekrar dene.',
 			'pushNotifications.title' => 'Lingola',
 			'pushNotifications.h2.0' => 'Kısa bir ara verdin galiba.',
 			'pushNotifications.h2.1' => 'Bir kelime kadar vaktin var mı?',

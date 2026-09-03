@@ -617,6 +617,7 @@ class _Translations$rolePlayPage$zh implements Translations$rolePlayPage$en {
 	@override late final _Translations$rolePlayPage$takingTaxi$zh takingTaxi = _Translations$rolePlayPage$takingTaxi$zh._(_root);
 	@override late final _Translations$rolePlayPage$rentingApartment$zh rentingApartment = _Translations$rolePlayPage$rentingApartment$zh._(_root);
 	@override late final _Translations$rolePlayPage$birthdayParty$zh birthdayParty = _Translations$rolePlayPage$birthdayParty$zh._(_root);
+	@override String get deleteFailed => '无法删除场景，请重试。';
 }
 
 // Path: notificationsPage
@@ -2654,6 +2655,7 @@ extension on TranslationsZh {
 			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Nice',
 			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! When should we have the party?',
 			'rolePlayPage.birthdayParty.chat.botReply' => 'Would you rather have the party at home or at a restaurant?',
+			'rolePlayPage.deleteFailed' => '无法删除场景，请重试。',
 			'notificationsPage.title' => '通知',
 			'notificationsPage.deleteConfirmTitle' => '确定吗？',
 			'notificationsPage.deleteConfirmBody' => '此通知将被删除。',

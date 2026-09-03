@@ -617,6 +617,7 @@ class _Translations$rolePlayPage$hi implements Translations$rolePlayPage$en {
 	@override late final _Translations$rolePlayPage$takingTaxi$hi takingTaxi = _Translations$rolePlayPage$takingTaxi$hi._(_root);
 	@override late final _Translations$rolePlayPage$rentingApartment$hi rentingApartment = _Translations$rolePlayPage$rentingApartment$hi._(_root);
 	@override late final _Translations$rolePlayPage$birthdayParty$hi birthdayParty = _Translations$rolePlayPage$birthdayParty$hi._(_root);
+	@override String get deleteFailed => 'सीन नहीं हटाया जा सका। कृपया फिर से कोशिश करें।';
 }
 
 // Path: notificationsPage
@@ -2654,6 +2655,7 @@ extension on TranslationsHi {
 			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Nice',
 			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! When should we have the party?',
 			'rolePlayPage.birthdayParty.chat.botReply' => 'Would you rather have the party at home or at a restaurant?',
+			'rolePlayPage.deleteFailed' => 'सीन नहीं हटाया जा सका। कृपया फिर से कोशिश करें।',
 			'notificationsPage.title' => 'सूचनाएँ',
 			'notificationsPage.deleteConfirmTitle' => 'क्या आप सुनिश्चित हैं?',
 			'notificationsPage.deleteConfirmBody' => 'यह सूचना हटा दी जाएगी।',

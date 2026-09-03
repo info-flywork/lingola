@@ -891,7 +891,8 @@
         "incoming2Rest": "! Partiyi ne zaman yapalım?",
         "botReply": "Evde mi yoksa restoranda mı yapmayı tercih edersin?"
       }
-    }
+    },
+    "deleteFailed": "Senaryo silinemedi. Lütfen tekrar dene."
   },
   "pushNotifications": {
     "title": "Lingola",

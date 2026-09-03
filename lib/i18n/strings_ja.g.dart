@@ -617,6 +617,7 @@ class _Translations$rolePlayPage$ja implements Translations$rolePlayPage$en {
 	@override late final _Translations$rolePlayPage$takingTaxi$ja takingTaxi = _Translations$rolePlayPage$takingTaxi$ja._(_root);
 	@override late final _Translations$rolePlayPage$rentingApartment$ja rentingApartment = _Translations$rolePlayPage$rentingApartment$ja._(_root);
 	@override late final _Translations$rolePlayPage$birthdayParty$ja birthdayParty = _Translations$rolePlayPage$birthdayParty$ja._(_root);
+	@override String get deleteFailed => 'シナリオを削除できませんでした。もう一度お試しください。';
 }
 
 // Path: notificationsPage
@@ -2654,6 +2655,7 @@ extension on TranslationsJa {
 			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Nice',
 			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! When should we have the party?',
 			'rolePlayPage.birthdayParty.chat.botReply' => 'Would you rather have the party at home or at a restaurant?',
+			'rolePlayPage.deleteFailed' => 'シナリオを削除できませんでした。もう一度お試しください。',
 			'notificationsPage.title' => '通知',
 			'notificationsPage.deleteConfirmTitle' => 'よろしいですか？',
 			'notificationsPage.deleteConfirmBody' => 'この通知は削除されます。',

@@ -104,6 +104,7 @@ abstract final class RolePlayApiService {
     final json = await ApiClient.post(
       '/roleplay/scenarios/custom/generate',
       auth: true,
+      receiveTimeout: const Duration(seconds: 120),
       body: {
         'scenario': scenario,
         'tutorRole': tutorRole,
@@ -119,6 +120,12 @@ abstract final class RolePlayApiService {
       throw ApiException('Invalid custom role play response');
     }
     return RolePlayScenarioDto.fromJson(created);
+  }
+
+  static Future<void> deleteCustomScenario(String scenarioId) async {
+    final id = scenarioId.trim();
+    if (id.isEmpty) throw ApiException('scenarioId is required');
+    await ApiClient.delete('/roleplay/scenarios/$id', auth: true);
   }
 
   static Future<RolePlayProgressDto> saveProgress({

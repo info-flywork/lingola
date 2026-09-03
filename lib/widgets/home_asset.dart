@@ -72,8 +72,12 @@ class HomeAsset extends StatelessWidget {
       );
     }
 
+    // Küçük ikonlarda cacheWidth/Height hem kırpıyor hem yumuşatıyor.
     final bool skipCacheResize =
-        _isFinitePositive(width) && width! <= 32 && _isFinitePositive(height) && height! <= 32;
+        _isFinitePositive(width) &&
+        width! <= 48 &&
+        _isFinitePositive(height) &&
+        height! <= 48;
 
     final int? cacheWidth = skipCacheResize
         ? null

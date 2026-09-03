@@ -54,6 +54,7 @@ abstract final class ApiClient {
     Map<String, dynamic>? body,
     bool auth = false,
     bool allowRefresh = true,
+    Duration? receiveTimeout,
   }) async {
     return _request(
       'POST',
@@ -61,6 +62,7 @@ abstract final class ApiClient {
       body: body,
       auth: auth,
       allowRefresh: allowRefresh,
+      receiveTimeout: receiveTimeout,
     );
   }
 
@@ -108,6 +110,7 @@ abstract final class ApiClient {
     Map<String, dynamic>? body,
     bool auth = false,
     bool allowRefresh = true,
+    Duration? receiveTimeout,
   }) async {
     final headers = <String, dynamic>{};
 
@@ -124,7 +127,11 @@ abstract final class ApiClient {
       final response = await dio.request<dynamic>(
         path,
         data: body,
-        options: Options(method: method, headers: headers),
+        options: Options(
+          method: method,
+          headers: headers,
+          receiveTimeout: receiveTimeout,
+        ),
       );
 
       return _asJson(response.data, response.statusCode);
@@ -144,6 +151,7 @@ abstract final class ApiClient {
             body: body,
             auth: auth,
             allowRefresh: false,
+            receiveTimeout: receiveTimeout,
           );
         }
       }

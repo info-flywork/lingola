@@ -891,7 +891,8 @@
         "incoming2Rest": "! When should we have the party?",
         "botReply": "Would you rather have the party at home or at a restaurant?"
       }
-    }
+    },
+    "deleteFailed": "Could not delete scenario. Please try again."
   },
   "pushNotifications": {
     "title": "Lingola",
