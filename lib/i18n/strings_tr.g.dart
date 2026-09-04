@@ -125,6 +125,7 @@ class _Translations$onboarding$tr implements Translations$onboarding$en {
 
 	// Translations
 	@override String pageA11y({required Object current, required Object total}) => 'Eğitim sayfası ${current} / ${total}';
+	@override String get letsStart => 'Hadi Başlayalım';
 	@override late final _Translations$onboarding$slide1$tr slide1 = _Translations$onboarding$slide1$tr._(_root);
 	@override late final _Translations$onboarding$slide2$tr slide2 = _Translations$onboarding$slide2$tr._(_root);
 	@override late final _Translations$onboarding$slide3$tr slide3 = _Translations$onboarding$slide3$tr._(_root);
@@ -182,29 +183,63 @@ class _Translations$setup$tr implements Translations$setup$en {
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get goalTitle => 'Hedefin ne?';
+	@override String get goalTitle => 'Neden yeni bir dil öğrenmek istiyorsunuz?';
+	@override String get goalHint => 'Hedefine tam uyan kişisel bir çalışma planı hazırlayacağız';
 	@override String get goalCareer => 'Kariyer Gelişimi';
 	@override String get goalTravel => 'Seyahat';
 	@override String get goalLiving => 'Yurt Dışında Yaşamak';
-	@override String get goalStudying => 'Yurt Dışında Eğitim';
-	@override String get goalOther => 'Diğer';
-	@override String get levelTitle => 'Mevcut dil seviyen nedir?';
-	@override String get levelA1 => 'A1 — Birkaç kelime biliyorum';
-	@override String get levelA2 => 'A2 — Basit ifadeler kullanabiliyorum';
-	@override String get levelB1 => 'B1 — Günlük konuşmalar yapabiliyorum';
-	@override String get levelB2 => 'B2 — Tanıdık konularda akıcı iletişim kurabiliyorum';
-	@override String get levelC1 => 'C1 — İleri düzey, geliştirmek istiyorum';
-	@override String get levelC2 => 'C2 — Ana dil seviyesine yakın';
-	@override String get paceTitle => 'Ne kadar hızlı gelişmek istiyorsun?';
+	@override String get goalStudying => 'Eğitim';
+	@override String get goalOther => 'Kişisel gelişim';
+	@override String get interestsTitle => 'Lütfen ilgi alanlarınızı seçiniz';
+	@override String get interestsHint => 'İlgini çeken konularla sana özel bir öğrenme deneyimi oluşturacağız.';
+	@override String get seeMoreEllipsis => 'Daha fazla...';
+	@override String get levelTitle => 'Mevcut seviyeni nasıl tanımlarsın?';
+	@override String get levelA1 => 'Bu dili sıfırdan öğreniyorum';
+	@override String get levelA2 => 'Temel sohbetlere katılabilirim';
+	@override String get levelB1 => 'Aşina olduğum konularda kısa sohbetleri idare edebilirim';
+	@override String get levelB2 => 'Günlük konular hakkında detaylı konuşabilirim';
+	@override String get levelC1 => 'Ana dili konuşanlarla akıcı bir şekilde konuşabilirim';
+	@override String get levelC2 => 'Her konuda kendimi net bir şekilde ifade edebiliyorum';
+	@override String get paceTitle => 'Kayda değer bir ilerleme görmeyi ne kadar yakında istiyorsun?';
 	@override String get explanationTitle => 'Kendi dilinde sorduğun sorulara nasıl açıklama yapalım?';
 	@override String get explanationHint => 'Bunu istediğin zaman profil ayarlarından değiştirebilirsin.';
 	@override String get explanationNative => 'Anadilimde açıkla';
 	@override String get explanationEnglish => 'İngilizce açıkla';
-	@override String get paceMin5 => '5 dk/gün';
-	@override String get paceMin10 => '10 dk/gün';
-	@override String get paceMin15 => '15 dk/gün';
-	@override String get paceMin30 => '30 dk/gün';
-	@override String get paceMin60 => '60 dk/gün';
+	@override String get paceHint => 'Planın temposunu ayarlamamıza yardımcı olur';
+	@override String get paceMonth1 => '1 ay';
+	@override String get paceMonth2_3 => '2-3 ay';
+	@override String get paceMonth6 => '6 ay';
+	@override String get paceYear1 => '1 yıl';
+	@override String get paceRelaxed => 'Acele etmiyorum';
+	@override String get progressInsightTitle => 'Sadece 2 haftada gerçek ilerleme gör!';
+	@override String get progressInsightBody => 'Lingola kullanıcıları genelde daha en baştan konuşma özgüvenlerinde büyük bir artış fark ediyor.';
+	@override String get progressInsightConfidence => 'Konuşma özgüveni';
+	@override String get progressInsightToday => 'Today';
+	@override String get progressInsightWeek2 => '2. hafta';
+	@override String get progressInsightWithLingola => 'Lingola ile';
+	@override String get progressInsightWithoutApp => 'Uygulama olmadan';
+	@override String get levelHint => 'Lingola, her seviyeden dil öğrencisine yardımcı olmak için tasarlandı';
+	@override String get dailyPracticeTitle => 'Günde ne kadar pratik yapmak istiyorsun?';
+	@override String get dailyPracticeHint => 'Kendi hızında ilerle, her gün bir adım daha yaklaş.';
+	@override String dailyPracticeMonthlyHours({required Object hours}) => '${hours} / month';
+	@override String dailyPracticeOnlyMinutes({required Object minutes}) => 'Günde sadece ${minutes} dk';
+	@override String dailyPracticeMinutesOption({required Object minutes}) => '${minutes} dk';
+	@override String get dailyPracticeToday => 'Bugün';
+	@override String get practiceTimeTitle => 'Günün hangi saati pratik yapmak istersin?';
+	@override String get practiceTimeHint => 'Hatırlatmalar serini korumana yardımcı olur, her gün hedefine bir adım daha yaklaşmanı sağlar.';
+	@override String get practiceTimeMorning => 'Sabah';
+	@override String get practiceTimeAfternoon => 'Öğleden sonra';
+	@override String get practiceTimeEvening => 'Akşam';
+	@override String get practiceTimeFlexible => 'Esneğim';
+	@override String get practiceTimeSave => 'Kaydet';
+	@override String get setPracticeTimeTitle => 'Zamanını ayarla';
+	@override String get setPracticeTimeHint => 'Hangi zaman aralığında pratik yapmak istersin?';
+	@override String get promiseTitle => 'Ben, her gün konuşma pratiği yapacağıma söz veriyorum';
+	@override String get promiseBody => 'Ve yapay zeka eğitmenleri ile dil öğrenme hedeflerime mümkün olan en hızlı şekilde ulaş';
+	@override String get promiseHoldHint => 'Onaylamak için Lingola logosuna dokunup basılı tut';
+	@override String get aiTutorsIntroTitle => 'Lingola’da 20+ yapay zeka\neğitmeninden dilediğini seçebilirsin';
+	@override String get aiTutorsIntroBody => 'Hepsinin derin kişilikleri ve farklı aksanları var';
+	@override String get aiTutorsIntroCta => 'Biraz Seni Tanıyalım';
 }
 
 // Path: accountCreating
@@ -266,19 +301,19 @@ class _Translations$planReady$tr implements Translations$planReady$en {
 	@override String get goalCareer => 'Kariyer ve İş';
 	@override String get goalTravel => 'Seyahat';
 	@override String get goalLiving => 'Yurt Dışında Yaşamak';
-	@override String get goalStudying => 'Yurt Dışında Eğitim';
-	@override String get goalOther => 'Diğer';
+	@override String get goalStudying => 'Eğitim';
+	@override String get goalOther => 'Kişisel gelişim';
 	@override String get levelA1 => 'A1';
 	@override String get levelA2 => 'A2';
 	@override String get levelB1 => 'B1';
 	@override String get levelB2 => 'B2';
 	@override String get levelC1 => 'C1';
 	@override String get levelC2 => 'C2';
-	@override String get paceMin5 => '5 dk/gün';
-	@override String get paceMin10 => '10 dk/gün';
-	@override String get paceMin15 => '15 dk/gün';
-	@override String get paceMin30 => '30 dk/gün';
-	@override String get paceMin60 => '60 dk/gün';
+	@override String get paceMonth1 => '1 ay';
+	@override String get paceMonth2_3 => '2-3 ay';
+	@override String get paceMonth6 => '6 ay';
+	@override String get paceYear1 => '1 yıl';
+	@override String get paceRelaxed => 'Acele etmiyorum';
 }
 
 // Path: demoChat
@@ -353,7 +388,7 @@ class _Translations$auth$tr implements Translations$auth$en {
 	@override String get continueGuest => 'Misafir Olarak Devam Et';
 	@override String get or => 'veya';
 	@override String get alreadyHaveAccount => 'Zaten hesabın var mı?';
-	@override String get signIn => 'Giriş yap';
+	@override String get signIn => 'Giriş Yap';
 	@override String get legal => 'Lingola\'ya kaydolarak, Hizmet Şartlarımızı kabul etmiş olursunuz. Verilerinizi nasıl işlediğimizi Gizlilik Politikasında ve Çerez Politikası\'nda öğrenin.';
 	@override String get terms => 'Hizmet Şartları';
 	@override String get privacy => 'Gizlilik Politikası';
@@ -604,14 +639,28 @@ class _Translations$rolePlayPage$tr implements Translations$rolePlayPage$en {
 	@override String get subtitle => 'Rolünü seç — gerçek bir senaryoyu deneyimle 🎭';
 	@override String progressCompleted({required Object value}) => '%${value} tamamlandı';
 	@override String minutes({required Object value}) => '${value} Dak';
-	@override String get beginner => 'Yeni Başlayan';
+	@override String get beginner => 'Başlangıç';
+	@override String get easy => 'Kolay';
+	@override String get medium => 'Orta';
+	@override String get hard => 'Zor';
 	@override String get intermediate => 'Orta';
 	@override String get beginnerIntermediate => 'Başlangıç–Orta';
 	@override String get screenplay => 'SENARYO';
+	@override String get filterAll => 'Tümü';
+	@override String get seeAll => 'Tümünü Gör';
+	@override String get lingolaRolePlay => 'Lingola RolePlay';
+	@override String get shopping => 'Alışveriş';
+	@override String get flirting => 'Flört';
+	@override String get lifeInTheUs => 'Life In The Us';
+	@override String get freeDiscussion => 'Serbest Sohbet';
+	@override String get jobInterview => 'İş Mülakatı';
 	@override String get dailyInteractions => 'Günlük Etkileşimler';
+	@override String get socialDynamics => 'Sosyal Dinamikler';
+	@override String get restaurant => 'Restoran';
+	@override String get travel => 'Seyahat';
 	@override String get business => 'İş';
 	@override String get customScenarios => 'Senaryoların';
-	@override String get createOwnScenario => 'Kendi senaryonu\noluştur!';
+	@override String get createOwnScenario => 'Kendi senaryonu oluştur!';
 	@override String get createOwnScenarioTitle => 'Kendi senaryonu oluştur';
 	@override String get createFieldScenario => 'Senaryo';
 	@override String get createFieldScenarioHint => 'örn. iş toplantısı';
@@ -621,11 +670,15 @@ class _Translations$rolePlayPage$tr implements Translations$rolePlayPage$en {
 	@override String get createFieldYourRoleHint => 'örn. aday';
 	@override String get createFieldExtraInfo => 'Ek Bilgiler (İsteğe bağlı)';
 	@override String get createFieldExtraInfoHint => 'örn. bir teknoloji şirketinde kıdemli yazılımcı pozisyonu için mülakat';
+	@override String get createFieldDifficulty => 'Zorluk';
 	@override String get createOwnScenarioContinue => 'Devam Et';
 	@override String get createFieldsRequired => 'Lütfen senaryo ve her iki rol alanını doldur.';
 	@override String get creatingScenario => 'Rol oyunun oluşturuluyor';
 	@override String get creatingScenarioSubtitle => 'Lingola senaryonu ve görselini hazırlıyor...';
 	@override String get createFailed => 'Senaryo oluşturulamadı. Lütfen tekrar dene.';
+	@override String get deleteFailed => 'Senaryo silinemedi. Lütfen tekrar dene.';
+	@override late final _Translations$rolePlayPage$flirtingMeet$tr flirtingMeet = _Translations$rolePlayPage$flirtingMeet$tr._(_root);
+	@override late final _Translations$rolePlayPage$freeTalkHobby$tr freeTalkHobby = _Translations$rolePlayPage$freeTalkHobby$tr._(_root);
 	@override late final _Translations$rolePlayPage$coffee$tr coffee = _Translations$rolePlayPage$coffee$tr._(_root);
 	@override late final _Translations$rolePlayPage$directions$tr directions = _Translations$rolePlayPage$directions$tr._(_root);
 	@override late final _Translations$rolePlayPage$interview$tr interview = _Translations$rolePlayPage$interview$tr._(_root);
@@ -638,7 +691,6 @@ class _Translations$rolePlayPage$tr implements Translations$rolePlayPage$en {
 	@override late final _Translations$rolePlayPage$takingTaxi$tr takingTaxi = _Translations$rolePlayPage$takingTaxi$tr._(_root);
 	@override late final _Translations$rolePlayPage$rentingApartment$tr rentingApartment = _Translations$rolePlayPage$rentingApartment$tr._(_root);
 	@override late final _Translations$rolePlayPage$birthdayParty$tr birthdayParty = _Translations$rolePlayPage$birthdayParty$tr._(_root);
-	@override String get deleteFailed => 'Senaryo silinemedi. Lütfen tekrar dene.';
 }
 
 // Path: pushNotifications
@@ -798,6 +850,9 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get targetLanguageLabel => 'Hedef Dil';
 	@override String get languageLevel => 'Dil Seviyesi';
 	@override String get nativeLanguage => 'Ana Dilim';
+	@override String get chineseShort => 'Çince';
+	@override String get seeMore => 'Daha Fazla...';
+	@override String get searchLanguages => 'Search';
 	@override String get interests => 'İlgi Alanları';
 	@override String get goalChipCareer => 'Kariyer';
 	@override String get goalChipTravel => 'Seyahat';
@@ -812,7 +867,7 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get selectNativeLanguageTitle => 'Ana dilini seç';
 	@override String get reminderOn => 'Açık';
 	@override String get reminderOff => 'Kapalı';
-	@override String get remindMe => 'Beni Hatırlat';
+	@override String get remindMe => 'Bana Hatırlat';
 	@override String get reminderSave => 'Kaydet';
 	@override String get reminderSaved => 'Hatırlatma kaydedildi';
 	@override String get selectLanguageTitle => 'Dil Seç';
@@ -821,9 +876,15 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get active => 'Aktif';
 	@override String get premiumVersion => 'Premium';
 	@override String get shareFriend => 'Arkadaşla Paylaş';
+	@override String get shareLingola => 'Lingola\'yı Paylaş';
 	@override String get shareWithFriendTitle => 'Arkadaşla Paylaş';
 	@override String get shareInviteBody => 'Arkadaşlarını davet et ve birlikte çeviri yapmanın tadını çıkar.';
-	@override String get rateUs => 'Bizi Değerlendir';
+	@override String get rateUs => 'Bizi Beğendin mi? Puan Ver';
+	@override String get settingsCertificates => 'Certificates';
+	@override String get restorePurchases => 'Satın Alımları Geri Yükle';
+	@override String get aboutFlywork => 'Flywork Hakkında';
+	@override String get faqHelp => 'SSS ve Yardım';
+	@override String get deleteAccountAndData => 'Hesabı ve Verileri Sil';
 	@override String get faq => 'Lingola SSS';
 	@override late final _Translations$profilePage$faqItems$tr faqItems = _Translations$profilePage$faqItems$tr._(_root);
 	@override String get support => 'Destek';
@@ -843,10 +904,10 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get savedWords => 'Kaydedilen Kelimeler';
 	@override String itemsToReview({required Object count}) => '${count} gözden geçirilecek öğe';
 	@override String get logout => 'Çıkış Yap';
-	@override String get logoutTitle => 'Çıkış yapmak üzeresin';
+	@override String get logoutTitle => 'Çıkış yapmak istediğine emin misiniz?';
 	@override String get logoutBody => 'Görüşmek üzere! Nefes egzersizlerini özleyeceğiz.';
-	@override String get logoutConfirm => 'ÇIKIŞ YAP';
-	@override String get logoutCancel => 'İPTAL';
+	@override String get logoutConfirm => 'LOGOUT';
+	@override String get logoutCancel => 'CANCEL';
 	@override late final _Translations$profilePage$days$tr days = _Translations$profilePage$days$tr._(_root);
 	@override String get certificateTitle => 'Sertifikanız';
 	@override String certificateLevelTitle({required Object level}) => '${level} Sertifikası';
@@ -885,6 +946,29 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get certificatePreviewBody => 'Lingola\'da bir CEFR seviyesini tamamladığınızda sertifikanız burada görünecek — adınız, seviyeniz ve doğrulanabilir QR kodu ile.';
 	@override String get certificatePreviewHint => 'Sertifikanızı açmak için bir seviye yolunu tamamlayın';
 	@override String get certificateTapToView => 'Sertifikanızı görüntülemek ve paylaşmak için dokunun';
+	@override String get interestShopping => 'Alışveriş';
+	@override String get interestFood => 'Yemek';
+	@override String get interestPopCulture => 'Popüler Kültür';
+	@override String get interestFilm => 'Film';
+	@override String get interestMusic => 'Müzik';
+	@override String get interestSport => 'Spor';
+	@override String get interestTechnology => 'Teknoloji';
+	@override String get interestScience => 'Bilim';
+	@override String get interestHealth => 'Sağlık';
+	@override String get interestFashion => 'Moda';
+	@override String get interestArt => 'Sanat';
+	@override String get interestLiterature => 'Edebiyat';
+	@override String get interestHistory => 'Tarih';
+	@override String get interestCulture => 'Kültür';
+	@override String get interestAstronomy => 'Astronomi';
+	@override String get interestPet => 'Evcil Hayvan';
+	@override String get interestSocialMedia => 'Sosyal Medya';
+	@override String get interestEntrepreneur => 'Girişimcilik';
+	@override String get confirmDeleteWarning => 'Hesabınız ve tüm ilerlemeniz kalıcı olarak silinecek. Bu işlemi geri almak mümkün değil.';
+	@override String get confirmKeepGoing => 'İlerlemeden Vazgeçme';
+	@override String get myCertificates => 'Sertifikalarım';
+	@override String get certificatesEmptyTitle => 'Henüz sertifika yok';
+	@override String get certificatesEmptySubtitle => 'Bir seviye tamamladığında tekrar kontrol etmeyi unutma.';
 }
 
 // Path: onboarding.slide1
@@ -931,7 +1015,7 @@ class _Translations$onboarding$slide3$tr implements Translations$onboarding$slid
 
 	// Translations
 	@override String get title => 'Senin İçin Oluşturulmuş Bir Öğrenme Planı';
-	@override String get body => 'Hedeflerin, hızın, seviyen.\nBaşlangıçtan akıcıya — adım adım.';
+	@override String get body => 'Hedeflerin, Hızın, Seviyen. Başlangıçtan Akıcıya — Adım Adım.';
 	@override String get goal => 'Hedef';
 	@override String get practice => 'Pratik';
 	@override String get progress => 'İlerleme';
@@ -1059,6 +1143,30 @@ class _Translations$lessonPage$levels$tr implements Translations$lessonPage$leve
 	@override late final _Translations$lessonPage$levels$b2$tr b2 = _Translations$lessonPage$levels$b2$tr._(_root);
 	@override late final _Translations$lessonPage$levels$c1$tr c1 = _Translations$lessonPage$levels$c1$tr._(_root);
 	@override late final _Translations$lessonPage$levels$c2$tr c2 = _Translations$lessonPage$levels$c2$tr._(_root);
+}
+
+// Path: rolePlayPage.flirtingMeet
+class _Translations$rolePlayPage$flirtingMeet$tr implements Translations$rolePlayPage$flirtingMeet$en {
+	_Translations$rolePlayPage$flirtingMeet$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Kafede Birini Tanımak';
+	@override String get screenplay => 'Samimi bir sohbet başlat, kendinden biraz bahset, ortak ilgi alanları paylaş ve tekrar görüşüp görüşmeyeceğinize karar ver.';
+	@override late final _Translations$rolePlayPage$flirtingMeet$chat$tr chat = _Translations$rolePlayPage$flirtingMeet$chat$tr._(_root);
+}
+
+// Path: rolePlayPage.freeTalkHobby
+class _Translations$rolePlayPage$freeTalkHobby$tr implements Translations$rolePlayPage$freeTalkHobby$en {
+	_Translations$rolePlayPage$freeTalkHobby$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Hobiler Hakkında Sohbet';
+	@override String get screenplay => 'Boş zaman aktiviteleri hakkında serbestçe konuş, takip soruları sor, tercihlerini paylaş ve birlikte yeni bir şey denemeyi öner.';
+	@override late final _Translations$rolePlayPage$freeTalkHobby$chat$tr chat = _Translations$rolePlayPage$freeTalkHobby$chat$tr._(_root);
 }
 
 // Path: rolePlayPage.coffee
@@ -1607,6 +1715,36 @@ class _Translations$lessonPage$levels$c2$tr implements Translations$lessonPage$l
 	];
 }
 
+// Path: rolePlayPage.flirtingMeet.chat
+class _Translations$rolePlayPage$flirtingMeet$chat$tr implements Translations$rolePlayPage$flirtingMeet$chat$en {
+	_Translations$rolePlayPage$flirtingMeet$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün kafede hafif bir flört sohbeti pratik edeceğiz — selam, iltifat, numara isteme. Önce açıklayacağım, sonra canlandıracağız. Hazır mısın?';
+	@override String get incoming1 => 'Bu koltuk dolu mu? Bugün yer kalmamış.';
+	@override String get outgoing1 => 'Buyurun! Ben de kahvemi bekliyordum.';
+	@override String get incoming2Highlight => 'Teşekkürler';
+	@override String get incoming2Rest => '! Bu arada ben Alex. Seni buraya ne getirdi?';
+	@override String get botReply => 'Tanıştığımıza memnun oldum. Sık gelir misin buraya?';
+}
+
+// Path: rolePlayPage.freeTalkHobby.chat
+class _Translations$rolePlayPage$freeTalkHobby$chat$tr implements Translations$rolePlayPage$freeTalkHobby$chat$en {
+	_Translations$rolePlayPage$freeTalkHobby$chat$tr._(this._root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Merhaba! Bugün hobiler hakkında serbest sohbet pratik edeceğiz — sorma, cevaplama, doğal tepkiler. Önce anlatacağım, sonra konuşacağız. Hazır mısın?';
+	@override String get incoming1 => 'Peki, hafta sonları genellikle ne yaparsın?';
+	@override String get outgoing1 => 'Yürüyüşü ve film izlemeyi severim. Sen?';
+	@override String get incoming2Highlight => 'Güzel';
+	@override String get incoming2Rest => '! Ben de daha fazla yürüyüş yapmak istiyordum. Favori bir parkurun var mı?';
+	@override String get botReply => 'Kulağa harika geliyor. Bir ara birlikte gidelim mi?';
+}
+
 // Path: rolePlayPage.coffee.chat
 class _Translations$rolePlayPage$coffee$chat$tr implements Translations$rolePlayPage$coffee$chat$en {
 	_Translations$rolePlayPage$coffee$chat$tr._(this._root);
@@ -1932,6 +2070,7 @@ extension on TranslationsTr {
 			'apiErrors.levelRequired' => 'Bu seviyeyi açmak için önceki dersleri tamamla.',
 			'apiErrors.internalError' => 'Bir şeyler ters gitti. Lütfen tekrar dene.',
 			'onboarding.pageA11y' => ({required Object current, required Object total}) => 'Eğitim sayfası ${current} / ${total}',
+			'onboarding.letsStart' => 'Hadi Başlayalım',
 			'onboarding.slide1.title' => 'Haftalar İçinde Kendine Güvenle Konuş',
 			'onboarding.slide1.body' => 'AI ile gerçek konuşmalar pratiği yap. Aksanını, özgüvenini ve akıcılığını her gün geliştir.',
 			'onboarding.slide1.testimonialName' => 'Sarah Williams, 24',
@@ -1951,7 +2090,7 @@ extension on TranslationsTr {
 			'onboarding.slide2.availability' => 'Uygunluk',
 			'onboarding.slide2.feeling' => 'Duygu',
 			'onboarding.slide3.title' => 'Senin İçin Oluşturulmuş Bir Öğrenme Planı',
-			'onboarding.slide3.body' => 'Hedeflerin, hızın, seviyen.\nBaşlangıçtan akıcıya — adım adım.',
+			'onboarding.slide3.body' => 'Hedeflerin, Hızın, Seviyen. Başlangıçtan Akıcıya — Adım Adım.',
 			'onboarding.slide3.goal' => 'Hedef',
 			'onboarding.slide3.practice' => 'Pratik',
 			'onboarding.slide3.progress' => 'İlerleme',
@@ -1982,29 +2121,63 @@ extension on TranslationsTr {
 			'language.japanese' => 'Japonca',
 			'language.spanish' => 'İspanyolca',
 			'language.russian' => 'Rusça',
-			'setup.goalTitle' => 'Hedefin ne?',
+			'setup.goalTitle' => 'Neden yeni bir dil öğrenmek istiyorsunuz?',
+			'setup.goalHint' => 'Hedefine tam uyan kişisel bir çalışma planı hazırlayacağız',
 			'setup.goalCareer' => 'Kariyer Gelişimi',
 			'setup.goalTravel' => 'Seyahat',
 			'setup.goalLiving' => 'Yurt Dışında Yaşamak',
-			'setup.goalStudying' => 'Yurt Dışında Eğitim',
-			'setup.goalOther' => 'Diğer',
-			'setup.levelTitle' => 'Mevcut dil seviyen nedir?',
-			'setup.levelA1' => 'A1 — Birkaç kelime biliyorum',
-			'setup.levelA2' => 'A2 — Basit ifadeler kullanabiliyorum',
-			'setup.levelB1' => 'B1 — Günlük konuşmalar yapabiliyorum',
-			'setup.levelB2' => 'B2 — Tanıdık konularda akıcı iletişim kurabiliyorum',
-			'setup.levelC1' => 'C1 — İleri düzey, geliştirmek istiyorum',
-			'setup.levelC2' => 'C2 — Ana dil seviyesine yakın',
-			'setup.paceTitle' => 'Ne kadar hızlı gelişmek istiyorsun?',
+			'setup.goalStudying' => 'Eğitim',
+			'setup.goalOther' => 'Kişisel gelişim',
+			'setup.interestsTitle' => 'Lütfen ilgi alanlarınızı seçiniz',
+			'setup.interestsHint' => 'İlgini çeken konularla sana özel bir öğrenme deneyimi oluşturacağız.',
+			'setup.seeMoreEllipsis' => 'Daha fazla...',
+			'setup.levelTitle' => 'Mevcut seviyeni nasıl tanımlarsın?',
+			'setup.levelA1' => 'Bu dili sıfırdan öğreniyorum',
+			'setup.levelA2' => 'Temel sohbetlere katılabilirim',
+			'setup.levelB1' => 'Aşina olduğum konularda kısa sohbetleri idare edebilirim',
+			'setup.levelB2' => 'Günlük konular hakkında detaylı konuşabilirim',
+			'setup.levelC1' => 'Ana dili konuşanlarla akıcı bir şekilde konuşabilirim',
+			'setup.levelC2' => 'Her konuda kendimi net bir şekilde ifade edebiliyorum',
+			'setup.paceTitle' => 'Kayda değer bir ilerleme görmeyi ne kadar yakında istiyorsun?',
 			'setup.explanationTitle' => 'Kendi dilinde sorduğun sorulara nasıl açıklama yapalım?',
 			'setup.explanationHint' => 'Bunu istediğin zaman profil ayarlarından değiştirebilirsin.',
 			'setup.explanationNative' => 'Anadilimde açıkla',
 			'setup.explanationEnglish' => 'İngilizce açıkla',
-			'setup.paceMin5' => '5 dk/gün',
-			'setup.paceMin10' => '10 dk/gün',
-			'setup.paceMin15' => '15 dk/gün',
-			'setup.paceMin30' => '30 dk/gün',
-			'setup.paceMin60' => '60 dk/gün',
+			'setup.paceHint' => 'Planın temposunu ayarlamamıza yardımcı olur',
+			'setup.paceMonth1' => '1 ay',
+			'setup.paceMonth2_3' => '2-3 ay',
+			'setup.paceMonth6' => '6 ay',
+			'setup.paceYear1' => '1 yıl',
+			'setup.paceRelaxed' => 'Acele etmiyorum',
+			'setup.progressInsightTitle' => 'Sadece 2 haftada gerçek ilerleme gör!',
+			'setup.progressInsightBody' => 'Lingola kullanıcıları genelde daha en baştan konuşma özgüvenlerinde büyük bir artış fark ediyor.',
+			'setup.progressInsightConfidence' => 'Konuşma özgüveni',
+			'setup.progressInsightToday' => 'Today',
+			'setup.progressInsightWeek2' => '2. hafta',
+			'setup.progressInsightWithLingola' => 'Lingola ile',
+			'setup.progressInsightWithoutApp' => 'Uygulama olmadan',
+			'setup.levelHint' => 'Lingola, her seviyeden dil öğrencisine yardımcı olmak için tasarlandı',
+			'setup.dailyPracticeTitle' => 'Günde ne kadar pratik yapmak istiyorsun?',
+			'setup.dailyPracticeHint' => 'Kendi hızında ilerle, her gün bir adım daha yaklaş.',
+			'setup.dailyPracticeMonthlyHours' => ({required Object hours}) => '${hours} / month',
+			'setup.dailyPracticeOnlyMinutes' => ({required Object minutes}) => 'Günde sadece ${minutes} dk',
+			'setup.dailyPracticeMinutesOption' => ({required Object minutes}) => '${minutes} dk',
+			'setup.dailyPracticeToday' => 'Bugün',
+			'setup.practiceTimeTitle' => 'Günün hangi saati pratik yapmak istersin?',
+			'setup.practiceTimeHint' => 'Hatırlatmalar serini korumana yardımcı olur, her gün hedefine bir adım daha yaklaşmanı sağlar.',
+			'setup.practiceTimeMorning' => 'Sabah',
+			'setup.practiceTimeAfternoon' => 'Öğleden sonra',
+			'setup.practiceTimeEvening' => 'Akşam',
+			'setup.practiceTimeFlexible' => 'Esneğim',
+			'setup.practiceTimeSave' => 'Kaydet',
+			'setup.setPracticeTimeTitle' => 'Zamanını ayarla',
+			'setup.setPracticeTimeHint' => 'Hangi zaman aralığında pratik yapmak istersin?',
+			'setup.promiseTitle' => 'Ben, her gün konuşma pratiği yapacağıma söz veriyorum',
+			'setup.promiseBody' => 'Ve yapay zeka eğitmenleri ile dil öğrenme hedeflerime mümkün olan en hızlı şekilde ulaş',
+			'setup.promiseHoldHint' => 'Onaylamak için Lingola logosuna dokunup basılı tut',
+			'setup.aiTutorsIntroTitle' => 'Lingola’da 20+ yapay zeka\neğitmeninden dilediğini seçebilirsin',
+			'setup.aiTutorsIntroBody' => 'Hepsinin derin kişilikleri ve farklı aksanları var',
+			'setup.aiTutorsIntroCta' => 'Biraz Seni Tanıyalım',
 			'accountCreating.title' => 'Kişisel Hesabın Oluşturuluyor',
 			'accountCreating.titleLine1' => 'Building your',
 			'accountCreating.titleLine2' => 'Account',
@@ -2048,19 +2221,19 @@ extension on TranslationsTr {
 			'planReady.goalCareer' => 'Kariyer ve İş',
 			'planReady.goalTravel' => 'Seyahat',
 			'planReady.goalLiving' => 'Yurt Dışında Yaşamak',
-			'planReady.goalStudying' => 'Yurt Dışında Eğitim',
-			'planReady.goalOther' => 'Diğer',
+			'planReady.goalStudying' => 'Eğitim',
+			'planReady.goalOther' => 'Kişisel gelişim',
 			'planReady.levelA1' => 'A1',
 			'planReady.levelA2' => 'A2',
 			'planReady.levelB1' => 'B1',
 			'planReady.levelB2' => 'B2',
 			'planReady.levelC1' => 'C1',
 			'planReady.levelC2' => 'C2',
-			'planReady.paceMin5' => '5 dk/gün',
-			'planReady.paceMin10' => '10 dk/gün',
-			'planReady.paceMin15' => '15 dk/gün',
-			'planReady.paceMin30' => '30 dk/gün',
-			'planReady.paceMin60' => '60 dk/gün',
+			'planReady.paceMonth1' => '1 ay',
+			'planReady.paceMonth2_3' => '2-3 ay',
+			'planReady.paceMonth6' => '6 ay',
+			'planReady.paceYear1' => '1 yıl',
+			'planReady.paceRelaxed' => 'Acele etmiyorum',
 			'demoChat.brand' => 'Lingola',
 			'demoChat.lessonBadge' => 'Seni tanıyalım',
 			'demoChat.speed' => '1x',
@@ -2099,7 +2272,7 @@ extension on TranslationsTr {
 			'auth.continueGuest' => 'Misafir Olarak Devam Et',
 			'auth.or' => 'veya',
 			'auth.alreadyHaveAccount' => 'Zaten hesabın var mı?',
-			'auth.signIn' => 'Giriş yap',
+			'auth.signIn' => 'Giriş Yap',
 			'auth.legal' => 'Lingola\'ya kaydolarak, Hizmet Şartlarımızı kabul etmiş olursunuz. Verilerinizi nasıl işlediğimizi Gizlilik Politikasında ve Çerez Politikası\'nda öğrenin.',
 			'auth.terms' => 'Hizmet Şartları',
 			'auth.privacy' => 'Gizlilik Politikası',
@@ -2382,6 +2555,8 @@ extension on TranslationsTr {
 			'lessonPage.levels.a2.lessons.22' => 'Yemek',
 			'lessonPage.levels.a2.lessons.23' => 'Ulaşım',
 			'lessonPage.levels.a2.lessons.24' => 'Bir seyahate hazır',
+			_ => null,
+		} ?? switch (path) {
 			'lessonPage.levels.a2.lessons.25' => 'Seyahat 1',
 			'lessonPage.levels.a2.lessons.26' => 'Şehir kaçamakları',
 			'lessonPage.levels.a2.lessons.27' => 'Seyahat 2',
@@ -2417,8 +2592,6 @@ extension on TranslationsTr {
 			'lessonPage.levels.b1.lessons.3' => 'Gelecek planları',
 			'lessonPage.levels.b1.lessons.4' => 'Etkinlik planlama',
 			'lessonPage.levels.b1.lessons.5' => 'Hedefler ve planlar',
-			_ => null,
-		} ?? switch (path) {
 			'lessonPage.levels.b1.lessons.6' => 'Tarihi olaylar',
 			'lessonPage.levels.b1.lessons.7' => 'Teknoloji',
 			'lessonPage.levels.b1.lessons.8' => 'Asla ama asla',
@@ -2549,14 +2722,28 @@ extension on TranslationsTr {
 			'rolePlayPage.subtitle' => 'Rolünü seç — gerçek bir senaryoyu deneyimle 🎭',
 			'rolePlayPage.progressCompleted' => ({required Object value}) => '%${value} tamamlandı',
 			'rolePlayPage.minutes' => ({required Object value}) => '${value} Dak',
-			'rolePlayPage.beginner' => 'Yeni Başlayan',
+			'rolePlayPage.beginner' => 'Başlangıç',
+			'rolePlayPage.easy' => 'Kolay',
+			'rolePlayPage.medium' => 'Orta',
+			'rolePlayPage.hard' => 'Zor',
 			'rolePlayPage.intermediate' => 'Orta',
 			'rolePlayPage.beginnerIntermediate' => 'Başlangıç–Orta',
 			'rolePlayPage.screenplay' => 'SENARYO',
+			'rolePlayPage.filterAll' => 'Tümü',
+			'rolePlayPage.seeAll' => 'Tümünü Gör',
+			'rolePlayPage.lingolaRolePlay' => 'Lingola RolePlay',
+			'rolePlayPage.shopping' => 'Alışveriş',
+			'rolePlayPage.flirting' => 'Flört',
+			'rolePlayPage.lifeInTheUs' => 'Life In The Us',
+			'rolePlayPage.freeDiscussion' => 'Serbest Sohbet',
+			'rolePlayPage.jobInterview' => 'İş Mülakatı',
 			'rolePlayPage.dailyInteractions' => 'Günlük Etkileşimler',
+			'rolePlayPage.socialDynamics' => 'Sosyal Dinamikler',
+			'rolePlayPage.restaurant' => 'Restoran',
+			'rolePlayPage.travel' => 'Seyahat',
 			'rolePlayPage.business' => 'İş',
 			'rolePlayPage.customScenarios' => 'Senaryoların',
-			'rolePlayPage.createOwnScenario' => 'Kendi senaryonu\noluştur!',
+			'rolePlayPage.createOwnScenario' => 'Kendi senaryonu oluştur!',
 			'rolePlayPage.createOwnScenarioTitle' => 'Kendi senaryonu oluştur',
 			'rolePlayPage.createFieldScenario' => 'Senaryo',
 			'rolePlayPage.createFieldScenarioHint' => 'örn. iş toplantısı',
@@ -2566,11 +2753,29 @@ extension on TranslationsTr {
 			'rolePlayPage.createFieldYourRoleHint' => 'örn. aday',
 			'rolePlayPage.createFieldExtraInfo' => 'Ek Bilgiler (İsteğe bağlı)',
 			'rolePlayPage.createFieldExtraInfoHint' => 'örn. bir teknoloji şirketinde kıdemli yazılımcı pozisyonu için mülakat',
+			'rolePlayPage.createFieldDifficulty' => 'Zorluk',
 			'rolePlayPage.createOwnScenarioContinue' => 'Devam Et',
 			'rolePlayPage.createFieldsRequired' => 'Lütfen senaryo ve her iki rol alanını doldur.',
 			'rolePlayPage.creatingScenario' => 'Rol oyunun oluşturuluyor',
 			'rolePlayPage.creatingScenarioSubtitle' => 'Lingola senaryonu ve görselini hazırlıyor...',
 			'rolePlayPage.createFailed' => 'Senaryo oluşturulamadı. Lütfen tekrar dene.',
+			'rolePlayPage.deleteFailed' => 'Senaryo silinemedi. Lütfen tekrar dene.',
+			'rolePlayPage.flirtingMeet.title' => 'Kafede Birini Tanımak',
+			'rolePlayPage.flirtingMeet.screenplay' => 'Samimi bir sohbet başlat, kendinden biraz bahset, ortak ilgi alanları paylaş ve tekrar görüşüp görüşmeyeceğinize karar ver.',
+			'rolePlayPage.flirtingMeet.chat.briefing' => 'Merhaba! Bugün kafede hafif bir flört sohbeti pratik edeceğiz — selam, iltifat, numara isteme. Önce açıklayacağım, sonra canlandıracağız. Hazır mısın?',
+			'rolePlayPage.flirtingMeet.chat.incoming1' => 'Bu koltuk dolu mu? Bugün yer kalmamış.',
+			'rolePlayPage.flirtingMeet.chat.outgoing1' => 'Buyurun! Ben de kahvemi bekliyordum.',
+			'rolePlayPage.flirtingMeet.chat.incoming2Highlight' => 'Teşekkürler',
+			'rolePlayPage.flirtingMeet.chat.incoming2Rest' => '! Bu arada ben Alex. Seni buraya ne getirdi?',
+			'rolePlayPage.flirtingMeet.chat.botReply' => 'Tanıştığımıza memnun oldum. Sık gelir misin buraya?',
+			'rolePlayPage.freeTalkHobby.title' => 'Hobiler Hakkında Sohbet',
+			'rolePlayPage.freeTalkHobby.screenplay' => 'Boş zaman aktiviteleri hakkında serbestçe konuş, takip soruları sor, tercihlerini paylaş ve birlikte yeni bir şey denemeyi öner.',
+			'rolePlayPage.freeTalkHobby.chat.briefing' => 'Merhaba! Bugün hobiler hakkında serbest sohbet pratik edeceğiz — sorma, cevaplama, doğal tepkiler. Önce anlatacağım, sonra konuşacağız. Hazır mısın?',
+			'rolePlayPage.freeTalkHobby.chat.incoming1' => 'Peki, hafta sonları genellikle ne yaparsın?',
+			'rolePlayPage.freeTalkHobby.chat.outgoing1' => 'Yürüyüşü ve film izlemeyi severim. Sen?',
+			'rolePlayPage.freeTalkHobby.chat.incoming2Highlight' => 'Güzel',
+			'rolePlayPage.freeTalkHobby.chat.incoming2Rest' => '! Ben de daha fazla yürüyüş yapmak istiyordum. Favori bir parkurun var mı?',
+			'rolePlayPage.freeTalkHobby.chat.botReply' => 'Kulağa harika geliyor. Bir ara birlikte gidelim mi?',
 			'rolePlayPage.coffee.title' => 'Kahve Dükkanında Sipariş Verme',
 			'rolePlayPage.coffee.screenplay' => 'Favori içeceğini sipariş et, boyutlar ve ekler hakkında sorular sor, toplamını onayla ve kahveni tezgahın üzerinden al.',
 			'rolePlayPage.coffee.chat.briefing' => 'Merhaba! Bugün bir kahve dükkanında sipariş vermeyi pratik edeceğiz — selam, boyutlar, ekler. Önce biraz açıklama yapacağım, sonra canlandıracağız. Nasıl, iyi mi?',
@@ -2667,7 +2872,6 @@ extension on TranslationsTr {
 			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Güzel',
 			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! Partiyi ne zaman yapalım?',
 			'rolePlayPage.birthdayParty.chat.botReply' => 'Evde mi yoksa restoranda mı yapmayı tercih edersin?',
-			'rolePlayPage.deleteFailed' => 'Senaryo silinemedi. Lütfen tekrar dene.',
 			'pushNotifications.title' => 'Lingola',
 			'pushNotifications.h2.0' => 'Kısa bir ara verdin galiba.',
 			'pushNotifications.h2.1' => 'Bir kelime kadar vaktin var mı?',
@@ -2797,6 +3001,9 @@ extension on TranslationsTr {
 			'profilePage.targetLanguageLabel' => 'Hedef Dil',
 			'profilePage.languageLevel' => 'Dil Seviyesi',
 			'profilePage.nativeLanguage' => 'Ana Dilim',
+			'profilePage.chineseShort' => 'Çince',
+			'profilePage.seeMore' => 'Daha Fazla...',
+			'profilePage.searchLanguages' => 'Search',
 			'profilePage.interests' => 'İlgi Alanları',
 			'profilePage.goalChipCareer' => 'Kariyer',
 			'profilePage.goalChipTravel' => 'Seyahat',
@@ -2811,7 +3018,7 @@ extension on TranslationsTr {
 			'profilePage.selectNativeLanguageTitle' => 'Ana dilini seç',
 			'profilePage.reminderOn' => 'Açık',
 			'profilePage.reminderOff' => 'Kapalı',
-			'profilePage.remindMe' => 'Beni Hatırlat',
+			'profilePage.remindMe' => 'Bana Hatırlat',
 			'profilePage.reminderSave' => 'Kaydet',
 			'profilePage.reminderSaved' => 'Hatırlatma kaydedildi',
 			'profilePage.selectLanguageTitle' => 'Dil Seç',
@@ -2820,9 +3027,15 @@ extension on TranslationsTr {
 			'profilePage.active' => 'Aktif',
 			'profilePage.premiumVersion' => 'Premium',
 			'profilePage.shareFriend' => 'Arkadaşla Paylaş',
+			'profilePage.shareLingola' => 'Lingola\'yı Paylaş',
 			'profilePage.shareWithFriendTitle' => 'Arkadaşla Paylaş',
 			'profilePage.shareInviteBody' => 'Arkadaşlarını davet et ve birlikte çeviri yapmanın tadını çıkar.',
-			'profilePage.rateUs' => 'Bizi Değerlendir',
+			'profilePage.rateUs' => 'Bizi Beğendin mi? Puan Ver',
+			'profilePage.settingsCertificates' => 'Certificates',
+			'profilePage.restorePurchases' => 'Satın Alımları Geri Yükle',
+			'profilePage.aboutFlywork' => 'Flywork Hakkında',
+			'profilePage.faqHelp' => 'SSS ve Yardım',
+			'profilePage.deleteAccountAndData' => 'Hesabı ve Verileri Sil',
 			'profilePage.faq' => 'Lingola SSS',
 			'profilePage.faqItems.supportedLanguages.question' => 'Uygulama hangi dilleri destekliyor?',
 			'profilePage.faqItems.supportedLanguages.answer' => 'Lingola arayüzü İngilizce, Almanca, İtalyanca, Fransızca, Türkçe, Japonca, İspanyolca, Rusça, Hintçe, Portekizce ve Basitleştirilmiş Çince dillerinde kullanılabilir.',
@@ -2856,15 +3069,17 @@ extension on TranslationsTr {
 			'profilePage.currentLevel' => 'Mevcut Seviye',
 			'profilePage.xpLeft' => ({required Object xp, required Object level}) => 'Sadece ${xp} XP kaldı, ${level} seviyesine ulaşmak için!',
 			'profilePage.toNextLevel' => 'SONRAKİ SEVİYEYE',
+			_ => null,
+		} ?? switch (path) {
 			'profilePage.dayStreakLabel' => 'Gün Serisi',
 			'profilePage.totalPoints' => 'Toplam Puan',
 			'profilePage.savedWords' => 'Kaydedilen Kelimeler',
 			'profilePage.itemsToReview' => ({required Object count}) => '${count} gözden geçirilecek öğe',
 			'profilePage.logout' => 'Çıkış Yap',
-			'profilePage.logoutTitle' => 'Çıkış yapmak üzeresin',
+			'profilePage.logoutTitle' => 'Çıkış yapmak istediğine emin misiniz?',
 			'profilePage.logoutBody' => 'Görüşmek üzere! Nefes egzersizlerini özleyeceğiz.',
-			'profilePage.logoutConfirm' => 'ÇIKIŞ YAP',
-			'profilePage.logoutCancel' => 'İPTAL',
+			'profilePage.logoutConfirm' => 'LOGOUT',
+			'profilePage.logoutCancel' => 'CANCEL',
 			'profilePage.days.mon' => 'PZT',
 			'profilePage.days.tue' => 'SAL',
 			'profilePage.days.wed' => 'ÇAR',
@@ -2909,6 +3124,29 @@ extension on TranslationsTr {
 			'profilePage.certificatePreviewBody' => 'Lingola\'da bir CEFR seviyesini tamamladığınızda sertifikanız burada görünecek — adınız, seviyeniz ve doğrulanabilir QR kodu ile.',
 			'profilePage.certificatePreviewHint' => 'Sertifikanızı açmak için bir seviye yolunu tamamlayın',
 			'profilePage.certificateTapToView' => 'Sertifikanızı görüntülemek ve paylaşmak için dokunun',
+			'profilePage.interestShopping' => 'Alışveriş',
+			'profilePage.interestFood' => 'Yemek',
+			'profilePage.interestPopCulture' => 'Popüler Kültür',
+			'profilePage.interestFilm' => 'Film',
+			'profilePage.interestMusic' => 'Müzik',
+			'profilePage.interestSport' => 'Spor',
+			'profilePage.interestTechnology' => 'Teknoloji',
+			'profilePage.interestScience' => 'Bilim',
+			'profilePage.interestHealth' => 'Sağlık',
+			'profilePage.interestFashion' => 'Moda',
+			'profilePage.interestArt' => 'Sanat',
+			'profilePage.interestLiterature' => 'Edebiyat',
+			'profilePage.interestHistory' => 'Tarih',
+			'profilePage.interestCulture' => 'Kültür',
+			'profilePage.interestAstronomy' => 'Astronomi',
+			'profilePage.interestPet' => 'Evcil Hayvan',
+			'profilePage.interestSocialMedia' => 'Sosyal Medya',
+			'profilePage.interestEntrepreneur' => 'Girişimcilik',
+			'profilePage.confirmDeleteWarning' => 'Hesabınız ve tüm ilerlemeniz kalıcı olarak silinecek. Bu işlemi geri almak mümkün değil.',
+			'profilePage.confirmKeepGoing' => 'İlerlemeden Vazgeçme',
+			'profilePage.myCertificates' => 'Sertifikalarım',
+			'profilePage.certificatesEmptyTitle' => 'Henüz sertifika yok',
+			'profilePage.certificatesEmptySubtitle' => 'Bir seviye tamamladığında tekrar kontrol etmeyi unutma.',
 			_ => null,
 		};
 	}

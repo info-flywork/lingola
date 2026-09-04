@@ -14,6 +14,8 @@ import '../../features/tutor/widgets/tutor_rive_avatar.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
 import 'role_play_api_service.dart';
+import 'role_play_catalog.dart';
+import 'role_play_widgets.dart';
 
 class CreateRolePlayScreen extends StatefulWidget {
   const CreateRolePlayScreen({super.key});
@@ -31,6 +33,7 @@ class _CreateRolePlayScreenState extends State<CreateRolePlayScreen>
   late final AnimationController _progressController;
   var _generating = false;
   var _error = '';
+  String _levelKey = 'beginner';
 
   @override
   void initState() {
@@ -87,6 +90,7 @@ class _CreateRolePlayScreenState extends State<CreateRolePlayScreen>
         userRole: userRole,
         extraInfo: extraInfo.isEmpty ? null : extraInfo,
         nativeLanguageCode: nativeCode,
+        levelKey: _levelKey,
       );
       if (!mounted) return;
       Navigator.of(context).pop(created);
@@ -188,6 +192,30 @@ class _CreateRolePlayScreenState extends State<CreateRolePlayScreen>
                             optional: true,
                             minLines: 3,
                             maxLines: 5,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            text.createFieldDifficulty,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              height: 20 / 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final key in RolePlayCatalog.difficultyKeys)
+                                RolePlayFilterChip(
+                                  label: RolePlayCatalog.levelLabel(text, key),
+                                  selected: _levelKey == key,
+                                  onTap: () => setState(() => _levelKey = key),
+                                ),
+                            ],
                           ),
                           if (_error.isNotEmpty) ...[
                             const SizedBox(height: 12),

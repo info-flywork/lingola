@@ -11,6 +11,7 @@ class RolePlayScenarioDto {
     this.screenplay,
     this.openingMessage,
     this.sectionKey,
+    this.categoryKey,
     this.isCustom = false,
     this.progressPercent = 0,
     this.elapsedSeconds = 0,
@@ -26,6 +27,7 @@ class RolePlayScenarioDto {
   final String? openingMessage;
   final String imageAsset;
   final String? sectionKey;
+  final String? categoryKey;
   final int minutes;
   final String levelKey;
   final bool isCustom;
@@ -44,6 +46,7 @@ class RolePlayScenarioDto {
       openingMessage: json['openingMessage'] as String?,
       imageAsset: json['imageAsset'] as String? ?? '',
       sectionKey: json['sectionKey'] as String?,
+      categoryKey: json['categoryKey'] as String? ?? json['sectionKey'] as String?,
       minutes: (json['minutes'] as num?)?.toInt() ?? 8,
       levelKey: json['levelKey'] as String? ?? 'beginner',
       isCustom: json['isCustom'] == true,
