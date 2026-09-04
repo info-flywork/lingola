@@ -208,6 +208,8 @@ class _CreateRolePlayScreenState extends State<CreateRolePlayScreen>
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
+                            alignment: WrapAlignment.center,
+                            runAlignment: WrapAlignment.center,
                             children: [
                               for (final key in RolePlayCatalog.difficultyKeys)
                                 RolePlayFilterChip(

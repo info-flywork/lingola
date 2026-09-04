@@ -39,6 +39,7 @@ class HomePathPreviewNode {
     required this.status,
     required this.slug,
     required this.a1Index,
+    required this.globalIndex,
     this.hasNotes = false,
     this.tutorId,
     this.tutorSlug,
@@ -51,7 +52,10 @@ class HomePathPreviewNode {
   final bool showStars;
   final HomePathNodeStatus status;
   final String slug;
+  /// Seviye içi index (slug / i18n fallback).
   final int a1Index;
+  /// Müfredattaki global index (premium gate).
+  final int globalIndex;
   final bool hasNotes;
   final String? tutorId;
   final String? tutorSlug;
@@ -59,6 +63,18 @@ class HomePathPreviewNode {
 
   bool get canOpen =>
       status != HomePathNodeStatus.locked && slug.isNotEmpty;
+}
+
+class HomePathLevelSection {
+  const HomePathLevelSection({
+    required this.levelId,
+    required this.title,
+    required this.nodes,
+  });
+
+  final String levelId;
+  final String title;
+  final List<HomePathPreviewNode> nodes;
 }
 
 class HomeTutorCarouselItem {
@@ -86,12 +102,12 @@ class HomeTutorCarouselItem {
 class HomeRemoteData {
   const HomeRemoteData({
     this.continueData,
-    this.pathNodes = const [],
+    this.pathSections = const [],
     this.tutors = const [],
   });
 
   final HomeContinueData? continueData;
-  final List<HomePathPreviewNode> pathNodes;
+  final List<HomePathLevelSection> pathSections;
   final List<HomeTutorCarouselItem> tutors;
 }
 
@@ -101,15 +117,6 @@ abstract final class HomeDataService {
 
   /// Son başarılı home yanıtı — açılışta path anında görünsün.
   static HomeRemoteData? get cached => _cached;
-
-  /// Home learning path preview slots — Figma layout order, not catalog order.
-  static const _previewSlots = <({String asset, int a1Index})>[
-    (asset: 'assets/learningPath/a1/introduction.svg', a1Index: 1),
-    (asset: 'assets/learningPath/a1/greetings.svg', a1Index: 0),
-    (asset: 'assets/learningPath/a1/jobs.svg', a1Index: 2),
-    (asset: 'assets/learningPath/a1/favoriteroom.svg', a1Index: 3),
-    (asset: 'assets/learningPath/a1/dailyroutine.svg', a1Index: 4),
-  ];
 
   static Future<HomeRemoteData?> fetch() async {
     try {
@@ -121,7 +128,6 @@ abstract final class HomeDataService {
       final tutors = results[1] as List<TutorDto>;
       final text = AppText.current;
 
-      // Mindcoach: konuşma açılmadan CDN .riv arka planda hazır olsun.
       RivePreloadService.preloadMany([
         AppAssets.tutorLingolaRivCdn,
         ...tutors.map((t) => t.remoteRiveUrl),
@@ -129,7 +135,7 @@ abstract final class HomeDataService {
 
       final data = HomeRemoteData(
         continueData: _buildContinue(path, text),
-        pathNodes: _buildPathPreview(path, text),
+        pathSections: _buildPathSections(path, text),
         tutors: _buildTutors(tutors, text),
       );
       _cached = data;
@@ -137,6 +143,94 @@ abstract final class HomeDataService {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Home learning path — tüm CEFR seviyeleri (A1 → C2), Lesson sekmesiyle aynı.
+  static List<HomePathLevelSection> _buildPathSections(
+    LessonPathDto path,
+    Translations text,
+  ) {
+    final levels = text.lessonPage.levels;
+    final titles = <String, String>{
+      'a1': levels.a1.title,
+      'a2': levels.a2.title,
+      'b1': levels.b1.title,
+      'b2': levels.b2.title,
+      'c1': levels.c1.title,
+      'c2': levels.c2.title,
+    };
+    final lessonLists = <String, List<String>>{
+      'a1': levels.a1.lessons,
+      'a2': levels.a2.lessons,
+      'b1': levels.b1.lessons,
+      'b2': levels.b2.lessons,
+      'c1': levels.c1.lessons,
+      'c2': levels.c2.lessons,
+    };
+    final remoteByLevel = {
+      for (final level in path.levels) level.id: level.lessons,
+    };
+
+    var global = 0;
+    final sections = <HomePathLevelSection>[];
+    for (final level in LessonCurriculum.levels) {
+      final labels = lessonLists[level.id] ?? const <String>[];
+      final icons = level.iconAssets;
+      final remoteLessons = remoteByLevel[level.id] ?? const <LessonNodeDto>[];
+      final count = labels.isNotEmpty
+          ? labels.length
+          : [
+              remoteLessons.length,
+              icons.length,
+            ].reduce((a, b) => a > b ? a : b);
+
+      final nodes = <HomePathPreviewNode>[
+        for (var i = 0; i < count; i++)
+          () {
+            final lesson = i < remoteLessons.length ? remoteLessons[i] : null;
+            final status = _nodeStatus(lesson);
+            final label = _lessonDisplayTitle(lesson, text, level.id, i);
+            final labelColor = switch (status) {
+              HomePathNodeStatus.completed => 0xFF2D46FF,
+              HomePathNodeStatus.active => 0xFF2D46FF,
+              HomePathNodeStatus.unlocked => 0xFF8A8A8A,
+              HomePathNodeStatus.locked => 0xFF8A8A8A,
+            };
+            final slug = lesson != null && lesson.slug.isNotEmpty
+                ? lesson.slug
+                : (LessonCurriculum.slugAt(level.id, i) ?? '');
+            final icon = icons.isEmpty
+                ? ''
+                : icons[i < icons.length ? i : icons.length - 1];
+            final node = HomePathPreviewNode(
+              asset: icon,
+              label: label,
+              labelColor: labelColor,
+              showStars: status == HomePathNodeStatus.completed ||
+                  status == HomePathNodeStatus.active,
+              status: status,
+              slug: slug,
+              a1Index: i,
+              globalIndex: global,
+              hasNotes: lesson?.hasNotes ?? false,
+              tutorId: lesson?.tutorId,
+              tutorSlug: lesson?.tutorSlug,
+              cefrLevel: lesson?.cefrLevel ?? level.id,
+            );
+            global += 1;
+            return node;
+          }(),
+      ];
+
+      sections.add(
+        HomePathLevelSection(
+          levelId: level.id,
+          title: titles[level.id] ?? level.id.toUpperCase(),
+          nodes: nodes,
+        ),
+      );
+    }
+    return sections;
   }
 
   static HomeContinueData? _buildContinue(
@@ -175,11 +269,11 @@ abstract final class HomeDataService {
     current ??= allLessons.where((l) => l.isUnlocked).firstOrNull;
     current ??= allLessons.first;
 
-    // Başlık için A1 index fallback (yalnızca A1 ise anlamlı)
-    final a1 = path.levels.where((l) => l.id == 'a1').firstOrNull;
-    final a1Index = a1 == null ? 0 : a1.lessons.indexOf(current);
-    final fallbackIndex = a1Index >= 0 ? a1Index : 0;
-    final title = _lessonDisplayTitle(current, text, fallbackIndex);
+    final located = LessonCurriculum.locateSlug(current.slug);
+    final levelId =
+        (located?.levelId ?? current.cefrLevel ?? 'a1').toLowerCase();
+    final fallbackIndex = located?.index ?? 0;
+    final title = _lessonDisplayTitle(current, text, levelId, fallbackIndex);
 
     final elapsedSeconds = current.elapsedSeconds;
     final elapsed = current.elapsedMinutes;
@@ -196,45 +290,6 @@ abstract final class HomeDataService {
       tutorId: current.tutorId,
       tutorSlug: current.tutorSlug,
     );
-  }
-
-  static List<HomePathPreviewNode> _buildPathPreview(
-    LessonPathDto path,
-    Translations text,
-  ) {
-    final a1 = path.levels.where((l) => l.id == 'a1').firstOrNull;
-    final lessons = a1?.lessons ?? const <LessonNodeDto>[];
-
-    return _previewSlots.map((slot) {
-      final lesson = slot.a1Index < lessons.length
-          ? lessons[slot.a1Index]
-          : null;
-      final status = _nodeStatus(lesson);
-      final label = _lessonDisplayTitle(lesson, text, slot.a1Index);
-      final labelColor = switch (status) {
-        HomePathNodeStatus.completed => 0xFF2D46FF,
-        HomePathNodeStatus.active => 0xFF2D46FF,
-        HomePathNodeStatus.unlocked => 0xFF8A8A8A,
-        HomePathNodeStatus.locked => 0xFF8A8A8A,
-      };
-      final slug = lesson != null && lesson.slug.isNotEmpty
-          ? lesson.slug
-          : (LessonCurriculum.slugAt('a1', slot.a1Index) ?? '');
-      return HomePathPreviewNode(
-        asset: slot.asset,
-        label: label,
-        labelColor: labelColor,
-        showStars: status == HomePathNodeStatus.completed ||
-            status == HomePathNodeStatus.active,
-        status: status,
-        slug: slug,
-        a1Index: slot.a1Index,
-        hasNotes: lesson?.hasNotes ?? false,
-        tutorId: lesson?.tutorId,
-        tutorSlug: lesson?.tutorSlug,
-        cefrLevel: lesson?.cefrLevel ?? 'a1',
-      );
-    }).toList();
   }
 
   static HomePathNodeStatus _nodeStatus(LessonNodeDto? lesson) {
@@ -254,6 +309,7 @@ abstract final class HomeDataService {
   static String _lessonDisplayTitle(
     LessonNodeDto? lesson,
     Translations text,
+    String levelId,
     int fallbackIndex,
   ) {
     final locale = LocaleSettings.currentLocale;
@@ -270,10 +326,20 @@ abstract final class HomeDataService {
         if (tr != null && tr.isNotEmpty) return tr;
       }
     }
-    return _i18nPathLabel(fallbackIndex, text);
+    return _i18nPathLabel(levelId, fallbackIndex, text);
   }
 
-  static String _i18nPathLabel(int index, Translations text) {
+  static String _i18nPathLabel(String levelId, int index, Translations text) {
+    final levels = text.lessonPage.levels;
+    final list = switch (levelId) {
+      'a2' => levels.a2.lessons,
+      'b1' => levels.b1.lessons,
+      'b2' => levels.b2.lessons,
+      'c1' => levels.c1.lessons,
+      'c2' => levels.c2.lessons,
+      _ => levels.a1.lessons,
+    };
+    if (index >= 0 && index < list.length) return list[index];
     final home = text.home;
     return switch (index) {
       0 => home.greetings,
@@ -313,9 +379,11 @@ abstract final class HomeDataService {
     return HomeTutorCarouselItem(
       name: _tutorName(tutorPage.tutors, dto.nameKey, dto.slug),
       image: image,
-      flagAsset: dto.flagAssetPath?.trim().isNotEmpty == true
-          ? dto.flagAssetPath
-          : AppAssets.flagForTutorSlug(dto.slug),
+      flagAsset: dto.slug.toLowerCase() == 'lingola'
+          ? null
+          : (dto.flagAssetPath?.trim().isNotEmpty == true
+              ? dto.flagAssetPath
+              : AppAssets.flagForTutorSlug(dto.slug)),
       tags: tagLabels,
       slug: dto.slug,
       riveAsset: dto.remoteRiveUrl ?? AppAssets.tutorRiveCdn(dto.slug),

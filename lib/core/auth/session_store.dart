@@ -114,6 +114,7 @@ abstract final class SessionStore {
             'nativeLanguageCode': user.onboarding!.nativeLanguageCode,
             'targetLanguageCode': user.onboarding!.targetLanguageCode,
             'goal': user.onboarding!.goal,
+            'interests': user.onboarding!.interests,
             'level': user.onboarding!.level,
             'pace': user.onboarding!.pace,
             'explanationLanguage': user.onboarding!.explanationLanguage,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_assets.dart';
-import '../core/theme/app_theme.dart';
 import 'home_asset.dart';
 
 /// Path / uzun liste ekranlarında: alttayken ↓ (ilerleme), üstteyken ↑ (başa).
@@ -22,7 +21,11 @@ class PathScrollFab extends StatelessWidget {
   final double right;
 
   static const _size = 44.0;
-  static const _radius = 12.0;
+  static const _radius = 14.0;
+  static const _icon = 24.0;
+  /// Figma: drop shadow Y=2, blur=0 → katı 2px alt bant (clip edilmez).
+  static const _shadowY = 2.0;
+  static const _border = Color(0xFFE2E2E2);
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +36,10 @@ class PathScrollFab extends StatelessWidget {
       bottom: bottom,
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.secondaryButtonShadow,
+          color: _border,
           borderRadius: BorderRadius.circular(_radius),
         ),
-        padding: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.only(bottom: _shadowY),
         child: Material(
           color: Colors.transparent,
           elevation: 0,
@@ -49,22 +52,23 @@ class PathScrollFab extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(_radius),
-                border: Border.all(color: AppColors.secondaryButtonShadow),
+                border: Border.all(color: _border),
               ),
               child: Center(
+                // Asset yukarı ok; aşağı gitmek için 180° çevir.
                 child: pointsToTop
-                    ? Transform.rotate(
+                    ? const HomeAsset(
+                        AppAssets.pathScrollArrow,
+                        width: _icon,
+                        height: _icon,
+                      )
+                    : Transform.rotate(
                         angle: 3.141592653589793,
                         child: const HomeAsset(
-                          AppAssets.homeArrowDown,
-                          width: 22,
-                          height: 22,
+                          AppAssets.pathScrollArrow,
+                          width: _icon,
+                          height: _icon,
                         ),
-                      )
-                    : const HomeAsset(
-                        AppAssets.homeArrowDown,
-                        width: 22,
-                        height: 22,
                       ),
               ),
             ),

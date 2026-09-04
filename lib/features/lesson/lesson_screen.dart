@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/auth/api_client.dart';
 import '../../core/auth/auth_service.dart';
@@ -25,6 +24,7 @@ import 'lesson_api_service.dart';
 import 'lesson_badge.dart';
 import 'lesson_curriculum.dart';
 import 'lesson_notes_screen.dart';
+import 'lesson_path_view.dart';
 import 'lesson_session_result.dart';
 import '../onboarding/language_flag.dart';
 import '../shell/main_shell.dart';
@@ -154,7 +154,7 @@ class _LessonScreenState extends State<LessonScreen> {
       final list = _remote[level.id];
       final count = list?.length ?? level.iconAssets.length;
       for (var i = 0; i < count; i++) {
-        if (_stateFor(level.id, i) == _NodeState.active) {
+        if (_stateFor(level.id, i) == LessonNodeState.active) {
           return (levelId: level.id, nodeIndex: i);
         }
       }
@@ -163,7 +163,7 @@ class _LessonScreenState extends State<LessonScreen> {
       final list = _remote[level.id];
       final count = list?.length ?? level.iconAssets.length;
       for (var i = 0; i < count; i++) {
-        if (_stateFor(level.id, i) == _NodeState.unlocked) {
+        if (_stateFor(level.id, i) == LessonNodeState.unlocked) {
           return (levelId: level.id, nodeIndex: i);
         }
       }
@@ -206,17 +206,17 @@ class _LessonScreenState extends State<LessonScreen> {
     }
   }
 
-  _NodeState _stateFor(String levelId, int index) {
+  LessonNodeState _stateFor(String levelId, int index) {
     final list = _remote[levelId];
     if (list != null && index < list.length) {
       final status = list[index].status;
-      if (status == 'completed') return _NodeState.completed;
-      if (status == 'available') return _NodeState.active;
-      if (status == 'unlocked') return _NodeState.unlocked;
-      return _NodeState.locked;
+      if (status == 'completed') return LessonNodeState.completed;
+      if (status == 'available') return LessonNodeState.active;
+      if (status == 'unlocked') return LessonNodeState.unlocked;
+      return LessonNodeState.locked;
     }
-    if (levelId == 'a1' && index == 0) return _NodeState.unlocked;
-    return _NodeState.locked;
+    if (levelId == 'a1' && index == 0) return LessonNodeState.unlocked;
+    return LessonNodeState.locked;
   }
 
   LessonNodeDto? _remoteAt(String levelId, int index) {
@@ -279,7 +279,7 @@ class _LessonScreenState extends State<LessonScreen> {
     final lessonCefr =
         (remote?.cefrLevel ?? levelId).toUpperCase();
 
-    if (state == _NodeState.locked) {
+    if (state == LessonNodeState.locked) {
       final userMax = (_userCefrMax ?? '').toUpperCase();
       if (userMax.isNotEmpty) {
         await _showLevelLockedDialog(
@@ -301,7 +301,7 @@ class _LessonScreenState extends State<LessonScreen> {
       return;
     }
 
-    if (state == _NodeState.completed && remote?.hasNotes == true) {
+    if (state == LessonNodeState.completed && remote?.hasNotes == true) {
       await _openNotes(slug: slug, label: label, offerPractice: true);
       return;
     }
@@ -327,13 +327,13 @@ class _LessonScreenState extends State<LessonScreen> {
     if (_busy) return;
     final text = AppText.current.lessonPage;
     final nodeState = switch (status) {
-      'completed' => _NodeState.completed,
-      'available' => _NodeState.active,
-      'unlocked' => _NodeState.unlocked,
-      _ => _NodeState.locked,
+      'completed' => LessonNodeState.completed,
+      'available' => LessonNodeState.active,
+      'unlocked' => LessonNodeState.unlocked,
+      _ => LessonNodeState.locked,
     };
 
-    if (nodeState == _NodeState.locked) {
+    if (nodeState == LessonNodeState.locked) {
       final userMax = (userCefrMax ?? _userCefrMax ?? '').toUpperCase();
       final lessonCefr = (cefrLevel ?? 'a1').toUpperCase();
       if (userMax.isNotEmpty) {
@@ -354,7 +354,7 @@ class _LessonScreenState extends State<LessonScreen> {
       return;
     }
 
-    if (nodeState == _NodeState.completed && hasNotes) {
+    if (nodeState == LessonNodeState.completed && hasNotes) {
       await _openNotes(slug: slug, label: label, offerPractice: true);
       return;
     }
@@ -831,9 +831,9 @@ class _LessonScreenState extends State<LessonScreen> {
     for (final level in LessonCurriculum.levels) {
       final lessons = lessonLists[level.id]!;
       final icons = level.iconAssets;
-      final levelNodes = <_LessonPathNodeData>[
+      final levelNodes = <LessonPathNode>[
         for (var i = 0; i < lessons.length; i++)
-          _LessonPathNodeData(
+          LessonPathNode(
             label: lessons[i],
             iconAsset: icons[i < icons.length ? i : icons.length - 1],
             state: _stateFor(level.id, i),
@@ -902,19 +902,6 @@ class _LessonScreenState extends State<LessonScreen> {
   }
 }
 
-class _LessonPathNodeData {
-  const _LessonPathNodeData({
-    required this.label,
-    required this.iconAsset,
-    required this.state,
-    required this.onTap,
-  });
-  final String label;
-  final String iconAsset;
-  final _NodeState state;
-  final VoidCallback onTap;
-}
-
 class _LevelSectionData {
   const _LevelSectionData({
     required this.title,
@@ -923,7 +910,7 @@ class _LevelSectionData {
   });
 
   final String title;
-  final List<_LessonPathNodeData> nodes;
+  final List<LessonPathNode> nodes;
   final int? progressNodeIndex;
 }
 
@@ -1026,7 +1013,7 @@ class _LevelPathSection extends StatelessWidget {
   });
 
   final String title;
-  final List<_LessonPathNodeData> nodes;
+  final List<LessonPathNode> nodes;
   final int? progressNodeIndex;
   final GlobalKey? progressAnchorKey;
 
@@ -1050,353 +1037,12 @@ class _LevelPathSection extends StatelessWidget {
             ),
           ),
         ),
-        _LevelLessonPath(
+        LessonPathView(
           nodes: nodes,
           progressNodeIndex: progressNodeIndex,
           progressAnchorKey: progressAnchorKey,
         ),
       ],
     );
-  }
-}
-
-/// Bir seviyenin bağımsız S-yolu — yumuşak U, ikon apex ortasında.
-class _LevelLessonPath extends StatelessWidget {
-  const _LevelLessonPath({
-    required this.nodes,
-    this.progressNodeIndex,
-    this.progressAnchorKey,
-  });
-
-  final List<_LessonPathNodeData> nodes;
-  final int? progressNodeIndex;
-  final GlobalKey? progressAnchorKey;
-
-  static const _designWidth = 398.0;
-  static const _leftX = 65.0;
-  static const _rightX = 278.0;
-  static const _nodeSize = 63.0;
-  static const _pitch = 112.0;
-  static const _y0 = 40.0;
-  static const _trackStroke = 22.0;
-
-  bool _isLeft(int index) => index.isOdd;
-
-  ({List<double> hs, List<double> nodeCenters}) _layout(int n) {
-    final hs = <double>[_y0];
-    final nodeCenters = <double>[_y0];
-    for (var i = 1; i < n; i++) {
-      hs.add(hs.last + _pitch);
-      final yTop = hs[hs.length - 2];
-      final yBot = hs[hs.length - 1];
-      nodeCenters.add((yTop + yBot) / 2);
-    }
-    return (hs: hs, nodeCenters: nodeCenters);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final n = nodes.length;
-    if (n == 0) return const SizedBox.shrink();
-
-    final layout = _layout(n);
-    final nodeCenters = layout.nodeCenters;
-    final horizontalYs = layout.hs;
-
-    double nodeTop(int i) => nodeCenters[i] - _nodeSize / 2;
-
-    final lastTop = nodeTop(n - 1);
-    final height = lastTop + _nodeSize + 48;
-    final leftApex = _leftX + _nodeSize / 2;
-    final rightApex = _rightX + _nodeSize / 2;
-    const radius = _pitch / 2;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SizedBox(
-          height: height * (constraints.maxWidth / _designWidth),
-          width: constraints.maxWidth,
-          child: FittedBox(
-            fit: BoxFit.fitWidth,
-            alignment: Alignment.topCenter,
-            child: SizedBox(
-              width: _designWidth,
-              height: height,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _LessonPathTrackPainter(
-                        horizontalYs: horizontalYs,
-                        leftApexX: leftApex,
-                        rightApexX: rightApex,
-                        radius: radius,
-                        strokeWidth: _trackStroke,
-                      ),
-                    ),
-                  ),
-                  for (var i = 0; i < n; i++)
-                    Positioned(
-                      left: _isLeft(i) ? _leftX : _rightX,
-                      top: nodeTop(i),
-                      child: KeyedSubtree(
-                        key: progressNodeIndex == i ? progressAnchorKey : null,
-                        child: _LessonNode(
-                          label: nodes[i].label,
-                          iconAsset: nodes[i].iconAsset,
-                          state: nodes[i].state,
-                          onTap: nodes[i].onTap,
-                          // İlk node (Greetings): Figma’da etiket ikonun altında.
-                          labelSide: i == 0
-                              ? _LabelSide.below
-                              : (_isLeft(i)
-                                  ? _LabelSide.right
-                                  : _LabelSide.left),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-enum _NodeState { active, completed, locked, unlocked }
-
-enum _LabelSide { left, right, below }
-
-class _LessonNode extends StatelessWidget {
-  const _LessonNode({
-    required this.label,
-    required this.iconAsset,
-    required this.state,
-    required this.labelSide,
-    required this.onTap,
-  });
-
-  final String label;
-  final String iconAsset;
-  final _NodeState state;
-  final _LabelSide labelSide;
-  final VoidCallback onTap;
-
-  static const _size = 63.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = AppText.current;
-    final isLocked = state == _NodeState.locked;
-    final isMuted =
-        state == _NodeState.locked || state == _NodeState.unlocked;
-    final circle = isMuted ? const Color(0xFFDBDBDB) : AppColors.primary;
-    final iconColor = isMuted ? const Color(0xFF656565) : Colors.white;
-    final labelColor = switch (state) {
-      _NodeState.active => AppColors.primary,
-      _NodeState.completed => AppColors.ink,
-      _NodeState.locked => AppColors.secondary,
-      _NodeState.unlocked => AppColors.secondary,
-    };
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-      width: _size,
-      height: _size,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: _size,
-            height: _size,
-            decoration: BoxDecoration(
-              color: circle,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: .18),
-                  blurRadius: 4,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: SvgPicture.asset(
-              iconAsset,
-              width: 28,
-              height: 28,
-              fit: BoxFit.contain,
-              colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
-              placeholderBuilder: (_) => const SizedBox(width: 28, height: 28),
-            ),
-          ),
-          if (state == _NodeState.completed)
-            Positioned(
-              right: -4,
-              bottom: -4,
-              child: Semantics(
-                label: text.lessonPage.completed,
-                child: Container(
-                  width: 23,
-                  height: 23,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF34C759),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  child: const Icon(
-                    Icons.check_rounded,
-                    size: 13,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          if (isLocked)
-            Positioned(
-              // SVG viewBox 30x30; görünür daire ~22–23 (Figma).
-              right: -6,
-              bottom: -2,
-              child: Semantics(
-                label: text.lessonPage.locked,
-                child: SvgPicture.asset(
-                  'assets/learningPath/a1/badge_lock.svg',
-                  width: 30,
-                  height: 30,
-                ),
-              ),
-            ),
-          if (labelSide == _LabelSide.right)
-            Positioned(
-              left: _size + 10,
-              top: (_size - 30) / 2,
-              width: 118,
-              child: Text(
-                label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: _labelStyle(labelColor),
-              ),
-            ),
-          if (labelSide == _LabelSide.left)
-            Positioned(
-              left: -128,
-              top: (_size - 30) / 2,
-              width: 118,
-              child: Text(
-                label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.right,
-                style: _labelStyle(labelColor),
-              ),
-            ),
-          if (labelSide == _LabelSide.below)
-            Positioned(
-              left: (_size - 118) / 2,
-              top: _size + 6,
-              width: 118,
-              child: Text(
-                label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: _labelStyle(labelColor),
-              ),
-            ),
-        ],
-      ),
-      ),
-    );
-  }
-
-  TextStyle _labelStyle(Color color) {
-    return TextStyle(
-      color: color,
-      fontFamily: 'Poppins',
-      fontSize: 12,
-      height: 15 / 12,
-      fontWeight: FontWeight.w500,
-    );
-  }
-}
-
-/// Yumuşak yarım daire U’lar; sabit yarıçap.
-class _LessonPathTrackPainter extends CustomPainter {
-  _LessonPathTrackPainter({
-    required this.horizontalYs,
-    required this.leftApexX,
-    required this.rightApexX,
-    required this.radius,
-    required this.strokeWidth,
-  });
-
-  final List<double> horizontalYs;
-  final double leftApexX;
-  final double rightApexX;
-  final double radius;
-  final double strokeWidth;
-
-  Path _buildCenterline() {
-    final hs = horizontalYs;
-    final path = Path();
-    if (hs.isEmpty) return path;
-
-    final leftInner = leftApexX + radius;
-    final rightInner = rightApexX - radius;
-
-    path.moveTo(rightApexX, hs[0]);
-    if (hs.length == 1) return path;
-
-    for (var i = 0; i < hs.length - 1; i++) {
-      final yA = hs[i];
-      final yB = hs[i + 1];
-      if (i.isEven) {
-        path.lineTo(leftInner, yA);
-        path.arcToPoint(
-          Offset(leftInner, yB),
-          radius: Radius.circular(radius),
-          clockwise: false,
-        );
-      } else {
-        path.lineTo(rightInner, yA);
-        path.arcToPoint(
-          Offset(rightInner, yB),
-          radius: Radius.circular(radius),
-          clockwise: true,
-        );
-      }
-    }
-    return path;
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (horizontalYs.isEmpty) return;
-
-    final track = Paint()
-      ..color = const Color(0xFFEBEBEB)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..isAntiAlias = true;
-
-    canvas.drawPath(_buildCenterline(), track);
-  }
-
-  @override
-  bool shouldRepaint(covariant _LessonPathTrackPainter oldDelegate) {
-    return oldDelegate.horizontalYs != horizontalYs ||
-        oldDelegate.leftApexX != leftApexX ||
-        oldDelegate.rightApexX != rightApexX ||
-        oldDelegate.radius != radius ||
-        oldDelegate.strokeWidth != strokeWidth;
   }
 }

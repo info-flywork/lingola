@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' show sqrt;
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,6 +12,7 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../shell/main_shell.dart';
 import 'onboarding_draft.dart';
+import 'language_setup_screens.dart';
 import 'post_onboarding_screens.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -261,7 +263,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (!_pageController.hasClients) return;
 
     _autoAdvanceTimer?.cancel();
+    // Alt kart (Giriş Yap vb.) hedef slide ile aynı anda güncellensin;
+    // aksi halde 3→1 geçişinde link bir süre yanlış slide'da kalır.
+    final nextPage = (_page + 1) % _pageCount;
     setState(() {
+      _page = nextPage;
       _textAnimDuration = _pageAnimationDuration;
       _textOpacity = 0.0;
     });
@@ -283,14 +289,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _onContinuePressed() {
     _autoAdvanceTimer?.cancel();
-    _goToAuth();
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => LanguageSetupScreen(draft: OnboardingDraft()),
+      ),
+    );
   }
 
-  void _goToAuth() {
+  void _onSignInPressed() {
+    _autoAdvanceTimer?.cancel();
+    _goToAuth(existingAccount: true);
+  }
+
+  void _goToAuth({required bool existingAccount}) {
     _autoAdvanceTimer?.cancel();
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => AuthScreen(draft: OnboardingDraft()),
+        builder: (_) => AuthScreen(
+          draft: OnboardingDraft(),
+          existingAccount: existingAccount,
+        ),
       ),
     );
   }
@@ -379,23 +397,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 176),
-                            child: AnimatedOpacity(
-                              opacity: _textOpacity,
-                              duration: _textAnimDuration,
-                              curve: Curves.easeInOut,
-                              child: _OnboardingCopyBlock(
-                                title: copy.title,
-                                body: copy.body,
-                              ),
+                          AnimatedOpacity(
+                            opacity: _textOpacity,
+                            duration: _textAnimDuration,
+                            curve: Curves.easeInOut,
+                            child: _OnboardingCopyBlock(
+                              title: copy.title,
+                              body: copy.body,
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 5),
                           _PageDots(activeIndex: _page),
-                          const SizedBox(height: 20),
+                          // Giriş linki yalnızca 3. splash (index 2)
+                          if (_page == 2) ...[
+                            const SizedBox(height: 20),
+                            _AlreadyHaveAccountLink(
+                              onSignIn: _onSignInPressed,
+                            ),
+                          ],
+                          const SizedBox(height: 16),
                           PrimaryButton(
-                            label: text.common.continueLabel,
+                            label: text.onboarding.letsStart,
                             onPressed: _onContinuePressed,
                           ),
                         ],
@@ -992,6 +1014,63 @@ class _OnboardingCopyBlock extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AlreadyHaveAccountLink extends StatefulWidget {
+  const _AlreadyHaveAccountLink({required this.onSignIn});
+
+  final VoidCallback onSignIn;
+
+  @override
+  State<_AlreadyHaveAccountLink> createState() =>
+      _AlreadyHaveAccountLinkState();
+}
+
+class _AlreadyHaveAccountLinkState extends State<_AlreadyHaveAccountLink> {
+  late final TapGestureRecognizer _signInRecognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _signInRecognizer = TapGestureRecognizer()..onTap = widget.onSignIn;
+  }
+
+  @override
+  void didUpdateWidget(covariant _AlreadyHaveAccountLink oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _signInRecognizer.onTap = widget.onSignIn;
+  }
+
+  @override
+  void dispose() {
+    _signInRecognizer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = AppText.current.auth;
+    return Text.rich(
+      TextSpan(
+        style: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 16,
+          height: 24 / 16,
+          fontWeight: FontWeight.w500,
+          color: AppColors.ink,
+        ),
+        children: [
+          TextSpan(text: '${text.alreadyHaveAccount} '),
+          TextSpan(
+            text: text.signIn,
+            style: const TextStyle(color: AppColors.primary),
+            recognizer: _signInRecognizer,
+          ),
+        ],
+      ),
+      textAlign: TextAlign.center,
     );
   }
 }

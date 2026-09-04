@@ -16,8 +16,9 @@ import '../../core/theme/app_theme.dart';
 import '../../features/tutor/widgets/tutor_rive_avatar.dart';
 import '../../i18n/strings.g.dart';
 import '../../widgets/app_widgets.dart';
-import '../shell/main_shell.dart';
+import '../profile/interests_sheet.dart';
 import 'onboarding_draft.dart';
+import 'post_onboarding_screens.dart';
 
 class AccountCreatingScreen extends StatefulWidget {
   const AccountCreatingScreen({super.key, required this.draft});
@@ -225,8 +226,11 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen>
       await PremiumService.presentPaywall(context);
     }
     if (!mounted) return;
+    // Onboarding son adım: hesap oluştur / giriş
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const MainShell()),
+      MaterialPageRoute<void>(
+        builder: (_) => AuthScreen(draft: widget.draft),
+      ),
     );
   }
 
@@ -1526,13 +1530,17 @@ class _PlanReadyPanel extends StatelessWidget {
   }
 
   String _interestLabel(Translations$planReady$en readyText) {
-    return switch (draft.goal) {
-      'travel' => '🛫 ${readyText.goalTravel}',
-      'livingAbroad' => '🏠 ${readyText.goalLiving}',
-      'studyingAbroad' => '🎓 ${readyText.goalStudying}',
-      'other' => '✨ ${readyText.goalOther}',
-      _ => '🛫 ${readyText.goalTravel}',
-    };
+    var ids = List<String>.from(draft.interests);
+    // Draft boşsa oturumdaki onboarding'den yedekle.
+    if (ids.isEmpty) {
+      final saved = SessionStore.currentUser?.onboarding?.interests;
+      if (saved != null && saved.isNotEmpty) {
+        ids = List<String>.from(saved);
+      }
+    }
+    if (ids.isEmpty) return '—';
+    final byId = {for (final o in allInterestOptions()) o.id: o.label};
+    return ids.map((id) => byId[id] ?? id).join(', ');
   }
 
   String _levelLabel(Translations$planReady$en readyText) {

@@ -1155,16 +1155,13 @@ class _ChatRobotHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rive = riveAsset?.trim();
-    final hasRive = rive != null && rive.isNotEmpty;
+    final hasRemoteRive = rive != null && rive.startsWith('http');
 
-    final avatar = hasRive
+    final avatar = hasRemoteRive
         ? TutorRiveAvatar(
-            assetPath: rive.startsWith('http')
-                ? rive
-                : AppAssets.tutorLingolaRivCdn,
+            assetPath: rive,
             talking: talking,
             lipsyncViseme: lipsyncViseme,
-            fallbackRivePath: AppAssets.tutorLingolaRivCdn,
             fallbackImage: fallbackImage,
             loadingBackgroundColor: Colors.transparent,
           )
@@ -1384,9 +1381,10 @@ class _WhatsAppChatComposer extends StatelessWidget {
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       onPressed: enabled ? onCancelRecording : null,
-                      icon: const Icon(
-                        Icons.delete_outline_rounded,
-                        color: Color(0xFFEF3F3F),
+                      icon: const HomeAsset(
+                        AppAssets.deleteIcon,
+                        width: AppAssets.deleteIconSize,
+                        height: AppAssets.deleteIconSize,
                       ),
                     )
                   else

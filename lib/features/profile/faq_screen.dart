@@ -149,6 +149,7 @@ class _FaqCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       question,
+                      softWrap: true,
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 12,

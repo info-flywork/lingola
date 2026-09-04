@@ -3,6 +3,9 @@ abstract final class AppAssets {
   // —— Genel ——
   static const backArrow = 'assets/images/generalArrowIcon.svg';
   static const heart = 'assets/images/heart.svg';
+  /// Figma silme ikonu — 36×36.
+  static const deleteIcon = 'assets/images/deleteIcon.png';
+  static const deleteIconSize = 36.0;
   static const microphone = 'assets/images/microphone.svg';
   static const speaker = 'assets/images/speaker.svg';
   static const whiteSpeaker = 'assets/images/whiteSpeaker.svg';
@@ -16,8 +19,13 @@ abstract final class AppAssets {
   static const chatVideo = 'assets/images/chat_video.svg';
   static const chatActionMessage = 'assets/images/chat_action_message.svg';
   static const chatActionMic = 'assets/images/chat_action_mic.svg';
-  static const success = 'assets/images/quizSection/succesfull.svg';
-  static const failed = 'assets/images/onboarding/unseccesfull.svg';
+  static const success = 'assets/images/quizSection/successful.png';
+  static const failed = 'assets/images/quizSection/failed.png';
+  static const homePractice = 'assets/images/quizSection/practice.png';
+  static const homeImmersive = 'assets/images/quizSection/immersive.png';
+  /// Onboarding seçim tik — 19.5×19.5.
+  static const selectionTick = 'assets/images/onboarding/tik.png';
+  static const selectionTickSize = 19.5;
 
   // —— Flags ——
   static const flagEn = 'assets/images/flags/en.svg';
@@ -37,7 +45,8 @@ abstract final class AppAssets {
   static String? flagForTutorSlug(String? slug) {
     switch (slug?.toLowerCase()) {
       case 'lingola':
-        return flagGeneric;
+        // Lingola: bayrak yok — UI 🌎 gösterir.
+        return null;
       case 'elena':
         return flagEn;
       case 'kenji':
@@ -70,10 +79,12 @@ abstract final class AppAssets {
   }
 
   // —— Quiz ——
-  static const quizBook = 'assets/images/quizIcons/book.svg';
-  static const quizWriting = 'assets/images/quizIcons/writing.svg';
-  static const quizSpeaking = 'assets/images/quizIcons/microphoneSpeaking.svg';
+  static const quizReading = 'assets/images/quizIcons/reading.png';
+  static const quizWriting = 'assets/images/quizIcons/writing.png';
+  static const quizSpeaking = 'assets/images/quizIcons/speaking.png';
   static const quizArrow = 'assets/images/quizIcons/arrow.svg';
+  /// Eski SVG yolları (geriye dönük referanslar).
+  static const quizBook = quizReading;
 
   // —— Writing Test ——
   static const writingCopy = 'assets/images/writingTestIcons/copyIcon.svg';
@@ -90,7 +101,7 @@ abstract final class AppAssets {
   static const profileSettings =
       'assets/images/profilIcons/profilesettings.svg';
   static const profileSettingsGear =
-      'assets/images/profilIcons/newProfileIcons/settings.svg';
+      'assets/images/profilIcons/newProfileIcons/settings.png';
   static const profileEditPen =
       'assets/images/profilIcons/newProfileIcons/editPen.png';
   static const profileLangFlag =
@@ -98,9 +109,12 @@ abstract final class AppAssets {
   static const profileCrown = 'assets/images/profilIcons/crownProfile.svg';
   static const profileShareFriends =
       'assets/images/profilIcons/shareFriends.svg';
+  static const profileShare = 'assets/images/profilIcons/share.png';
   static const shareFriendsBanner =
       'assets/images/profilIcons/shareWitFriendsBanner.png';
   static const profileRateUs = 'assets/images/profilIcons/rateUs.svg';
+  static const profileRateHeart = 'assets/images/profilIcons/rateHeart.png';
+  static const profileSearch = 'assets/images/profilIcons/search.png';
   static const profileFaq = 'assets/images/profilIcons/faq.svg';
   static const profileTopArrow = 'assets/images/profilIcons/topArrow.svg';
   static const profileBottomArrow =
@@ -111,7 +125,7 @@ abstract final class AppAssets {
       'assets/images/profilIcons/progression.svg';
   static const profileSaveButton =
       'assets/images/profilIcons/saveButton.svg';
-  static const profileLogout = 'assets/images/profilIcons/logout.svg';
+  static const profileLogout = 'assets/images/profilIcons/logout.png';
   static const profileCamera = 'assets/images/profilIcons/camera.svg';
   static const profileDeleteAccount =
       'assets/images/profilIcons/deleteAccount.svg';
@@ -133,26 +147,80 @@ abstract final class AppAssets {
   static const profileChain = 'assets/images/profilIcons/chain.svg';
   static const profileLock = 'assets/images/profilIcons/lock.svg';
   static const profileTargetLang =
-      'assets/images/profilIcons/newProfileIcons/targetLang.svg';
+      'assets/images/profilIcons/newProfileIcons/targetLang.png';
   static const profileLangLevel =
-      'assets/images/profilIcons/newProfileIcons/langLevel.svg';
+      'assets/images/profilIcons/newProfileIcons/langLevel.png';
   static const profileMotherTongue =
-      'assets/images/profilIcons/newProfileIcons/motherTongue.svg';
+      'assets/images/profilIcons/newProfileIcons/motherTongue.png';
   static const profileHobbies =
-      'assets/images/profilIcons/newProfileIcons/hobbies.svg';
+      'assets/images/profilIcons/newProfileIcons/hobbies.png';
   static const profileDailyTarget =
-      'assets/images/profilIcons/newProfileIcons/dailyTarget.svg';
+      'assets/images/profilIcons/newProfileIcons/dailyTarget.png';
   static const profileDailyReminder =
-      'assets/images/profilIcons/newProfileIcons/dailyReminder.svg';
+      'assets/images/profilIcons/newProfileIcons/dailyReminder.png';
 
-  // —— Onboarding goal icons (profile interests sheet) ——
-  static const goalCareer = 'assets/images/onboardingGoals/career.svg';
-  static const goalTravel = 'assets/images/onboardingGoals/plane.svg';
+  // —— Onboarding goal icons ——
+  static const goalCareer =
+      'assets/images/onboarding/whyDoYouWantToLearn/careerDevelopment.png';
+  static const goalTravel =
+      'assets/images/onboarding/whyDoYouWantToLearn/travel.png';
+  static const goalEducation =
+      'assets/images/onboarding/whyDoYouWantToLearn/education.png';
   static const goalLivingAbroad =
+      'assets/images/onboarding/whyDoYouWantToLearn/abroad.png';
+  static const goalPersonalDevelopment =
+      'assets/images/onboarding/whyDoYouWantToLearn/personalDevelopment.png';
+  static const paceMonth1 =
+      'assets/images/onboarding/significant_progress/amonth.png';
+  static const paceMonth2_3 =
+      'assets/images/onboarding/significant_progress/twoOrThreeMonth.png';
+  static const paceMonth6 =
+      'assets/images/onboarding/significant_progress/sixMonth.png';
+  static const paceYear1 =
+      'assets/images/onboarding/significant_progress/ayear.png';
+  static const paceRelaxed =
+      'assets/images/onboarding/significant_progress/easy.png';
+  static const levelA1 = 'assets/images/onboarding/levels/a1.png';
+  static const levelA2 = 'assets/images/onboarding/levels/a2level.png';
+  static const levelB1 = 'assets/images/onboarding/levels/b1level.png';
+  static const levelB2 = 'assets/images/onboarding/levels/b2level.png';
+  static const levelC1 = 'assets/images/onboarding/levels/c1.png';
+  static const levelC2 = 'assets/images/onboarding/levels/c2.png';
+  static const levelIconWidth = 32.0;
+  static const levelIconHeight = 22.0;
+  // Legacy SVG paths (profile / older screens)
+  static const goalCareerSvg = 'assets/images/onboardingGoals/career.svg';
+  static const goalTravelSvg = 'assets/images/onboardingGoals/plane.svg';
+  static const goalLivingAbroadSvg =
       'assets/images/onboardingGoals/livingabroad.svg';
-  static const goalStudyingAbroad =
+  static const goalStudyingAbroadSvg =
       'assets/images/onboardingGoals/studyingAbroad.svg';
-  static const goalOther = 'assets/images/onboardingGoals/other.svg';
+  static const goalOtherSvg = 'assets/images/onboardingGoals/other.svg';
+  static const interestTravel =
+      'assets/images/profilIcons/interests/travel.png';
+  static const interestShopping =
+      'assets/images/profilIcons/interests/shopping.png';
+  static const interestFood = 'assets/images/profilIcons/interests/food.png';
+  static const interestPopCulture =
+      'assets/images/profilIcons/interests/popCulture.png';
+  static const interestFilm = 'assets/images/profilIcons/interests/film.png';
+  static const interestMusic = 'assets/images/profilIcons/interests/music.png';
+  static const interestSport = 'assets/images/interests/sport.png';
+  static const interestTechnology = 'assets/images/interests/technology.png';
+  static const interestScience = 'assets/images/interests/science.png';
+  static const interestHealth = 'assets/images/interests/health.png';
+  static const interestFashion = 'assets/images/interests/fashion.png';
+  static const interestArt = 'assets/images/interests/art.png';
+  static const interestLiterature = 'assets/images/interests/literature.png';
+  static const interestHistory = 'assets/images/interests/history.png';
+  static const interestCulture = 'assets/images/interests/culture.png';
+  static const interestAstronomy = 'assets/images/interests/astronomy.png';
+  static const interestPet = 'assets/images/interests/pet.png';
+  static const interestSocialMedia = 'assets/images/interests/socailMedia.png';
+  static const interestEntrepreneur =
+      'assets/images/interests/entrepreneur.png';
+  static const logoutWarning =
+      'assets/images/profilIcons/logoutWarning.png';
 
   // —— Certificate ——
   static const flyworkLogo = 'assets/images/certificate/flywork_logo.png';
@@ -166,10 +234,12 @@ abstract final class AppAssets {
   static const certificateC1Advanced =
       'assets/images/certificate/c1_advanced.png';
   static const certificateC2Expert = 'assets/images/certificate/c2_expert.png';
+  /// Boş sertifika durumu — Figma 129×129.
+  static const certificatesEmpty =
+      'assets/images/certificate/no_certificate.png';
   static const profileNotification =
       'assets/images/home/notification_icon.svg';
-  static const notificationTrash =
-      'assets/images/notifications/trash.svg';
+  static const notificationTrash = deleteIcon;
   static const notificationsEmptyBell =
       'assets/images/notifications/empty_bell.png';
   static const profileStreakFlame = 'assets/images/home/streak_icon.svg';
@@ -183,6 +253,7 @@ abstract final class AppAssets {
   static const homeStar = 'assets/images/home/star_small.svg';
   static const homeArrowCircle = 'assets/images/home/arrow_circle.svg';
   static const homeArrowDown = 'assets/images/home/arrow_down.svg';
+  static const pathScrollArrow = 'assets/images/home/path_scroll_arrow.svg';
 
   // —— Role Play ——
   static const rolePlayCoffee = 'assets/images/roleplay/orderingcoffe.png';
@@ -270,5 +341,5 @@ abstract final class AppAssets {
   static const tutorAmaraRiv = 'assets/riv/Female/avatar1.riv';
   static const tutorErikRiv = 'assets/riv/Male/avatar3.riv';
   static const tutorKatieRiv = 'assets/riv/Female/kaite.riv';
-  static const tutorMorganRiv = 'assets/riv/Male/morgan.riv';
+  static const tutorMorganRiv = 'assets/riv/morgan.riv';
 }

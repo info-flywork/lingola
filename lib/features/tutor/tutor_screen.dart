@@ -339,6 +339,7 @@ class _TutorScreenState extends State<TutorScreen> {
         child: CustomScrollView(
           slivers: [
             SliverPersistentHeader(
+              key: ValueKey('tutor-hero-${focused.identity}'),
               pinned: true,
               delegate: _PinnedTutorHeroDelegate(
                 topInset: MediaQuery.paddingOf(context).top,
@@ -564,9 +565,6 @@ class _TutorScreenState extends State<TutorScreen> {
                       tags: tutor.tags,
                       theme: tutor.theme,
                       selected: selected,
-                      onHoverChanged: (hovering) {
-                        if (hovering) _focusTutor(tutor);
-                      },
                       onSelect: () => _focusTutor(tutor),
                       onStartTalk: () {
                         _focusTutor(tutor);
@@ -981,6 +979,7 @@ class _LessonTutorPickerScreenState extends State<LessonTutorPickerScreen> {
         body: CustomScrollView(
           slivers: [
             SliverPersistentHeader(
+              key: ValueKey('lesson-tutor-hero-${focused.identity}'),
               pinned: true,
               delegate: _PinnedTutorHeroDelegate(
                 topInset: MediaQuery.paddingOf(context).top,
@@ -1186,9 +1185,6 @@ class _LessonTutorPickerScreenState extends State<LessonTutorPickerScreen> {
                             tags: tutor.tags,
                             theme: tutor.theme,
                             selected: selected,
-                            onHoverChanged: (hovering) {
-                              if (hovering) _focusTutor(tutor);
-                            },
                             onSelect: () => _focusTutor(tutor),
                             onStartTalk: () {
                               _focusTutor(tutor);
@@ -1342,7 +1338,13 @@ class _TutorData {
   final String? riveCdnUrl;
   final String? voiceId;
 
-  String get identity => id ?? slug ?? name;
+  String get identity {
+    final s = slug?.trim();
+    if (s != null && s.isNotEmpty) return s;
+    final i = id?.trim();
+    if (i != null && i.isNotEmpty) return i;
+    return name;
+  }
 
   String get heroRiveUrl {
     final cdn = riveCdnUrl?.trim();
@@ -1404,6 +1406,9 @@ class _PinnedTutorHeroDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _PinnedTutorHeroDelegate oldDelegate) {
     return oldDelegate.topInset != topInset ||
         oldDelegate.tutor.identity != tutor.identity ||
+        oldDelegate.tutor.heroRiveUrl != tutor.heroRiveUrl ||
+        oldDelegate.tutor.theme?.gradientStart != tutor.theme?.gradientStart ||
+        oldDelegate.tutor.theme?.gradientEnd != tutor.theme?.gradientEnd ||
         oldDelegate.showChatAction != showChatAction;
   }
 }
@@ -1629,7 +1634,12 @@ class _TutorHeroState extends State<_TutorHero> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const _TutorHeroBackdrop(),
+          _TutorHeroBackdrop(
+            gradientStart: tutor.theme?.gradientStart ??
+                TutorSceneTheme.gradientForSlug(tutor.slug)?.$1,
+            gradientEnd: tutor.theme?.gradientEnd ??
+                TutorSceneTheme.gradientForSlug(tutor.slug)?.$2,
+          ),
           if (widget.leading != null)
             Positioned(
               left: 8,
@@ -1655,7 +1665,6 @@ class _TutorHeroState extends State<_TutorHero> {
                       talking: _speaking,
                       lipsyncViseme: _speaking ? _lipsyncViseme : null,
                       fallbackImage: tutor.image,
-                      fallbackRivePath: AppAssets.tutorLingolaRivCdn,
                       loadingBackgroundColor: Colors.transparent,
                       anchorBottom: true,
                       fit: rive.Fit.contain,
@@ -1752,29 +1761,50 @@ class _TutorHeroState extends State<_TutorHero> {
   }
 }
 
-/// Figma: #2D46FF / #2D85FF / #37B2E3 blur ellipses → surface.
+/// Varsayılan: mavi blur. Themed tutor (cadı/ork/elf/uzaylı/santa): kart renkleri.
 class _TutorHeroBackdrop extends StatelessWidget {
-  const _TutorHeroBackdrop();
+  const _TutorHeroBackdrop({
+    this.gradientStart,
+    this.gradientEnd,
+  });
+
+  final Color? gradientStart;
+  final Color? gradientEnd;
+
+  bool get _themed => gradientStart != null && gradientEnd != null;
 
   @override
   Widget build(BuildContext context) {
+    final top = _themed ? gradientStart! : const Color(0xFF2D46FF);
+    final mid = _themed
+        ? Color.lerp(gradientStart!, gradientEnd!, 0.45)!
+        : const Color(0xFF2D85FF);
+    final bottom = _themed
+        ? Color.lerp(gradientEnd!, AppColors.surface, 0.35)!
+        : const Color(0xFF37B2E3);
+    final orbA = _themed ? gradientStart! : const Color(0xFF2D46FF);
+    final orbB = _themed
+        ? Color.lerp(gradientStart!, gradientEnd!, 0.4)!
+        : const Color(0xFF37B2E3);
+    final orbC = _themed ? gradientEnd! : const Color(0xFF2D85FF);
+
     return ClipRect(
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const ColoredBox(color: Color(0xFF2D46FF)),
-          const DecoratedBox(
+          ColoredBox(color: top),
+          DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFF2D46FF),
-                  Color(0xFF2D85FF),
-                  Color(0xFF37B2E3),
+                  top,
+                  mid,
+                  bottom,
                   AppColors.surface,
                 ],
-                stops: [0, 0.28, 0.55, 1],
+                stops: const [0, 0.28, 0.55, 1],
               ),
             ),
           ),
@@ -1786,9 +1816,9 @@ class _TutorHeroBackdrop extends StatelessWidget {
               child: Container(
                 width: 320,
                 height: 320,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF2D46FF),
+                  color: orbA,
                 ),
               ),
             ),
@@ -1801,9 +1831,9 @@ class _TutorHeroBackdrop extends StatelessWidget {
               child: Container(
                 width: 300,
                 height: 300,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF37B2E3),
+                  color: orbB,
                 ),
               ),
             ),
@@ -1816,9 +1846,9 @@ class _TutorHeroBackdrop extends StatelessWidget {
               child: Container(
                 width: 280,
                 height: 280,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF2D85FF),
+                  color: orbC,
                 ),
               ),
             ),

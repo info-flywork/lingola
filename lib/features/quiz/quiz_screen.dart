@@ -12,6 +12,7 @@ import 'writing_test_screen.dart';
 class QuizScreen extends StatelessWidget {
   const QuizScreen({super.key});
 
+  static const _readingIconBg = Color(0xFFFFCBCB);
   static const _writingOrange = Color(0xFFFF8D28);
   static const _writingIconBg = Color(0xFFFFE8D4);
   static const _speakingGreen = Color(0xFF34C759);
@@ -69,7 +70,7 @@ class QuizScreen extends StatelessWidget {
                         fontFamily: 'Poppins',
                         fontSize: 20,
                         height: 28 / 20,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.ink,
                       ),
                     ),
@@ -79,21 +80,18 @@ class QuizScreen extends StatelessWidget {
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
-                        height: 24 / 16,
+                        height: 1,
                         fontWeight: FontWeight.w500,
                         color: AppColors.secondary,
                       ),
                     ),
                     const SizedBox(height: 16),
                     _QuizOptionCard(
-                      iconAsset: AppAssets.quizBook,
-                      brandPrimaryIcon: true,
+                      iconAsset: AppAssets.quizReading,
+                      iconBg: _readingIconBg,
                       title: text.readingTitle,
                       description: text.readingBody,
-                      titleColor: AppColors.ink,
-                      descriptionColor: AppColors.secondary,
                       arrowBg: AppColors.primary,
-                      arrowColor: Colors.white,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
@@ -108,10 +106,7 @@ class QuizScreen extends StatelessWidget {
                       iconBg: _writingIconBg,
                       title: text.writingTitle,
                       description: text.writingBody,
-                      titleColor: AppColors.ink,
-                      descriptionColor: AppColors.secondary,
                       arrowBg: _writingOrange,
-                      arrowColor: Colors.white,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
@@ -126,10 +121,7 @@ class QuizScreen extends StatelessWidget {
                       iconBg: _speakingIconBg,
                       title: text.speakingTitle,
                       description: text.speakingBody,
-                      titleColor: AppColors.ink,
-                      descriptionColor: AppColors.secondary,
                       arrowBg: _speakingGreen,
-                      arrowColor: Colors.white,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(
@@ -152,26 +144,18 @@ class QuizScreen extends StatelessWidget {
 class _QuizOptionCard extends StatelessWidget {
   const _QuizOptionCard({
     required this.iconAsset,
-    this.iconBg,
-    this.brandPrimaryIcon = false,
+    required this.iconBg,
     required this.title,
     required this.description,
-    required this.titleColor,
-    required this.descriptionColor,
     required this.arrowBg,
-    required this.arrowColor,
     required this.onTap,
   });
 
   final String iconAsset;
-  final Color? iconBg;
-  final bool brandPrimaryIcon;
+  final Color iconBg;
   final String title;
   final String description;
-  final Color titleColor;
-  final Color descriptionColor;
   final Color arrowBg;
-  final Color arrowColor;
   final VoidCallback onTap;
 
   @override
@@ -182,7 +166,6 @@ class _QuizOptionCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: Ink(
-          height: 100,
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: AppColors.border10),
@@ -191,13 +174,12 @@ class _QuizOptionCard extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.all(10),
               child: Row(
                 children: [
                   _QuizIconBadge(
                     iconAsset: iconAsset,
                     iconBg: iconBg,
-                    brandPrimary: brandPrimaryIcon,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -207,12 +189,12 @@ class _QuizOptionCard extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 16,
                             height: 20 / 16,
-                            fontWeight: FontWeight.w700,
-                            color: titleColor,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.ink,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -220,12 +202,12 @@ class _QuizOptionCard extends StatelessWidget {
                           description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 12,
-                            height: 16 / 12,
+                            fontSize: 14,
+                            height: 16 / 14,
                             fontWeight: FontWeight.w500,
-                            color: descriptionColor,
+                            color: AppColors.secondary,
                           ),
                         ),
                       ],
@@ -240,11 +222,11 @@ class _QuizOptionCard extends StatelessWidget {
                       color: arrowBg,
                       shape: BoxShape.circle,
                     ),
-                    child: HomeAsset(
+                    child: const HomeAsset(
                       AppAssets.quizArrow,
                       width: 6,
                       height: 12,
-                      color: arrowColor,
+                      color: Colors.white,
                     ),
                   ),
                 ],
@@ -257,33 +239,35 @@ class _QuizOptionCard extends StatelessWidget {
   }
 }
 
-/// Quiz kartı sol ikon — yazma/konuşma ile aynı ölçü ve kenarlık.
 class _QuizIconBadge extends StatelessWidget {
   const _QuizIconBadge({
     required this.iconAsset,
-    this.iconBg,
-    this.brandPrimary = false,
+    required this.iconBg,
   });
 
   final String iconAsset;
-  final Color? iconBg;
-  final bool brandPrimary;
+  final Color iconBg;
 
-  static const _size = 52.0;
+  static const _size = 60.0;
   static const _radius = 10.0;
-  static const _iconPadding = 10.0;
+  static const _padding = 4.0;
+  static const _iconSize = 52.0;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: _size,
       height: _size,
-      padding: const EdgeInsets.all(_iconPadding),
+      padding: const EdgeInsets.all(_padding),
       decoration: BoxDecoration(
-        color: brandPrimary ? AppColors.primary : iconBg,
+        color: iconBg,
         borderRadius: BorderRadius.circular(_radius),
       ),
-      child: HomeAsset(iconAsset, width: 32, height: 32),
+      child: HomeAsset(
+        iconAsset,
+        width: _iconSize,
+        height: _iconSize,
+      ),
     );
   }
 }

@@ -7,6 +7,15 @@ class CefrLevels {
 
   static const emojis = ['🌱', '🌿', '💬', '🗣️', '🚀', '🏆'];
 
+  static const iconAssets = [
+    'assets/images/onboarding/levels/a1.png',
+    'assets/images/onboarding/levels/a2level.png',
+    'assets/images/onboarding/levels/b1level.png',
+    'assets/images/onboarding/levels/b2level.png',
+    'assets/images/onboarding/levels/c1.png',
+    'assets/images/onboarding/levels/c2.png',
+  ];
+
   /// Eski beginner/intermediate/advanced ve bilinmeyen değerleri normalize eder.
   static String normalize(String? level) {
     final raw = level?.trim().toLowerCase();

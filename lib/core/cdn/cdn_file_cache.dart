@@ -48,13 +48,41 @@ abstract final class CdnFileCache {
     }
   }
 
+  static Future<void> evict(String url, {String kind = 'rive'}) async {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty || !_isNetwork(trimmed)) return;
+    _inflight.remove(trimmed);
+    try {
+      final file = await _fileFor(trimmed, kind);
+      if (await file.exists()) await file.delete();
+      final tmp = File('${file.path}.tmp');
+      if (await tmp.exists()) await tmp.delete();
+    } catch (_) {}
+  }
+
+  static bool looksLikeRive(List<int> bytes) {
+    return bytes.length >= 4 &&
+        bytes[0] == 0x52 && // R
+        bytes[1] == 0x49 && // I
+        bytes[2] == 0x56 && // V
+        bytes[3] == 0x45; // E
+  }
+
   static bool _isNetwork(String value) =>
       value.startsWith('http://') || value.startsWith('https://');
 
   static Future<String> _downloadIfNeeded(String url, String kind) async {
     final file = await _fileFor(url, kind);
     if (await file.exists() && await file.length() > 64) {
-      return file.path;
+      if (kind != 'rive' || await _fileLooksLikeRive(file)) {
+        return file.path;
+      }
+      if (kDebugMode) {
+        debugPrint('[cdn-cache] evict invalid rive ${file.path}');
+      }
+      try {
+        await file.delete();
+      } catch (_) {}
     }
 
     final tmp = File('${file.path}.tmp');
@@ -63,6 +91,9 @@ abstract final class CdnFileCache {
       final bytes = res.data;
       if (bytes == null || bytes.length < 64) {
         throw StateError('CDN file empty: $url');
+      }
+      if (kind == 'rive' && !looksLikeRive(bytes)) {
+        throw StateError('CDN file is not Rive: $url');
       }
       await tmp.parent.create(recursive: true);
       await tmp.writeAsBytes(bytes, flush: true);
@@ -79,6 +110,20 @@ abstract final class CdnFileCache {
         } catch (_) {}
       }
       rethrow;
+    }
+  }
+
+  static Future<bool> _fileLooksLikeRive(File file) async {
+    try {
+      final raf = await file.open();
+      try {
+        final header = await raf.read(4);
+        return looksLikeRive(header);
+      } finally {
+        await raf.close();
+      }
+    } catch (_) {
+      return false;
     }
   }
 

@@ -651,7 +651,7 @@ class _Translations$rolePlayPage$tr implements Translations$rolePlayPage$en {
 	@override String get lingolaRolePlay => 'Lingola RolePlay';
 	@override String get shopping => 'Alışveriş';
 	@override String get flirting => 'Flört';
-	@override String get lifeInTheUs => 'Life In The Us';
+	@override String get lifeInTheUs => 'ABD\'de Yaşam';
 	@override String get freeDiscussion => 'Serbest Sohbet';
 	@override String get jobInterview => 'İş Mülakatı';
 	@override String get dailyInteractions => 'Günlük Etkileşimler';
@@ -969,6 +969,8 @@ class _Translations$profilePage$tr implements Translations$profilePage$en {
 	@override String get myCertificates => 'Sertifikalarım';
 	@override String get certificatesEmptyTitle => 'Henüz sertifika yok';
 	@override String get certificatesEmptySubtitle => 'Bir seviye tamamladığında tekrar kontrol etmeyi unutma.';
+	@override String get restorePurchasesSuccess => 'Satın alımların geri yüklendi.';
+	@override String get restorePurchasesEmpty => 'Bu hesap için aktif satın alma bulunamadı.';
 }
 
 // Path: onboarding.slide1
@@ -2734,7 +2736,7 @@ extension on TranslationsTr {
 			'rolePlayPage.lingolaRolePlay' => 'Lingola RolePlay',
 			'rolePlayPage.shopping' => 'Alışveriş',
 			'rolePlayPage.flirting' => 'Flört',
-			'rolePlayPage.lifeInTheUs' => 'Life In The Us',
+			'rolePlayPage.lifeInTheUs' => 'ABD\'de Yaşam',
 			'rolePlayPage.freeDiscussion' => 'Serbest Sohbet',
 			'rolePlayPage.jobInterview' => 'İş Mülakatı',
 			'rolePlayPage.dailyInteractions' => 'Günlük Etkileşimler',
@@ -3147,6 +3149,8 @@ extension on TranslationsTr {
 			'profilePage.myCertificates' => 'Sertifikalarım',
 			'profilePage.certificatesEmptyTitle' => 'Henüz sertifika yok',
 			'profilePage.certificatesEmptySubtitle' => 'Bir seviye tamamladığında tekrar kontrol etmeyi unutma.',
+			'profilePage.restorePurchasesSuccess' => 'Satın alımların geri yüklendi.',
+			'profilePage.restorePurchasesEmpty' => 'Bu hesap için aktif satın alma bulunamadı.',
 			_ => null,
 		};
 	}

@@ -1424,8 +1424,8 @@ class Translations$rolePlayPage$en {
 	/// en: 'Flirting'
 	String get flirting => 'Flirting';
 
-	/// en: 'Life In The Us'
-	String get lifeInTheUs => 'Life In The Us';
+	/// en: 'Life in the US'
+	String get lifeInTheUs => 'Life in the US';
 
 	/// en: 'Free Discussion'
 	String get freeDiscussion => 'Free Discussion';
@@ -2194,6 +2194,12 @@ class Translations$profilePage$en {
 
 	/// en: 'Don't forget to check again when you complete a level.'
 	String get certificatesEmptySubtitle => 'Don\'t forget to check again when you complete a level.';
+
+	/// en: 'Your purchases were restored.'
+	String get restorePurchasesSuccess => 'Your purchases were restored.';
+
+	/// en: 'No active purchases found for this account.'
+	String get restorePurchasesEmpty => 'No active purchases found for this account.';
 }
 
 // Path: onboarding.slide1
@@ -4479,7 +4485,7 @@ extension on Translations {
 			'rolePlayPage.lingolaRolePlay' => 'Lingola RolePlay',
 			'rolePlayPage.shopping' => 'Shopping',
 			'rolePlayPage.flirting' => 'Flirting',
-			'rolePlayPage.lifeInTheUs' => 'Life In The Us',
+			'rolePlayPage.lifeInTheUs' => 'Life in the US',
 			'rolePlayPage.freeDiscussion' => 'Free Discussion',
 			'rolePlayPage.jobInterview' => 'Job Interview',
 			'rolePlayPage.dailyInteractions' => 'Daily Interactions',
@@ -4892,6 +4898,8 @@ extension on Translations {
 			'profilePage.myCertificates' => 'My Certificates',
 			'profilePage.certificatesEmptyTitle' => 'No certificates yet',
 			'profilePage.certificatesEmptySubtitle' => 'Don\'t forget to check again when you complete a level.',
+			'profilePage.restorePurchasesSuccess' => 'Your purchases were restored.',
+			'profilePage.restorePurchasesEmpty' => 'No active purchases found for this account.',
 			_ => null,
 		};
 	}

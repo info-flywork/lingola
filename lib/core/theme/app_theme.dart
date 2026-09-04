@@ -10,7 +10,8 @@ abstract final class AppColors {
   static const border = Color(0xFFEAEAEA);
   static const navInactive = Color(0xFFCAD5E2);
   static const quizOrange = Color(0xFFFF5623);
-  static const immersiveLabel = Color(0xFFFF3B00);
+  /// Figma More Features — IMMERSIVE label (butonla aynı turuncu).
+  static const immersiveLabel = Color(0xFFFF5623);
   static const progressTrack = Color(0xFFC5C7D4);
   static const onboardingSky = Color(0xFF63B1D9);
   static const onboardingBlue = Color(0xFF2D85FF);

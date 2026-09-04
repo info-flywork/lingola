@@ -773,7 +773,7 @@
     "lingolaRolePlay": "Lingola RolePlay",
     "shopping": "Alışveriş",
     "flirting": "Flört",
-    "lifeInTheUs": "Life In The Us",
+    "lifeInTheUs": "ABD'de Yaşam",
     "freeDiscussion": "Serbest Sohbet",
     "jobInterview": "İş Mülakatı",
     "dailyInteractions": "Günlük Etkileşimler",
@@ -1297,6 +1297,8 @@
     "confirmKeepGoing": "İlerlemeden Vazgeçme",
     "myCertificates": "Sertifikalarım",
     "certificatesEmptyTitle": "Henüz sertifika yok",
-    "certificatesEmptySubtitle": "Bir seviye tamamladığında tekrar kontrol etmeyi unutma."
+    "certificatesEmptySubtitle": "Bir seviye tamamladığında tekrar kontrol etmeyi unutma.",
+    "restorePurchasesSuccess": "Satın alımların geri yüklendi.",
+    "restorePurchasesEmpty": "Bu hesap için aktif satın alma bulunamadı."
   }
 }

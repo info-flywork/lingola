@@ -9,7 +9,6 @@ import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/constants/cefr_levels.dart';
 import '../../core/constants/daily_pace.dart';
-import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/home_asset.dart';
 import '../../widgets/user_avatar.dart';
@@ -21,7 +20,8 @@ import 'profile_general_settings_screen.dart';
 import 'profile_emoji.dart';
 import 'profile_option_sheet.dart';
 import 'profile_settings_screen.dart';
-import 'select_language_screen.dart';
+import 'native_language_sheet.dart';
+import 'interests_sheet.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -31,16 +31,16 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static const _badgeStart = Color(0xFF000088);
   static const _streakDone = Color(0xFF2D46FF);
   static const _streakIdle = Color(0xFFD7D7D7);
-
-  static const _accountTargetBg = Color(0xFFEFF6FF);
-  static const _accountLevelBg = Color(0x1A28FFCB);
-  static const _accountNativeBg = Color(0x1A284FFF);
-  static const _accountInterestsBg = Color(0x1AFF28D8);
-  static const _accountDailyGoalBg = Color(0x1AFF2828);
-  static const _accountReminderBg = Color(0x1AFFC728);
+  static const _settingsDivider = Color(0xFFC6C6C6);
+  static const _rowTextStyle = TextStyle(
+    fontFamily: 'Poppins',
+    fontSize: 14,
+    height: 16 / 14,
+    fontWeight: FontWeight.w500,
+    color: Color(0xFF000000),
+  );
 
   var _streakStates = _streakStatesFromSummary(StreakSummaryDto.empty());
   var _notificationsOn = true;
@@ -54,6 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   var _nativeLanguageCode = 'tr';
   var _level = CefrLevels.defaultLevel;
   var _goal = 'career';
+  var _interests = <String>[];
   var _pace = DailyPace.defaultPace;
   var _onboardingBusy = false;
   var _uploadingAvatar = false;
@@ -119,6 +120,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _nativeLanguageCode = user.onboarding?.nativeLanguageCode ?? 'tr';
     _level = CefrLevels.normalize(user.onboarding?.level);
     _goal = user.onboarding?.goal ?? 'career';
+    _interests = List<String>.from(user.onboarding?.interests ?? const []);
+    // Legacy: eski istemciler interest'i goal alanına yazmış olabilir.
+    if (_interests.isEmpty) {
+      final legacy = _goal;
+      const goalOnly = {
+        'career',
+        'livingAbroad',
+        'studyingAbroad',
+        'other',
+      };
+      if (legacy.isNotEmpty && !goalOnly.contains(legacy)) {
+        if (legacy == 'travel' ||
+            [
+              'shopping',
+              'food',
+              'popCulture',
+              'film',
+              'music',
+              'sport',
+              'technology',
+              'science',
+              'health',
+              'fashion',
+              'art',
+              'literature',
+              'history',
+              'culture',
+              'astronomy',
+              'pet',
+              'socialMedia',
+              'entrepreneur',
+            ].contains(legacy)) {
+          _interests = [legacy];
+        }
+      }
+    }
     _pace = DailyPace.normalize(user.onboarding?.pace);
   }
 
@@ -185,37 +222,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
     };
   }
 
-  String _levelLabel(String? level) => CefrLevels.displayCode(level);
-
-  String _goalLabel(String? goal) {
-    final ready = AppText.current.planReady;
-    return switch (goal) {
-      'travel' => ready.goalTravel,
-      'livingAbroad' => ready.goalLiving,
-      'studyingAbroad' => ready.goalStudying,
-      'other' => ready.goalOther,
-      _ => ready.goalCareer,
+  String _languageFlagEmoji(String code) {
+    return switch (code) {
+      'en' => '🇬🇧',
+      'de' => '🇩🇪',
+      'fr' => '🇫🇷',
+      'es' => '🇪🇸',
+      'it' => '🇮🇹',
+      'tr' => '🇹🇷',
+      'jp' || 'ja' => '🇯🇵',
+      'ru' => '🇷🇺',
+      'hi' => '🇮🇳',
+      'pt' => '🇵🇹',
+      'zh' => '🇨🇳',
+      _ => '🇬🇧',
     };
   }
 
-  String _paceLabel(String? pace) => DailyPace.label(AppText.current, pace);
+  String _levelLabel(String? level) => CefrLevels.displayCode(level);
 
-  List<ProfileOption> _paceOptions() {
-    return [
-      for (var i = 0; i < DailyPace.values.length; i++)
-        ProfileOption(
-          id: DailyPace.values[i],
-          label: DailyPace.label(AppText.current, DailyPace.values[i]),
-          emoji: DailyPace.emojis[i],
-        ),
-    ];
+  String _interestLabel(String? id) {
+    final page = AppText.current.profilePage;
+    final setup = AppText.current.setup;
+    return switch (id) {
+      'travel' => page.goalChipTravel,
+      'shopping' => page.interestShopping,
+      'food' => page.interestFood,
+      'popCulture' => page.interestPopCulture,
+      'film' => page.interestFilm,
+      'music' => page.interestMusic,
+      'sport' => page.interestSport,
+      'technology' => page.interestTechnology,
+      'science' => page.interestScience,
+      'health' => page.interestHealth,
+      'fashion' => page.interestFashion,
+      'art' => page.interestArt,
+      'literature' => page.interestLiterature,
+      'history' => page.interestHistory,
+      'culture' => page.interestCulture,
+      'astronomy' => page.interestAstronomy,
+      'pet' => page.interestPet,
+      'socialMedia' => page.interestSocialMedia,
+      'entrepreneur' => page.interestEntrepreneur,
+      'livingAbroad' => setup.goalLiving,
+      'studyingAbroad' => setup.goalStudying,
+      'other' => setup.goalOther,
+      'career' => setup.goalCareer,
+      _ => id ?? '',
+    };
   }
+
+  String _interestsValueLabel(List<String> ids) {
+    if (ids.isEmpty) return '—';
+    return ids.map(_interestLabel).where((e) => e.isNotEmpty).join(', ');
+  }
+
+  String _paceLabel(String? pace) => DailyPace.label(AppText.current, pace);
 
   Future<void> _updateOnboarding({
     String? explanationLanguage,
     String? targetLanguageCode,
     String? nativeLanguageCode,
     String? goal,
+    List<String>? interests,
     String? level,
     String? pace,
   }) async {
@@ -227,6 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         targetLanguageCode: targetLanguageCode,
         nativeLanguageCode: nativeLanguageCode,
         goal: goal,
+        interests: interests,
         level: level,
         pace: pace != null ? DailyPace.normalize(pace) : null,
       );
@@ -249,6 +319,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             id: item.code,
             label: item.label,
             flagCode: item.code,
+            comingSoon: item.comingSoon,
+            disabled: item.comingSoon,
           ),
         )
         .toList();
@@ -264,37 +336,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ];
   }
 
-  List<ProfileOption> _goalOptions() {
-    final page = AppText.current.profilePage;
-    return [
-      ProfileOption(
-        id: 'career',
-        label: page.goalChipCareer,
-        iconAsset: AppAssets.goalCareer,
-      ),
-      ProfileOption(
-        id: 'travel',
-        label: page.goalChipTravel,
-        iconAsset: AppAssets.goalTravel,
-      ),
-      ProfileOption(
-        id: 'livingAbroad',
-        label: page.goalChipLiving,
-        iconAsset: AppAssets.goalLivingAbroad,
-      ),
-      ProfileOption(
-        id: 'studyingAbroad',
-        label: page.goalChipStudying,
-        iconAsset: AppAssets.goalStudyingAbroad,
-      ),
-      ProfileOption(
-        id: 'other',
-        label: page.goalChipOther,
-        iconAsset: AppAssets.goalOther,
-      ),
-    ];
-  }
-
   Future<void> _pickTargetLanguage() async {
     final text = AppText.current.profilePage;
     await showProfileOptionSheet(
@@ -303,23 +344,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
       titleIcon: AppAssets.profileTargetLang,
       options: _targetLanguageOptions(),
       selectedId: _targetLanguageCode,
-      columns: 3,
+      columns: 2,
       gridIcons: true,
       readOnly: true,
+      flat: true,
     );
   }
 
   Future<void> _pickNativeLanguage() async {
-    final selected = await Navigator.of(context).push<String>(
-      MaterialPageRoute<String>(
-        builder: (_) => SelectLanguageScreen(
-          initialCode: _nativeLanguageCode,
-          kind: LanguagePickerKind.nativeLanguage,
-        ),
-      ),
+    final selected = await showNativeLanguageSheet(
+      context,
+      selectedId: _nativeLanguageCode,
     );
     if (selected == null || selected == _nativeLanguageCode) return;
     await _updateOnboarding(nativeLanguageCode: selected);
+    // Onboarding ile aynı: anadil değişince uygulama UI dili de değişir.
+    final appLocale = selected == 'jp' ? 'ja' : selected;
+    try {
+      await AuthService.updateProfile(appLocale: appLocale);
+    } catch (_) {}
+    if (mounted) setState(() {});
   }
 
   Future<void> _pickLevel() async {
@@ -332,24 +376,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       selectedId: _level,
       columns: 3,
       compact: true,
+      flat: true,
     );
     if (selected == null || selected == _level) return;
     await _updateOnboarding(level: selected);
   }
 
   Future<void> _pickGoal() async {
-    final text = AppText.current.profilePage;
-    final selected = await showProfileOptionSheet(
+    final selected = await showInterestsSheet(
       context,
-      title: text.interests,
-      titleIcon: AppAssets.profileHobbies,
-      options: _goalOptions(),
-      selectedId: _goal,
-      columns: 3,
-      gridIcons: true,
+      selectedIds: _interests,
     );
-    if (selected == null || selected == _goal) return;
-    await _updateOnboarding(goal: selected);
+    if (selected == null) return;
+    final same = selected.length == _interests.length &&
+        selected.toSet().containsAll(_interests);
+    if (same) return;
+    // Profil satırını Kaydet sonrası hemen güncelle.
+    setState(() => _interests = List<String>.from(selected));
+    await _updateOnboarding(interests: selected);
   }
 
   Future<void> _pickPace() async {
@@ -358,10 +402,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context,
       title: text.dailyGoal,
       titleIcon: AppAssets.profileDailyTarget,
-      options: _paceOptions(),
+      options: [
+        for (final pace in DailyPace.values)
+          ProfileOption(
+            id: pace,
+            label: DailyPace.label(AppText.current, pace),
+          ),
+      ],
       selectedId: _pace,
       columns: 3,
-      gridIcons: true,
+      compact: true,
+      flat: true,
     );
     if (selected == null || selected == _pace) return;
     await _updateOnboarding(pace: selected);
@@ -446,24 +497,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     GestureDetector(
                       onTap: _uploadingAvatar ? null : _openProfileSettings,
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: PremiumService.isPremiumListenable,
-                        builder: (context, isPremium, _) {
-                          if (_uploadingAvatar) {
-                            return const SizedBox(
+                      child: _uploadingAvatar
+                          ? const SizedBox(
                               width: 86,
                               height: 86,
                               child: CircularProgressIndicator(strokeWidth: 2),
-                            );
-                          }
-                          return UserAvatar(
-                            size: 86,
-                            avatarUrl: _avatarUrl,
-                            displayName: _displayName,
-                            showPremiumBadge: isPremium,
-                          );
-                        },
-                      ),
+                            )
+                          : UserAvatar(
+                              size: 86,
+                              avatarUrl: _avatarUrl,
+                              displayName: _displayName,
+                            ),
                     ),
                     Positioned(
                       right: -2,
@@ -510,9 +554,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 20,
-                            height: 28 / 20,
+                            height: 24 / 20,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.ink,
+                            color: Color(0xFF000000),
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -526,58 +570,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              Center(
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: PremiumService.isPremiumListenable,
-                  builder: (context, isPremium, _) {
-                    if (isPremium) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(999),
-                          gradient: const LinearGradient(
-                            colors: [_badgeStart, AppColors.primary],
-                          ),
-                        ),
-                        child: Text(
-                          text.premiumVersion,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            height: 24 / 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      );
-                    }
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: AppColors.primary),
-                      ),
-                      child: Text(
-                        text.freeVersion,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          height: 24 / 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
               const SizedBox(height: 24),
               _DayStreakCard(
                 title: text.dayStreak,
@@ -585,17 +577,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 states: _streakStates,
               ),
               const SizedBox(height: 24),
-              Text(
-                text.accountSettings,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  height: 20 / 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.ink,
-                ),
-              ),
-              const SizedBox(height: 10),
               _LearnNativeToggleRow(
                 label: text.learnInNativeLanguage,
                 value: _explanationLanguage != 'english',
@@ -611,38 +592,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   _SettingsTile(
                     icon: AppAssets.profileTargetLang,
-                    iconBg: _accountTargetBg,
                     preserveIconColors: true,
                     label: text.targetLanguageLabel,
                     valueLabel: _languageLabel(_targetLanguageCode),
+                    valuePrefix: profileEmoji(
+                      _languageFlagEmoji(_targetLanguageCode),
+                      size: 16,
+                    ),
                     onTap: _onboardingBusy ? null : _pickTargetLanguage,
                   ),
                   _SettingsTile(
                     icon: AppAssets.profileLangLevel,
-                    iconBg: _accountLevelBg,
                     preserveIconColors: true,
                     label: text.languageLevel,
                     valueLabel: _levelLabel(_level),
                     onTap: _onboardingBusy ? null : _pickLevel,
                   ),
                   _SettingsTile(
-                    iconFlagCode: _nativeLanguageCode,
-                    iconBg: _accountNativeBg,
+                    icon: AppAssets.profileMotherTongue,
+                    preserveIconColors: true,
                     label: text.nativeLanguage,
                     valueLabel: _languageLabel(_nativeLanguageCode),
                     onTap: _onboardingBusy ? null : _pickNativeLanguage,
                   ),
                   _SettingsTile(
                     icon: AppAssets.profileHobbies,
-                    iconBg: _accountInterestsBg,
                     preserveIconColors: true,
                     label: text.interests,
-                    valueLabel: _goalLabel(_goal),
+                    valueLabel: _interestsValueLabel(_interests),
                     onTap: _onboardingBusy ? null : _pickGoal,
                   ),
                   _SettingsTile(
                     icon: AppAssets.profileDailyTarget,
-                    iconBg: _accountDailyGoalBg,
                     preserveIconColors: true,
                     label: text.dailyGoal,
                     valueLabel: _paceLabel(_pace),
@@ -650,7 +631,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   _SettingsTile(
                     icon: AppAssets.profileDailyReminder,
-                    iconBg: _accountReminderBg,
                     preserveIconColors: true,
                     label: text.dailyReminder,
                     valueLabel: _reminderValueLabel(),
@@ -807,7 +787,7 @@ class _SettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.only(top: 17, bottom: 18),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: AppColors.border10),
@@ -816,8 +796,19 @@ class _SettingsGroup extends StatelessWidget {
       child: Column(
         children: [
           for (var i = 0; i < children.length; i++) ...[
-            if (i > 0) const SizedBox(height: 16),
-            children[i],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: children[i],
+            ),
+            if (i < children.length - 1) ...[
+              const SizedBox(height: 17.85),
+              // Figma: çizgi kartın sol/sağ kenarına kadar.
+              const ColoredBox(
+                color: _ProfileScreenState._settingsDivider,
+                child: SizedBox(height: 0.3, width: double.infinity),
+              ),
+              const SizedBox(height: 17.85),
+            ],
           ],
         ],
       ),
@@ -853,24 +844,22 @@ class _LearnNativeToggleRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                height: 20 / 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.ink,
-              ),
+              style: _ProfileScreenState._rowTextStyle,
             ),
           ),
-          Transform.scale(
-            scale: 0.78,
-            alignment: Alignment.centerRight,
-            child: Switch.adaptive(
-              value: value,
-              activeThumbColor: Colors.white,
-              activeTrackColor: AppColors.primary,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onChanged: busy ? null : onChanged,
+          SizedBox(
+            width: 39,
+            height: 24,
+            child: FittedBox(
+              fit: BoxFit.contain,
+              alignment: Alignment.centerRight,
+              child: Switch.adaptive(
+                value: value,
+                activeThumbColor: Colors.white,
+                activeTrackColor: AppColors.primary,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                onChanged: busy ? null : onChanged,
+              ),
             ),
           ),
         ],
@@ -884,12 +873,12 @@ class _SettingsTile extends StatelessWidget {
     this.icon,
     this.iconEmoji,
     this.iconFlagCode,
-    required this.iconBg,
     required this.label,
     this.iconColor,
     this.labelColor,
     this.valueLabel,
     this.valueColor,
+    this.valuePrefix,
     this.preserveIconColors = false,
     this.trailing,
     this.onTap,
@@ -901,83 +890,99 @@ class _SettingsTile extends StatelessWidget {
   final String? icon;
   final String? iconEmoji;
   final String? iconFlagCode;
-  final Color iconBg;
   final String label;
   final Color? iconColor;
   final Color? labelColor;
   final String? valueLabel;
   final Color? valueColor;
+  final Widget? valuePrefix;
   final bool preserveIconColors;
   final Widget? trailing;
   final VoidCallback? onTap;
 
+  Widget _buildLeadingIcon() {
+    if (iconFlagCode != null) {
+      return LanguageFlag.badge(iconFlagCode!, size: 32);
+    }
+    if (iconEmoji != null) {
+      return profileEmoji(iconEmoji!, size: 28);
+    }
+    return HomeAsset(
+      icon!,
+      width: 32,
+      height: 32,
+      color: preserveIconColors ? null : iconColor,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final valueStyle = TextStyle(
+      fontFamily: 'Poppins',
+      fontSize: 14,
+      height: 16 / 14,
+      fontWeight: FontWeight.w500,
+      color: valueColor ?? const Color(0xFF000000),
+    );
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: SizedBox(
-        height: 46,
+        height: 32,
         child: Row(
           children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: iconBg,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              alignment: Alignment.center,
-              child: iconFlagCode != null
-                  ? LanguageFlag.badge(iconFlagCode!, size: 22)
-                  : iconEmoji != null
-                  ? profileEmoji(iconEmoji!, size: 22)
-                  : HomeAsset(
-                      icon!,
-                      width: 28,
-                      height: 28,
-                      color: preserveIconColors ? null : iconColor,
-                    ),
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: Center(child: _buildLeadingIcon()),
             ),
             const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  height: 20 / 14,
-                  fontWeight: FontWeight.w500,
-                  color: labelColor ?? AppColors.ink,
-                ),
+            Text(
+              label,
+              maxLines: 1,
+              softWrap: false,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                height: 16 / 14,
+                fontWeight: FontWeight.w500,
+                color: labelColor ?? const Color(0xFF000000),
               ),
             ),
-            if (valueLabel != null) ...[
-              Text(
-                valueLabel!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 12,
-                  height: 16 / 12,
-                  fontWeight: FontWeight.w500,
-                  color: valueColor ?? AppColors.ink.withValues(alpha: 0.35),
-                ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (valuePrefix != null) ...[
+                    valuePrefix!,
+                    const SizedBox(width: 6),
+                  ],
+                  if (valueLabel != null)
+                    Flexible(
+                      child: Text(
+                        valueLabel!,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: valueStyle,
+                      ),
+                    ),
+                  if (valueLabel != null) const SizedBox(width: 6),
+                  if (trailing != null)
+                    trailing!
+                  else
+                    const HomeAsset(
+                      AppAssets.quizArrow,
+                      width: 6,
+                      height: 12,
+                      color: Color(0xFF828282),
+                    ),
+                ],
               ),
-              const SizedBox(width: 6),
-            ],
-            if (trailing != null)
-              trailing!
-            else
-              const HomeAsset(
-                AppAssets.quizArrow,
-                width: 6,
-                height: 12,
-                color: Color(0xFF828282),
-              ),
+            ),
           ],
         ),
       ),

@@ -218,13 +218,13 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                           alignment: Alignment.centerRight,
                           padding: const EdgeInsets.only(right: 20),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE53935),
+                            color: const Color(0x33FF0014),
                             borderRadius: BorderRadius.circular(14),
                           ),
-                          child: const Icon(
-                            Icons.delete_rounded,
-                            color: Colors.white,
-                            size: 28,
+                          child: const HomeAsset(
+                            AppAssets.deleteIcon,
+                            width: AppAssets.deleteIconSize,
+                            height: AppAssets.deleteIconSize,
                           ),
                         ),
                         child: _HistoryTile(

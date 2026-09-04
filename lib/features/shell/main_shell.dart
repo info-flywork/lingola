@@ -21,10 +21,10 @@ class MainShell extends StatefulWidget {
     context.findAncestorStateOfType<_MainShellState>()?.selectTab(index);
   }
 
-  static void goToProfile(BuildContext context) => goToTab(context, 4);
+  static void goToProfile(BuildContext context) => goToTab(context, 3);
 
-  /// Bottom nav Lessons (index 2).
-  static void goToLessons(BuildContext context) => goToTab(context, 2);
+  /// Eski Lessons sekmesi kaldırıldı — no-op (ders oturumu Offstage host üzerinden).
+  static void goToLessons(BuildContext context) {}
 
   /// Bottom nav Tutors (index 1).
   static void goToTutors(BuildContext context) => goToTab(context, 1);
@@ -39,12 +39,21 @@ class _MainShellState extends State<MainShell> {
   @override
   void initState() {
     super.initState();
-    _index = widget.initialIndex.clamp(0, 4);
+    // Eski 5 sekmeli index’leri 4 sekmeye map et.
+    final raw = widget.initialIndex;
+    _index = switch (raw) {
+      0 => 0, // home
+      1 => 1, // tutor
+      2 => 0, // eski lesson → home
+      3 => 2, // roleplay
+      4 => 3, // profile
+      _ => 0,
+    };
   }
 
   void selectTab(int index) {
     if (!mounted) return;
-    setState(() => _index = index.clamp(0, 4));
+    setState(() => _index = index.clamp(0, 3));
   }
 
   static const _iconSets = [
@@ -55,10 +64,6 @@ class _MainShellState extends State<MainShell> {
     (
       'assets/images/nav/tutor_active.svg',
       'assets/images/nav/tutor_inactive.svg',
-    ),
-    (
-      'assets/images/nav/lesson_active.svg',
-      'assets/images/nav/lesson_inactive.svg',
     ),
     (
       'assets/images/nav/roleplay_active.svg',
@@ -79,7 +84,6 @@ class _MainShellState extends State<MainShell> {
         final labels = [
           text.nav.home,
           text.nav.tutor,
-          text.nav.lesson,
           text.nav.rolePlay,
           text.nav.profile,
         ];
@@ -88,7 +92,6 @@ class _MainShellState extends State<MainShell> {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: const SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
-            // Açık #F5F6FA zemin → koyu saat / wifi / şarj ikonları
             statusBarIconBrightness: Brightness.dark,
             statusBarBrightness: Brightness.light,
             systemNavigationBarColor: Colors.white,
@@ -99,14 +102,25 @@ class _MainShellState extends State<MainShell> {
             body: SafeArea(
               top: _index != 1,
               bottom: false,
-              child: IndexedStack(
-                index: _index,
+              child: Stack(
                 children: [
-                  HomeScreen(key: ValueKey('home-$localeKey')),
-                  TutorScreen(key: ValueKey('tutor-$localeKey')),
-                  LessonScreen(key: ValueKey('lesson-$localeKey')),
-                  RolePlayScreen(key: ValueKey('roleplay-$localeKey')),
-                  ProfileScreen(key: ValueKey('profile-$localeKey')),
+                  IndexedStack(
+                    index: _index,
+                    children: [
+                      HomeScreen(key: ValueKey('home-$localeKey')),
+                      TutorScreen(key: ValueKey('tutor-$localeKey')),
+                      RolePlayScreen(key: ValueKey('roleplay-$localeKey')),
+                      ProfileScreen(key: ValueKey('profile-$localeKey')),
+                    ],
+                  ),
+                  // Ders oturumu host — sekmede yok; state mount kalsın.
+                  Visibility(
+                    visible: false,
+                    maintainState: true,
+                    child: LessonScreen(
+                      key: ValueKey('lesson-host-$localeKey'),
+                    ),
+                  ),
                 ],
               ),
             ),

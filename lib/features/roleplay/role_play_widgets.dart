@@ -75,9 +75,9 @@ class RolePlayFilterChip extends StatelessWidget {
                 ? null
                 : Border.all(color: const Color(0xFFE2E2E2)),
           ),
-          alignment: Alignment.center,
           child: Text(
             label,
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: selected ? Colors.white : const Color(0xFF8F8F8F),
               fontFamily: 'Poppins',

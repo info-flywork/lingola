@@ -37,12 +37,17 @@ Future<String?> showProfileOptionSheet(
   bool compact = false,
   bool gridIcons = false,
   bool readOnly = false,
+  /// Figma: üst köşe radius yok, düz bottom sheet.
+  bool flat = false,
 }) {
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black.withValues(alpha: 0.45),
+    shape: flat
+        ? const RoundedRectangleBorder(borderRadius: BorderRadius.zero)
+        : null,
     builder: (sheetContext) {
       return Padding(
         padding: EdgeInsets.only(
@@ -57,6 +62,7 @@ Future<String?> showProfileOptionSheet(
           compact: compact,
           gridIcons: gridIcons,
           readOnly: readOnly,
+          flat: flat,
         ),
       );
     },
@@ -73,6 +79,7 @@ class _ProfileOptionSheet extends StatefulWidget {
     this.compact = false,
     this.gridIcons = false,
     this.readOnly = false,
+    this.flat = false,
   });
 
   final String title;
@@ -83,6 +90,7 @@ class _ProfileOptionSheet extends StatefulWidget {
   final bool compact;
   final bool gridIcons;
   final bool readOnly;
+  final bool flat;
 
   @override
   State<_ProfileOptionSheet> createState() => _ProfileOptionSheetState();
@@ -104,7 +112,8 @@ class _ProfileOptionSheetState extends State<_ProfileOptionSheet> {
     if (opts.isEmpty) return 1;
     if (widget.compact) return 3;
 
-    final longest = opts.map((o) => o.label.length).reduce((a, b) => a > b ? a : b);
+    final longest =
+        opts.map((o) => o.label.length).reduce((a, b) => a > b ? a : b);
     if (opts.any((o) => o.flagCode != null)) return 1;
     if (opts.length <= 3 && longest <= 14) return opts.length;
     if (longest <= 8) return 3;
@@ -113,6 +122,57 @@ class _ProfileOptionSheetState extends State<_ProfileOptionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.flat) {
+      return _buildFlatSheet(context);
+    }
+    return _buildRoundedSheet(context);
+  }
+
+  Widget _buildFlatSheet(BuildContext context) {
+    final text = AppText.current.profilePage;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final columns = widget.columns ?? 2;
+    // Dil Seviyesi / Günlük Hedef (compact): dengeli boşluk.
+    final titleGap = widget.compact ? 24.0 : 16.0;
+    final buttonGap = widget.compact ? 40.0 : 24.0;
+
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: Color(0xFFECECEC), width: 2),
+        ),
+      ),
+      padding: EdgeInsets.fromLTRB(16, 24, 16, 30 + bottomInset),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildTitle(iconSize: 32, fontSize: 16, fontWeight: FontWeight.w500),
+          SizedBox(height: titleGap),
+          _FlatOptionGrid(
+            options: widget.options,
+            columns: columns,
+            selectedId: _selectedId,
+            readOnly: widget.readOnly,
+            compact: widget.compact,
+            onSelect: widget.readOnly
+                ? (_) {}
+                : (id) => setState(() => _selectedId = id),
+          ),
+          SizedBox(height: buttonGap),
+          PrimaryButton(
+            label: text.reminderSave,
+            onPressed: () => Navigator.of(context).pop(
+              widget.readOnly ? null : _selectedId,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRoundedSheet(BuildContext context) {
     final text = AppText.current.profilePage;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final maxSheetHeight = MediaQuery.sizeOf(context).height * 0.78;
@@ -141,60 +201,32 @@ class _ProfileOptionSheetState extends State<_ProfileOptionSheet> {
           const SizedBox(height: 18),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: horizontalPad),
-            child: widget.titleIcon?.trim().isNotEmpty == true
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      HomeAsset(
-                        widget.titleIcon!.trim(),
-                        width: 22,
-                        height: 22,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        widget.title,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 18,
-                          height: 24 / 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.ink,
-                        ),
-                      ),
-                    ],
-                  )
-                : Text(
-                    widget.title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 18,
-                      height: 24 / 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.ink,
-                    ),
-                  ),
+            child: _buildTitle(
+              iconSize: 22,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 18),
           Flexible(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final columns = _columnCount(constraints.maxWidth);
-                // ScrollView'ın yatay padding'i düşülür — yoksa 3. chip alta kayar.
-                final contentWidth =
-                    constraints.maxWidth - horizontalPad * 2;
+                final contentWidth = constraints.maxWidth - horizontalPad * 2;
                 final itemWidth = columns <= 1
                     ? contentWidth
                     : (contentWidth - spacing * (columns - 1)) / columns;
 
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: horizontalPad),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: horizontalPad),
                   child: columns > 1
                       ? Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            for (var i = 0; i < widget.options.length; i += columns)
+                            for (var i = 0;
+                                i < widget.options.length;
+                                i += columns)
                               Padding(
                                 padding: EdgeInsets.only(
                                   bottom: i + columns < widget.options.length
@@ -214,8 +246,7 @@ class _ProfileOptionSheetState extends State<_ProfileOptionSheet> {
                                   columns: columns,
                                   itemWidth: itemWidth,
                                   spacing: spacing,
-                                  rowWidth:
-                                      columns * itemWidth +
+                                  rowWidth: columns * itemWidth +
                                       spacing * (columns - 1),
                                   selectedId: _selectedId,
                                   compact: widget.compact,
@@ -271,6 +302,209 @@ class _ProfileOptionSheetState extends State<_ProfileOptionSheet> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTitle({
+    required double iconSize,
+    required double fontSize,
+    required FontWeight fontWeight,
+  }) {
+    final hasIcon = widget.titleIcon?.trim().isNotEmpty == true;
+    if (!hasIcon) {
+      return Text(
+        widget.title,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: fontSize,
+          height: 1,
+          fontWeight: fontWeight,
+          color: AppColors.ink,
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        HomeAsset(
+          widget.titleIcon!.trim(),
+          width: iconSize,
+          height: iconSize,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          widget.title,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: fontSize,
+            height: 1,
+            fontWeight: fontWeight,
+            color: AppColors.ink,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Figma Hedef Dil / Dil Seviyesi: hug veya sabit chip’ler, ortalanmış, gap 10.
+class _FlatOptionGrid extends StatelessWidget {
+  const _FlatOptionGrid({
+    required this.options,
+    required this.columns,
+    required this.selectedId,
+    required this.readOnly,
+    required this.onSelect,
+    this.compact = false,
+  });
+
+  final List<ProfileOption> options;
+  final int columns;
+  final String selectedId;
+  final bool readOnly;
+  final bool compact;
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < options.length; i += columns) ...[
+          if (i > 0) const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var j = 0;
+                  j < columns && i + j < options.length;
+                  j++) ...[
+                if (j > 0) const SizedBox(width: 10),
+                _FlatOptionChip(
+                  option: options[i + j],
+                  selected: options[i + j].id == selectedId,
+                  readOnly: readOnly,
+                  compact: compact,
+                  onTap: readOnly || options[i + j].disabled
+                      ? null
+                      : () => onSelect(options[i + j].id),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _FlatOptionChip extends StatelessWidget {
+  const _FlatOptionChip({
+    required this.option,
+    required this.selected,
+    required this.readOnly,
+    this.compact = false,
+    this.onTap,
+  });
+
+  final ProfileOption option;
+  final bool selected;
+  final bool readOnly;
+  final bool compact;
+  final VoidCallback? onTap;
+
+  static const _unselectedBorder = Color(0xFFE2E2E2);
+
+  @override
+  Widget build(BuildContext context) {
+    final isPassive = readOnly && !selected;
+    final isDisabled = option.disabled && !readOnly;
+    final muted = isPassive || isDisabled;
+
+    final labelColor = selected
+        ? Colors.white
+        : muted
+            ? AppColors.secondary
+            : AppColors.ink;
+
+    final label = Text(
+      option.label,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: 'Poppins',
+        fontSize: compact ? 16 : 14,
+        height: compact ? 24 / 16 : 1,
+        fontWeight: compact ? FontWeight.w600 : FontWeight.w500,
+        color: labelColor,
+      ),
+    );
+
+    Widget content;
+    if (compact &&
+        option.flagCode == null &&
+        option.iconAsset == null &&
+        option.emoji == null) {
+      // Dil Seviyesi / Günlük Hedef: hug, yükseklik 48, padding 12
+      content = ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 100, minHeight: 48),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Center(child: label),
+        ),
+      );
+    } else {
+      content = Container(
+        height: 48,
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (option.flagCode != null)
+              Opacity(
+                opacity: muted ? 0.45 : 1,
+                child: LanguageFlag.badge(option.flagCode!, size: 16),
+              )
+            else if (option.iconAsset != null)
+              HomeAsset(
+                option.iconAsset!,
+                width: 16,
+                height: 16,
+                color: selected ? Colors.white : AppColors.ink,
+              )
+            else if (option.emoji != null)
+              Opacity(
+                opacity: muted ? 0.45 : 1,
+                child: profileEmoji(option.emoji!, size: 15),
+              ),
+            if (option.flagCode != null ||
+                option.iconAsset != null ||
+                option.emoji != null)
+              const SizedBox(width: 10),
+            label,
+          ],
+        ),
+      );
+    }
+
+    return Material(
+      color: selected ? AppColors.primary : Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selected ? AppColors.primary : _unselectedBorder,
+            ),
+          ),
+          child: content,
+        ),
       ),
     );
   }
@@ -363,24 +597,24 @@ class _ProfileOptionChip extends StatelessWidget {
     final labelColor = selected
         ? Colors.white
         : isPassive
-        ? AppColors.secondary
-        : isDisabled
-        ? AppColors.secondary
-        : AppColors.ink;
+            ? AppColors.secondary
+            : isDisabled
+                ? AppColors.secondary
+                : AppColors.ink;
 
     final borderColor = selected
         ? AppColors.primary
         : isPassive
-        ? AppColors.border
-        : isDisabled
-        ? AppColors.border
-        : AppColors.primary;
+            ? AppColors.border
+            : isDisabled
+                ? AppColors.border
+                : AppColors.primary;
 
     final backgroundColor = selected
         ? AppColors.primary
         : isPassive
-        ? const Color(0xFFF6F7FB)
-        : Colors.white;
+            ? const Color(0xFFF6F7FB)
+            : Colors.white;
 
     Widget chipContent = Row(
       children: [
@@ -397,8 +631,8 @@ class _ProfileOptionChip extends StatelessWidget {
             color: selected
                 ? Colors.white
                 : isPassive
-                ? AppColors.secondary
-                : AppColors.primary,
+                    ? AppColors.secondary
+                    : AppColors.primary,
           )
         else if (option.emoji != null)
           SizedBox(
@@ -460,14 +694,14 @@ class _ProfileOptionChip extends StatelessWidget {
     final labelColor = selected
         ? Colors.white
         : isDisabled
-        ? AppColors.secondary
-        : AppColors.ink;
+            ? AppColors.secondary
+            : AppColors.ink;
 
     final borderColor = selected
         ? AppColors.primary
         : isDisabled
-        ? AppColors.border
-        : AppColors.primary;
+            ? AppColors.border
+            : AppColors.primary;
 
     return Material(
       color: selected ? AppColors.primary : Colors.white,
@@ -489,8 +723,8 @@ class _ProfileOptionChip extends StatelessWidget {
           child: Row(
             mainAxisAlignment:
                 compact && option.flagCode == null && option.iconAsset == null
-                ? MainAxisAlignment.center
-                : MainAxisAlignment.start,
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               if (option.flagCode != null) ...[

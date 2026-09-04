@@ -655,8 +655,8 @@ class _ReadingTestScreenState extends State<ReadingTestScreen> {
               children: [
                 HomeAsset(
                   iconAsset,
-                  width: 55,
-                  height: 56,
+                  width: 66,
+                  height: 66,
                 ),
                 const SizedBox(height: 10),
                 Text(

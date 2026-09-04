@@ -56,7 +56,8 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
     if (widget.isCustom) {
       return 'Role Play: ${widget.titleEn} #custom:${widget.scenarioId}';
     }
-    return 'Role Play: ${widget.titleEn}';
+    // scenarioId taşı: coffee-hard → ayrı session + backend zorluk
+    return 'Role Play: ${widget.titleEn} #scenario:${widget.scenarioId}';
   }
 
   @override

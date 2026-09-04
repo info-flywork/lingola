@@ -7,10 +7,12 @@ import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/auth/api_client.dart';
+import '../../core/auth/app_user.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
+import '../shell/main_shell.dart';
 import 'onboarding_draft.dart';
 import 'language_setup_screens.dart';
 
@@ -43,9 +45,16 @@ Future<void> presentOnboardingPaywallThenAuth(
 }
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({super.key, required this.draft});
+  const AuthScreen({
+    super.key,
+    required this.draft,
+    this.existingAccount = false,
+  });
 
   final OnboardingDraft draft;
+
+  /// true: Giriş Yap — tamamlanmış hesapta ana sayfaya.
+  final bool existingAccount;
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
@@ -57,12 +66,31 @@ class _AuthScreenState extends State<AuthScreen> {
   /// Apple sadece iOS'ta; Android'de Google + Guest.
   bool get _showAppleSignIn => !kIsWeb && Platform.isIOS;
 
-  void _enterApp() {
+  void _enterApp(AppUser user) {
+    final serverDone = user.onboarding?.goal != null &&
+        user.onboarding!.goal!.trim().isNotEmpty;
+    // Splash'ten giriş: sunucu kaydı. Onboarding sonrası auth: draft dolu olabilir.
+    final draftDone = (widget.draft.goal ?? '').trim().isNotEmpty;
+    final onboardingDone = serverDone || (!widget.existingAccount && draftDone);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => LanguageSetupScreen(draft: widget.draft),
+        builder: (_) => onboardingDone
+            ? const MainShell()
+            : LanguageSetupScreen(draft: widget.draft),
       ),
     );
+  }
+
+  /// Onboarding'de seçilen pratik başlangıç saatini günlük hatırlatmaya yazar.
+  Future<void> _persistReminderFromDraft() async {
+    if (widget.existingAccount || !widget.draft.practiceWindowSet) return;
+    try {
+      await AuthService.updateDailyReminder(
+        enabled: true,
+        hour: widget.draft.reminderHour,
+        minute: widget.draft.reminderMinute,
+      );
+    } catch (_) {}
   }
 
   void _showApiError(ApiException err) {
@@ -79,9 +107,10 @@ class _AuthScreenState extends State<AuthScreen> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      await AuthService.signInAsGuest(widget.draft);
+      final user = await AuthService.signInAsGuest(widget.draft);
+      await _persistReminderFromDraft();
       if (!mounted) return;
-      _enterApp();
+      _enterApp(user);
     } on ApiException catch (err) {
       if (!mounted) return;
       _showApiError(err);
@@ -99,9 +128,10 @@ class _AuthScreenState extends State<AuthScreen> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      await AuthService.signInWithGoogle(widget.draft);
+      final user = await AuthService.signInWithGoogle(widget.draft);
+      await _persistReminderFromDraft();
       if (!mounted) return;
-      _enterApp();
+      _enterApp(user);
     } on ApiException catch (err) {
       if (!mounted) return;
       _showApiError(err);
@@ -119,9 +149,10 @@ class _AuthScreenState extends State<AuthScreen> {
     if (_busy) return;
     setState(() => _busy = true);
     try {
-      await AuthService.signInWithApple(widget.draft);
+      final user = await AuthService.signInWithApple(widget.draft);
+      await _persistReminderFromDraft();
       if (!mounted) return;
-      _enterApp();
+      _enterApp(user);
     } on ApiException catch (err) {
       if (!mounted) return;
       _showApiError(err);
@@ -260,16 +291,16 @@ class _AuthScreenState extends State<AuthScreen> {
                                     height: 18,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color:
-                                          AppColors.ink.withValues(alpha: .65),
+                                      color: AppColors.ink
+                                          .withValues(alpha: .65),
                                     ),
                                   )
                                 : Text(
                                     text.auth.continueGuest,
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
-                                      color:
-                                          AppColors.ink.withValues(alpha: .65),
+                                      color: AppColors.ink
+                                          .withValues(alpha: .65),
                                       fontSize: 14,
                                       height: 18 / 14,
                                       fontWeight: FontWeight.w500,

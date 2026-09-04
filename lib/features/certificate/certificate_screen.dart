@@ -14,18 +14,16 @@ import 'certificate_image_export.dart';
 import 'certificate_level_assets.dart';
 import 'certificate_qr_share.dart';
 
-/// Tam ekran sertifika görünümü — kazanılmış veya önizleme modu.
+/// Sertifika listesi — boşsa empty state, doluysa satır listesi.
 class CertificateScreen extends StatefulWidget {
   const CertificateScreen({
     super.key,
     required this.displayName,
     this.summary,
-    this.initialLevel,
   });
 
   final String displayName;
   final CertificatesSummaryDto? summary;
-  final String? initialLevel;
 
   @override
   State<CertificateScreen> createState() => _CertificateScreenState();
@@ -34,23 +32,13 @@ class CertificateScreen extends StatefulWidget {
 class _CertificateScreenState extends State<CertificateScreen> {
   late CertificatesSummaryDto _summary;
   late bool _loading;
-  late String _selectedLevel;
-  final _exportKey = GlobalKey();
-  var _downloading = false;
-  var _sharingQr = false;
 
   @override
   void initState() {
     super.initState();
     _summary = widget.summary ?? CertificatesSummaryDto.empty();
-    _loading = widget.summary == null;
-    _selectedLevel = widget.initialLevel ??
-        widget.summary?.primary?.cefrLevel ??
-        widget.summary?.highestLevel ??
-        'A1';
-    if (widget.summary == null) {
-      _load();
-    }
+    _loading = true;
+    _load();
   }
 
   Future<void> _load() async {
@@ -60,9 +48,6 @@ class _CertificateScreenState extends State<CertificateScreen> {
       setState(() {
         _summary = data;
         _loading = false;
-        if (_selectedLevel.isEmpty && data.primary != null) {
-          _selectedLevel = data.primary!.cefrLevel;
-        }
       });
     } catch (_) {
       if (!mounted) return;
@@ -70,70 +55,224 @@ class _CertificateScreenState extends State<CertificateScreen> {
     }
   }
 
-  CertificateDto? get _activeCert {
-    if (_summary.certificates.isEmpty) return null;
-    for (final c in _summary.certificates.reversed) {
-      if (c.cefrLevel == _selectedLevel) return c;
-    }
-    return _summary.primary;
-  }
-
-  bool get _hasCertificate => _summary.certificates.isNotEmpty;
-
-  bool get _canUseCertificate {
-    final cert = _activeCert;
-    if (cert == null) return false;
-    return cert.cefrLevel == _selectedLevel;
-  }
-
-  String get _levelCode =>
-      _selectedLevel.isNotEmpty ? _selectedLevel : 'A1';
-
-  Future<void> _showCertificateLocked() async {
-    final text = AppText.current.profilePage;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          text.certificateNotAvailableTitle,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w700,
-          ),
+  void _openDetail(CertificateDto cert) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CertificateDetailScreen(
+          displayName: widget.displayName,
+          certificate: cert,
         ),
-        content: Text(
-          text.certificateNotAvailable(level: _levelCode),
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            height: 21 / 14,
-          ),
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
-            child: Text(text.certificateNotAvailableOk),
-          ),
-        ],
       ),
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final text = AppText.current.profilePage;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: AppColors.surface,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      icon: const HomeAsset(
+                        AppAssets.backArrow,
+                        width: 24,
+                        height: 24,
+                      ),
+                      tooltip: AppText.current.common.back,
+                    ),
+                    Expanded(
+                      child: Text(
+                        text.myCertificates,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          height: 1,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: _loading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : _summary.certificates.isEmpty
+                        ? _CertificatesEmptyState(
+                            title: text.certificatesEmptyTitle,
+                            subtitle: text.certificatesEmptySubtitle,
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                            itemCount: _summary.certificates.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 10),
+                            itemBuilder: (context, index) {
+                              final cert = _summary.certificates[index];
+                              return _CertificateListTile(
+                                title: cert.title?.trim().isNotEmpty == true
+                                    ? cert.title!
+                                    : CertificateLevelAssets.listTitle(
+                                        cert.cefrLevel,
+                                      ),
+                                onTap: () => _openDetail(cert),
+                              );
+                            },
+                          ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CertificatesEmptyState extends StatelessWidget {
+  const _CertificatesEmptyState({
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              AppAssets.certificatesEmpty,
+              width: 129,
+              height: 129,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 24,
+                height: 1,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                height: 1,
+                fontWeight: FontWeight.w400,
+                color: AppColors.secondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Figma liste satırı — 12 pad, radius 10, border #ECECEC.
+class _CertificateListTile extends StatelessWidget {
+  const _CertificateListTile({
+    required this.title,
+    required this.onTap,
+  });
+
+  final String title;
+  final VoidCallback onTap;
+
+  static const _border = Color(0xFFECECEC);
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: _border),
+          ),
+          padding: const EdgeInsets.all(12),
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              height: 22 / 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.ink,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Kazanılmış sertifika detayı — paylaş / QR / indir.
+class CertificateDetailScreen extends StatefulWidget {
+  const CertificateDetailScreen({
+    super.key,
+    required this.displayName,
+    required this.certificate,
+  });
+
+  final String displayName;
+  final CertificateDto certificate;
+
+  @override
+  State<CertificateDetailScreen> createState() =>
+      _CertificateDetailScreenState();
+}
+
+class _CertificateDetailScreenState extends State<CertificateDetailScreen> {
+  final _exportKey = GlobalKey();
+  var _downloading = false;
+  var _sharingQr = false;
+
   Future<void> _download() async {
     if (_downloading) return;
-    if (!_canUseCertificate) {
-      _showCertificateLocked();
-      return;
-    }
     setState(() => _downloading = true);
     final text = AppText.current.profilePage;
     try {
       final ok = await CertificateImageExport.saveToGallery(
         boundaryKey: _exportKey,
         fileName:
-            'lingola_certificate_${_selectedLevel.toLowerCase()}_${DateTime.now().millisecondsSinceEpoch}',
+            'lingola_certificate_${widget.certificate.cefrLevel.toLowerCase()}_${DateTime.now().millisecondsSinceEpoch}',
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -149,12 +288,7 @@ class _CertificateScreenState extends State<CertificateScreen> {
   }
 
   Future<void> _share() async {
-    if (!_canUseCertificate) {
-      _showCertificateLocked();
-      return;
-    }
-    final cert = _activeCert;
-    if (cert == null) return;
+    final cert = widget.certificate;
     final text = CertificateCopy.page;
     await Share.share(
       '${text.certificateShareBody(level: cert.cefrLevel)}\n${cert.verifyUrl}',
@@ -163,12 +297,8 @@ class _CertificateScreenState extends State<CertificateScreen> {
   }
 
   Future<void> _shareQr() async {
-    if (!_canUseCertificate) {
-      _showCertificateLocked();
-      return;
-    }
-    final cert = _activeCert;
-    if (cert == null || _sharingQr) return;
+    if (_sharingQr) return;
+    final cert = widget.certificate;
     final text = CertificateCopy.page;
     setState(() => _sharingQr = true);
     try {
@@ -192,6 +322,7 @@ class _CertificateScreenState extends State<CertificateScreen> {
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.profilePage;
+    final cert = widget.certificate;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -238,53 +369,34 @@ class _CertificateScreenState extends State<CertificateScreen> {
                   ],
                 ),
               ),
-              if (_loading)
-                const Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  ),
-                )
-              else
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-                    children: [
-                      if (_hasCertificate && _summary.certificates.length > 1)
-                        _LevelChips(
-                          levels: _summary.certificates
-                              .map((c) => c.cefrLevel)
-                              .toList(),
-                          selected: _selectedLevel,
-                          onSelected: (lv) =>
-                              setState(() => _selectedLevel = lv),
-                        ),
-                      RepaintBoundary(
-                        key: _exportKey,
-                        child: ColoredBox(
-                          color: Colors.white,
-                          child: CertificateAchievementView(
-                            displayName: widget.displayName,
-                            certificate: _activeCert,
-                            preview: !_hasCertificate,
-                            level: _selectedLevel.isNotEmpty
-                                ? _selectedLevel
-                                : 'A1',
-                          ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                  children: [
+                    RepaintBoundary(
+                      key: _exportKey,
+                      child: ColoredBox(
+                        color: Colors.white,
+                        child: CertificateAchievementView(
+                          displayName: widget.displayName,
+                          certificate: cert,
+                          level: cert.cefrLevel,
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      PrimaryButton(
-                        label: text.certificateShare,
-                        onPressed: _share,
-                      ),
-                      const SizedBox(height: 10),
-                      SecondaryButton(
-                        label: text.certificateCreateQr,
-                        onPressed: _sharingQr ? () {} : _shareQr,
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 24),
+                    PrimaryButton(
+                      label: text.certificateShare,
+                      onPressed: _share,
+                    ),
+                    const SizedBox(height: 10),
+                    SecondaryButton(
+                      label: text.certificateCreateQr,
+                      onPressed: _sharingQr ? () {} : _shareQr,
+                    ),
+                  ],
                 ),
+              ),
             ],
           ),
         ),
@@ -299,14 +411,12 @@ class CertificateAchievementView extends StatelessWidget {
     super.key,
     required this.displayName,
     required this.level,
-    this.certificate,
-    this.preview = false,
+    required this.certificate,
   });
 
   final String displayName;
   final String level;
-  final CertificateDto? certificate;
-  final bool preview;
+  final CertificateDto certificate;
 
   static String _formatDate(DateTime? date) {
     if (date == null) return '—';
@@ -320,8 +430,8 @@ class CertificateAchievementView extends StatelessWidget {
   }
 
   String get _certId {
-    final token = certificate?.verifyToken;
-    if (token != null && token.isNotEmpty) return token;
+    final token = certificate.verifyToken;
+    if (token.isNotEmpty) return token;
     return CertificateLevelAssets.defaultCertificateId(level);
   }
 
@@ -330,9 +440,7 @@ class CertificateAchievementView extends StatelessWidget {
     final text = CertificateCopy.page;
     final levelName = CertificateLevelAssets.levelLabel(level);
     final name = displayName.isEmpty ? 'Lingola Learner' : displayName;
-    final dateLabel = preview
-        ? _formatDate(DateTime.now())
-        : _formatDate(certificate?.issuedAt);
+    final dateLabel = _formatDate(certificate.issuedAt);
 
     return Column(
       children: [
@@ -455,49 +563,7 @@ class CertificateAchievementView extends StatelessWidget {
   }
 }
 
-class _LevelChips extends StatelessWidget {
-  const _LevelChips({
-    required this.levels,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final List<String> levels;
-  final String selected;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        alignment: WrapAlignment.center,
-        children: levels.map((level) {
-          final active = level == selected;
-          return ChoiceChip(
-            label: Text(level),
-            selected: active,
-            onSelected: (_) => onSelected(level),
-            labelStyle: TextStyle(
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
-              color: active ? Colors.white : AppColors.ink,
-            ),
-            selectedColor: AppColors.primary,
-            backgroundColor: Colors.white,
-            side: BorderSide(
-              color: active ? AppColors.primary : const Color(0xFFE0E3EF),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-/// Profilde ayar satırı — tıklanınca tam sertifika ekranı açılır.
+/// Profilde ayar satırı — tıklanınca sertifika listesi açılır.
 class ProfileCertificateTile extends StatelessWidget {
   const ProfileCertificateTile({
     super.key,
@@ -553,7 +619,7 @@ class ProfileCertificateTile extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                text.certificateTitle,
+                text.myCertificates,
                 style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,

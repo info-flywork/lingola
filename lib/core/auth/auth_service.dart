@@ -191,6 +191,7 @@ abstract final class AuthService {
     String? targetLanguageCode,
     String? nativeLanguageCode,
     String? goal,
+    List<String>? interests,
     String? level,
     String? pace,
   }) async {
@@ -205,6 +206,7 @@ abstract final class AuthService {
       body['nativeLanguageCode'] = nativeLanguageCode;
     }
     if (goal != null) body['goal'] = goal;
+    if (interests != null) body['interests'] = interests;
     if (level != null) body['level'] = CefrLevels.forApi(level);
     if (pace != null) body['pace'] = pace;
     final json = await ApiClient.patch(

@@ -166,14 +166,18 @@ class _CallingScreenState extends State<CallingScreen> {
       final json = await ApiClient.get('/tutors/$slug/call-enter$q');
       final rive = json['rive'];
       final ok = json['ok'] == true;
+      final magicRaw = rive is Map ? rive['magic'] : null;
+      final magic = magicRaw is String
+          ? magicRaw.replaceAll(RegExp(r'[^\x20-\x7E]'), '.')
+          : '-';
       debugPrint(
         '[call-enter] slug=$slug ok=$ok'
         ' reachable=${rive is Map ? rive['reachable'] : '-'}'
-        ' magic=${rive is Map ? rive['magic'] : '-'}'
+        ' magic=$magic'
         ' url=${rive is Map ? rive['url'] : '-'}',
       );
     } catch (e) {
-      debugPrint('[call-enter] backend probe fail: $e');
+      debugPrint('[call-enter] backend probe fail');
     }
   }
 
@@ -486,10 +490,7 @@ class _CallingScreenState extends State<CallingScreen> {
         ? cdnRaw
         : (slug != null && slug.isNotEmpty
             ? AppAssets.tutorRiveCdn(slug)
-            : AppAssets.tutorLingolaRivCdn);
-    final rivFallback = primary == AppAssets.tutorLingolaRivCdn
-        ? null
-        : AppAssets.tutorLingolaRivCdn;
+            : '');
 
     return Padding(
       padding: padding,
@@ -497,7 +498,6 @@ class _CallingScreenState extends State<CallingScreen> {
         assetPath: primary,
         talking: _conversation.avatarTalking,
         fallbackImage: widget.imagePath,
-        fallbackRivePath: rivFallback,
         fit: cover ? rive.Fit.cover : rive.Fit.contain,
         alignment: alignment,
         scale: scale,

@@ -1,25 +1,44 @@
 import '../../i18n/strings.g.dart';
 
-/// Günlük hedef süreleri — onboarding + profil ortak kaynağı.
+/// İlerleme temposu — onboarding + profil ortak kaynağı.
 class DailyPace {
   DailyPace._();
 
-  static const values = ['min5', 'min10', 'min15', 'min30', 'min60'];
-  static const defaultPace = 'min15';
+  static const values = [
+    'month1',
+    'month2_3',
+    'month6',
+    'year1',
+    'relaxed',
+  ];
+  static const defaultPace = 'month2_3';
 
-  static const emojis = ['⏰', '⌛', '⛳', '🚀', '🔥'];
+  static const iconAssets = [
+    'assets/images/onboarding/significant_progress/amonth.png',
+    'assets/images/onboarding/significant_progress/twoOrThreeMonth.png',
+    'assets/images/onboarding/significant_progress/sixMonth.png',
+    'assets/images/onboarding/significant_progress/ayear.png',
+    'assets/images/onboarding/significant_progress/easy.png',
+  ];
 
-  /// Eski light / recommended / fast değerlerini yeni dakika kodlarına çevirir.
+  /// Eski light / recommended / fast / min* değerlerini yeni ufka çevirir.
   static String normalize(String? pace) {
     final raw = pace?.trim();
     if (raw == null || raw.isEmpty) return defaultPace;
     switch (raw) {
       case 'light':
-        return 'min5';
+      case 'min5':
+        return 'relaxed';
+      case 'min10':
+        return 'year1';
       case 'recommended':
-        return 'min15';
+      case 'min15':
+        return 'month6';
       case 'fast':
-        return 'min30';
+      case 'min30':
+        return 'month2_3';
+      case 'min60':
+        return 'month1';
       default:
         return values.contains(raw) ? raw : defaultPace;
     }
@@ -31,16 +50,27 @@ class DailyPace {
     return index >= 0 ? index : values.indexOf(defaultPace);
   }
 
-  static String emojiFor(String? pace) => emojis[indexOf(pace)];
+  static String iconFor(String? pace) => iconAssets[indexOf(pace)];
+
+  /// Plan özeti satırları için tempo emojisi.
+  static String emojiFor(String? pace) {
+    return switch (normalize(pace)) {
+      'month1' => '🚀',
+      'month2_3' => '⚡',
+      'month6' => '🎯',
+      'year1' => '📅',
+      _ => '☕',
+    };
+  }
 
   static String label(Translations t, String? pace) {
-    final plan = t.planReady;
+    final setup = t.setup;
     return switch (normalize(pace)) {
-      'min5' => plan.paceMin5,
-      'min10' => plan.paceMin10,
-      'min30' => plan.paceMin30,
-      'min60' => plan.paceMin60,
-      _ => plan.paceMin15,
+      'month1' => setup.paceMonth1,
+      'month2_3' => setup.paceMonth2_3,
+      'month6' => setup.paceMonth6,
+      'year1' => setup.paceYear1,
+      _ => setup.paceRelaxed,
     };
   }
 }

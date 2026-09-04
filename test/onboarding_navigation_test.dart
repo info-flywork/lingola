@@ -64,7 +64,7 @@ void main() {
 
     await tester.tap(find.text(text.common.continueLabel).last);
     await _settle(tester);
-    expect(find.text(text.setup.levelTitle), findsOneWidget);
+    expect(find.text(text.setup.interestsTitle), findsOneWidget);
 
     await tester.tap(find.text(text.common.continueLabel).last);
     await _settle(tester);

@@ -58,6 +58,7 @@ Future<void> showProfileDeleteAccountSheet(BuildContext context) async {
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black.withValues(alpha: .45),
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
     builder: (sheetContext) {
       return Padding(
         padding: EdgeInsets.only(
@@ -488,7 +489,7 @@ class _DeleteAccountSheet extends StatefulWidget {
   State<_DeleteAccountSheet> createState() => _DeleteAccountSheetState();
 }
 
-enum _DeleteStep { survey, offer, farewell }
+enum _DeleteStep { gate, survey, offer, farewell }
 
 class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
   static const _border = Color(0x0D000000);
@@ -504,7 +505,7 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
 
   final _messageController = TextEditingController();
   int? _selectedIndex;
-  _DeleteStep _step = _DeleteStep.survey;
+  _DeleteStep _step = _DeleteStep.gate;
   var _busy = false;
   String _accessUntilLabel = '—';
 
@@ -618,6 +619,8 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
   Future<void> _onNext() async {
     if (_busy) return;
     switch (_step) {
+      case _DeleteStep.gate:
+        setState(() => _step = _DeleteStep.survey);
       case _DeleteStep.survey:
         if (_selectedIndex == null) return;
         setState(() => _step = _DeleteStep.offer);
@@ -634,21 +637,24 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
     final canNext =
         !_busy && (_step != _DeleteStep.survey || _selectedIndex != null);
     final isFarewell = _step == _DeleteStep.farewell;
+    final isGate = _step == _DeleteStep.gate;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return SafeArea(
-      top: false,
-      child: Container(
-        width: double.infinity,
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+    return Container(
+      width: double.infinity,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: Color(0xFFECECEC), width: 2),
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isGate) ...[
             const SizedBox(height: 10),
             Container(
               width: 33,
@@ -659,79 +665,144 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
               ),
             ),
             const SizedBox(height: 10),
-            Flexible(
-              child: SingleChildScrollView(
-                child: switch (_step) {
-                  _DeleteStep.survey => _buildSurvey(text),
-                  _DeleteStep.offer => _buildOffer(text),
-                  _DeleteStep.farewell => _buildFarewell(text),
-                },
-              ),
+          ],
+          Flexible(
+            child: SingleChildScrollView(
+              child: switch (_step) {
+                _DeleteStep.gate => _buildGate(text),
+                _DeleteStep.survey => _buildSurvey(text),
+                _DeleteStep.offer => _buildOffer(text),
+                _DeleteStep.farewell => _buildFarewell(text),
+              },
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_busy)
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 12),
-                      child: LinearProgressIndicator(minHeight: 2),
-                    ),
-                  if (_step == _DeleteStep.offer) ...[
-                    PrimaryButton(
-                      label: text.switchMonthlyCta,
-                      onPressed: () => _acceptOffer('monthly_plan'),
-                    ),
-                    const SizedBox(height: 10),
-                    PrimaryButton(
-                      label: text.acceptDiscountCta,
-                      onPressed: () => _acceptOffer('discount_60'),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                  if (isFarewell)
-                    SecondaryButton(
-                      label: text.done,
-                      onPressed: _finishAfterDeletion,
-                    )
-                  else
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _step == _DeleteStep.survey
-                              ? PrimaryButton(
-                                  label: text.logoutCancel,
-                                  onPressed: _close,
-                                )
-                              : SecondaryButton(
-                                  label: text.logoutCancel,
-                                  onPressed: _close,
-                                ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottomInset),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_busy)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: LinearProgressIndicator(minHeight: 2),
+                  ),
+                if (isGate) ...[
+                  SecondaryButton(
+                    label: text.deleteAccountAndData,
+                    onPressed: () =>
+                        setState(() => _step = _DeleteStep.survey),
+                  ),
+                  const SizedBox(height: 10),
+                  PrimaryButton(
+                    label: text.confirmKeepGoing,
+                    onPressed: _close,
+                  ),
+                ] else if (_step == _DeleteStep.offer) ...[
+                  PrimaryButton(
+                    label: text.switchMonthlyCta,
+                    onPressed: () => _acceptOffer('monthly_plan'),
+                  ),
+                  const SizedBox(height: 10),
+                  PrimaryButton(
+                    label: text.acceptDiscountCta,
+                    onPressed: () => _acceptOffer('discount_60'),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SecondaryButton(
+                          label: text.logoutCancel,
+                          onPressed: _close,
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Opacity(
-                            opacity: canNext ? 1 : 0.55,
-                            child: IgnorePointer(
-                              ignoring: !canNext,
-                              child: SecondaryButton(
-                                label: text.next,
-                                onPressed: _onNext,
-                              ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Opacity(
+                          opacity: canNext ? 1 : 0.55,
+                          child: IgnorePointer(
+                            ignoring: !canNext,
+                            child: SecondaryButton(
+                              label: text.next,
+                              onPressed: _onNext,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                ],
-              ),
+                      ),
+                    ],
+                  ),
+                ] else if (isFarewell)
+                  SecondaryButton(
+                    label: text.done,
+                    onPressed: _finishAfterDeletion,
+                  )
+                else
+                  Row(
+                    children: [
+                      Expanded(
+                        child: PrimaryButton(
+                          label: text.logoutCancel,
+                          onPressed: _close,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Opacity(
+                          opacity: canNext ? 1 : 0.55,
+                          child: IgnorePointer(
+                            ignoring: !canNext,
+                            child: SecondaryButton(
+                              label: text.next,
+                              onPressed: _onNext,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _buildGate(Translations$profilePage$en text) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      child: Column(
+        children: [
+          const Text('🤔', style: TextStyle(fontSize: 64)),
+          const SizedBox(height: 16),
+          Text(
+            text.confirmTitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 24,
+              height: 1,
+              fontWeight: FontWeight.w500,
+              color: AppColors.ink,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            text.confirmDeleteWarning,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 18,
+              height: 22 / 18,
+              fontWeight: FontWeight.w500,
+              color: AppColors.ink.withValues(alpha: 0.36),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSurvey(Translations$profilePage$en text) {
     final reasons = [
       text.deleteReasons.aiCharacters,

@@ -267,7 +267,7 @@ class _Translations$planReady$de implements Translations$planReady$en {
 	@override String get fieldLevel => 'YOUR LEVEL';
 	@override String get fieldFocus => 'FOCUS AREA';
 	@override String get fieldDuration => 'DURATION';
-	@override String get fieldInterests => 'INTERESTS';
+	@override String get fieldInterests => 'INTERESSEN';
 	@override String get startPlan => 'Start my plan →';
 	@override String get courseEnglish => 'English';
 	@override String get courseGerman => 'German';
@@ -277,9 +277,9 @@ class _Translations$planReady$de implements Translations$planReady$en {
 	@override String get courseJapanese => 'Japanese';
 	@override String get courseRussian => 'Russian';
 	@override String get courseTurkish => 'Turkish';
-	@override String get goalCareer => 'Career & business';
-	@override String get goalTravel => 'Travel';
-	@override String get goalLiving => 'Living abroad';
+	@override String get goalCareer => 'Karriereentwicklung';
+	@override String get goalTravel => 'Reisen';
+	@override String get goalLiving => 'Im Ausland leben';
 	@override String get goalStudying => 'Bildung';
 	@override String get goalOther => 'Persönliche Entwicklung';
 	@override String get levelA1 => 'A1';
@@ -626,7 +626,7 @@ class _Translations$rolePlayPage$de implements Translations$rolePlayPage$en {
 	@override late final _Translations$rolePlayPage$directions$de directions = _Translations$rolePlayPage$directions$de._(_root);
 	@override late final _Translations$rolePlayPage$interview$de interview = _Translations$rolePlayPage$interview$de._(_root);
 	@override String get customScenarios => 'Your scenarios';
-	@override String get createOwnScenario => 'Create your\nown scenario!';
+	@override String get createOwnScenario => 'Erstelle dein eigenes Szenario!';
 	@override String get createOwnScenarioTitle => 'Create your scenario';
 	@override String get creatingScenario => 'Creating your role play';
 	@override String get creatingScenarioSubtitle => 'Lingola is writing your scene and illustration...';
@@ -653,6 +653,23 @@ class _Translations$rolePlayPage$de implements Translations$rolePlayPage$en {
 	@override late final _Translations$rolePlayPage$rentingApartment$de rentingApartment = _Translations$rolePlayPage$rentingApartment$de._(_root);
 	@override late final _Translations$rolePlayPage$birthdayParty$de birthdayParty = _Translations$rolePlayPage$birthdayParty$de._(_root);
 	@override String get deleteFailed => 'Szenario konnte nicht gelöscht werden. Bitte erneut versuchen.';
+	@override String get easy => 'Leicht';
+	@override String get medium => 'Mittel';
+	@override String get hard => 'Schwer';
+	@override String get filterAll => 'Alle';
+	@override String get seeAll => 'Alle anzeigen';
+	@override String get lingolaRolePlay => 'Lingola RolePlay';
+	@override String get shopping => 'Einkaufen';
+	@override String get flirting => 'Flirten';
+	@override String get lifeInTheUs => 'Leben in den USA';
+	@override String get freeDiscussion => 'Freie Diskussion';
+	@override String get jobInterview => 'Vorstellungsgespräch';
+	@override String get socialDynamics => 'Soziale Dynamik';
+	@override String get restaurant => 'Restaurant';
+	@override String get travel => 'Reisen';
+	@override String get createFieldDifficulty => 'Schwierigkeit';
+	@override late final _Translations$rolePlayPage$flirtingMeet$de flirtingMeet = _Translations$rolePlayPage$flirtingMeet$de._(_root);
+	@override late final _Translations$rolePlayPage$freeTalkHobby$de freeTalkHobby = _Translations$rolePlayPage$freeTalkHobby$de._(_root);
 }
 
 // Path: notificationsPage
@@ -731,21 +748,21 @@ class _Translations$profilePage$de implements Translations$profilePage$en {
 	@override String get explanationNative => 'Muttersprache';
 	@override String get explanationEnglish => 'Englisch';
 	@override String get explanationUpdateFailed => 'Erklärungssprache konnte nicht aktualisiert werden';
-	@override String get learnInNativeLanguage => 'Learn in your native language';
-	@override String get targetLanguageLabel => 'Target language';
-	@override String get languageLevel => 'Language level';
-	@override String get nativeLanguage => 'Native language';
-	@override String get interests => 'Interests';
-	@override String get goalChipCareer => 'Career';
-	@override String get goalChipTravel => 'Travel';
-	@override String get goalChipLiving => 'Living';
-	@override String get goalChipStudying => 'Study';
-	@override String get goalChipOther => 'Other';
-	@override String get dailyGoal => 'Daily goal';
-	@override String get dailyReminder => 'Daily reminder';
-	@override String get selectNativeLanguageTitle => 'Select your native language';
-	@override String get reminderOn => 'On';
-	@override String get reminderOff => 'Off';
+	@override String get learnInNativeLanguage => 'In deiner Muttersprache lernen';
+	@override String get targetLanguageLabel => 'Zielsprache';
+	@override String get languageLevel => 'Sprachniveau';
+	@override String get nativeLanguage => 'Muttersprache';
+	@override String get interests => 'Interessen';
+	@override String get goalChipCareer => 'Karriere';
+	@override String get goalChipTravel => 'Reisen';
+	@override String get goalChipLiving => 'Leben';
+	@override String get goalChipStudying => 'Studium';
+	@override String get goalChipOther => 'Sonstiges';
+	@override String get dailyGoal => 'Tagesziel';
+	@override String get dailyReminder => 'Tägliche Erinnerung';
+	@override String get selectNativeLanguageTitle => 'Muttersprache wählen';
+	@override String get reminderOn => 'An';
+	@override String get reminderOff => 'Aus';
 	@override String get remindMe => 'Erinnere mich';
 	@override String get reminderSave => 'Speichern';
 	@override String get reminderSaved => 'Erinnerung gespeichert';
@@ -788,7 +805,7 @@ class _Translations$profilePage$de implements Translations$profilePage$en {
 	@override String get profileSaveFailed => 'Could not save profile';
 	@override String get photoUploadFailed => 'Photo upload failed';
 	@override String get notificationsUpdateFailed => 'Could not update notifications';
-	@override String get notificationsPermissionDenied => 'Allow notifications in your device settings to get study reminders.';
+	@override String get notificationsPermissionDenied => 'Erlaube Benachrichtigungen in den Geräteeinstellungen, um Lern-Erinnerungen zu erhalten.';
 	@override String get certificateTitle => 'Ihr Zertifikat';
 	@override String certificateLevelTitle({required Object level}) => '${level} Certificate';
 	@override String get certificateOf => 'Certificate of Achievement';
@@ -830,12 +847,12 @@ class _Translations$profilePage$de implements Translations$profilePage$en {
 	@override String get dailyGoalValueLight => '5-10 Min/Tag';
 	@override String get dailyGoalValueRecommended => '15-20 Min/Tag';
 	@override String get dailyGoalValueFast => '30+ Min/Tag';
-	@override String get settingsShare => 'Share';
+	@override String get settingsShare => 'Teilen';
 	@override String get settingsSupport => 'Support';
-	@override String get settingsAbout => 'About';
-	@override String get settingsAccount => 'Account';
-	@override String get followInstagram => 'Follow on Instagram';
-	@override String get followTikTok => 'Follow on TikTok';
+	@override String get settingsAbout => 'Über';
+	@override String get settingsAccount => 'Konto';
+	@override String get followInstagram => 'Auf Instagram folgen';
+	@override String get followTikTok => 'Auf TikTok folgen';
 	@override String get chineseShort => 'Chinesisch';
 	@override String get seeMore => 'Mehr...';
 	@override String get searchLanguages => 'Suchen';
@@ -843,7 +860,7 @@ class _Translations$profilePage$de implements Translations$profilePage$en {
 	@override String get settingsCertificates => 'Zertifikate';
 	@override String get restorePurchases => 'Käufe wiederherstellen';
 	@override String get aboutFlywork => 'Über Flywork';
-	@override String get faqHelp => 'FAQ & Hilfe';
+	@override String get faqHelp => 'Häufige Fragen & Hilfe';
 	@override String get deleteAccountAndData => 'Konto und Daten löschen';
 	@override String get interestShopping => 'Einkaufen';
 	@override String get interestFood => 'Essen';
@@ -868,6 +885,8 @@ class _Translations$profilePage$de implements Translations$profilePage$en {
 	@override String get myCertificates => 'Meine Zertifikate';
 	@override String get certificatesEmptyTitle => 'Noch keine Zertifikate';
 	@override String get certificatesEmptySubtitle => 'Schau wieder vorbei, wenn du ein Level abgeschlossen hast.';
+	@override String get restorePurchasesSuccess => 'Deine Käufe wurden wiederhergestellt.';
+	@override String get restorePurchasesEmpty => 'Für dieses Konto wurden keine aktiven Käufe gefunden.';
 }
 
 // Path: pushNotifications
@@ -1270,6 +1289,30 @@ class _Translations$rolePlayPage$birthdayParty$de implements Translations$rolePl
 	@override String get title => 'Planning a Birthday Party';
 	@override String get screenplay => 'Plan a birthday party with a friend — pick the venue, date, guest list, food, cake, music, and activities together.';
 	@override late final _Translations$rolePlayPage$birthdayParty$chat$de chat = _Translations$rolePlayPage$birthdayParty$chat$de._(_root);
+}
+
+// Path: rolePlayPage.flirtingMeet
+class _Translations$rolePlayPage$flirtingMeet$de implements Translations$rolePlayPage$flirtingMeet$en {
+	_Translations$rolePlayPage$flirtingMeet$de._(this._root);
+
+	final TranslationsDe _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Meeting Someone New at a Café';
+	@override String get screenplay => 'Strike up a friendly conversation, share a little about yourself, exchange interests, and decide whether to meet again.';
+	@override late final _Translations$rolePlayPage$flirtingMeet$chat$de chat = _Translations$rolePlayPage$flirtingMeet$chat$de._(_root);
+}
+
+// Path: rolePlayPage.freeTalkHobby
+class _Translations$rolePlayPage$freeTalkHobby$de implements Translations$rolePlayPage$freeTalkHobby$en {
+	_Translations$rolePlayPage$freeTalkHobby$de._(this._root);
+
+	final TranslationsDe _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking About Hobbies';
+	@override String get screenplay => 'Chat freely about free-time activities, ask follow-up questions, share preferences, and suggest trying something new together.';
+	@override late final _Translations$rolePlayPage$freeTalkHobby$chat$de chat = _Translations$rolePlayPage$freeTalkHobby$chat$de._(_root);
 }
 
 // Path: notificationsPage.translation
@@ -1854,6 +1897,36 @@ class _Translations$rolePlayPage$birthdayParty$chat$de implements Translations$r
 	@override String get botReply => 'Would you rather have the party at home or at a restaurant?';
 }
 
+// Path: rolePlayPage.flirtingMeet.chat
+class _Translations$rolePlayPage$flirtingMeet$chat$de implements Translations$rolePlayPage$flirtingMeet$chat$en {
+	_Translations$rolePlayPage$flirtingMeet$chat$de._(this._root);
+
+	final TranslationsDe _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice a light flirting conversation at a café — hellos, compliments, and asking for a number. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'Is this seat taken? The place is packed today.';
+	@override String get outgoing1 => 'Oh, go ahead! I was just waiting for my coffee.';
+	@override String get incoming2Highlight => 'Thanks';
+	@override String get incoming2Rest => '! I\'m Alex, by the way. What brings you here?';
+	@override String get botReply => 'Nice to meet you. Do you come here often?';
+}
+
+// Path: rolePlayPage.freeTalkHobby.chat
+class _Translations$rolePlayPage$freeTalkHobby$chat$de implements Translations$rolePlayPage$freeTalkHobby$chat$en {
+	_Translations$rolePlayPage$freeTalkHobby$chat$de._(this._root);
+
+	final TranslationsDe _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice free discussion about hobbies — asking, answering, and reacting naturally. I\'ll explain first, then we\'ll talk. Ready?';
+	@override String get incoming1 => 'So, what do you usually do on weekends?';
+	@override String get outgoing1 => 'I like hiking and watching films. How about you?';
+	@override String get incoming2Highlight => 'Nice';
+	@override String get incoming2Rest => '! I\'ve been meaning to try hiking more. Any favorite trails?';
+	@override String get botReply => 'That sounds perfect. Want to go together sometime?';
+}
+
 // Path: profilePage.faqItems.supportedLanguages
 class _Translations$profilePage$faqItems$supportedLanguages$de implements Translations$profilePage$faqItems$supportedLanguages$en {
 	_Translations$profilePage$faqItems$supportedLanguages$de._(this._root);
@@ -2125,7 +2198,7 @@ extension on TranslationsDe {
 			'planReady.fieldLevel' => 'YOUR LEVEL',
 			'planReady.fieldFocus' => 'FOCUS AREA',
 			'planReady.fieldDuration' => 'DURATION',
-			'planReady.fieldInterests' => 'INTERESTS',
+			'planReady.fieldInterests' => 'INTERESSEN',
 			'planReady.startPlan' => 'Start my plan →',
 			'planReady.courseEnglish' => 'English',
 			'planReady.courseGerman' => 'German',
@@ -2135,9 +2208,9 @@ extension on TranslationsDe {
 			'planReady.courseJapanese' => 'Japanese',
 			'planReady.courseRussian' => 'Russian',
 			'planReady.courseTurkish' => 'Turkish',
-			'planReady.goalCareer' => 'Career & business',
-			'planReady.goalTravel' => 'Travel',
-			'planReady.goalLiving' => 'Living abroad',
+			'planReady.goalCareer' => 'Karriereentwicklung',
+			'planReady.goalTravel' => 'Reisen',
+			'planReady.goalLiving' => 'Im Ausland leben',
 			'planReady.goalStudying' => 'Bildung',
 			'planReady.goalOther' => 'Persönliche Entwicklung',
 			'planReady.levelA1' => 'A1',
@@ -2668,7 +2741,7 @@ extension on TranslationsDe {
 			'rolePlayPage.interview.chat.incoming2Rest' => '. Erzähl mir von einem aktuellen Projekt, auf das du stolz bist.',
 			'rolePlayPage.interview.chat.botReply' => 'Das ist beeindruckend. Welche Fragen hast du zur Rolle?',
 			'rolePlayPage.customScenarios' => 'Your scenarios',
-			'rolePlayPage.createOwnScenario' => 'Create your\nown scenario!',
+			'rolePlayPage.createOwnScenario' => 'Erstelle dein eigenes Szenario!',
 			'rolePlayPage.createOwnScenarioTitle' => 'Create your scenario',
 			'rolePlayPage.creatingScenario' => 'Creating your role play',
 			'rolePlayPage.creatingScenarioSubtitle' => 'Lingola is writing your scene and illustration...',
@@ -2758,6 +2831,37 @@ extension on TranslationsDe {
 			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! When should we have the party?',
 			'rolePlayPage.birthdayParty.chat.botReply' => 'Would you rather have the party at home or at a restaurant?',
 			'rolePlayPage.deleteFailed' => 'Szenario konnte nicht gelöscht werden. Bitte erneut versuchen.',
+			'rolePlayPage.easy' => 'Leicht',
+			'rolePlayPage.medium' => 'Mittel',
+			'rolePlayPage.hard' => 'Schwer',
+			'rolePlayPage.filterAll' => 'Alle',
+			'rolePlayPage.seeAll' => 'Alle anzeigen',
+			'rolePlayPage.lingolaRolePlay' => 'Lingola RolePlay',
+			'rolePlayPage.shopping' => 'Einkaufen',
+			'rolePlayPage.flirting' => 'Flirten',
+			'rolePlayPage.lifeInTheUs' => 'Leben in den USA',
+			'rolePlayPage.freeDiscussion' => 'Freie Diskussion',
+			'rolePlayPage.jobInterview' => 'Vorstellungsgespräch',
+			'rolePlayPage.socialDynamics' => 'Soziale Dynamik',
+			'rolePlayPage.restaurant' => 'Restaurant',
+			'rolePlayPage.travel' => 'Reisen',
+			'rolePlayPage.createFieldDifficulty' => 'Schwierigkeit',
+			'rolePlayPage.flirtingMeet.title' => 'Meeting Someone New at a Café',
+			'rolePlayPage.flirtingMeet.screenplay' => 'Strike up a friendly conversation, share a little about yourself, exchange interests, and decide whether to meet again.',
+			'rolePlayPage.flirtingMeet.chat.briefing' => 'Hi! Today we\'ll practice a light flirting conversation at a café — hellos, compliments, and asking for a number. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.flirtingMeet.chat.incoming1' => 'Is this seat taken? The place is packed today.',
+			'rolePlayPage.flirtingMeet.chat.outgoing1' => 'Oh, go ahead! I was just waiting for my coffee.',
+			'rolePlayPage.flirtingMeet.chat.incoming2Highlight' => 'Thanks',
+			'rolePlayPage.flirtingMeet.chat.incoming2Rest' => '! I\'m Alex, by the way. What brings you here?',
+			'rolePlayPage.flirtingMeet.chat.botReply' => 'Nice to meet you. Do you come here often?',
+			'rolePlayPage.freeTalkHobby.title' => 'Talking About Hobbies',
+			'rolePlayPage.freeTalkHobby.screenplay' => 'Chat freely about free-time activities, ask follow-up questions, share preferences, and suggest trying something new together.',
+			'rolePlayPage.freeTalkHobby.chat.briefing' => 'Hi! Today we\'ll practice free discussion about hobbies — asking, answering, and reacting naturally. I\'ll explain first, then we\'ll talk. Ready?',
+			'rolePlayPage.freeTalkHobby.chat.incoming1' => 'So, what do you usually do on weekends?',
+			'rolePlayPage.freeTalkHobby.chat.outgoing1' => 'I like hiking and watching films. How about you?',
+			'rolePlayPage.freeTalkHobby.chat.incoming2Highlight' => 'Nice',
+			'rolePlayPage.freeTalkHobby.chat.incoming2Rest' => '! I\'ve been meaning to try hiking more. Any favorite trails?',
+			'rolePlayPage.freeTalkHobby.chat.botReply' => 'That sounds perfect. Want to go together sometime?',
 			'notificationsPage.title' => 'Benachrichtigungen',
 			'notificationsPage.deleteConfirmTitle' => 'Sind Sie sicher?',
 			'notificationsPage.deleteConfirmBody' => 'Diese Benachrichtigung wird gelöscht.',
@@ -2829,21 +2933,21 @@ extension on TranslationsDe {
 			'profilePage.explanationNative' => 'Muttersprache',
 			'profilePage.explanationEnglish' => 'Englisch',
 			'profilePage.explanationUpdateFailed' => 'Erklärungssprache konnte nicht aktualisiert werden',
-			'profilePage.learnInNativeLanguage' => 'Learn in your native language',
-			'profilePage.targetLanguageLabel' => 'Target language',
-			'profilePage.languageLevel' => 'Language level',
-			'profilePage.nativeLanguage' => 'Native language',
-			'profilePage.interests' => 'Interests',
-			'profilePage.goalChipCareer' => 'Career',
-			'profilePage.goalChipTravel' => 'Travel',
-			'profilePage.goalChipLiving' => 'Living',
-			'profilePage.goalChipStudying' => 'Study',
-			'profilePage.goalChipOther' => 'Other',
-			'profilePage.dailyGoal' => 'Daily goal',
-			'profilePage.dailyReminder' => 'Daily reminder',
-			'profilePage.selectNativeLanguageTitle' => 'Select your native language',
-			'profilePage.reminderOn' => 'On',
-			'profilePage.reminderOff' => 'Off',
+			'profilePage.learnInNativeLanguage' => 'In deiner Muttersprache lernen',
+			'profilePage.targetLanguageLabel' => 'Zielsprache',
+			'profilePage.languageLevel' => 'Sprachniveau',
+			'profilePage.nativeLanguage' => 'Muttersprache',
+			'profilePage.interests' => 'Interessen',
+			'profilePage.goalChipCareer' => 'Karriere',
+			'profilePage.goalChipTravel' => 'Reisen',
+			'profilePage.goalChipLiving' => 'Leben',
+			'profilePage.goalChipStudying' => 'Studium',
+			'profilePage.goalChipOther' => 'Sonstiges',
+			'profilePage.dailyGoal' => 'Tagesziel',
+			'profilePage.dailyReminder' => 'Tägliche Erinnerung',
+			'profilePage.selectNativeLanguageTitle' => 'Muttersprache wählen',
+			'profilePage.reminderOn' => 'An',
+			'profilePage.reminderOff' => 'Aus',
 			'profilePage.remindMe' => 'Erinnere mich',
 			'profilePage.reminderSave' => 'Speichern',
 			'profilePage.reminderSaved' => 'Erinnerung gespeichert',
@@ -2911,7 +3015,7 @@ extension on TranslationsDe {
 			'profilePage.profileSaveFailed' => 'Could not save profile',
 			'profilePage.photoUploadFailed' => 'Photo upload failed',
 			'profilePage.notificationsUpdateFailed' => 'Could not update notifications',
-			'profilePage.notificationsPermissionDenied' => 'Allow notifications in your device settings to get study reminders.',
+			'profilePage.notificationsPermissionDenied' => 'Erlaube Benachrichtigungen in den Geräteeinstellungen, um Lern-Erinnerungen zu erhalten.',
 			'profilePage.certificateTitle' => 'Ihr Zertifikat',
 			'profilePage.certificateLevelTitle' => ({required Object level}) => '${level} Certificate',
 			'profilePage.certificateOf' => 'Certificate of Achievement',
@@ -2953,12 +3057,12 @@ extension on TranslationsDe {
 			'profilePage.dailyGoalValueLight' => '5-10 Min/Tag',
 			'profilePage.dailyGoalValueRecommended' => '15-20 Min/Tag',
 			'profilePage.dailyGoalValueFast' => '30+ Min/Tag',
-			'profilePage.settingsShare' => 'Share',
+			'profilePage.settingsShare' => 'Teilen',
 			'profilePage.settingsSupport' => 'Support',
-			'profilePage.settingsAbout' => 'About',
-			'profilePage.settingsAccount' => 'Account',
-			'profilePage.followInstagram' => 'Follow on Instagram',
-			'profilePage.followTikTok' => 'Follow on TikTok',
+			'profilePage.settingsAbout' => 'Über',
+			'profilePage.settingsAccount' => 'Konto',
+			'profilePage.followInstagram' => 'Auf Instagram folgen',
+			'profilePage.followTikTok' => 'Auf TikTok folgen',
 			'profilePage.chineseShort' => 'Chinesisch',
 			'profilePage.seeMore' => 'Mehr...',
 			'profilePage.searchLanguages' => 'Suchen',
@@ -2966,7 +3070,9 @@ extension on TranslationsDe {
 			'profilePage.settingsCertificates' => 'Zertifikate',
 			'profilePage.restorePurchases' => 'Käufe wiederherstellen',
 			'profilePage.aboutFlywork' => 'Über Flywork',
-			'profilePage.faqHelp' => 'FAQ & Hilfe',
+			'profilePage.faqHelp' => 'Häufige Fragen & Hilfe',
+			_ => null,
+		} ?? switch (path) {
 			'profilePage.deleteAccountAndData' => 'Konto und Daten löschen',
 			'profilePage.interestShopping' => 'Einkaufen',
 			'profilePage.interestFood' => 'Essen',
@@ -2991,6 +3097,8 @@ extension on TranslationsDe {
 			'profilePage.myCertificates' => 'Meine Zertifikate',
 			'profilePage.certificatesEmptyTitle' => 'Noch keine Zertifikate',
 			'profilePage.certificatesEmptySubtitle' => 'Schau wieder vorbei, wenn du ein Level abgeschlossen hast.',
+			'profilePage.restorePurchasesSuccess' => 'Deine Käufe wurden wiederhergestellt.',
+			'profilePage.restorePurchasesEmpty' => 'Für dieses Konto wurden keine aktiven Käufe gefunden.',
 			'pushNotifications.title' => 'Lingola',
 			'pushNotifications.h2.0' => 'Es sieht so aus, als hättest du eine kurze Pause gemacht.',
 			'pushNotifications.h2.1' => 'Hast du einen Moment für ein Wort?',
@@ -2998,8 +3106,6 @@ extension on TranslationsDe {
 			'pushNotifications.h2.3' => 'Dein Lernrhythmus hat kurz pausiert.',
 			'pushNotifications.h2.4' => 'Eine kleine Wiederholung könnte gut tun.',
 			'pushNotifications.h4.0' => 'Ein neues Wort könnte heute auf dich warten 👀',
-			_ => null,
-		} ?? switch (path) {
 			'pushNotifications.h4.1' => 'Vielleicht hast du eine schnelle Übung verpasst.',
 			'pushNotifications.h4.2' => 'Vielleicht hast du einen nützlichen Satz übersprungen.',
 			'pushNotifications.h4.3' => 'Der Fortschritt von heute ist noch offen.',

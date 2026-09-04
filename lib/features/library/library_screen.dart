@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
@@ -722,11 +721,11 @@ class _DeleteActionButton extends StatelessWidget {
               color: _red.withValues(alpha: 0.20),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Center(
-              child: SvgPicture.asset(
-                'assets/images/deleteIcon.svg',
-                width: 24,
-                height: 24,
+            child: const Center(
+              child: HomeAsset(
+                AppAssets.deleteIcon,
+                width: AppAssets.deleteIconSize,
+                height: AppAssets.deleteIconSize,
               ),
             ),
           ),

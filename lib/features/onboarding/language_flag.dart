@@ -26,7 +26,7 @@ class LanguageFlag extends StatelessWidget {
       'zh': 'china',
       'cn': 'china',
     };
-    final file = fileByCode[code] ?? code;
+    final file = fileByCode[code.toLowerCase()] ?? code.toLowerCase();
     return 'assets/images/flags/$file.svg';
   }
 
@@ -35,11 +35,20 @@ class LanguageFlag extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: ClipOval(
-        child: SvgPicture.asset(
-          assetPathFor(code),
-          fit: BoxFit.cover,
-          alignment: Alignment.center,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFFE2E2E2)),
+          color: const Color(0xFFF3F4F8),
+        ),
+        child: ClipOval(
+          child: SvgPicture.asset(
+            assetPathFor(code),
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+            placeholderBuilder: (_) => const SizedBox.expand(),
+            errorBuilder: (_, _, _) => _FlagFallback(code: code, size: size * 0.35),
+          ),
         ),
       ),
     );
@@ -47,8 +56,16 @@ class LanguageFlag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
+    // Beyaz bayraklar (JP, RU üst şerit) arka planda kaybolmasın diye kenarlık.
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F8),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFFE2E2E2)),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: SvgPicture.asset(
         assetPathFor(code),
         width: width,
@@ -56,6 +73,36 @@ class LanguageFlag extends StatelessWidget {
         fit: BoxFit.cover,
         alignment: Alignment.center,
         placeholderBuilder: (_) => SizedBox(width: width, height: height),
+        errorBuilder: (_, _, _) => _FlagFallback(
+          code: code,
+          size: (height * 0.45).clamp(8, 14),
+        ),
+      ),
+    );
+  }
+}
+
+class _FlagFallback extends StatelessWidget {
+  const _FlagFallback({required this.code, required this.size});
+
+  final String code;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: const Color(0xFFF3F4F8),
+      child: Center(
+        child: Text(
+          code.toUpperCase(),
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: size,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF606060),
+            height: 1,
+          ),
+        ),
       ),
     );
   }

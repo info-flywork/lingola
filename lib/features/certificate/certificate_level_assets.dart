@@ -43,6 +43,26 @@ abstract final class CertificateLevelAssets {
     }
   }
 
+  /// Liste satırı — Figma: "A1 - Starter Certificate".
+  static String listTitle(String level) {
+    switch (level.toUpperCase()) {
+      case 'A1':
+        return 'A1 - Starter Certificate';
+      case 'A2':
+        return 'A2 - Basic Certificate';
+      case 'B1':
+        return 'B1 - Intermediate Certificate';
+      case 'B2':
+        return 'B2 - Upper Intermediate Certificate';
+      case 'C1':
+        return 'C1 - Advanced Certificate';
+      case 'C2':
+        return 'C2 - Expert Certificate';
+      default:
+        return '${level.toUpperCase()} Certificate';
+    }
+  }
+
   /// Önizleme veya token yokken gösterilecek varsayılan kimlik.
   static String defaultCertificateId(String level) {
     switch (level.toUpperCase()) {

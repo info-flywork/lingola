@@ -290,7 +290,7 @@ class _WritingTestScreenState extends State<WritingTestScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                HomeAsset(iconAsset, width: 55, height: 56),
+                HomeAsset(iconAsset, width: 66, height: 66),
                 const SizedBox(height: 10),
                 Text(
                   title,

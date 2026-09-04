@@ -39,6 +39,7 @@ abstract final class RivePreloadService {
     if (url == null) return;
     _cache.remove(url);
     _loading.remove(url);
+    unawaited(CdnFileCache.evict(url, kind: 'rive'));
   }
 
   static void preload(String? rawUrl) {
@@ -112,6 +113,10 @@ abstract final class RivePreloadService {
       }
     } catch (e) {
       _log('disk failed $url — $e');
+      if ('$e'.contains('not Rive')) {
+        _log('failed $url');
+        return null;
+      }
     }
 
     final fromNetwork = await _loaderFromUrl(url);
@@ -157,6 +162,8 @@ abstract final class RivePreloadService {
       ];
 
   static void _log(String message) {
-    if (kDebugMode) debugPrint('[RivePreload] $message');
+    if (!kDebugMode) return;
+    final safe = message.replaceAll(RegExp(r'[^\x09\x0A\x0D\x20-\x7E]'), '.');
+    debugPrint('[RivePreload] $safe');
   }
 }

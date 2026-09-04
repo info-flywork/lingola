@@ -14,6 +14,7 @@ import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/tutor/widgets/tutor_rive_avatar.dart';
 import '../../i18n/strings.g.dart';
+import '../profile/interests_sheet.dart';
 import '../shell/main_shell.dart';
 import 'onboarding_draft.dart';
 
@@ -134,13 +135,16 @@ class _PlanReadyScreenState extends State<PlanReadyScreen>
   }
 
   String _interestLabel(Translations$planReady$en readyText) {
-    return switch (widget.draft.goal) {
-      'travel' => '🛫 ${readyText.goalTravel}',
-      'livingAbroad' => '🏠 ${readyText.goalLiving}',
-      'studyingAbroad' => '🎓 ${readyText.goalStudying}',
-      'other' => '✨ ${readyText.goalOther}',
-      _ => '🛫 ${readyText.goalTravel}',
-    };
+    var ids = List<String>.from(widget.draft.interests);
+    if (ids.isEmpty) {
+      final saved = SessionStore.currentUser?.onboarding?.interests;
+      if (saved != null && saved.isNotEmpty) {
+        ids = List<String>.from(saved);
+      }
+    }
+    if (ids.isEmpty) return '—';
+    final byId = {for (final o in allInterestOptions()) o.id: o.label};
+    return ids.map((id) => byId[id] ?? id).join(', ');
   }
 
   String _levelLabel(Translations$planReady$en readyText) {

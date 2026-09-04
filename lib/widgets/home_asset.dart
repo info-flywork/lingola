@@ -72,24 +72,18 @@ class HomeAsset extends StatelessWidget {
       );
     }
 
-    // Küçük ikonlarda cacheWidth/Height hem kırpıyor hem yumuşatıyor.
-    final bool skipCacheResize =
-        _isFinitePositive(width) &&
-        width! <= 48 &&
-        _isFinitePositive(height) &&
-        height! <= 48;
-
-    final int? cacheWidth = skipCacheResize
-        ? null
-        : _isFinitePositive(width)
+    // Tek boyut ver: en-boy oranını koru. Küçük ikonlarda da cache kullan —
+    // aksi halde 200KB+ PNG'ler tam çözünürlükte decode edilip UI donuyor.
+    final int? cacheWidth = _isFinitePositive(width)
         ? (width! * dpr).round().clamp(1, 2048)
         : width == null
         ? (420 * dpr).round().clamp(1, 2048)
         : null;
 
-    final int? cacheHeight = skipCacheResize || !_isFinitePositive(height)
-        ? null
-        : (height! * dpr).round().clamp(1, 2048);
+    final int? cacheHeight = (!_isFinitePositive(width) &&
+            _isFinitePositive(height))
+        ? (height! * dpr).round().clamp(1, 2048)
+        : null;
 
     if (_isNetwork) {
       return Image.network(
@@ -100,7 +94,7 @@ class HomeAsset extends StatelessWidget {
         alignment: alignment,
         cacheWidth: cacheWidth,
         cacheHeight: cacheHeight,
-        filterQuality: FilterQuality.high,
+        filterQuality: FilterQuality.medium,
         isAntiAlias: true,
         errorBuilder: (_, _, _) => _placeholder(),
       );
@@ -114,7 +108,7 @@ class HomeAsset extends StatelessWidget {
       alignment: alignment,
       cacheWidth: cacheWidth,
       cacheHeight: cacheHeight,
-      filterQuality: FilterQuality.high,
+      filterQuality: FilterQuality.medium,
       isAntiAlias: true,
       errorBuilder: (_, _, _) => _placeholder(),
     );

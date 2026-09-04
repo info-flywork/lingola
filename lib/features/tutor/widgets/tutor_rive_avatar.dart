@@ -73,7 +73,16 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   @override
   void initState() {
     super.initState();
-    unawaited(_resolveLoader(_resolvePrimaryUrl()));
+    unawaited(_bootstrap());
+  }
+
+  Future<void> _bootstrap() async {
+    final url = _resolvePrimaryUrl();
+    if (url == null) {
+      if (mounted) setState(() => _riveFailed = true);
+      return;
+    }
+    await _resolveLoader(url);
   }
 
   @override
@@ -86,7 +95,7 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
       _riveEverLoaded = false;
       _riveFailed = false;
       _fileLoader = null;
-      unawaited(_resolveLoader(_resolvePrimaryUrl()));
+      unawaited(_bootstrap());
       return;
     }
 
@@ -138,10 +147,8 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     super.dispose();
   }
 
-  String _resolvePrimaryUrl() {
-    return RivePreloadService.normalizeRiveUrl(widget.assetPath) ??
-        RivePreloadService.normalizeRiveUrl(widget.fallbackRivePath) ??
-        RivePreloadService.defaultFallbackUrl;
+  String? _resolvePrimaryUrl() {
+    return RivePreloadService.normalizeRiveUrl(widget.assetPath);
   }
 
   Future<void> _resolveLoader(String url) async {
@@ -182,24 +189,28 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
     _recoveryAttempted = true;
 
     final current = RivePreloadService.normalizeRiveUrl(_activeUrl);
-    final fallback =
-        RivePreloadService.normalizeRiveUrl(widget.fallbackRivePath) ??
-            RivePreloadService.defaultFallbackUrl;
-
-    if (current != null && current != fallback) {
-      debugPrint('[rive] recover → fallback CDN $fallback');
+    if (current != null) {
       RivePreloadService.invalidate(current);
-      final ok = await RivePreloadService.ensurePreloaded(fallback);
+    }
+
+    // Aynı eğitmen için alternatif CDN — başka karaktere (Lingola robot) düşme.
+    final alt = RivePreloadService.normalizeRiveUrl(widget.fallbackRivePath);
+    if (alt != null && alt != current) {
+      debugPrint('[rive] recover → alt CDN $alt');
+      final ok = await RivePreloadService.ensurePreloaded(alt);
       if (!mounted) return;
       if (ok) {
-        await _resolveLoader(fallback);
+        await _resolveLoader(alt);
         return;
       }
     }
 
-    debugPrint('[rive] recover invalidate+reload $current');
-    RivePreloadService.invalidate(current);
-    await _resolveLoader(current ?? fallback);
+    if (!mounted) return;
+    debugPrint('[rive] recover failed — PNG fallback');
+    setState(() {
+      _riveFailed = true;
+      _fileLoader = null;
+    });
   }
 
   rive.RiveWidgetController _createController(rive.File file) {
@@ -275,7 +286,7 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   }
 
   void _onFailed(Object error, StackTrace stack) {
-    debugPrint('[rive] onFailed ($_activeUrl): $error');
+    debugPrint('[rive] onFailed ($_activeUrl)');
     if (_riveEverLoaded) return;
     unawaited(_recoverAfterFailure());
   }

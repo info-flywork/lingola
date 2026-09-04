@@ -7,6 +7,7 @@ class CertificateDto {
     required this.verifyToken,
     required this.verifyUrl,
     required this.issuedAt,
+    this.title,
   });
 
   final String id;
@@ -14,6 +15,7 @@ class CertificateDto {
   final String verifyToken;
   final String verifyUrl;
   final DateTime? issuedAt;
+  final String? title;
 
   factory CertificateDto.fromJson(Map<String, dynamic> json) {
     final rawDate = json['issuedAt'] as String?;
@@ -23,6 +25,7 @@ class CertificateDto {
       verifyToken: json['verifyToken'] as String? ?? '',
       verifyUrl: json['verifyUrl'] as String? ?? '',
       issuedAt: rawDate == null ? null : DateTime.tryParse(rawDate),
+      title: json['title'] as String?,
     );
   }
 }

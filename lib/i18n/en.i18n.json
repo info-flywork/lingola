@@ -773,7 +773,7 @@
     "lingolaRolePlay": "Lingola RolePlay",
     "shopping": "Shopping",
     "flirting": "Flirting",
-    "lifeInTheUs": "Life In The Us",
+    "lifeInTheUs": "Life in the US",
     "freeDiscussion": "Free Discussion",
     "jobInterview": "Job Interview",
     "dailyInteractions": "Daily Interactions",
@@ -1297,6 +1297,8 @@
     "confirmKeepGoing": "Don't give up on progress",
     "myCertificates": "My Certificates",
     "certificatesEmptyTitle": "No certificates yet",
-    "certificatesEmptySubtitle": "Don't forget to check again when you complete a level."
+    "certificatesEmptySubtitle": "Don't forget to check again when you complete a level.",
+    "restorePurchasesSuccess": "Your purchases were restored.",
+    "restorePurchasesEmpty": "No active purchases found for this account."
   }
 }

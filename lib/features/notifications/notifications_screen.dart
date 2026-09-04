@@ -195,8 +195,8 @@ class _NotificationsEmptyState extends StatelessWidget {
           children: [
             Image.asset(
               AppAssets.notificationsEmptyBell,
-              width: 120,
-              height: 120,
+              width: 129,
+              height: 129,
               fit: BoxFit.contain,
             ),
             const SizedBox(height: 24),
@@ -206,7 +206,7 @@ class _NotificationsEmptyState extends StatelessWidget {
               style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 24,
-                height: 36 / 24,
+                height: 1,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
               ),
@@ -218,7 +218,7 @@ class _NotificationsEmptyState extends StatelessWidget {
               style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,
-                height: 21 / 14,
+                height: 1,
                 fontWeight: FontWeight.w400,
                 color: AppColors.secondary,
               ),
@@ -310,12 +310,11 @@ class _NotificationSwipeRowState extends State<_NotificationSwipeRow> {
                 child: const SizedBox(
                   width: _actionW,
                   height: _actionW,
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
+                  child: Center(
                     child: HomeAsset(
-                      AppAssets.notificationTrash,
-                      width: 24,
-                      height: 24,
+                      AppAssets.deleteIcon,
+                      width: AppAssets.deleteIconSize,
+                      height: AppAssets.deleteIconSize,
                     ),
                   ),
                 ),

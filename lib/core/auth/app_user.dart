@@ -113,6 +113,7 @@ class UserOnboarding {
     required this.nativeLanguageCode,
     required this.targetLanguageCode,
     this.goal,
+    this.interests = const [],
     this.level,
     this.pace,
     this.explanationLanguage = 'native',
@@ -121,6 +122,7 @@ class UserOnboarding {
   final String nativeLanguageCode;
   final String targetLanguageCode;
   final String? goal;
+  final List<String> interests;
   final String? level;
   final String? pace;
   final String explanationLanguage;
@@ -132,6 +134,7 @@ class UserOnboarding {
       nativeLanguageCode: json['nativeLanguageCode'] as String? ?? 'tr',
       targetLanguageCode: json['targetLanguageCode'] as String? ?? 'en',
       goal: json['goal'] as String?,
+      interests: _parseInterests(json['interests']),
       level: json['level'] as String?,
       pace: json['pace'] as String?,
       explanationLanguage:
@@ -139,17 +142,30 @@ class UserOnboarding {
     );
   }
 
+  static List<String> _parseInterests(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw
+        .map((e) => e?.toString().trim() ?? '')
+        .where((e) => e.isNotEmpty)
+        .toList();
+  }
+
   UserOnboarding copyWith({
     String? nativeLanguageCode,
     String? targetLanguageCode,
     String? explanationLanguage,
+    String? goal,
+    List<String>? interests,
+    String? level,
+    String? pace,
   }) {
     return UserOnboarding(
       nativeLanguageCode: nativeLanguageCode ?? this.nativeLanguageCode,
       targetLanguageCode: targetLanguageCode ?? this.targetLanguageCode,
-      goal: goal,
-      level: level,
-      pace: pace,
+      goal: goal ?? this.goal,
+      interests: interests ?? this.interests,
+      level: level ?? this.level,
+      pace: pace ?? this.pace,
       explanationLanguage: explanationLanguage ?? this.explanationLanguage,
     );
   }

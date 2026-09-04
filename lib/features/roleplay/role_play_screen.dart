@@ -436,7 +436,17 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
           const SizedBox(height: 10),
           RolePlayScenarioCard(
             scenario: preview,
-            onTap: () => _openDetail(context, preview),
+            onTap: () {
+              final baseId = RolePlayCatalog.baseId(preview.id);
+              final variants = group
+                  .where((s) => RolePlayCatalog.baseId(s.id) == baseId)
+                  .toList(growable: false);
+              _openCategoryScreen(
+                categoryKey: key,
+                categoryTitle: preview.title,
+                scenarios: variants,
+              );
+            },
           ),
           const SizedBox(height: 16),
         ]);
