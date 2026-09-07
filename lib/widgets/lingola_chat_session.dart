@@ -122,6 +122,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   static const _expandedBg = Color(0xFF1A2A4A);
 
   final _controller = TextEditingController();
+  final _textFocus = FocusNode();
   final _scrollController = ScrollController();
   late final List<LingolaChatMessage> _messages;
   final _tts = TutorTtsService();
@@ -152,7 +153,6 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
   bool _awaitingReply = false;
   bool _recording = false;
   bool _recordingLocked = false;
-  bool _cancelRecordingPending = false;
   bool _speaking = false;
   String? _localError;
 
@@ -312,6 +312,7 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     unawaited(_player.stop());
     unawaited(_mic.cancel());
     _controller.dispose();
+    _textFocus.dispose();
     _scrollController.dispose();
     unawaited(_playerCompleteSub?.cancel());
     unawaited(_playerPositionSub?.cancel());
@@ -373,17 +374,6 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     return raw;
   }
 
-  Future<void> _toggleMic() async {
-    if (!widget.enableMic || _composerBlocked || _finished) return;
-    if (_recording) {
-      await _stopMicAndSend();
-      return;
-    }
-    _cancelRecordingPending = false;
-    await _startMic();
-    if (mounted && _recording) _startRecordingTimer();
-  }
-
   Future<void> _cancelRecording() async {
     if (!_recording && !_recordingLocked) return;
     _stopRecordingTimer();
@@ -392,7 +382,6 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     setState(() {
       _recording = false;
       _recordingLocked = false;
-      _cancelRecordingPending = false;
     });
   }
 
@@ -416,7 +405,6 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     setState(() {
       _recording = false;
       _recordingLocked = false;
-      _cancelRecordingPending = false;
       _speaking = false;
     });
     (widget.onSessionExpired ?? widget.onClose)(_elapsed);
@@ -509,7 +497,39 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
             _controller.text.trim().isEmpty) {
           _controller.text = suggestion;
         }
+      } else {
+        _textFocus.unfocus();
       }
+    });
+    if (_textComposeOn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _textFocus.requestFocus();
+      });
+    }
+  }
+
+  Future<void> _onMicHoldStart() async {
+    if (!widget.enableMic || _composerBlocked || _finished) return;
+    if (_recording || _recordingLocked) return;
+    await _startMic();
+    if (mounted && _recording) _startRecordingTimer();
+  }
+
+  Future<void> _onMicHoldSend() async {
+    if (!_recording || _recordingLocked) return;
+    await _stopMicAndSend();
+  }
+
+  Future<void> _onMicHoldCancel() async {
+    await _cancelRecording();
+  }
+
+  void _onMicLock() {
+    if (_recordingLocked) return;
+    setState(() {
+      _recording = true;
+      _recordingLocked = true;
     });
   }
 
@@ -652,7 +672,6 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     setState(() {
       _recording = false;
       _recordingLocked = false;
-      _cancelRecordingPending = false;
       _transcribing = true;
       _localError = null;
     });
@@ -817,28 +836,10 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     final hint = widget.typeMessageHint ?? AppText.current.previewChat.typeMessage;
     final blocked = _composerBlocked;
 
-    if (_recordingLocked) {
-      return _WhatsAppChatComposer(
-        controller: _controller,
-        hint: hint,
-        enabled: !blocked,
-        enableMic: false,
-        recording: _recording,
-        recordingLocked: _recordingLocked,
-        cancelPending: _cancelRecordingPending,
-        recordingTimer: _recordingTimerLabel,
-        chatLabels: AppText.current.previewChat,
-        onSend: () => unawaited(_sendMessage()),
-        onMicPointerDown: (_) {},
-        onMicPointerCancel: (_) {},
-        onCancelRecording: () => unawaited(_cancelRecording()),
-        onFinishLockedRecording: () => unawaited(_finishLockedRecording()),
-      );
-    }
-
     if (_textComposeOn) {
       return _WhatsAppChatComposer(
         controller: _controller,
+        focusNode: _textFocus,
         hint: hint,
         enabled: !blocked,
         enableMic: widget.enableMic,
@@ -862,16 +863,24 @@ class _LingolaChatSessionState extends State<LingolaChatSession> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
       child: ChatSessionActionBar(
+        holdToRecord: true,
         enableMic: widget.enableMic,
         busy: blocked,
         micBusy: _transcribing,
-        listening: _recording,
+        listening: _recording && !_recordingLocked,
+        recordingLocked: _recordingLocked,
+        recordingTimer: _recordingTimerLabel,
         messageActive: false,
         hintActive: _hintsOn,
         hintLoading: _hintLoading,
         onMessage: _toggleTextCompose,
         onHint: () => unawaited(_requestHint()),
-        onMicTap: () => unawaited(_toggleMic()),
+        onMicHoldStart: () => unawaited(_onMicHoldStart()),
+        onMicHoldSend: () => unawaited(_onMicHoldSend()),
+        onMicHoldCancel: () => unawaited(_onMicHoldCancel()),
+        onMicLock: _onMicLock,
+        onMicUnlockSend: () => unawaited(_finishLockedRecording()),
+        onMicUnlockCancel: () => unawaited(_cancelRecording()),
       ),
     );
   }
@@ -1306,6 +1315,7 @@ class _WhatsAppChatComposer extends StatelessWidget {
     required this.onMicPointerCancel,
     required this.onCancelRecording,
     required this.onFinishLockedRecording,
+    this.focusNode,
     this.onHint,
     this.hintLoading = false,
     this.micDismissesComposer = false,
@@ -1313,6 +1323,7 @@ class _WhatsAppChatComposer extends StatelessWidget {
   });
 
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String hint;
   final bool enabled;
   final bool enableMic;
@@ -1554,7 +1565,9 @@ class _WhatsAppChatComposer extends StatelessWidget {
                       Expanded(
                         child: TextField(
                           controller: controller,
+                          focusNode: focusNode,
                           enabled: enabled,
+                          autofocus: focusNode != null,
                           textInputAction: TextInputAction.send,
                           onSubmitted: (_) {
                             if (hasText) onSend();

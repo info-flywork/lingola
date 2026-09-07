@@ -339,7 +339,6 @@ class _TutorScreenState extends State<TutorScreen> {
         child: CustomScrollView(
           slivers: [
             SliverPersistentHeader(
-              key: ValueKey('tutor-hero-${focused.identity}'),
               pinned: true,
               delegate: _PinnedTutorHeroDelegate(
                 topInset: MediaQuery.paddingOf(context).top,
@@ -979,7 +978,6 @@ class _LessonTutorPickerScreenState extends State<LessonTutorPickerScreen> {
         body: CustomScrollView(
           slivers: [
             SliverPersistentHeader(
-              key: ValueKey('lesson-tutor-hero-${focused.identity}'),
               pinned: true,
               delegate: _PinnedTutorHeroDelegate(
                 topInset: MediaQuery.paddingOf(context).top,
@@ -1391,14 +1389,18 @@ class _PinnedTutorHeroDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return _TutorHero(
-      key: ValueKey(tutor.identity),
-      text: text,
-      tutor: tutor,
-      topInset: topInset,
-      onChat: onChat,
-      showChatAction: showChatAction,
-      leading: leading,
+    // KeyedSubtree: pinned header eski Rive'ı tutmasın; seçim değişince
+    // hero tamamen yeniden oluşturulsun.
+    return KeyedSubtree(
+      key: ValueKey('pinned-tutor-hero-${tutor.identity}'),
+      child: _TutorHero(
+        text: text,
+        tutor: tutor,
+        topInset: topInset,
+        onChat: onChat,
+        showChatAction: showChatAction,
+        leading: leading,
+      ),
     );
   }
 
@@ -1406,16 +1408,17 @@ class _PinnedTutorHeroDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _PinnedTutorHeroDelegate oldDelegate) {
     return oldDelegate.topInset != topInset ||
         oldDelegate.tutor.identity != tutor.identity ||
+        oldDelegate.tutor.image != tutor.image ||
         oldDelegate.tutor.heroRiveUrl != tutor.heroRiveUrl ||
         oldDelegate.tutor.theme?.gradientStart != tutor.theme?.gradientStart ||
         oldDelegate.tutor.theme?.gradientEnd != tutor.theme?.gradientEnd ||
-        oldDelegate.showChatAction != showChatAction;
+        oldDelegate.showChatAction != showChatAction ||
+        oldDelegate.leading != leading;
   }
 }
 
 class _TutorHero extends StatefulWidget {
   const _TutorHero({
-    super.key,
     required this.text,
     required this.tutor,
     required this.topInset,
@@ -1660,11 +1663,12 @@ class _TutorHeroState extends State<_TutorHero> {
                     width: 240,
                     height: 260,
                     child: TutorRiveAvatar(
-                      key: ValueKey(tutor.identity),
+                      key: ValueKey('hero-rive-${tutor.identity}'),
                       assetPath: tutor.heroRiveUrl,
                       talking: _speaking,
                       lipsyncViseme: _speaking ? _lipsyncViseme : null,
                       fallbackImage: tutor.image,
+                      fallbackRivePath: tutor.riveAsset,
                       loadingBackgroundColor: Colors.transparent,
                       anchorBottom: true,
                       fit: rive.Fit.contain,

@@ -103,14 +103,16 @@ Do NOT laugh or joke when nothing was funny.''';
     final native = _nativeLanguageName(nativeLanguageCode);
     if (explanationLanguage == 'english') {
       return '''
-- The learner prefers explanations in English only.
-- Even if they write in $native, explain in simple clear English (A1–A2).
+- CRITICAL — The learner prefers explanations in English only.
+- Even if they write or speak in $native, explain and answer in simple clear English (A1–A2).
+- Do not use $native in your replies.
 - Speech-to-text may garble short English attempts (e.g. "hay" for "Hi"). Infer their intended English phrase charitably — never echo offensive mis-transcriptions.
 - When teaching greetings, always show correct spelling: Hi, Hello, Hey — never Hay or homophone misspellings.''';
     }
     return '''
-- The learner prefers explanations in $native when they ask in $native.
-- If they write in $native, reply in $native to explain, encourage, or answer — then gently invite them back to English practice in the same reply.
+- CRITICAL — The learner prefers explanations in $native.
+- If they write or speak in $native, reply primarily in $native: explain, agree, encourage — at least one full sentence in $native.
+- Do NOT reply entirely in English when they spoke or asked in $native. You may add one short English phrase example after the $native explanation.
 - For English practice parts, keep using simple spoken English.
 - Speech-to-text may garble English attempts; infer intent charitably (e.g. "hay" meant "Hi").
 - When correcting, show exact spelling: Hi, Hello, Hey — never Hay.''';

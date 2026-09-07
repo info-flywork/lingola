@@ -10,6 +10,7 @@ import 'create_roleplay_screen.dart';
 import 'role_play_api_service.dart';
 import 'role_play_catalog.dart';
 import 'role_play_category_screen.dart';
+import 'role_play_content.dart';
 import 'role_play_widgets.dart';
 
 class RolePlayScreen extends StatefulWidget {
@@ -23,7 +24,6 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
   List<RolePlayScenarioDto>? _remoteDtos;
   String? _openSwipeId;
   String _categoryFilter = 'all';
-  String _difficultyFilter = 'all';
 
   @override
   void initState() {
@@ -168,45 +168,11 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
   }
 
   static String? _titleFor(dynamic page, String key) {
-    final base = RolePlayCatalog.baseId(key);
-    return switch (base) {
-      'coffee' => page.coffee.title as String?,
-      'directions' => page.directions.title as String?,
-      'interview' => page.interview.title as String?,
-      'missedTrain' => page.missedTrain.title as String?,
-      'flightAttendant' => page.flightAttendant.title as String?,
-      'trainTicket' => page.trainTicket.title as String?,
-      'restaurantReservation' => page.restaurantReservation.title as String?,
-      'doctorAppointment' => page.doctorAppointment.title as String?,
-      'shoppingClothes' => page.shoppingClothes.title as String?,
-      'takingTaxi' => page.takingTaxi.title as String?,
-      'rentingApartment' => page.rentingApartment.title as String?,
-      'birthdayParty' => page.birthdayParty.title as String?,
-      'flirtingMeet' => page.flirtingMeet.title as String?,
-      'freeTalkHobby' => page.freeTalkHobby.title as String?,
-      _ => null,
-    };
+    return rolePlayTitleForKey(page, key);
   }
 
   static String? _screenplayFor(dynamic page, String key) {
-    final base = RolePlayCatalog.baseId(key);
-    return switch (base) {
-      'coffee' => page.coffee.screenplay as String?,
-      'directions' => page.directions.screenplay as String?,
-      'interview' => page.interview.screenplay as String?,
-      'missedTrain' => page.missedTrain.screenplay as String?,
-      'flightAttendant' => page.flightAttendant.screenplay as String?,
-      'trainTicket' => page.trainTicket.screenplay as String?,
-      'restaurantReservation' => page.restaurantReservation.screenplay as String?,
-      'doctorAppointment' => page.doctorAppointment.screenplay as String?,
-      'shoppingClothes' => page.shoppingClothes.screenplay as String?,
-      'takingTaxi' => page.takingTaxi.screenplay as String?,
-      'rentingApartment' => page.rentingApartment.screenplay as String?,
-      'birthdayParty' => page.birthdayParty.screenplay as String?,
-      'flirtingMeet' => page.flirtingMeet.screenplay as String?,
-      'freeTalkHobby' => page.freeTalkHobby.screenplay as String?,
-      _ => null,
-    };
+    return rolePlayScreenplayForKey(page, key);
   }
 
   static String _imageFor(String id) {
@@ -243,7 +209,6 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
   void _setCategoryFilter(String key) {
     setState(() {
       _categoryFilter = key;
-      _difficultyFilter = 'all';
       _openSwipeId = null;
     });
   }
@@ -457,41 +422,28 @@ class _RolePlayScreenState extends State<RolePlayScreen> {
     final categoryItems = staticScenarios
         .where((s) => s.categoryKey == _categoryFilter)
         .toList(growable: false);
-    final filtered = _difficultyFilter == 'all'
-        ? categoryItems
-        : categoryItems
-            .where((s) => s.levelKey == _difficultyFilter)
-            .toList(growable: false);
+    final filtered = RolePlayCatalog.uniqueByBase(categoryItems);
 
     return [
-      SizedBox(
-        height: 40,
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: 1 + RolePlayCatalog.difficultyKeys.length,
-          separatorBuilder: (_, _) => const SizedBox(width: 8),
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return RolePlayFilterChip(
-                label: page.filterAll,
-                selected: _difficultyFilter == 'all',
-                onTap: () => setState(() => _difficultyFilter = 'all'),
-              );
-            }
-            final key = RolePlayCatalog.difficultyKeys[index - 1];
-            return RolePlayFilterChip(
-              label: RolePlayCatalog.levelLabel(page, key),
-              selected: _difficultyFilter == key,
-              onTap: () => setState(() => _difficultyFilter = key),
-            );
-          },
-        ),
-      ),
-      const SizedBox(height: 16),
       for (final scenario in filtered) ...[
         RolePlayScenarioCard(
           scenario: scenario,
-          onTap: () => _openDetail(context, scenario),
+          hideDifficulty: true,
+          onTap: () {
+            final baseId = RolePlayCatalog.baseId(scenario.id);
+            final variants = categoryItems
+                .where((s) => RolePlayCatalog.baseId(s.id) == baseId)
+                .toList(growable: false);
+            if (variants.length > 1) {
+              _openCategoryScreen(
+                categoryKey: _categoryFilter,
+                categoryTitle: scenario.title,
+                scenarios: variants,
+              );
+              return;
+            }
+            _openDetail(context, scenario);
+          },
         ),
         const SizedBox(height: 12),
       ],

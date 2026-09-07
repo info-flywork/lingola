@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// Onboarding: günün hangi diliminde pratik yapılacağı.
@@ -32,7 +34,9 @@ class PracticeTimeOfDay {
 
   static String iconFor(String? value) => iconAssets[indexOf(value)];
 
-  /// Seçilen dilime göre varsayılan pratik aralığı.
+  static bool isFlexible(String? value) => normalize(value) == 'flexible';
+
+  /// Seçilen dilime göre varsayılan pratik aralığı (Esneğim sheet).
   static (TimeOfDay start, TimeOfDay end) defaultRange(String? value) {
     switch (normalize(value)) {
       case 'morning':
@@ -57,5 +61,23 @@ class PracticeTimeOfDay {
           const TimeOfDay(hour: 22, minute: 0),
         );
     }
+  }
+
+  /// Preset (Sabah/Öğleden sonra/Akşam) için tek somut saat.
+  /// Aralık: morning [06,12), afternoon [12,18), evening [18,23).
+  /// Çağıran taraf sonucu state'te saklamalı — render'da yeniden üretme.
+  static TimeOfDay randomConcreteTime(
+    String? value, {
+    math.Random? random,
+  }) {
+    final r = random ?? math.Random();
+    final (startMin, spanMin) = switch (normalize(value)) {
+      'morning' => (6 * 60, 6 * 60), // 06:00 .. 11:59
+      'afternoon' => (12 * 60, 6 * 60), // 12:00 .. 17:59
+      'evening' => (18 * 60, 5 * 60), // 18:00 .. 22:59
+      _ => (12 * 60, 6 * 60),
+    };
+    final total = startMin + r.nextInt(spanMin);
+    return TimeOfDay(hour: total ~/ 60, minute: total % 60);
   }
 }

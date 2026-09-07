@@ -16,6 +16,7 @@ import '../profile/interests_sheet.dart';
 import 'language_flag.dart';
 import 'onboarding_draft.dart';
 import 'daily_practice_setup_screen.dart';
+import 'onboarding_step_header.dart';
 import 'progress_insight_screen.dart';
 
 class ExplanationLanguageSetupScreen extends StatefulWidget {
@@ -30,6 +31,7 @@ class ExplanationLanguageSetupScreen extends StatefulWidget {
 
 class _ExplanationLanguageSetupScreenState
     extends State<ExplanationLanguageSetupScreen> {
+  /// İlk gelişte seçili gelmesin; kullanıcı dokununca set edilir.
   int? _selected;
 
   @override
@@ -47,9 +49,10 @@ class _ExplanationLanguageSetupScreenState
       options: options,
       selectedIndex: _selected ?? -1,
       centerOptions: true,
-      mutedUnselectedLabels: true,
-      iconSize: 28,
-      iconHeight: 21,
+      filledSelected: true,
+      iconSize: 32,
+      optionHeight: 56,
+      largeTitle: true,
       showFooter: false,
       onSelect: (index) {
         setState(() => _selected = index);
@@ -74,19 +77,8 @@ class GoalSetupScreen extends StatefulWidget {
 }
 
 class _GoalSetupScreenState extends State<GoalSetupScreen> {
+  /// İlk gelişte seçili gelmesin; kullanıcı dokununca set edilir.
   int? _selected;
-
-  @override
-  void initState() {
-    super.initState();
-    final goal = widget.draft.goal;
-    if (goal == null || goal.isEmpty) {
-      _selected = null;
-      return;
-    }
-    final index = OnboardingDraft.goals.indexOf(goal);
-    _selected = index >= 0 ? index : null;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +101,7 @@ class _GoalSetupScreenState extends State<GoalSetupScreen> {
       filledSelected: true,
       iconSize: 32,
       optionHeight: 56,
+      largeTitle: true,
       showFooter: false,
       onSelect: (index) {
         setState(() => _selected = index);
@@ -184,56 +177,40 @@ class _InterestsSetupScreenState extends State<InterestsSetupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Text(
-                  text.language.step(current: 4, total: 8),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AppColors.secondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: const LinearProgressIndicator(
-                    minHeight: 13,
-                    value: 4 / 8,
-                    color: AppColors.primary,
-                    backgroundColor: AppColors.border,
-                  ),
-                ),
+              OnboardingStepHeader(
+                step: 4,
+                totalSteps: 8,
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
+                  // Figma Frame 5: 376 genişlik, padding 10, title↔hint gap 6.
+                  padding: const EdgeInsets.fromLTRB(10, 28, 10, 16),
                   child: Column(
                     children: [
-                      Text(
-                        text.setup.interestsTitle,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          color: AppColors.ink,
-                          fontSize: 24,
-                          height: 30 / 24,
-                          fontWeight: FontWeight.w700,
+                      SizedBox(
+                        width: double.infinity,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            text.setup.interestsTitle,
+                            maxLines: 1,
+                            softWrap: false,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.onboardingSetupTitleLg,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        text.setup.interestsHint,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          color: AppColors.ink.withValues(alpha: 0.65),
-                          fontSize: 16,
-                          height: 20 / 16,
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            text.setup.interestsHint,
+                            textAlign: TextAlign.center,
+                            softWrap: false,
+                            style: AppTextStyles.onboardingSetupHint,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 28),
@@ -342,12 +319,16 @@ class LevelSetupScreen extends StatefulWidget {
 }
 
 class _LevelSetupScreenState extends State<LevelSetupScreen> {
-  late int _selected;
+  int? _selected;
 
   @override
   void initState() {
     super.initState();
-    _selected = CefrLevels.indexOf(widget.draft.level);
+    // Kullanıcı daha önce seçtiyse (geri dönüş) göster; aksi halde boş.
+    final level = widget.draft.level;
+    if (level != null && level.trim().isNotEmpty) {
+      _selected = CefrLevels.indexOf(level);
+    }
   }
 
   @override
@@ -371,16 +352,15 @@ class _LevelSetupScreenState extends State<LevelSetupScreen> {
       title: text.setup.levelTitle,
       subtitle: text.setup.levelHint,
       options: options,
-      selectedIndex: _selected,
+      selectedIndex: _selected ?? -1,
       filledSelected: true,
       iconSize: AppAssets.levelIconWidth,
       iconHeight: AppAssets.levelIconHeight,
       iconGap: 3,
       optionHeight: 60,
-      titleFontSize: 20,
       showFooter: false,
       onSelect: (index) {
-        _selected = index;
+        setState(() => _selected = index);
         widget.draft.setLevelIndex(index);
         Navigator.of(context).push(
           MaterialPageRoute<void>(
@@ -402,20 +382,25 @@ class PaceSetupScreen extends StatefulWidget {
 }
 
 class _PaceSetupScreenState extends State<PaceSetupScreen> {
-  late int _selected;
+  int? _selected;
   var _continuing = false;
 
   @override
   void initState() {
     super.initState();
-    final pace = DailyPace.normalize(widget.draft.pace);
-    _selected = DailyPace.indexOf(pace);
+    final pace = widget.draft.pace;
+    if (pace != null && pace.trim().isNotEmpty) {
+      _selected = DailyPace.indexOf(DailyPace.normalize(pace));
+    }
   }
 
-  Future<void> _finishSetup() async {
+  Future<void> _finishSetup(int index) async {
     if (_continuing) return;
-    setState(() => _continuing = true);
-    widget.draft.setPaceIndex(_selected);
+    setState(() {
+      _continuing = true;
+      _selected = index;
+    });
+    widget.draft.setPaceIndex(index);
     // Giriş yokken auth sync UI'yi kilitlemesin.
     if (SessionStore.currentUser != null) {
       unawaited(() async {
@@ -451,15 +436,14 @@ class _PaceSetupScreenState extends State<PaceSetupScreen> {
       title: text.setup.paceTitle,
       subtitle: text.setup.paceHint,
       options: options,
-      selectedIndex: _selected,
+      selectedIndex: _selected ?? -1,
       centerOptions: true,
       filledSelected: true,
       iconSize: 32,
       optionHeight: 56,
       showFooter: false,
       onSelect: (index) {
-        _selected = index;
-        unawaited(_finishSetup());
+        unawaited(_finishSetup(index));
       },
     );
   }
@@ -484,7 +468,7 @@ class _SetupQuestionScaffold extends StatelessWidget {
     this.iconHeight,
     this.iconGap = 8,
     this.optionHeight,
-    this.titleFontSize = 24,
+    this.largeTitle = false,
   });
 
   final int step;
@@ -504,7 +488,8 @@ class _SetupQuestionScaffold extends StatelessWidget {
   final double? iconHeight;
   final double iconGap;
   final double? optionHeight;
-  final double titleFontSize;
+  /// true → Figma 24/30 (hedef vb.), false → 20/30.
+  final bool largeTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -522,59 +507,23 @@ class _SetupQuestionScaffold extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Text(
-                  text.language.step(current: step, total: totalSteps),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AppColors.secondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    minHeight: 13,
-                    value: step / totalSteps,
-                    color: AppColors.primary,
-                    backgroundColor: AppColors.border,
-                  ),
-                ),
+              OnboardingStepHeader(
+                step: step,
+                totalSteps: totalSteps,
+                onBack: onBack,
               ),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
                   child: Column(
                     children: [
-                      Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          color: AppColors.ink,
-                          fontSize: titleFontSize,
-                          height: 30 / titleFontSize,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      _SetupTitleBlock(
+                        text: title,
+                        largeTitle: largeTitle,
                       ),
                       if (subtitle != null && subtitle!.trim().isNotEmpty) ...[
                         const SizedBox(height: 10),
-                        Text(
-                          subtitle!,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            color: AppColors.ink.withValues(alpha: 0.65),
-                            fontSize: 16,
-                            height: 20 / 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        _SetupHintBlock(text: subtitle!),
                       ],
                       const SizedBox(height: 28),
                       for (var i = 0; i < options.length; i++) ...[
@@ -628,6 +577,58 @@ class _SetupQuestionScaffold extends StatelessWidget {
   }
 }
 
+/// Tüm satırlar aynı punto; dar ekranda birlikte küçülür.
+class _SetupTitleBlock extends StatelessWidget {
+  const _SetupTitleBlock({
+    required this.text,
+    required this.largeTitle,
+  });
+
+  final String text;
+  final bool largeTitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = largeTitle
+        ? AppTextStyles.onboardingSetupTitleLg
+        : AppTextStyles.onboardingSetupTitle;
+    return SizedBox(
+      width: double.infinity,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          softWrap: false,
+          style: style,
+        ),
+      ),
+    );
+  }
+}
+
+class _SetupHintBlock extends StatelessWidget {
+  const _SetupHintBlock({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          softWrap: false,
+          style: AppTextStyles.onboardingSetupHint,
+        ),
+      ),
+    );
+  }
+}
+
 class _OptionIcon extends StatelessWidget {
   const _OptionIcon({
     required this.assetPath,
@@ -662,8 +663,16 @@ class _OptionIcon extends StatelessWidget {
     }
     final isPng = assetPath.toLowerCase().endsWith('.png');
     final h = height ?? size;
-    // Renkli PNG ikonlar tint edilmez; SVG'lerde seçili/seçili değil rengi uygulanır.
-    if (isPng || !tintWhenSelected) {
+    // Renkli PNG: dolu seçili satırda beyaza çek (mavi A2 rozeti mavi zeminde kaybolmasın).
+    if (isPng) {
+      return HomeAsset(
+        assetPath,
+        width: size,
+        height: h,
+        color: selected && !tintWhenSelected ? Colors.white : null,
+      );
+    }
+    if (!tintWhenSelected) {
       return HomeAsset(
         assetPath,
         width: size,

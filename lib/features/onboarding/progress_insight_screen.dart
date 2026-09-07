@@ -94,30 +94,31 @@ class _ProgressInsightScreenState extends State<ProgressInsightScreen>
             children: [
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 55, 16, 24),
+                  // Figma frame: yatay padding 10, içerik genişliği ~398.
+                  padding: const EdgeInsets.fromLTRB(10, 55, 10, 24),
                   child: Column(
                     children: [
-                      Text(
-                        text.progressInsightTitle,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 20,
-                          height: 24 / 20,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.ink,
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: AppTextStyles.insightTitleMaxWidth,
+                        ),
+                        child: Text(
+                          text.progressInsightTitle,
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.onboardingInsightTitle,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        text.progressInsightBody,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 15,
-                          height: 20 / 15,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.ink.withValues(alpha: 0.65),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            text.progressInsightBody,
+                            textAlign: TextAlign.center,
+                            softWrap: false,
+                            style: AppTextStyles.onboardingInsightBody,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 78),
@@ -202,49 +203,54 @@ class _ProgressChart extends StatelessWidget {
   static const _red = Color(0xFFC8102E);
   static const _muted = Color(0xFF848A9C);
 
+  /// Referans tasarım — normalize % (x:0 sol…100 sağ, y:0 üst…100 alt).
+  static const _bluePct = <(double, double)>[
+    (2, 78),
+    (18, 72),
+    (32, 60),
+    (47, 44),
+    (62, 28),
+    (76, 17),
+    (91, 11),
+  ];
+  static const _redPct = <(double, double)>[
+    (1, 78),
+    (20, 75),
+    (35, 70),
+    (48, 61),
+    (61, 58),
+    (75, 60),
+    (90, 58),
+  ];
+  static const _gridY = <double>[10, 27, 44, 61, 78];
+  static const _blueStartM = (3.0, 77.0);
+  static const _redEndM = (86.0, 59.0);
+
   @override
   Widget build(BuildContext context) {
-    // Figma plot: 356×168 + üst/alt etiket payı.
     return SizedBox(
       width: double.infinity,
       height: 228,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final chartTop = 28.0;
-          final chartBottom = constraints.maxHeight - 28;
-          final chartLeft = 8.0;
-          final chartRight = constraints.maxWidth - 8;
-          final chartH = chartBottom - chartTop;
-          final chartW = chartRight - chartLeft;
+          final w = constraints.maxWidth;
+          final h = constraints.maxHeight;
 
-          Offset map(double t, double yNorm) {
-            return Offset(
-              chartLeft + chartW * t,
-              chartBottom - chartH * yNorm,
-            );
-          }
+          Offset pct(double x, double y) => Offset(w * x / 100, h * y / 100);
 
-          // Figma Vector 7: yumuşak sigmoid (Lingola ile).
-          final withPts = _sample((t) {
-            final s = 1.0 / (1.0 + math.exp(-11.5 * (t - 0.50)));
-            return map(t, 0.05 + s * 0.90);
-          });
-          // Uygulama olmadan: alttan 2. grid çizgisine (~0.25) yumuşak okyanus dalgası.
-          // Yüksel → hafif kırılma/çukur → tekrar yumuşak çıkış.
-          final withoutPts = _sample((t) {
-            final envelope = 0.02 + 0.22 * (1 - math.exp(-2.8 * t));
-            final ocean = 0.055 *
-                math.sin(t * math.pi * 2.35 - 0.55) *
-                Curves.easeOut.transform(math.min(1.0, t * 1.15));
-            return map(t, (envelope + ocean).clamp(0.02, 0.30));
-          });
+          final bluePts = [for (final p in _bluePct) pct(p.$1, p.$2)];
+          final redPts = [for (final p in _redPct) pct(p.$1, p.$2)];
+          final blueStart = pct(_blueStartM.$1, _blueStartM.$2);
+          // Bitiş noktası eğrinin ucunda — kaymasın.
+          final blueEnd = bluePts.last;
+          final redEnd = pct(_redEndM.$1, _redEndM.$2);
 
           return Stack(
             clipBehavior: Clip.none,
             children: [
               Positioned(
-                left: chartLeft,
-                top: 0,
+                left: pct(0, 0).dx,
+                top: pct(0, 0).dy,
                 child: Text(
                   confidenceLabel,
                   style: const TextStyle(
@@ -261,21 +267,23 @@ class _ProgressChart extends StatelessWidget {
                 child: RepaintBoundary(
                   child: CustomPaint(
                     painter: _ProgressChartPainter(
-                      withoutPts: withoutPts,
-                      withPts: withPts,
+                      bluePts: bluePts,
+                      redPts: redPts,
+                      blueStart: blueStart,
+                      blueEnd: blueEnd,
+                      redEnd: redEnd,
+                      gridYs: [for (final y in _gridY) pct(0, y).dy],
+                      gridLeft: pct(0, 0).dx,
+                      gridRight: pct(92, 0).dx,
                       withoutProgress: withoutProgress,
                       withProgress: withProgress,
-                      gridTop: chartTop,
-                      gridBottom: chartBottom,
-                      gridLeft: chartLeft,
-                      gridRight: chartRight,
                     ),
                   ),
                 ),
               ),
               Positioned(
-                left: chartLeft,
-                bottom: 0,
+                left: pct(0, 90).dx,
+                top: pct(0, 90).dy,
                 child: Text(
                   todayLabel,
                   style: const TextStyle(
@@ -287,8 +295,8 @@ class _ProgressChart extends StatelessWidget {
                 ),
               ),
               Positioned(
-                right: chartLeft,
-                bottom: 0,
+                left: pct(82, 90).dx,
+                top: pct(82, 90).dy,
                 child: Text(
                   weekLabel,
                   style: const TextStyle(
@@ -303,58 +311,41 @@ class _ProgressChart extends StatelessWidget {
                 AnimatedBuilder(
                   animation: swayListenable,
                   builder: (context, child) {
-                    // Yerinde çapraz salınım (kayma yok).
-                    final a = math.sin(
-                      swayListenable.value * math.pi * 2,
-                    );
+                    final a = math.sin(swayListenable.value * math.pi * 2);
+                    // x:64% y:42% — pill eğrinin üstünde.
                     return Positioned(
-                      left: (withoutPts.last.dx - 52)
-                          .clamp(0.0, constraints.maxWidth - 150),
-                      top: withoutPts.last.dy - 34,
+                      left: pct(64, 42).dx,
+                      top: pct(64, 42).dy,
                       child: Transform.translate(
                         offset: Offset(-a * 6, a * 5),
                         child: child,
                       ),
                     );
                   },
-                  child: _PillLabel(
-                    label: withoutLabel,
-                    color: _red,
-                  ),
+                  child: _PillLabel(label: withoutLabel, color: _red),
                 ),
               if (withProgress > 0.92)
                 AnimatedBuilder(
                   animation: swayListenable,
                   builder: (context, child) {
-                    // Ters çapraz — yerinde.
-                    final a = math.sin(
-                      swayListenable.value * math.pi * 2,
-                    );
+                    final a = math.sin(swayListenable.value * math.pi * 2);
+                    // x:76% y:0% — mavi eğrinin sağ-üstünde, örtüşmesin.
                     return Positioned(
-                      left: (withPts.last.dx - 36)
-                          .clamp(0.0, constraints.maxWidth - 100),
-                      top: withPts.last.dy - 36,
+                      left: pct(76, 0).dx,
+                      top: pct(76, 0).dy,
                       child: Transform.translate(
                         offset: Offset(a * 6, -a * 5),
                         child: child,
                       ),
                     );
                   },
-                  child: _PillLabel(
-                    label: withLabel,
-                    color: _blue,
-                  ),
+                  child: _PillLabel(label: withLabel, color: _blue),
                 ),
             ],
           );
         },
       ),
     );
-  }
-
-  /// Yoğun örnekleme → C1 süreklilik; segment birleşiminde kırık “dağ” olmaz.
-  static List<Offset> _sample(Offset Function(double t) fn, {int n = 64}) {
-    return [for (var i = 0; i <= n; i++) fn(i / n)];
   }
 }
 
@@ -388,37 +379,61 @@ class _PillLabel extends StatelessWidget {
 
 class _ProgressChartPainter extends CustomPainter {
   _ProgressChartPainter({
-    required this.withoutPts,
-    required this.withPts,
-    required this.withoutProgress,
-    required this.withProgress,
-    required this.gridTop,
-    required this.gridBottom,
+    required this.bluePts,
+    required this.redPts,
+    required this.blueStart,
+    required this.blueEnd,
+    required this.redEnd,
+    required this.gridYs,
     required this.gridLeft,
     required this.gridRight,
+    required this.withoutProgress,
+    required this.withProgress,
   });
 
-  final List<Offset> withoutPts;
-  final List<Offset> withPts;
-  final double withoutProgress;
-  final double withProgress;
-  final double gridTop;
-  final double gridBottom;
+  final List<Offset> bluePts;
+  final List<Offset> redPts;
+  final Offset blueStart;
+  final Offset blueEnd;
+  final Offset redEnd;
+  final List<double> gridYs;
   final double gridLeft;
   final double gridRight;
+  final double withoutProgress;
+  final double withProgress;
 
-  static const _blueStart = Color(0xFFCBD1FE);
-  static const _blueEnd = Color(0xFF1B2A99);
-  static const _redStart = Color(0xFFFECBCB);
-  static const _redEnd = Color(0xFF991B1B);
+  static const _blueStartC = Color(0xFFCBD1FE);
+  static const _blueEndC = Color(0xFF1B2A99);
+  static const _redStartC = Color(0xFFFECBCB);
+  static const _redEndC = Color(0xFF991B1B);
   static const _grid = Color(0xFFE1E3E8);
+  static const _blue = Color(0xFF2D46FF);
+  static const _red = Color(0xFFC8102E);
 
-  Path _curve(List<Offset> pts) {
-    final path = Path()..moveTo(pts.first.dx, pts.first.dy);
-    if (pts.length < 2) return path;
-    // Yoğun örneklenmiş yumuşak fonksiyon → lineTo yeterli (kırık cubic yok).
-    for (var i = 1; i < pts.length; i++) {
-      path.lineTo(pts[i].dx, pts[i].dy);
+  /// Catmull-Rom → cubic Bezier — kırık polyline değil, yumuşak S.
+  Path _smoothBezier(List<Offset> pts) {
+    final path = Path();
+    if (pts.isEmpty) return path;
+    path.moveTo(pts.first.dx, pts.first.dy);
+    if (pts.length == 1) return path;
+    if (pts.length == 2) {
+      path.lineTo(pts[1].dx, pts[1].dy);
+      return path;
+    }
+    for (var i = 0; i < pts.length - 1; i++) {
+      final p0 = i == 0 ? pts[0] : pts[i - 1];
+      final p1 = pts[i];
+      final p2 = pts[i + 1];
+      final p3 = i + 2 < pts.length ? pts[i + 2] : p2;
+      final cp1 = Offset(
+        p1.dx + (p2.dx - p0.dx) / 6,
+        p1.dy + (p2.dy - p0.dy) / 6,
+      );
+      final cp2 = Offset(
+        p2.dx - (p3.dx - p1.dx) / 6,
+        p2.dy - (p3.dy - p1.dy) / 6,
+      );
+      path.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, p2.dx, p2.dy);
     }
     return path;
   }
@@ -438,55 +453,25 @@ class _ProgressChartPainter extends CustomPainter {
     return path;
   }
 
-  void _drawLine(
+  void _drawStroke(
     Canvas canvas,
     Path fullPath,
     double progress, {
     required Color start,
     required Color end,
-    required Color dot,
   }) {
     if (progress <= 0) return;
-    final drawn = _extract(fullPath, progress);
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..shader = ui.Gradient.linear(
-        Offset(gridLeft, gridBottom),
-        Offset(gridRight, gridTop),
+        Offset(gridLeft, gridYs.isNotEmpty ? gridYs.last : 0),
+        Offset(gridRight, gridYs.isNotEmpty ? gridYs.first : 0),
         [start, end],
       );
-    canvas.drawPath(drawn, paint);
-
-    if (progress > 0.02) {
-      final metrics = fullPath.computeMetrics().toList();
-      if (metrics.isEmpty) return;
-      final total = metrics.fold<double>(0, (s, m) => s + m.length);
-      final target = total * progress.clamp(0, 1);
-      var walked = 0.0;
-      Offset? endPoint;
-      Offset? startPoint;
-      for (final metric in metrics) {
-        startPoint ??= metric.getTangentForOffset(0)?.position;
-        if (walked + metric.length >= target) {
-          endPoint = metric.getTangentForOffset(target - walked)?.position;
-          break;
-        }
-        walked += metric.length;
-        endPoint = metric.getTangentForOffset(metric.length)?.position;
-      }
-      final dotPaint = Paint()
-        ..style = PaintingStyle.fill
-        ..color = dot;
-      if (startPoint != null && progress > 0.05) {
-        canvas.drawCircle(startPoint, 5, dotPaint);
-      }
-      if (endPoint != null && progress > 0.85) {
-        canvas.drawCircle(endPoint, 6, dotPaint);
-      }
-    }
+    canvas.drawPath(_extract(fullPath, progress), paint);
   }
 
   @override
@@ -497,8 +482,7 @@ class _ProgressChartPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     const dashes = 2.0;
-    for (var i = 0; i < 5; i++) {
-      final y = gridTop + (gridBottom - gridTop) * (i / 4);
+    for (final y in gridYs) {
       var x = gridLeft;
       while (x < gridRight) {
         canvas.drawLine(
@@ -510,31 +494,47 @@ class _ProgressChartPainter extends CustomPainter {
       }
     }
 
-    final withoutPath = _curve(withoutPts);
-    final withPath = _curve(withPts);
+    final redPath = _smoothBezier(redPts);
+    final bluePath = _smoothBezier(bluePts);
 
-    // Önce kırmızı (uygulama olmadan), sonra mavi (Lingola ile).
-    _drawLine(
+    _drawStroke(
       canvas,
-      withoutPath,
+      redPath,
       withoutProgress,
-      start: _redStart,
-      end: _redEnd,
-      dot: const Color(0xFFC8102E),
+      start: _redStartC,
+      end: _redEndC,
     );
-    _drawLine(
+    _drawStroke(
       canvas,
-      withPath,
+      bluePath,
       withProgress,
-      start: _blueStart,
-      end: _blueEnd,
-      dot: const Color(0xFF2D46FF),
+      start: _blueStartC,
+      end: _blueEndC,
     );
+
+    final blueFill = Paint()
+      ..style = PaintingStyle.fill
+      ..color = _blue;
+    final redFill = Paint()
+      ..style = PaintingStyle.fill
+      ..color = _red;
+
+    if (withProgress > 0.05) {
+      canvas.drawCircle(blueStart, 5, blueFill);
+    }
+    if (withProgress > 0.85) {
+      canvas.drawCircle(blueEnd, 6, blueFill);
+    }
+    if (withoutProgress > 0.85) {
+      canvas.drawCircle(redEnd, 6, redFill);
+    }
   }
 
   @override
   bool shouldRepaint(covariant _ProgressChartPainter oldDelegate) {
     return oldDelegate.withoutProgress != withoutProgress ||
-        oldDelegate.withProgress != withProgress;
+        oldDelegate.withProgress != withProgress ||
+        oldDelegate.bluePts != bluePts ||
+        oldDelegate.redPts != redPts;
   }
 }

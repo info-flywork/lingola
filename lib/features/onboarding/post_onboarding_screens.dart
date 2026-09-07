@@ -12,6 +12,7 @@ import '../../core/auth/auth_service.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/theme/app_theme.dart';
+import '../../widgets/app_widgets.dart';
 import '../shell/main_shell.dart';
 import 'onboarding_draft.dart';
 import 'language_setup_screens.dart';
@@ -434,11 +435,13 @@ class _SocialAuthButton extends StatelessWidget {
       ),
     );
 
-    final radius = BorderRadius.circular(10);
+    final radius = BorderRadius.circular(PrimaryButton.radius);
     final shadow = shadowColor;
+    const faceH = PrimaryButton.height;
+    const shadowY = PrimaryButton.shadowOffset;
 
     return SizedBox(
-      height: 48,
+      height: faceH + (shadow != null ? shadowY : 0),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -446,8 +449,8 @@ class _SocialAuthButton extends StatelessWidget {
             Positioned(
               left: 0,
               right: 0,
-              top: 4,
-              height: 48,
+              top: shadowY,
+              height: faceH,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: shadow,
@@ -459,7 +462,7 @@ class _SocialAuthButton extends StatelessWidget {
             left: 0,
             right: 0,
             top: 0,
-            height: 48,
+            height: faceH,
             child: Material(
               color: background,
               borderRadius: radius,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/constants/practice_time_of_day.dart';
 import '../../core/theme/app_theme.dart';
+import '../../widgets/app_widgets.dart';
 
 class PracticeTimeWindow {
   const PracticeTimeWindow({required this.start, required this.end});
@@ -121,11 +122,15 @@ class _SetPracticeTimeSheetState extends State<_SetPracticeTimeSheet> {
     });
   }
 
-  String _format(TimeOfDay t) {
+  String _periodLabel(DayPeriod period) {
+    final setup = AppText.current.setup;
+    return period == DayPeriod.am ? setup.periodAm : setup.periodPm;
+  }
+
+  String _clock(TimeOfDay t) {
     final h = _displayHour(t).toString().padLeft(2, '0');
     final m = t.minute.toString().padLeft(2, '0');
-    final period = t.period == DayPeriod.am ? 'AM' : 'PM';
-    return '$h:$m $period';
+    return '$h:$m';
   }
 
   String _two(int value) => value.toString().padLeft(2, '0');
@@ -220,7 +225,8 @@ class _SetPracticeTimeSheetState extends State<_SetPracticeTimeSheet> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _RangeTimeLabel(
-                  label: _format(_start),
+                  clock: _clock(_start),
+                  period: _periodLabel(_start.period),
                   selected: _editingStart,
                   onTap: () => _selectEndpoint(start: true),
                 ),
@@ -233,7 +239,8 @@ class _SetPracticeTimeSheetState extends State<_SetPracticeTimeSheet> {
                   ),
                 ),
                 _RangeTimeLabel(
-                  label: _format(_end),
+                  clock: _clock(_end),
+                  period: _periodLabel(_end.period),
                   selected: !_editingStart,
                   onTap: () => _selectEndpoint(start: false),
                 ),
@@ -283,8 +290,10 @@ class _SetPracticeTimeSheetState extends State<_SetPracticeTimeSheet> {
                         (_editingStart ? _start : _end).period == DayPeriod.am
                             ? 0
                             : 1,
-                    format: (i) => i == 0 ? 'AM' : 'PM',
-                    width: 64,
+                    format: (i) =>
+                        i == 0 ? text.periodAm : text.periodPm,
+                    width: 72,
+                    itemFontWeight: FontWeight.w400,
                     onSelected: (value) => _applyPicker(
                       period: value == 0 ? DayPeriod.am : DayPeriod.pm,
                     ),
@@ -307,7 +316,7 @@ class _SetPracticeTimeSheetState extends State<_SetPracticeTimeSheet> {
                   10,
                   bottomInset > 0 ? bottomInset + 10 : 30,
                 ),
-                child: _ContinueButton(
+                child: PrimaryButton(
                   label: AppText.current.common.continueLabel,
                   onPressed: () {
                     Navigator.of(context).pop(
@@ -326,29 +335,55 @@ class _SetPracticeTimeSheetState extends State<_SetPracticeTimeSheet> {
 
 class _RangeTimeLabel extends StatelessWidget {
   const _RangeTimeLabel({
-    required this.label,
+    required this.clock,
+    required this.period,
     required this.selected,
     required this.onTap,
   });
 
-  final String label;
+  final String clock;
+  final String period;
   final bool selected;
   final VoidCallback onTap;
 
+  static const _letterSpacing = 32 * -0.02;
+  static const _height = 24 / 32;
+
   @override
   Widget build(BuildContext context) {
+    final color = selected
+        ? AppColors.primary
+        : const Color(0xFF1A1714).withValues(alpha: 0.65);
     return GestureDetector(
       onTap: onTap,
-      child: Text(
-        label,
-        style: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 28,
-          height: 24 / 28,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.56,
-          color: selected ? AppColors.primary : AppColors.ink,
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: clock,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 32,
+                height: _height,
+                fontWeight: FontWeight.w600,
+                letterSpacing: _letterSpacing,
+                color: color,
+              ),
+            ),
+            TextSpan(
+              text: ' $period',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 32,
+                height: _height,
+                fontWeight: FontWeight.w400,
+                letterSpacing: _letterSpacing,
+                color: color,
+              ),
+            ),
+          ],
         ),
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -363,6 +398,7 @@ class _FlatTimeColumn extends StatelessWidget {
     required this.format,
     required this.onSelected,
     this.width = 60,
+    this.itemFontWeight = FontWeight.w600,
   });
 
   final FixedExtentScrollController controller;
@@ -371,6 +407,7 @@ class _FlatTimeColumn extends StatelessWidget {
   final String Function(int) format;
   final ValueChanged<int> onSelected;
   final double width;
+  final FontWeight itemFontWeight;
 
   static const _itemExtent = 38.0;
 
@@ -408,7 +445,7 @@ class _FlatTimeColumn extends StatelessWidget {
                     fontFamily: 'Poppins',
                     fontSize: 20,
                     height: 1,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: itemFontWeight,
                     color: isSelected
                         ? AppColors.primary
                         : AppColors.ink.withValues(alpha: 0.25),
@@ -417,49 +454,6 @@ class _FlatTimeColumn extends StatelessWidget {
               ),
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-/// Figma Devam Et — 54×398, radius 10, shadow #0015B4 y:4.
-class _ContinueButton extends StatelessWidget {
-  const _ContinueButton({
-    required this.label,
-    required this.onPressed,
-  });
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppColors.darkShadow,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.only(bottom: 4),
-      child: SizedBox(
-        height: 54,
-        child: FilledButton(
-          onPressed: onPressed,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            textStyle: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 16,
-              height: 1,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          child: Text(label),
         ),
       ),
     );

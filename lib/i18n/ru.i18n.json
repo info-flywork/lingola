@@ -113,14 +113,14 @@
     "progressInsightTitle": "Увидьте реальный прогресс всего за 2 недели!",
     "progressInsightBody": "Пользователи Lingola обычно замечают заметный рост уверенности в речи уже с самого начала.",
     "progressInsightConfidence": "Уверенность в речи",
-    "progressInsightToday": "Today",
+    "progressInsightToday": "Сегодня",
     "progressInsightWeek2": "2-я неделя",
     "progressInsightWithLingola": "С Lingola",
     "progressInsightWithoutApp": "Без приложения",
     "levelHint": "Lingola создан, чтобы помогать ученикам любого уровня",
     "dailyPracticeTitle": "Сколько ты хочешь практиковать в день?",
     "dailyPracticeHint": "Иди в своём темпе — каждый день на шаг ближе.",
-    "dailyPracticeMonthlyHours": "$hours / month",
+    "dailyPracticeMonthlyHours": "$hours ч / месяц",
     "dailyPracticeOnlyMinutes": "Всего $minutes мин в день",
     "dailyPracticeMinutesOption": "$minutes мин",
     "dailyPracticeToday": "Сегодня",
@@ -133,6 +133,8 @@
     "practiceTimeSave": "Сохранить",
     "setPracticeTimeTitle": "Выбери время",
     "setPracticeTimeHint": "В каком промежутке времени ты хочешь практиковать?",
+    "periodAm": "ДП",
+    "periodPm": "ПП",
     "promiseTitle": "Я обещаю практиковать речь каждый день",
     "promiseBody": "И как можно быстрее достичь языковых целей с ИИ-тьюторами",
     "promiseHoldHint": "Удерживай логотип Lingola, чтобы подтвердить",
@@ -148,24 +150,24 @@
     "stepPlan": "Ваш план завершается",
     "optimization": "Оптимизация",
     "progress": "$value%",
-    "titleLine1": "Building your",
-    "titleLine2": "Account",
-    "testimonialQuote": "Week one I could barely say hello. Week three I was having full conversations with my AI tutor. I'm not stopping now.",
-    "testimonialAuthor": "Maria, 29 — 3 months in",
-    "comparisonPitch": "Learn 600+ extra phrases about 30× faster with Lingola than studying entirely on your own.",
+    "titleLine1": "Твой аккаунт",
+    "titleLine2": "создаётся",
+    "testimonialQuote": "В первую неделю я едва могла сказать «привет». На третьей уже вела полноценные разговоры с ИИ-тьютором. Я не останавливаюсь.",
+    "testimonialAuthor": "Мария, 29 — уже 3 месяца",
+    "comparisonPitch": "Учи больше 600 дополнительных фраз с Lingola примерно в 30× быстрее, чем в одиночку.",
     "comparisonAloneCount": "400",
     "comparisonLingolaCount": "1000",
-    "comparisonUnit": "PHRASES",
-    "comparisonAloneLabel": "On your own",
+    "comparisonUnit": "ФРАЗЫ",
+    "comparisonAloneLabel": "Самостоятельно",
     "comparisonLingolaLabel": "Lingola",
-    "fluencyPitch": "From today to fluency — your next level is only 30 days away",
-    "chartToday": "Today",
-    "chartMid": "15 Sep",
-    "chartEnd": "30 Sep"
+    "fluencyPitch": "От сегодня до беглости — следующий уровень всего через 30 дней",
+    "chartToday": "Сегодня",
+    "chartMid": "15 сен",
+    "chartEnd": "30 сен"
   },
   "planReady": {
-    "titleLine1": "Your plan is",
-    "titleLine2": "Ready!",
+    "titleLine1": "Твой план",
+    "titleLine2": "готов!",
     "statBanner": "95% of users see results within the first 7 days",
     "planTitle": "$name'S PLAN",
     "defaultName": "YOUR",
@@ -174,7 +176,7 @@
     "fieldFocus": "FOCUS AREA",
     "fieldDuration": "DURATION",
     "fieldInterests": "ИНТЕРЕСЫ",
-    "startPlan": "Start my plan →",
+    "startPlan": "Начать мой план →",
     "courseEnglish": "English",
     "courseGerman": "German",
     "courseFrench": "French",
@@ -763,6 +765,42 @@
         "botReply": "Отличный выбор. Что-то еще к вашему заказу?"
       }
     },
+    "coffeeQueue": {
+      "title": "Waiting in the Coffee Line",
+      "screenplay": "Stand in line at a busy café, chat politely with the person ahead of you, hold your spot, and get ready to order when it's your turn.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice waiting in a coffee line — small talk, holding your place, and moving up. I'll explain a little first, then we'll act it out. Ready?",
+        "incoming1": "This line is moving slowly today, huh?",
+        "outgoing1": "Yeah — mornings are always busy here.",
+        "incoming2Highlight": "True",
+        "incoming2Rest": "! Are you getting the usual, or trying something new?",
+        "botReply": "Nice. Looks like you're next — good luck with your order!"
+      }
+    },
+    "coffeeRecommendation": {
+      "title": "Asking for a Drink Recommendation",
+      "screenplay": "Ask the barista what they recommend, compare a few drinks, choose size and milk options, then place your order confidently.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking a barista for recommendations — flavors, sizes, milk options. I'll explain a little first, then we'll role-play. Sound good?",
+        "incoming1": "Hey! Need a suggestion, or do you already know what you want?",
+        "outgoing1": "I'd love a recommendation — something not too bitter.",
+        "incoming2Highlight": "Perfect",
+        "incoming2Rest": "! Our honey oat latte is popular, or the caramel cold brew if you want iced.",
+        "botReply": "Great pick. What size should I make that?"
+      }
+    },
+    "coffeeWrongOrder": {
+      "title": "Fixing a Wrong Coffee Order",
+      "screenplay": "Politely explain that your drink is wrong, describe what you ordered, ask for a remake or swap, and thank the barista.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice fixing a wrong coffee order — staying polite, explaining the mistake, and asking for a remake. I'll teach a few phrases first, then we'll act it out. Ready?",
+        "incoming1": "Here's your order — medium iced latte. Enjoy!",
+        "outgoing1": "Sorry, I think this might be wrong. I asked for a hot oat milk latte.",
+        "incoming2Highlight": "Oh no",
+        "incoming2Rest": " — my mistake! I'll remake that for you right away.",
+        "botReply": "Thanks for your patience. Hot oat milk latte coming up."
+      }
+    },
     "directions": {
       "title": "Спросить Направление на Улице",
       "screenplay": "Спросите направление к месту, узнайте, как добраться до метро или автобуса, получите информацию о билетах и послушайте рекомендации по ресторанам.",
@@ -775,6 +813,42 @@
         "botReply": "Пожалуйста! Хотите совет по ресторану рядом со станцией?"
       }
     },
+    "directionsWrongWay": {
+      "title": "Correcting Wrong Directions",
+      "screenplay": "Realize the directions were wrong, politely check again, and get clearer landmark-based instructions.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice fixing wrong directions politely. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "Did you find the park?",
+        "outgoing1": "I think I went the wrong way. Could you explain it again with landmarks?",
+        "incoming2Highlight": "Of course",
+        "incoming2Rest": " — walk past the red bookstore, then left at the fountain.",
+        "botReply": "If you see the bakery, you've gone too far."
+      }
+    },
+    "directionsTransit": {
+      "title": "Asking About Bus or Subway Routes",
+      "screenplay": "Ask which line to take, how many stops, and where to transfer to reach your destination.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking about bus and subway routes. I'll explain first, then we'll act it out. Sound good?",
+        "incoming1": "Need transit help?",
+        "outgoing1": "Yes — which subway line goes to the museum?",
+        "incoming2Highlight": "Take the blue line",
+        "incoming2Rest": " three stops, then transfer to the green line.",
+        "botReply": "The whole trip is about twenty minutes."
+      }
+    },
+    "directionsLost": {
+      "title": "Asking for Help When You're Lost",
+      "screenplay": "Admit you're lost, describe where you need to go, and confirm the directions before you leave.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking for help when you're lost. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "You look a little lost — need a hand?",
+        "outgoing1": "Yes, please. I'm trying to find City Hall.",
+        "incoming2Highlight": "Easy",
+        "incoming2Rest": " — go straight two blocks, then turn right.",
+        "botReply": "Want me to point it out on the map too?"
+      }
+    },
     "interview": {
       "title": "Собеседование",
       "screenplay": "Представьтесь, ответьте на общие вопросы собеседования, расскажите о своем опыте и спросите о роли и следующих шагах.",
@@ -785,6 +859,42 @@
         "incoming2Highlight": "Замечательно",
         "incoming2Rest": ". Расскажите о недавнем проекте, которым вы гордитесь.",
         "botReply": "Это впечатляет. Какие у вас есть вопросы о роли?"
+      }
+    },
+    "interviewSalary": {
+      "title": "Discussing Salary Expectations",
+      "screenplay": "Talk about salary range politely, ask about benefits, and keep the tone professional.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice discussing salary expectations professionally. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "What are your salary expectations for this role?",
+        "outgoing1": "I'm looking for a range around market average for this level. Could you share your band?",
+        "incoming2Highlight": "Sure",
+        "incoming2Rest": ". Benefits also include remote days and learning budget.",
+        "botReply": "Are benefits important in your decision?"
+      }
+    },
+    "interviewExperience": {
+      "title": "Describing Work Experience",
+      "screenplay": "Walk through a recent role, your responsibilities, and one achievement with numbers if possible.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice describing work experience clearly. I'll explain first, then we'll act it out. Sound good?",
+        "incoming1": "Tell me about your most recent role.",
+        "outgoing1": "I coordinated a small team and improved our delivery time.",
+        "incoming2Highlight": "Interesting",
+        "incoming2Rest": ". By how much did you improve it?",
+        "botReply": "What was the hardest part of that job?"
+      }
+    },
+    "interviewStrengths": {
+      "title": "Talking About Your Strengths",
+      "screenplay": "Describe two strengths with short examples and connect them to the job.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice talking about your strengths in an interview. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "What would you say are your biggest strengths?",
+        "outgoing1": "I'm organized and I communicate clearly with teammates.",
+        "incoming2Highlight": "Good",
+        "incoming2Rest": ". Can you give a quick example?",
+        "botReply": "How do those strengths help in this role?"
       }
     },
     "customScenarios": "Your scenarios",
@@ -817,6 +927,42 @@
         "botReply": "Would you prefer the fastest option or the cheapest one?"
       }
     },
+    "missedTrainRefund": {
+      "title": "Asking About Rebooking or a Refund",
+      "screenplay": "Ask about rebooking, refunds, or compensation after missing a connection due to a delay.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking about rebooking or refunds after a missed train. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "How can I help?",
+        "outgoing1": "My first train was delayed and I missed the connection. Can I rebook for free?",
+        "incoming2Highlight": "Yes",
+        "incoming2Rest": " — I'll put you on the next available train.",
+        "botReply": "Would you like an email confirmation too?"
+      }
+    },
+    "missedTrainTicket": {
+      "title": "Fixing a Ticket After Missing a Train",
+      "screenplay": "Ask whether your ticket is still valid, if you can board the next train, and what to do at the gate.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice fixing ticket issues after missing a train. I'll explain first, then we'll act it out. Sound good?",
+        "incoming1": "Ticket problems?",
+        "outgoing1": "I missed my train. Is this ticket still valid for the next one?",
+        "incoming2Highlight": "Yes",
+        "incoming2Rest": " for the next two hours on the same route.",
+        "botReply": "Just show it at the gate — you're fine."
+      }
+    },
+    "missedTrainNext": {
+      "title": "Finding the Next Train",
+      "screenplay": "Explain you missed your train and ask when the next one leaves and which platform to use.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice finding the next train after missing yours. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "Can I help you?",
+        "outgoing1": "I just missed the 10:15 to Boston. When's the next one?",
+        "incoming2Highlight": "Next is 10:45",
+        "incoming2Rest": " from platform 3.",
+        "botReply": "Do you need help with the ticket gate?"
+      }
+    },
     "flightAttendant": {
       "title": "Talking to a Flight Attendant",
       "screenplay": "You're a passenger on a flight. Find your seat, get help with luggage, choose food and drinks, and ask for anything you need during the flight.",
@@ -827,6 +973,42 @@
         "incoming2Highlight": "Thank you",
         "incoming2Rest": ". Would you like some help finding your seat?",
         "botReply": "Would you like something to drink — water, juice, coffee, or tea?"
+      }
+    },
+    "flightDelay": {
+      "title": "Asking About a Delay or Connection",
+      "screenplay": "Ask why the flight is delayed, whether you'll make a connection, and what help is available.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking about delays and connections on a flight. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "We'll be delayed about forty minutes.",
+        "outgoing1": "I have a tight connection. Will I still make it?",
+        "incoming2Highlight": "We'll try",
+        "incoming2Rest": ". I'll radio ahead if needed.",
+        "botReply": "Do you need gate information for the next flight?"
+      }
+    },
+    "flightSpecialMeal": {
+      "title": "Asking for a Special Meal",
+      "screenplay": "Ask about meal options, request vegetarian or other special meals, and confirm timing.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking for a special meal on a flight. I'll explain first, then we'll act it out. Ready?",
+        "incoming1": "We're serving dinner soon.",
+        "outgoing1": "Do you have a vegetarian option?",
+        "incoming2Highlight": "Yes",
+        "incoming2Rest": " — pasta or salad box.",
+        "botReply": "I'll bring it with the next cart."
+      }
+    },
+    "flightSeat": {
+      "title": "Asking to Change Seats",
+      "screenplay": "Politely ask if you can switch seats for comfort, family, or a window/aisle preference.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking a flight attendant to change seats. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "Need anything before takeoff?",
+        "outgoing1": "Could I move to an aisle seat if one is free?",
+        "incoming2Highlight": "Let me check",
+        "incoming2Rest": "… yes, 14C is open.",
+        "botReply": "I'll move your bag tag too."
       }
     },
     "trainTicket": {
@@ -841,6 +1023,42 @@
         "botReply": "Would you like a one-way or return ticket?"
       }
     },
+    "trainTicketUpgrade": {
+      "title": "Upgrading Your Seat or Class",
+      "screenplay": "Ask about upgrading to quiet car or first class, compare prices, and complete the change.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice upgrading a train seat or class. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "Need help with your ticket?",
+        "outgoing1": "Can I upgrade to first class on this train?",
+        "incoming2Highlight": "Yes",
+        "incoming2Rest": " — seats are open for an extra forty dollars.",
+        "botReply": "Quiet car is cheaper if you prefer that."
+      }
+    },
+    "trainTicketPlatform": {
+      "title": "Finding the Right Platform",
+      "screenplay": "Ask which platform your train leaves from and how to get there with luggage.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice finding the right train platform. I'll explain first, then we'll act it out. Sound good?",
+        "incoming1": "Looking for your platform?",
+        "outgoing1": "Yes — the train to Chicago. Which platform is it?",
+        "incoming2Highlight": "Platform 7",
+        "incoming2Rest": ". Elevators are on the left.",
+        "botReply": "Boarding starts in ten minutes."
+      }
+    },
+    "trainTicketChange": {
+      "title": "Changing Your Train Ticket Time",
+      "screenplay": "Ask to change departure time, check fees, and confirm the new ticket.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice changing a train ticket time. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "Ticket desk — how can I help?",
+        "outgoing1": "Can I change my 3 pm ticket to the 5 pm train?",
+        "incoming2Highlight": "Yes",
+        "incoming2Rest": ", with a small change fee.",
+        "botReply": "I'll print the updated ticket now."
+      }
+    },
     "restaurantReservation": {
       "title": "Making a Restaurant Reservation",
       "screenplay": "Call or visit a restaurant to book a table — choose the date, time, number of guests, seating preference, and confirm your reservation.",
@@ -851,6 +1069,42 @@
         "incoming2Highlight": "Of course",
         "incoming2Rest": ". What day would you like to come?",
         "botReply": "How many people will be joining you?"
+      }
+    },
+    "restaurantComplaint": {
+      "title": "Complaining Politely at a Restaurant",
+      "screenplay": "Explain a problem with food or service calmly and ask for a fair fix.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice complaining politely at a restaurant. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "Is everything alright with your meal?",
+        "outgoing1": "The pasta is cold. Could you remake it, please?",
+        "incoming2Highlight": "I'm sorry",
+        "incoming2Rest": " — we'll remake it right away.",
+        "botReply": "Would you like a drink while you wait?"
+      }
+    },
+    "restaurantAllergy": {
+      "title": "Talking About Food Allergies",
+      "screenplay": "Explain allergies or diet needs, ask what's safe on the menu, and confirm with the staff.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice talking about food allergies at a restaurant. I'll explain first, then we'll act it out. Sound good?",
+        "incoming1": "Any allergies we should know about?",
+        "outgoing1": "Yes — I'm allergic to peanuts. Which dishes are safe?",
+        "incoming2Highlight": "Most pasta dishes",
+        "incoming2Rest": " are fine. I'll flag it for the kitchen.",
+        "botReply": "Would you like the chef's recommendation?"
+      }
+    },
+    "restaurantChange": {
+      "title": "Changing a Restaurant Reservation",
+      "screenplay": "Call to change the time or party size and confirm the new details.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice changing a restaurant reservation. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "Reservation desk, how can I help?",
+        "outgoing1": "I have a booking for 7. Can we move it to 8 for four people?",
+        "incoming2Highlight": "Sure",
+        "incoming2Rest": ", 8 pm for four is available.",
+        "botReply": "I'll text you the confirmation."
       }
     },
     "doctorAppointment": {
@@ -865,6 +1119,42 @@
         "botReply": "What would you like to see the doctor about?"
       }
     },
+    "doctorFollowUp": {
+      "title": "Talking About Test Results",
+      "screenplay": "Ask what results mean, next steps, and whether you need another appointment.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice talking about test results with a doctor. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "Your blood test results are back.",
+        "outgoing1": "What do they mean? Do I need more tests?",
+        "incoming2Highlight": "Mostly normal",
+        "incoming2Rest": ". One value is a bit high, so let's recheck in a month.",
+        "botReply": "Any questions before we finish?"
+      }
+    },
+    "doctorPrescription": {
+      "title": "Asking About Medicine",
+      "screenplay": "Ask how to take medicine, about side effects, and when to come back if it doesn't help.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking about medicine and prescriptions. I'll explain first, then we'll act it out. Ready?",
+        "incoming1": "I'm giving you this medicine twice a day.",
+        "outgoing1": "Should I take it with food? Any side effects?",
+        "incoming2Highlight": "Yes",
+        "incoming2Rest": ", with food. Mild drowsiness is possible.",
+        "botReply": "If it doesn't help in three days, call us."
+      }
+    },
+    "doctorSymptoms": {
+      "title": "Describing Your Symptoms",
+      "screenplay": "Explain what hurts, when it started, and how strong the pain is.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice describing symptoms at a doctor's appointment. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "What brings you in today?",
+        "outgoing1": "I've had a sore throat for three days.",
+        "incoming2Highlight": "I see",
+        "incoming2Rest": ". Any fever or cough?",
+        "botReply": "On a scale of one to ten, how bad is the pain?"
+      }
+    },
     "shoppingClothes": {
       "title": "Shopping for Clothes",
       "screenplay": "In a clothing store, tell the assistant what you're looking for, try items on, compare sizes and colors, and decide whether to buy.",
@@ -875,6 +1165,42 @@
         "incoming2Highlight": "Sure",
         "incoming2Rest": ". What size do you usually wear?",
         "botReply": "Would you prefer something casual or more formal?"
+      }
+    },
+    "shoppingDiscount": {
+      "title": "Asking About a Discount",
+      "screenplay": "Ask about sales, student discounts, or price matches, then decide whether the deal is worth it.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking about discounts and sales. I'll teach a few phrases first, then we'll role-play. Ready?",
+        "incoming1": "That jacket looks great on you!",
+        "outgoing1": "Thanks! Is it on sale, or do you have any discounts today?",
+        "incoming2Highlight": "Actually",
+        "incoming2Rest": ", there's 20% off if you buy two items.",
+        "botReply": "Student discount is also available with ID."
+      }
+    },
+    "shoppingReturn": {
+      "title": "Returning an Item to the Store",
+      "screenplay": "Return a purchase politely — explain the reason, show the receipt, and ask for a refund or exchange.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice returning an item — being polite, explaining why, and asking for a refund. I'll explain first, then we'll act it out. Sound good?",
+        "incoming1": "Hi! How can I help you today?",
+        "outgoing1": "I'd like to return this shirt. It doesn't fit well.",
+        "incoming2Highlight": "No problem",
+        "incoming2Rest": ". Do you have the receipt with you?",
+        "botReply": "Would you prefer a refund or an exchange?"
+      }
+    },
+    "shoppingFittingRoom": {
+      "title": "Trying Clothes in the Fitting Room",
+      "screenplay": "Ask for a different size, check the mirror, and decide whether to buy the outfit.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice in a fitting room — sizes, colors, and deciding to buy. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "How's that size working for you?",
+        "outgoing1": "It's a bit tight. Do you have a larger size?",
+        "incoming2Highlight": "Sure",
+        "incoming2Rest": "! I'll grab the next size for you.",
+        "botReply": "Want to try another color while I check?"
       }
     },
     "takingTaxi": {
@@ -889,6 +1215,42 @@
         "botReply": "Would you prefer the fastest route?"
       }
     },
+    "taxiComplaint": {
+      "title": "Handling a Taxi Problem",
+      "screenplay": "Politely raise an issue — wrong route, AC, or fare — and ask for a fair solution.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice handling a problem in a taxi politely. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "We're almost there.",
+        "outgoing1": "Sorry, but this isn't the address I gave. Can we fix that?",
+        "incoming2Highlight": "Oh",
+        "incoming2Rest": " — my mistake. I'll turn around right away.",
+        "botReply": "Thanks for telling me. No extra charge."
+      }
+    },
+    "taxiTraffic": {
+      "title": "Talking About Traffic and Routes",
+      "screenplay": "Discuss traffic, ask for a faster route, and decide whether to wait or take another way.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice talking about traffic and alternate routes in a taxi. I'll explain first, then we'll act it out. Ready?",
+        "incoming1": "Traffic is heavy on the highway.",
+        "outgoing1": "Is there a faster route through the city?",
+        "incoming2Highlight": "Yes",
+        "incoming2Rest": ", but there are more lights. It might still be quicker.",
+        "botReply": "Want me to take the city route?"
+      }
+    },
+    "taxiFare": {
+      "title": "Asking About the Taxi Fare",
+      "screenplay": "Ask for an estimate before the ride, confirm payment options, and check the final amount at the end.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking about taxi fares. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "Where to?",
+        "outgoing1": "To the airport, please. About how much will it cost?",
+        "incoming2Highlight": "Around thirty",
+        "incoming2Rest": ", depending on traffic.",
+        "botReply": "Card and cash are both fine."
+      }
+    },
     "rentingApartment": {
       "title": "Renting an Apartment",
       "screenplay": "Talk to a landlord about a rental apartment — ask about rent, bills, deposit, pets, parking, and arrange a viewing.",
@@ -901,6 +1263,42 @@
         "botReply": "Do you need a furnished or unfurnished apartment?"
       }
     },
+    "rentingApartmentNegotiate": {
+      "title": "Negotiating Rent and Lease Terms",
+      "screenplay": "Negotiate rent, deposit, move-in date, and pet policy politely while staying clear about your limits.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice negotiating rent and lease terms. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "The rent is thirteen hundred plus utilities.",
+        "outgoing1": "Could you do twelve fifty if I sign a longer lease?",
+        "incoming2Highlight": "Possibly",
+        "incoming2Rest": " for a 18-month lease. Deposit is still one month.",
+        "botReply": "Are pets allowed with an extra fee?"
+      }
+    },
+    "rentingApartmentAgent": {
+      "title": "Talking with a Real Estate Agent",
+      "screenplay": "Talk to an agent about budget, location, lease length, and which listings match your needs.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice talking with a real estate agent about rentals. I'll explain first, then we'll act it out. Ready?",
+        "incoming1": "What kind of apartment are you looking for?",
+        "outgoing1": "A one-bedroom near the subway, under twelve hundred a month.",
+        "incoming2Highlight": "Perfect",
+        "incoming2Rest": ". I have three options in that range.",
+        "botReply": "Do you prefer furnished or unfurnished?"
+      }
+    },
+    "rentingApartmentTour": {
+      "title": "Talking About the Apartment on a Tour",
+      "screenplay": "Ask about rooms, sunlight, noise, appliances, and whether furniture is included during a viewing.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice talking about an apartment during a viewing. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "Here's the living room — what do you think?",
+        "outgoing1": "It's nice. Does it get much sunlight in the afternoon?",
+        "incoming2Highlight": "Yes",
+        "incoming2Rest": ", especially from these windows.",
+        "botReply": "Want to see the kitchen and balcony next?"
+      }
+    },
     "birthdayParty": {
       "title": "Planning a Birthday Party",
       "screenplay": "Plan a birthday party with a friend — pick the venue, date, guest list, food, cake, music, and activities together.",
@@ -911,6 +1309,42 @@
         "incoming2Highlight": "Nice",
         "incoming2Rest": "! When should we have the party?",
         "botReply": "Would you rather have the party at home or at a restaurant?"
+      }
+    },
+    "birthdaySurprise": {
+      "title": "Planning a Surprise Party",
+      "screenplay": "Keep the surprise secret, assign tasks, and handle last-minute changes without spoiling it.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice planning a surprise party without spoiling it. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "Is everything ready for the surprise?",
+        "outgoing1": "Almost — can you distract her until 7?",
+        "incoming2Highlight": "Got it",
+        "incoming2Rest": ". What if she finishes work early?",
+        "botReply": "Text me and I'll stall with coffee."
+      }
+    },
+    "birthdayGifts": {
+      "title": "Talking About Birthday Gifts",
+      "screenplay": "Discuss gift ideas, budget, and whether to buy something together.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice talking about birthday gifts. I'll explain first, then we'll act it out. Sound good?",
+        "incoming1": "What should we get for Emma?",
+        "outgoing1": "Maybe a book or headphones. What's our budget?",
+        "incoming2Highlight": "Around thirty",
+        "incoming2Rest": " each if we go together.",
+        "botReply": "Want to shop online or in store?"
+      }
+    },
+    "birthdayInvite": {
+      "title": "Inviting Guests to a Party",
+      "screenplay": "Invite friends, share the date and place, and ask who can come.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice inviting guests to a birthday party. I'll explain first, then we'll role-play. Ready?",
+        "incoming1": "What's up?",
+        "outgoing1": "I'm hosting a birthday party on Saturday. Can you come?",
+        "incoming2Highlight": "Yes",
+        "incoming2Rest": "! What time does it start?",
+        "botReply": "Should I bring anything?"
       }
     },
     "deleteFailed": "Не удалось удалить сценарий. Попробуйте ещё раз.",
@@ -941,6 +1375,42 @@
         "botReply": "Nice to meet you. Do you come here often?"
       }
     },
+    "flirtingAwkward": {
+      "title": "Handling an Awkward Moment",
+      "screenplay": "Recover from a misunderstanding or awkward pause, apologize lightly, and steer the chat back to a comfortable topic.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice handling an awkward moment in a flirty chat — light apology and recovery. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "Wait… I think you mixed up my name.",
+        "outgoing1": "Oh no — sorry! That was embarrassing. Can we start over?",
+        "incoming2Highlight": "Haha, sure",
+        "incoming2Rest": ". I'm Maya.",
+        "botReply": "No hard feelings. What were we talking about?"
+      }
+    },
+    "flirtingAskOut": {
+      "title": "Asking Someone Out",
+      "screenplay": "After a short chat, suggest meeting again — coffee, a walk, or a movie — and handle a yes or a soft no gracefully.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice asking someone out politely. I'll explain first, then we'll act it out. Ready?",
+        "incoming1": "I've really enjoyed talking with you.",
+        "outgoing1": "Me too. Would you like to grab coffee sometime this week?",
+        "incoming2Highlight": "I'd love that",
+        "incoming2Rest": ". What day works for you?",
+        "botReply": "Saturday afternoon is free for me."
+      }
+    },
+    "flirtingCompliment": {
+      "title": "Giving a Friendly Compliment",
+      "screenplay": "Start with a light compliment, keep it respectful, and see if the other person wants to keep talking.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice giving a friendly compliment — short, kind, and natural. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "Oh, excuse me — I almost bumped into you.",
+        "outgoing1": "No worries! By the way, I like your jacket.",
+        "incoming2Highlight": "Thanks",
+        "incoming2Rest": "! That's sweet of you to say.",
+        "botReply": "Are you waiting for someone, or just hanging out?"
+      }
+    },
     "freeTalkHobby": {
       "title": "Talking About Hobbies",
       "screenplay": "Chat freely about free-time activities, ask follow-up questions, share preferences, and suggest trying something new together.",
@@ -951,6 +1421,42 @@
         "incoming2Highlight": "Nice",
         "incoming2Rest": "! I've been meaning to try hiking more. Any favorite trails?",
         "botReply": "That sounds perfect. Want to go together sometime?"
+      }
+    },
+    "freeTalkDisagree": {
+      "title": "Politely Disagreeing About Hobbies",
+      "screenplay": "Disagree politely about a hobby preference, explain your view, and keep the conversation friendly.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice disagreeing politely about hobbies. I'll explain first, then we'll role-play. Sound good?",
+        "incoming1": "I think hiking is boring.",
+        "outgoing1": "I get that — for me it's relaxing. What do you prefer instead?",
+        "incoming2Highlight": "Fair",
+        "incoming2Rest": ". I like indoor climbing more.",
+        "botReply": "Maybe we can try each other's hobby once."
+      }
+    },
+    "freeTalkMovies": {
+      "title": "Talking About Movies",
+      "screenplay": "Recommend a movie, ask about genres, and react to each other's favorites.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice talking about movies — genres, favorites, recommendations. I'll explain first, then we'll chat. Ready?",
+        "incoming1": "Seen any good movies lately?",
+        "outgoing1": "Yes — a comedy last week. Do you like comedies?",
+        "incoming2Highlight": "Love them",
+        "incoming2Rest": "! Any titles you'd recommend?",
+        "botReply": "I'll send you my top three tonight."
+      }
+    },
+    "freeTalkWeekend": {
+      "title": "Talking About Weekend Plans",
+      "screenplay": "Share weekend plans, ask about theirs, and suggest a simple activity you could do together.",
+      "chat": {
+        "briefing": "Hi! Today we'll practice chatting about weekend plans. I'll explain first, then we'll talk. Sound good?",
+        "incoming1": "Any plans for the weekend?",
+        "outgoing1": "I might go to the park. What about you?",
+        "incoming2Highlight": "Nice",
+        "incoming2Rest": "! I was thinking of a museum.",
+        "botReply": "Want to meet for a short walk on Sunday?"
       }
     }
   },
@@ -996,9 +1502,11 @@
     "general": "Общие",
     "profileSettings": "Настройки профиля",
     "fullName": "Полное имя",
+    "changeName": "Изменить имя",
     "email": "Электронная почта",
     "deleteAccount": "Удалить аккаунт",
     "save": "СОХРАНИТЬ",
+    "saveTitle": "Сохранить",
     "deleteTitle": "Мы не хотим, чтобы ты уходил, но мы понимаем.",
     "deleteBody": "Скажи нам, почему ты хочешь уйти, чтобы мы могли улучшить опыт использования Lingola?",
     "deleteReasons": {
@@ -1014,22 +1522,23 @@
     "next": "ДАЛЕЕ",
     "specialOfferTitle": "Специальное предложение",
     "specialOfferBody": "Посмотри на предложение, которое мы подготовили для тебя перед уходом.",
-    "monthlyPlanTitle": "Перейти на месячный план",
-    "monthlyPlanPrice": "\\$79/месяц, отмена в любое время",
-    "monthlyPlanDesc": "Без долгосрочных обязательств. Оставайся на связи с нашим сообществом на месячной основе.",
+    "monthlyPlanTitle": "Останься и получи скидку 50% на 1 год",
+    "monthlyPlanPrice": "Наше лучшее предложение. Всего \\$24,99/год",
+    "monthlyPlanDesc": "Наше лучшее предложение — скидка 50% на годовой план.",
     "whatYoullKeep": "Что ты сохранишь:",
     "keepCharacters": "Доступ ко всем персонажам",
     "keepVideo": "Неограниченные видеозвонки",
     "keepCourses": "Доступ ко всем курсам",
-    "switchMonthlyCta": "Перейти на месячный план",
+    "switchMonthlyCta": "Принять скидку 50% и остаться",
     "confirmTitle": "Ты уверен?",
     "confirmBody": "Мы действительно не хотим, чтобы ты уходил. Вот что ты потеряешь:",
     "loseCharacters": "Неограниченный доступ к персонажам",
     "loseVideo": "Неограниченный доступ к видеозвонкам",
     "loseCourses": "Доступ ко всем курсам",
-    "discountTitle": "Останься и получи 60% скидку на 1 месяц",
-    "discountSubtitle": "Наше лучшее предложение. Всего \\$27.60/месяц",
-    "acceptDiscountCta": "Принять 60% скидку и остаться",
+    "discountTitle": "Останься и получи скидку 50% на 1 год",
+    "discountSubtitle": "Наше лучшее предложение. Всего \\$24,99/год",
+    "acceptDiscountCta": "Принять скидку 50% и остаться",
+    "deleteCta": "DELETE",
     "farewellTitle": "Нам грустно видеть тебя уходящим",
     "farewellBody": "Твое членство отменено. Ты будешь иметь доступ до конца текущего расчетного периода $date.",
     "changeMindTitle": "✨ Передумал?",
@@ -1070,6 +1579,7 @@
     "shareInviteBody": "Пригласи своих друзей и наслаждайтесь переводом вместе",
     "rateUs": "Оцените нас",
     "faq": "Часто задаваемые вопросы Lingola",
+    "contactUs": "Связаться с нами",
     "faqItems": {
       "supportedLanguages": {
         "question": "Какие языки поддерживает приложение?",
@@ -1131,8 +1641,8 @@
     "logout": "Выйти",
     "logoutTitle": "Вы уверены, что хотите выйти?",
     "logoutBody": "Увидимся снова скоро! Нам будут не хватать твоих дыхательных упражнений.",
-    "logoutConfirm": "LOGOUT",
-    "logoutCancel": "CANCEL",
+    "logoutConfirm": "ВЫЙТИ",
+    "logoutCancel": "ОТМЕНА",
     "days": {
       "mon": "ПН",
       "tue": "ВТ",
@@ -1229,7 +1739,14 @@
     "certificatesEmptyTitle": "Сертификатов пока нет",
     "certificatesEmptySubtitle": "Не забудьте проверить снова, когда завершите уровень.",
     "restorePurchasesSuccess": "Покупки восстановлены.",
-    "restorePurchasesEmpty": "Активные покупки для этого аккаунта не найдены."
+    "restorePurchasesEmpty": "Активные покупки для этого аккаунта не найдены.",
+    "certificateListA1": "A1 - Сертификат стартового уровня",
+    "certificateListA2": "A2 - Базовый сертификат",
+    "certificateListB1": "B1 - Сертификат среднего уровня",
+    "certificateListB2": "B2 - Сертификат выше среднего",
+    "certificateListC1": "C1 - Продвинутый сертификат",
+    "certificateListC2": "C2 - Экспертный сертификат",
+    "certificateListGeneric": "Сертификат $level"
   },
   "pushNotifications": {
     "title": "Lingola",

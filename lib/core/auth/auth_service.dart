@@ -345,7 +345,7 @@ abstract final class AuthService {
     await FirebaseAuthGateway.signOut();
     await PremiumService.logOut();
     await SessionStore.clear();
-    await AppLocaleSync.applyCode('en');
+    await AppLocaleSync.applyDeviceLocale();
   }
 
   static String displayNameOf(AppUser? user) {

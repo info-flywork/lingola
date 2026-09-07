@@ -110,6 +110,8 @@ class HomeAsset extends StatelessWidget {
       cacheHeight: cacheHeight,
       filterQuality: FilterQuality.medium,
       isAntiAlias: true,
+      color: color,
+      colorBlendMode: color == null ? null : BlendMode.srcIn,
       errorBuilder: (_, _, _) => _placeholder(),
     );
   }

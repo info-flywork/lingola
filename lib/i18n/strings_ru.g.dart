@@ -193,14 +193,14 @@ class _Translations$setup$ru implements Translations$setup$en {
 	@override String get progressInsightTitle => 'Увидьте реальный прогресс всего за 2 недели!';
 	@override String get progressInsightBody => 'Пользователи Lingola обычно замечают заметный рост уверенности в речи уже с самого начала.';
 	@override String get progressInsightConfidence => 'Уверенность в речи';
-	@override String get progressInsightToday => 'Today';
+	@override String get progressInsightToday => 'Сегодня';
 	@override String get progressInsightWeek2 => '2-я неделя';
 	@override String get progressInsightWithLingola => 'С Lingola';
 	@override String get progressInsightWithoutApp => 'Без приложения';
 	@override String get levelHint => 'Lingola создан, чтобы помогать ученикам любого уровня';
 	@override String get dailyPracticeTitle => 'Сколько ты хочешь практиковать в день?';
 	@override String get dailyPracticeHint => 'Иди в своём темпе — каждый день на шаг ближе.';
-	@override String dailyPracticeMonthlyHours({required Object hours}) => '${hours} / month';
+	@override String dailyPracticeMonthlyHours({required Object hours}) => '${hours} ч / месяц';
 	@override String dailyPracticeOnlyMinutes({required Object minutes}) => 'Всего ${minutes} мин в день';
 	@override String dailyPracticeMinutesOption({required Object minutes}) => '${minutes} мин';
 	@override String get dailyPracticeToday => 'Сегодня';
@@ -213,6 +213,8 @@ class _Translations$setup$ru implements Translations$setup$en {
 	@override String get practiceTimeSave => 'Сохранить';
 	@override String get setPracticeTimeTitle => 'Выбери время';
 	@override String get setPracticeTimeHint => 'В каком промежутке времени ты хочешь практиковать?';
+	@override String get periodAm => 'ДП';
+	@override String get periodPm => 'ПП';
 	@override String get promiseTitle => 'Я обещаю практиковать речь каждый день';
 	@override String get promiseBody => 'И как можно быстрее достичь языковых целей с ИИ-тьюторами';
 	@override String get promiseHoldHint => 'Удерживай логотип Lingola, чтобы подтвердить';
@@ -235,20 +237,20 @@ class _Translations$accountCreating$ru implements Translations$accountCreating$e
 	@override String get stepPlan => 'Ваш план завершается';
 	@override String get optimization => 'Оптимизация';
 	@override String progress({required Object value}) => '${value}%';
-	@override String get titleLine1 => 'Building your';
-	@override String get titleLine2 => 'Account';
-	@override String get testimonialQuote => 'Week one I could barely say hello. Week three I was having full conversations with my AI tutor. I\'m not stopping now.';
-	@override String get testimonialAuthor => 'Maria, 29 — 3 months in';
-	@override String get comparisonPitch => 'Learn 600+ extra phrases about 30× faster with Lingola than studying entirely on your own.';
+	@override String get titleLine1 => 'Твой аккаунт';
+	@override String get titleLine2 => 'создаётся';
+	@override String get testimonialQuote => 'В первую неделю я едва могла сказать «привет». На третьей уже вела полноценные разговоры с ИИ-тьютором. Я не останавливаюсь.';
+	@override String get testimonialAuthor => 'Мария, 29 — уже 3 месяца';
+	@override String get comparisonPitch => 'Учи больше 600 дополнительных фраз с Lingola примерно в 30× быстрее, чем в одиночку.';
 	@override String get comparisonAloneCount => '400';
 	@override String get comparisonLingolaCount => '1000';
-	@override String get comparisonUnit => 'PHRASES';
-	@override String get comparisonAloneLabel => 'On your own';
+	@override String get comparisonUnit => 'ФРАЗЫ';
+	@override String get comparisonAloneLabel => 'Самостоятельно';
 	@override String get comparisonLingolaLabel => 'Lingola';
-	@override String get fluencyPitch => 'From today to fluency — your next level is only 30 days away';
-	@override String get chartToday => 'Today';
-	@override String get chartMid => '15 Sep';
-	@override String get chartEnd => '30 Sep';
+	@override String get fluencyPitch => 'От сегодня до беглости — следующий уровень всего через 30 дней';
+	@override String get chartToday => 'Сегодня';
+	@override String get chartMid => '15 сен';
+	@override String get chartEnd => '30 сен';
 }
 
 // Path: planReady
@@ -258,8 +260,8 @@ class _Translations$planReady$ru implements Translations$planReady$en {
 	final TranslationsRu _root; // ignore: unused_field
 
 	// Translations
-	@override String get titleLine1 => 'Your plan is';
-	@override String get titleLine2 => 'Ready!';
+	@override String get titleLine1 => 'Твой план';
+	@override String get titleLine2 => 'готов!';
 	@override String get statBanner => '95% of users see results within the first 7 days';
 	@override String planTitle({required Object name}) => '${name}\'S PLAN';
 	@override String get defaultName => 'YOUR';
@@ -268,7 +270,7 @@ class _Translations$planReady$ru implements Translations$planReady$en {
 	@override String get fieldFocus => 'FOCUS AREA';
 	@override String get fieldDuration => 'DURATION';
 	@override String get fieldInterests => 'ИНТЕРЕСЫ';
-	@override String get startPlan => 'Start my plan →';
+	@override String get startPlan => 'Начать мой план →';
 	@override String get courseEnglish => 'English';
 	@override String get courseGerman => 'German';
 	@override String get courseFrench => 'French';
@@ -623,8 +625,17 @@ class _Translations$rolePlayPage$ru implements Translations$rolePlayPage$en {
 	@override String get dailyInteractions => 'Ежедневные Взаимодействия';
 	@override String get business => 'Бизнес';
 	@override late final _Translations$rolePlayPage$coffee$ru coffee = _Translations$rolePlayPage$coffee$ru._(_root);
+	@override late final _Translations$rolePlayPage$coffeeQueue$ru coffeeQueue = _Translations$rolePlayPage$coffeeQueue$ru._(_root);
+	@override late final _Translations$rolePlayPage$coffeeRecommendation$ru coffeeRecommendation = _Translations$rolePlayPage$coffeeRecommendation$ru._(_root);
+	@override late final _Translations$rolePlayPage$coffeeWrongOrder$ru coffeeWrongOrder = _Translations$rolePlayPage$coffeeWrongOrder$ru._(_root);
 	@override late final _Translations$rolePlayPage$directions$ru directions = _Translations$rolePlayPage$directions$ru._(_root);
+	@override late final _Translations$rolePlayPage$directionsWrongWay$ru directionsWrongWay = _Translations$rolePlayPage$directionsWrongWay$ru._(_root);
+	@override late final _Translations$rolePlayPage$directionsTransit$ru directionsTransit = _Translations$rolePlayPage$directionsTransit$ru._(_root);
+	@override late final _Translations$rolePlayPage$directionsLost$ru directionsLost = _Translations$rolePlayPage$directionsLost$ru._(_root);
 	@override late final _Translations$rolePlayPage$interview$ru interview = _Translations$rolePlayPage$interview$ru._(_root);
+	@override late final _Translations$rolePlayPage$interviewSalary$ru interviewSalary = _Translations$rolePlayPage$interviewSalary$ru._(_root);
+	@override late final _Translations$rolePlayPage$interviewExperience$ru interviewExperience = _Translations$rolePlayPage$interviewExperience$ru._(_root);
+	@override late final _Translations$rolePlayPage$interviewStrengths$ru interviewStrengths = _Translations$rolePlayPage$interviewStrengths$ru._(_root);
 	@override String get customScenarios => 'Your scenarios';
 	@override String get createOwnScenario => 'Создай свой сценарий!';
 	@override String get createOwnScenarioTitle => 'Create your scenario';
@@ -644,14 +655,41 @@ class _Translations$rolePlayPage$ru implements Translations$rolePlayPage$en {
 	@override String get intermediate => 'Intermediate';
 	@override String get beginnerIntermediate => 'Beginner–Intermediate';
 	@override late final _Translations$rolePlayPage$missedTrain$ru missedTrain = _Translations$rolePlayPage$missedTrain$ru._(_root);
+	@override late final _Translations$rolePlayPage$missedTrainRefund$ru missedTrainRefund = _Translations$rolePlayPage$missedTrainRefund$ru._(_root);
+	@override late final _Translations$rolePlayPage$missedTrainTicket$ru missedTrainTicket = _Translations$rolePlayPage$missedTrainTicket$ru._(_root);
+	@override late final _Translations$rolePlayPage$missedTrainNext$ru missedTrainNext = _Translations$rolePlayPage$missedTrainNext$ru._(_root);
 	@override late final _Translations$rolePlayPage$flightAttendant$ru flightAttendant = _Translations$rolePlayPage$flightAttendant$ru._(_root);
+	@override late final _Translations$rolePlayPage$flightDelay$ru flightDelay = _Translations$rolePlayPage$flightDelay$ru._(_root);
+	@override late final _Translations$rolePlayPage$flightSpecialMeal$ru flightSpecialMeal = _Translations$rolePlayPage$flightSpecialMeal$ru._(_root);
+	@override late final _Translations$rolePlayPage$flightSeat$ru flightSeat = _Translations$rolePlayPage$flightSeat$ru._(_root);
 	@override late final _Translations$rolePlayPage$trainTicket$ru trainTicket = _Translations$rolePlayPage$trainTicket$ru._(_root);
+	@override late final _Translations$rolePlayPage$trainTicketUpgrade$ru trainTicketUpgrade = _Translations$rolePlayPage$trainTicketUpgrade$ru._(_root);
+	@override late final _Translations$rolePlayPage$trainTicketPlatform$ru trainTicketPlatform = _Translations$rolePlayPage$trainTicketPlatform$ru._(_root);
+	@override late final _Translations$rolePlayPage$trainTicketChange$ru trainTicketChange = _Translations$rolePlayPage$trainTicketChange$ru._(_root);
 	@override late final _Translations$rolePlayPage$restaurantReservation$ru restaurantReservation = _Translations$rolePlayPage$restaurantReservation$ru._(_root);
+	@override late final _Translations$rolePlayPage$restaurantComplaint$ru restaurantComplaint = _Translations$rolePlayPage$restaurantComplaint$ru._(_root);
+	@override late final _Translations$rolePlayPage$restaurantAllergy$ru restaurantAllergy = _Translations$rolePlayPage$restaurantAllergy$ru._(_root);
+	@override late final _Translations$rolePlayPage$restaurantChange$ru restaurantChange = _Translations$rolePlayPage$restaurantChange$ru._(_root);
 	@override late final _Translations$rolePlayPage$doctorAppointment$ru doctorAppointment = _Translations$rolePlayPage$doctorAppointment$ru._(_root);
+	@override late final _Translations$rolePlayPage$doctorFollowUp$ru doctorFollowUp = _Translations$rolePlayPage$doctorFollowUp$ru._(_root);
+	@override late final _Translations$rolePlayPage$doctorPrescription$ru doctorPrescription = _Translations$rolePlayPage$doctorPrescription$ru._(_root);
+	@override late final _Translations$rolePlayPage$doctorSymptoms$ru doctorSymptoms = _Translations$rolePlayPage$doctorSymptoms$ru._(_root);
 	@override late final _Translations$rolePlayPage$shoppingClothes$ru shoppingClothes = _Translations$rolePlayPage$shoppingClothes$ru._(_root);
+	@override late final _Translations$rolePlayPage$shoppingDiscount$ru shoppingDiscount = _Translations$rolePlayPage$shoppingDiscount$ru._(_root);
+	@override late final _Translations$rolePlayPage$shoppingReturn$ru shoppingReturn = _Translations$rolePlayPage$shoppingReturn$ru._(_root);
+	@override late final _Translations$rolePlayPage$shoppingFittingRoom$ru shoppingFittingRoom = _Translations$rolePlayPage$shoppingFittingRoom$ru._(_root);
 	@override late final _Translations$rolePlayPage$takingTaxi$ru takingTaxi = _Translations$rolePlayPage$takingTaxi$ru._(_root);
+	@override late final _Translations$rolePlayPage$taxiComplaint$ru taxiComplaint = _Translations$rolePlayPage$taxiComplaint$ru._(_root);
+	@override late final _Translations$rolePlayPage$taxiTraffic$ru taxiTraffic = _Translations$rolePlayPage$taxiTraffic$ru._(_root);
+	@override late final _Translations$rolePlayPage$taxiFare$ru taxiFare = _Translations$rolePlayPage$taxiFare$ru._(_root);
 	@override late final _Translations$rolePlayPage$rentingApartment$ru rentingApartment = _Translations$rolePlayPage$rentingApartment$ru._(_root);
+	@override late final _Translations$rolePlayPage$rentingApartmentNegotiate$ru rentingApartmentNegotiate = _Translations$rolePlayPage$rentingApartmentNegotiate$ru._(_root);
+	@override late final _Translations$rolePlayPage$rentingApartmentAgent$ru rentingApartmentAgent = _Translations$rolePlayPage$rentingApartmentAgent$ru._(_root);
+	@override late final _Translations$rolePlayPage$rentingApartmentTour$ru rentingApartmentTour = _Translations$rolePlayPage$rentingApartmentTour$ru._(_root);
 	@override late final _Translations$rolePlayPage$birthdayParty$ru birthdayParty = _Translations$rolePlayPage$birthdayParty$ru._(_root);
+	@override late final _Translations$rolePlayPage$birthdaySurprise$ru birthdaySurprise = _Translations$rolePlayPage$birthdaySurprise$ru._(_root);
+	@override late final _Translations$rolePlayPage$birthdayGifts$ru birthdayGifts = _Translations$rolePlayPage$birthdayGifts$ru._(_root);
+	@override late final _Translations$rolePlayPage$birthdayInvite$ru birthdayInvite = _Translations$rolePlayPage$birthdayInvite$ru._(_root);
 	@override String get deleteFailed => 'Не удалось удалить сценарий. Попробуйте ещё раз.';
 	@override String get easy => 'Лёгкий';
 	@override String get medium => 'Средний';
@@ -669,7 +707,13 @@ class _Translations$rolePlayPage$ru implements Translations$rolePlayPage$en {
 	@override String get travel => 'Путешествия';
 	@override String get createFieldDifficulty => 'Сложность';
 	@override late final _Translations$rolePlayPage$flirtingMeet$ru flirtingMeet = _Translations$rolePlayPage$flirtingMeet$ru._(_root);
+	@override late final _Translations$rolePlayPage$flirtingAwkward$ru flirtingAwkward = _Translations$rolePlayPage$flirtingAwkward$ru._(_root);
+	@override late final _Translations$rolePlayPage$flirtingAskOut$ru flirtingAskOut = _Translations$rolePlayPage$flirtingAskOut$ru._(_root);
+	@override late final _Translations$rolePlayPage$flirtingCompliment$ru flirtingCompliment = _Translations$rolePlayPage$flirtingCompliment$ru._(_root);
 	@override late final _Translations$rolePlayPage$freeTalkHobby$ru freeTalkHobby = _Translations$rolePlayPage$freeTalkHobby$ru._(_root);
+	@override late final _Translations$rolePlayPage$freeTalkDisagree$ru freeTalkDisagree = _Translations$rolePlayPage$freeTalkDisagree$ru._(_root);
+	@override late final _Translations$rolePlayPage$freeTalkMovies$ru freeTalkMovies = _Translations$rolePlayPage$freeTalkMovies$ru._(_root);
+	@override late final _Translations$rolePlayPage$freeTalkWeekend$ru freeTalkWeekend = _Translations$rolePlayPage$freeTalkWeekend$ru._(_root);
 }
 
 // Path: notificationsPage
@@ -709,9 +753,11 @@ class _Translations$profilePage$ru implements Translations$profilePage$en {
 	@override String get general => 'Общие';
 	@override String get profileSettings => 'Настройки профиля';
 	@override String get fullName => 'Полное имя';
+	@override String get changeName => 'Изменить имя';
 	@override String get email => 'Электронная почта';
 	@override String get deleteAccount => 'Удалить аккаунт';
 	@override String get save => 'СОХРАНИТЬ';
+	@override String get saveTitle => 'Сохранить';
 	@override String get deleteTitle => 'Мы не хотим, чтобы ты уходил, но мы понимаем.';
 	@override String get deleteBody => 'Скажи нам, почему ты хочешь уйти, чтобы мы могли улучшить опыт использования Lingola?';
 	@override late final _Translations$profilePage$deleteReasons$ru deleteReasons = _Translations$profilePage$deleteReasons$ru._(_root);
@@ -720,22 +766,23 @@ class _Translations$profilePage$ru implements Translations$profilePage$en {
 	@override String get next => 'ДАЛЕЕ';
 	@override String get specialOfferTitle => 'Специальное предложение';
 	@override String get specialOfferBody => 'Посмотри на предложение, которое мы подготовили для тебя перед уходом.';
-	@override String get monthlyPlanTitle => 'Перейти на месячный план';
-	@override String get monthlyPlanPrice => '\$79/месяц, отмена в любое время';
-	@override String get monthlyPlanDesc => 'Без долгосрочных обязательств. Оставайся на связи с нашим сообществом на месячной основе.';
+	@override String get monthlyPlanTitle => 'Останься и получи скидку 50% на 1 год';
+	@override String get monthlyPlanPrice => 'Наше лучшее предложение. Всего \$24,99/год';
+	@override String get monthlyPlanDesc => 'Наше лучшее предложение — скидка 50% на годовой план.';
 	@override String get whatYoullKeep => 'Что ты сохранишь:';
 	@override String get keepCharacters => 'Доступ ко всем персонажам';
 	@override String get keepVideo => 'Неограниченные видеозвонки';
 	@override String get keepCourses => 'Доступ ко всем курсам';
-	@override String get switchMonthlyCta => 'Перейти на месячный план';
+	@override String get switchMonthlyCta => 'Принять скидку 50% и остаться';
 	@override String get confirmTitle => 'Ты уверен?';
 	@override String get confirmBody => 'Мы действительно не хотим, чтобы ты уходил. Вот что ты потеряешь:';
 	@override String get loseCharacters => 'Неограниченный доступ к персонажам';
 	@override String get loseVideo => 'Неограниченный доступ к видеозвонкам';
 	@override String get loseCourses => 'Доступ ко всем курсам';
-	@override String get discountTitle => 'Останься и получи 60% скидку на 1 месяц';
-	@override String get discountSubtitle => 'Наше лучшее предложение. Всего \$27.60/месяц';
-	@override String get acceptDiscountCta => 'Принять 60% скидку и остаться';
+	@override String get discountTitle => 'Останься и получи скидку 50% на 1 год';
+	@override String get discountSubtitle => 'Наше лучшее предложение. Всего \$24,99/год';
+	@override String get acceptDiscountCta => 'Принять скидку 50% и остаться';
+	@override String get deleteCta => 'DELETE';
 	@override String get farewellTitle => 'Нам грустно видеть тебя уходящим';
 	@override String farewellBody({required Object date}) => 'Твое членство отменено. Ты будешь иметь доступ до конца текущего расчетного периода ${date}.';
 	@override String get changeMindTitle => '✨ Передумал?';
@@ -776,6 +823,7 @@ class _Translations$profilePage$ru implements Translations$profilePage$en {
 	@override String get shareInviteBody => 'Пригласи своих друзей и наслаждайтесь переводом вместе';
 	@override String get rateUs => 'Оцените нас';
 	@override String get faq => 'Часто задаваемые вопросы Lingola';
+	@override String get contactUs => 'Связаться с нами';
 	@override late final _Translations$profilePage$faqItems$ru faqItems = _Translations$profilePage$faqItems$ru._(_root);
 	@override String get support => 'Поддержка';
 	@override String get feedback => 'Обратная связь';
@@ -796,8 +844,8 @@ class _Translations$profilePage$ru implements Translations$profilePage$en {
 	@override String get logout => 'Выйти';
 	@override String get logoutTitle => 'Вы уверены, что хотите выйти?';
 	@override String get logoutBody => 'Увидимся снова скоро! Нам будут не хватать твоих дыхательных упражнений.';
-	@override String get logoutConfirm => 'LOGOUT';
-	@override String get logoutCancel => 'CANCEL';
+	@override String get logoutConfirm => 'ВЫЙТИ';
+	@override String get logoutCancel => 'ОТМЕНА';
 	@override late final _Translations$profilePage$days$ru days = _Translations$profilePage$days$ru._(_root);
 	@override String get profileSaved => 'Profile saved';
 	@override String get profilePhotoUpdated => 'Profile photo updated';
@@ -887,6 +935,13 @@ class _Translations$profilePage$ru implements Translations$profilePage$en {
 	@override String get certificatesEmptySubtitle => 'Не забудьте проверить снова, когда завершите уровень.';
 	@override String get restorePurchasesSuccess => 'Покупки восстановлены.';
 	@override String get restorePurchasesEmpty => 'Активные покупки для этого аккаунта не найдены.';
+	@override String get certificateListA1 => 'A1 - Сертификат стартового уровня';
+	@override String get certificateListA2 => 'A2 - Базовый сертификат';
+	@override String get certificateListB1 => 'B1 - Сертификат среднего уровня';
+	@override String get certificateListB2 => 'B2 - Сертификат выше среднего';
+	@override String get certificateListC1 => 'C1 - Продвинутый сертификат';
+	@override String get certificateListC2 => 'C2 - Экспертный сертификат';
+	@override String certificateListGeneric({required Object level}) => 'Сертификат ${level}';
 }
 
 // Path: pushNotifications
@@ -1159,6 +1214,42 @@ class _Translations$rolePlayPage$coffee$ru implements Translations$rolePlayPage$
 	@override late final _Translations$rolePlayPage$coffee$chat$ru chat = _Translations$rolePlayPage$coffee$chat$ru._(_root);
 }
 
+// Path: rolePlayPage.coffeeQueue
+class _Translations$rolePlayPage$coffeeQueue$ru implements Translations$rolePlayPage$coffeeQueue$en {
+	_Translations$rolePlayPage$coffeeQueue$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Waiting in the Coffee Line';
+	@override String get screenplay => 'Stand in line at a busy café, chat politely with the person ahead of you, hold your spot, and get ready to order when it\'s your turn.';
+	@override late final _Translations$rolePlayPage$coffeeQueue$chat$ru chat = _Translations$rolePlayPage$coffeeQueue$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.coffeeRecommendation
+class _Translations$rolePlayPage$coffeeRecommendation$ru implements Translations$rolePlayPage$coffeeRecommendation$en {
+	_Translations$rolePlayPage$coffeeRecommendation$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking for a Drink Recommendation';
+	@override String get screenplay => 'Ask the barista what they recommend, compare a few drinks, choose size and milk options, then place your order confidently.';
+	@override late final _Translations$rolePlayPage$coffeeRecommendation$chat$ru chat = _Translations$rolePlayPage$coffeeRecommendation$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.coffeeWrongOrder
+class _Translations$rolePlayPage$coffeeWrongOrder$ru implements Translations$rolePlayPage$coffeeWrongOrder$en {
+	_Translations$rolePlayPage$coffeeWrongOrder$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Fixing a Wrong Coffee Order';
+	@override String get screenplay => 'Politely explain that your drink is wrong, describe what you ordered, ask for a remake or swap, and thank the barista.';
+	@override late final _Translations$rolePlayPage$coffeeWrongOrder$chat$ru chat = _Translations$rolePlayPage$coffeeWrongOrder$chat$ru._(_root);
+}
+
 // Path: rolePlayPage.directions
 class _Translations$rolePlayPage$directions$ru implements Translations$rolePlayPage$directions$en {
 	_Translations$rolePlayPage$directions$ru._(this._root);
@@ -1169,6 +1260,42 @@ class _Translations$rolePlayPage$directions$ru implements Translations$rolePlayP
 	@override String get title => 'Спросить Направление на Улице';
 	@override String get screenplay => 'Спросите направление к месту, узнайте, как добраться до метро или автобуса, получите информацию о билетах и послушайте рекомендации по ресторанам.';
 	@override late final _Translations$rolePlayPage$directions$chat$ru chat = _Translations$rolePlayPage$directions$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.directionsWrongWay
+class _Translations$rolePlayPage$directionsWrongWay$ru implements Translations$rolePlayPage$directionsWrongWay$en {
+	_Translations$rolePlayPage$directionsWrongWay$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Correcting Wrong Directions';
+	@override String get screenplay => 'Realize the directions were wrong, politely check again, and get clearer landmark-based instructions.';
+	@override late final _Translations$rolePlayPage$directionsWrongWay$chat$ru chat = _Translations$rolePlayPage$directionsWrongWay$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.directionsTransit
+class _Translations$rolePlayPage$directionsTransit$ru implements Translations$rolePlayPage$directionsTransit$en {
+	_Translations$rolePlayPage$directionsTransit$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking About Bus or Subway Routes';
+	@override String get screenplay => 'Ask which line to take, how many stops, and where to transfer to reach your destination.';
+	@override late final _Translations$rolePlayPage$directionsTransit$chat$ru chat = _Translations$rolePlayPage$directionsTransit$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.directionsLost
+class _Translations$rolePlayPage$directionsLost$ru implements Translations$rolePlayPage$directionsLost$en {
+	_Translations$rolePlayPage$directionsLost$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking for Help When You\'re Lost';
+	@override String get screenplay => 'Admit you\'re lost, describe where you need to go, and confirm the directions before you leave.';
+	@override late final _Translations$rolePlayPage$directionsLost$chat$ru chat = _Translations$rolePlayPage$directionsLost$chat$ru._(_root);
 }
 
 // Path: rolePlayPage.interview
@@ -1183,6 +1310,42 @@ class _Translations$rolePlayPage$interview$ru implements Translations$rolePlayPa
 	@override late final _Translations$rolePlayPage$interview$chat$ru chat = _Translations$rolePlayPage$interview$chat$ru._(_root);
 }
 
+// Path: rolePlayPage.interviewSalary
+class _Translations$rolePlayPage$interviewSalary$ru implements Translations$rolePlayPage$interviewSalary$en {
+	_Translations$rolePlayPage$interviewSalary$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Discussing Salary Expectations';
+	@override String get screenplay => 'Talk about salary range politely, ask about benefits, and keep the tone professional.';
+	@override late final _Translations$rolePlayPage$interviewSalary$chat$ru chat = _Translations$rolePlayPage$interviewSalary$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.interviewExperience
+class _Translations$rolePlayPage$interviewExperience$ru implements Translations$rolePlayPage$interviewExperience$en {
+	_Translations$rolePlayPage$interviewExperience$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Describing Work Experience';
+	@override String get screenplay => 'Walk through a recent role, your responsibilities, and one achievement with numbers if possible.';
+	@override late final _Translations$rolePlayPage$interviewExperience$chat$ru chat = _Translations$rolePlayPage$interviewExperience$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.interviewStrengths
+class _Translations$rolePlayPage$interviewStrengths$ru implements Translations$rolePlayPage$interviewStrengths$en {
+	_Translations$rolePlayPage$interviewStrengths$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking About Your Strengths';
+	@override String get screenplay => 'Describe two strengths with short examples and connect them to the job.';
+	@override late final _Translations$rolePlayPage$interviewStrengths$chat$ru chat = _Translations$rolePlayPage$interviewStrengths$chat$ru._(_root);
+}
+
 // Path: rolePlayPage.missedTrain
 class _Translations$rolePlayPage$missedTrain$ru implements Translations$rolePlayPage$missedTrain$en {
 	_Translations$rolePlayPage$missedTrain$ru._(this._root);
@@ -1193,6 +1356,42 @@ class _Translations$rolePlayPage$missedTrain$ru implements Translations$rolePlay
 	@override String get title => 'You Missed Your Train';
 	@override String get screenplay => 'You missed your train and ask a station staff member for help — explain where you\'re going, find the next train, and get directions to the platform.';
 	@override late final _Translations$rolePlayPage$missedTrain$chat$ru chat = _Translations$rolePlayPage$missedTrain$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.missedTrainRefund
+class _Translations$rolePlayPage$missedTrainRefund$ru implements Translations$rolePlayPage$missedTrainRefund$en {
+	_Translations$rolePlayPage$missedTrainRefund$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking About Rebooking or a Refund';
+	@override String get screenplay => 'Ask about rebooking, refunds, or compensation after missing a connection due to a delay.';
+	@override late final _Translations$rolePlayPage$missedTrainRefund$chat$ru chat = _Translations$rolePlayPage$missedTrainRefund$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.missedTrainTicket
+class _Translations$rolePlayPage$missedTrainTicket$ru implements Translations$rolePlayPage$missedTrainTicket$en {
+	_Translations$rolePlayPage$missedTrainTicket$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Fixing a Ticket After Missing a Train';
+	@override String get screenplay => 'Ask whether your ticket is still valid, if you can board the next train, and what to do at the gate.';
+	@override late final _Translations$rolePlayPage$missedTrainTicket$chat$ru chat = _Translations$rolePlayPage$missedTrainTicket$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.missedTrainNext
+class _Translations$rolePlayPage$missedTrainNext$ru implements Translations$rolePlayPage$missedTrainNext$en {
+	_Translations$rolePlayPage$missedTrainNext$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Finding the Next Train';
+	@override String get screenplay => 'Explain you missed your train and ask when the next one leaves and which platform to use.';
+	@override late final _Translations$rolePlayPage$missedTrainNext$chat$ru chat = _Translations$rolePlayPage$missedTrainNext$chat$ru._(_root);
 }
 
 // Path: rolePlayPage.flightAttendant
@@ -1207,6 +1406,42 @@ class _Translations$rolePlayPage$flightAttendant$ru implements Translations$role
 	@override late final _Translations$rolePlayPage$flightAttendant$chat$ru chat = _Translations$rolePlayPage$flightAttendant$chat$ru._(_root);
 }
 
+// Path: rolePlayPage.flightDelay
+class _Translations$rolePlayPage$flightDelay$ru implements Translations$rolePlayPage$flightDelay$en {
+	_Translations$rolePlayPage$flightDelay$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking About a Delay or Connection';
+	@override String get screenplay => 'Ask why the flight is delayed, whether you\'ll make a connection, and what help is available.';
+	@override late final _Translations$rolePlayPage$flightDelay$chat$ru chat = _Translations$rolePlayPage$flightDelay$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.flightSpecialMeal
+class _Translations$rolePlayPage$flightSpecialMeal$ru implements Translations$rolePlayPage$flightSpecialMeal$en {
+	_Translations$rolePlayPage$flightSpecialMeal$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking for a Special Meal';
+	@override String get screenplay => 'Ask about meal options, request vegetarian or other special meals, and confirm timing.';
+	@override late final _Translations$rolePlayPage$flightSpecialMeal$chat$ru chat = _Translations$rolePlayPage$flightSpecialMeal$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.flightSeat
+class _Translations$rolePlayPage$flightSeat$ru implements Translations$rolePlayPage$flightSeat$en {
+	_Translations$rolePlayPage$flightSeat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking to Change Seats';
+	@override String get screenplay => 'Politely ask if you can switch seats for comfort, family, or a window/aisle preference.';
+	@override late final _Translations$rolePlayPage$flightSeat$chat$ru chat = _Translations$rolePlayPage$flightSeat$chat$ru._(_root);
+}
+
 // Path: rolePlayPage.trainTicket
 class _Translations$rolePlayPage$trainTicket$ru implements Translations$rolePlayPage$trainTicket$en {
 	_Translations$rolePlayPage$trainTicket$ru._(this._root);
@@ -1217,6 +1452,42 @@ class _Translations$rolePlayPage$trainTicket$ru implements Translations$rolePlay
 	@override String get title => 'Buying a Train Ticket';
 	@override String get screenplay => 'At a train station, tell the clerk where you\'re going, pick a departure time, choose ticket type and seat, and pay for your ticket.';
 	@override late final _Translations$rolePlayPage$trainTicket$chat$ru chat = _Translations$rolePlayPage$trainTicket$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.trainTicketUpgrade
+class _Translations$rolePlayPage$trainTicketUpgrade$ru implements Translations$rolePlayPage$trainTicketUpgrade$en {
+	_Translations$rolePlayPage$trainTicketUpgrade$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Upgrading Your Seat or Class';
+	@override String get screenplay => 'Ask about upgrading to quiet car or first class, compare prices, and complete the change.';
+	@override late final _Translations$rolePlayPage$trainTicketUpgrade$chat$ru chat = _Translations$rolePlayPage$trainTicketUpgrade$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.trainTicketPlatform
+class _Translations$rolePlayPage$trainTicketPlatform$ru implements Translations$rolePlayPage$trainTicketPlatform$en {
+	_Translations$rolePlayPage$trainTicketPlatform$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Finding the Right Platform';
+	@override String get screenplay => 'Ask which platform your train leaves from and how to get there with luggage.';
+	@override late final _Translations$rolePlayPage$trainTicketPlatform$chat$ru chat = _Translations$rolePlayPage$trainTicketPlatform$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.trainTicketChange
+class _Translations$rolePlayPage$trainTicketChange$ru implements Translations$rolePlayPage$trainTicketChange$en {
+	_Translations$rolePlayPage$trainTicketChange$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Changing Your Train Ticket Time';
+	@override String get screenplay => 'Ask to change departure time, check fees, and confirm the new ticket.';
+	@override late final _Translations$rolePlayPage$trainTicketChange$chat$ru chat = _Translations$rolePlayPage$trainTicketChange$chat$ru._(_root);
 }
 
 // Path: rolePlayPage.restaurantReservation
@@ -1231,6 +1502,42 @@ class _Translations$rolePlayPage$restaurantReservation$ru implements Translation
 	@override late final _Translations$rolePlayPage$restaurantReservation$chat$ru chat = _Translations$rolePlayPage$restaurantReservation$chat$ru._(_root);
 }
 
+// Path: rolePlayPage.restaurantComplaint
+class _Translations$rolePlayPage$restaurantComplaint$ru implements Translations$rolePlayPage$restaurantComplaint$en {
+	_Translations$rolePlayPage$restaurantComplaint$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Complaining Politely at a Restaurant';
+	@override String get screenplay => 'Explain a problem with food or service calmly and ask for a fair fix.';
+	@override late final _Translations$rolePlayPage$restaurantComplaint$chat$ru chat = _Translations$rolePlayPage$restaurantComplaint$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.restaurantAllergy
+class _Translations$rolePlayPage$restaurantAllergy$ru implements Translations$rolePlayPage$restaurantAllergy$en {
+	_Translations$rolePlayPage$restaurantAllergy$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking About Food Allergies';
+	@override String get screenplay => 'Explain allergies or diet needs, ask what\'s safe on the menu, and confirm with the staff.';
+	@override late final _Translations$rolePlayPage$restaurantAllergy$chat$ru chat = _Translations$rolePlayPage$restaurantAllergy$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.restaurantChange
+class _Translations$rolePlayPage$restaurantChange$ru implements Translations$rolePlayPage$restaurantChange$en {
+	_Translations$rolePlayPage$restaurantChange$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Changing a Restaurant Reservation';
+	@override String get screenplay => 'Call to change the time or party size and confirm the new details.';
+	@override late final _Translations$rolePlayPage$restaurantChange$chat$ru chat = _Translations$rolePlayPage$restaurantChange$chat$ru._(_root);
+}
+
 // Path: rolePlayPage.doctorAppointment
 class _Translations$rolePlayPage$doctorAppointment$ru implements Translations$rolePlayPage$doctorAppointment$en {
 	_Translations$rolePlayPage$doctorAppointment$ru._(this._root);
@@ -1241,6 +1548,42 @@ class _Translations$rolePlayPage$doctorAppointment$ru implements Translations$ro
 	@override String get title => 'Making a Doctor\'s Appointment';
 	@override String get screenplay => 'Call a clinic to book a doctor\'s appointment — explain why you need to visit, choose a day and time, and confirm your details.';
 	@override late final _Translations$rolePlayPage$doctorAppointment$chat$ru chat = _Translations$rolePlayPage$doctorAppointment$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.doctorFollowUp
+class _Translations$rolePlayPage$doctorFollowUp$ru implements Translations$rolePlayPage$doctorFollowUp$en {
+	_Translations$rolePlayPage$doctorFollowUp$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking About Test Results';
+	@override String get screenplay => 'Ask what results mean, next steps, and whether you need another appointment.';
+	@override late final _Translations$rolePlayPage$doctorFollowUp$chat$ru chat = _Translations$rolePlayPage$doctorFollowUp$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.doctorPrescription
+class _Translations$rolePlayPage$doctorPrescription$ru implements Translations$rolePlayPage$doctorPrescription$en {
+	_Translations$rolePlayPage$doctorPrescription$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking About Medicine';
+	@override String get screenplay => 'Ask how to take medicine, about side effects, and when to come back if it doesn\'t help.';
+	@override late final _Translations$rolePlayPage$doctorPrescription$chat$ru chat = _Translations$rolePlayPage$doctorPrescription$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.doctorSymptoms
+class _Translations$rolePlayPage$doctorSymptoms$ru implements Translations$rolePlayPage$doctorSymptoms$en {
+	_Translations$rolePlayPage$doctorSymptoms$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Describing Your Symptoms';
+	@override String get screenplay => 'Explain what hurts, when it started, and how strong the pain is.';
+	@override late final _Translations$rolePlayPage$doctorSymptoms$chat$ru chat = _Translations$rolePlayPage$doctorSymptoms$chat$ru._(_root);
 }
 
 // Path: rolePlayPage.shoppingClothes
@@ -1255,6 +1598,42 @@ class _Translations$rolePlayPage$shoppingClothes$ru implements Translations$role
 	@override late final _Translations$rolePlayPage$shoppingClothes$chat$ru chat = _Translations$rolePlayPage$shoppingClothes$chat$ru._(_root);
 }
 
+// Path: rolePlayPage.shoppingDiscount
+class _Translations$rolePlayPage$shoppingDiscount$ru implements Translations$rolePlayPage$shoppingDiscount$en {
+	_Translations$rolePlayPage$shoppingDiscount$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking About a Discount';
+	@override String get screenplay => 'Ask about sales, student discounts, or price matches, then decide whether the deal is worth it.';
+	@override late final _Translations$rolePlayPage$shoppingDiscount$chat$ru chat = _Translations$rolePlayPage$shoppingDiscount$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.shoppingReturn
+class _Translations$rolePlayPage$shoppingReturn$ru implements Translations$rolePlayPage$shoppingReturn$en {
+	_Translations$rolePlayPage$shoppingReturn$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Returning an Item to the Store';
+	@override String get screenplay => 'Return a purchase politely — explain the reason, show the receipt, and ask for a refund or exchange.';
+	@override late final _Translations$rolePlayPage$shoppingReturn$chat$ru chat = _Translations$rolePlayPage$shoppingReturn$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.shoppingFittingRoom
+class _Translations$rolePlayPage$shoppingFittingRoom$ru implements Translations$rolePlayPage$shoppingFittingRoom$en {
+	_Translations$rolePlayPage$shoppingFittingRoom$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Trying Clothes in the Fitting Room';
+	@override String get screenplay => 'Ask for a different size, check the mirror, and decide whether to buy the outfit.';
+	@override late final _Translations$rolePlayPage$shoppingFittingRoom$chat$ru chat = _Translations$rolePlayPage$shoppingFittingRoom$chat$ru._(_root);
+}
+
 // Path: rolePlayPage.takingTaxi
 class _Translations$rolePlayPage$takingTaxi$ru implements Translations$rolePlayPage$takingTaxi$en {
 	_Translations$rolePlayPage$takingTaxi$ru._(this._root);
@@ -1265,6 +1644,42 @@ class _Translations$rolePlayPage$takingTaxi$ru implements Translations$rolePlayP
 	@override String get title => 'Taking a Taxi';
 	@override String get screenplay => 'Get in a taxi in a new city, tell the driver where you\'re going, talk about the route, and pay at the end of the ride.';
 	@override late final _Translations$rolePlayPage$takingTaxi$chat$ru chat = _Translations$rolePlayPage$takingTaxi$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.taxiComplaint
+class _Translations$rolePlayPage$taxiComplaint$ru implements Translations$rolePlayPage$taxiComplaint$en {
+	_Translations$rolePlayPage$taxiComplaint$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Handling a Taxi Problem';
+	@override String get screenplay => 'Politely raise an issue — wrong route, AC, or fare — and ask for a fair solution.';
+	@override late final _Translations$rolePlayPage$taxiComplaint$chat$ru chat = _Translations$rolePlayPage$taxiComplaint$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.taxiTraffic
+class _Translations$rolePlayPage$taxiTraffic$ru implements Translations$rolePlayPage$taxiTraffic$en {
+	_Translations$rolePlayPage$taxiTraffic$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking About Traffic and Routes';
+	@override String get screenplay => 'Discuss traffic, ask for a faster route, and decide whether to wait or take another way.';
+	@override late final _Translations$rolePlayPage$taxiTraffic$chat$ru chat = _Translations$rolePlayPage$taxiTraffic$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.taxiFare
+class _Translations$rolePlayPage$taxiFare$ru implements Translations$rolePlayPage$taxiFare$en {
+	_Translations$rolePlayPage$taxiFare$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking About the Taxi Fare';
+	@override String get screenplay => 'Ask for an estimate before the ride, confirm payment options, and check the final amount at the end.';
+	@override late final _Translations$rolePlayPage$taxiFare$chat$ru chat = _Translations$rolePlayPage$taxiFare$chat$ru._(_root);
 }
 
 // Path: rolePlayPage.rentingApartment
@@ -1279,6 +1694,42 @@ class _Translations$rolePlayPage$rentingApartment$ru implements Translations$rol
 	@override late final _Translations$rolePlayPage$rentingApartment$chat$ru chat = _Translations$rolePlayPage$rentingApartment$chat$ru._(_root);
 }
 
+// Path: rolePlayPage.rentingApartmentNegotiate
+class _Translations$rolePlayPage$rentingApartmentNegotiate$ru implements Translations$rolePlayPage$rentingApartmentNegotiate$en {
+	_Translations$rolePlayPage$rentingApartmentNegotiate$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Negotiating Rent and Lease Terms';
+	@override String get screenplay => 'Negotiate rent, deposit, move-in date, and pet policy politely while staying clear about your limits.';
+	@override late final _Translations$rolePlayPage$rentingApartmentNegotiate$chat$ru chat = _Translations$rolePlayPage$rentingApartmentNegotiate$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.rentingApartmentAgent
+class _Translations$rolePlayPage$rentingApartmentAgent$ru implements Translations$rolePlayPage$rentingApartmentAgent$en {
+	_Translations$rolePlayPage$rentingApartmentAgent$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking with a Real Estate Agent';
+	@override String get screenplay => 'Talk to an agent about budget, location, lease length, and which listings match your needs.';
+	@override late final _Translations$rolePlayPage$rentingApartmentAgent$chat$ru chat = _Translations$rolePlayPage$rentingApartmentAgent$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.rentingApartmentTour
+class _Translations$rolePlayPage$rentingApartmentTour$ru implements Translations$rolePlayPage$rentingApartmentTour$en {
+	_Translations$rolePlayPage$rentingApartmentTour$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking About the Apartment on a Tour';
+	@override String get screenplay => 'Ask about rooms, sunlight, noise, appliances, and whether furniture is included during a viewing.';
+	@override late final _Translations$rolePlayPage$rentingApartmentTour$chat$ru chat = _Translations$rolePlayPage$rentingApartmentTour$chat$ru._(_root);
+}
+
 // Path: rolePlayPage.birthdayParty
 class _Translations$rolePlayPage$birthdayParty$ru implements Translations$rolePlayPage$birthdayParty$en {
 	_Translations$rolePlayPage$birthdayParty$ru._(this._root);
@@ -1289,6 +1740,42 @@ class _Translations$rolePlayPage$birthdayParty$ru implements Translations$rolePl
 	@override String get title => 'Planning a Birthday Party';
 	@override String get screenplay => 'Plan a birthday party with a friend — pick the venue, date, guest list, food, cake, music, and activities together.';
 	@override late final _Translations$rolePlayPage$birthdayParty$chat$ru chat = _Translations$rolePlayPage$birthdayParty$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.birthdaySurprise
+class _Translations$rolePlayPage$birthdaySurprise$ru implements Translations$rolePlayPage$birthdaySurprise$en {
+	_Translations$rolePlayPage$birthdaySurprise$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Planning a Surprise Party';
+	@override String get screenplay => 'Keep the surprise secret, assign tasks, and handle last-minute changes without spoiling it.';
+	@override late final _Translations$rolePlayPage$birthdaySurprise$chat$ru chat = _Translations$rolePlayPage$birthdaySurprise$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.birthdayGifts
+class _Translations$rolePlayPage$birthdayGifts$ru implements Translations$rolePlayPage$birthdayGifts$en {
+	_Translations$rolePlayPage$birthdayGifts$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking About Birthday Gifts';
+	@override String get screenplay => 'Discuss gift ideas, budget, and whether to buy something together.';
+	@override late final _Translations$rolePlayPage$birthdayGifts$chat$ru chat = _Translations$rolePlayPage$birthdayGifts$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.birthdayInvite
+class _Translations$rolePlayPage$birthdayInvite$ru implements Translations$rolePlayPage$birthdayInvite$en {
+	_Translations$rolePlayPage$birthdayInvite$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Inviting Guests to a Party';
+	@override String get screenplay => 'Invite friends, share the date and place, and ask who can come.';
+	@override late final _Translations$rolePlayPage$birthdayInvite$chat$ru chat = _Translations$rolePlayPage$birthdayInvite$chat$ru._(_root);
 }
 
 // Path: rolePlayPage.flirtingMeet
@@ -1303,6 +1790,42 @@ class _Translations$rolePlayPage$flirtingMeet$ru implements Translations$rolePla
 	@override late final _Translations$rolePlayPage$flirtingMeet$chat$ru chat = _Translations$rolePlayPage$flirtingMeet$chat$ru._(_root);
 }
 
+// Path: rolePlayPage.flirtingAwkward
+class _Translations$rolePlayPage$flirtingAwkward$ru implements Translations$rolePlayPage$flirtingAwkward$en {
+	_Translations$rolePlayPage$flirtingAwkward$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Handling an Awkward Moment';
+	@override String get screenplay => 'Recover from a misunderstanding or awkward pause, apologize lightly, and steer the chat back to a comfortable topic.';
+	@override late final _Translations$rolePlayPage$flirtingAwkward$chat$ru chat = _Translations$rolePlayPage$flirtingAwkward$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.flirtingAskOut
+class _Translations$rolePlayPage$flirtingAskOut$ru implements Translations$rolePlayPage$flirtingAskOut$en {
+	_Translations$rolePlayPage$flirtingAskOut$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Asking Someone Out';
+	@override String get screenplay => 'After a short chat, suggest meeting again — coffee, a walk, or a movie — and handle a yes or a soft no gracefully.';
+	@override late final _Translations$rolePlayPage$flirtingAskOut$chat$ru chat = _Translations$rolePlayPage$flirtingAskOut$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.flirtingCompliment
+class _Translations$rolePlayPage$flirtingCompliment$ru implements Translations$rolePlayPage$flirtingCompliment$en {
+	_Translations$rolePlayPage$flirtingCompliment$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Giving a Friendly Compliment';
+	@override String get screenplay => 'Start with a light compliment, keep it respectful, and see if the other person wants to keep talking.';
+	@override late final _Translations$rolePlayPage$flirtingCompliment$chat$ru chat = _Translations$rolePlayPage$flirtingCompliment$chat$ru._(_root);
+}
+
 // Path: rolePlayPage.freeTalkHobby
 class _Translations$rolePlayPage$freeTalkHobby$ru implements Translations$rolePlayPage$freeTalkHobby$en {
 	_Translations$rolePlayPage$freeTalkHobby$ru._(this._root);
@@ -1313,6 +1836,42 @@ class _Translations$rolePlayPage$freeTalkHobby$ru implements Translations$rolePl
 	@override String get title => 'Talking About Hobbies';
 	@override String get screenplay => 'Chat freely about free-time activities, ask follow-up questions, share preferences, and suggest trying something new together.';
 	@override late final _Translations$rolePlayPage$freeTalkHobby$chat$ru chat = _Translations$rolePlayPage$freeTalkHobby$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.freeTalkDisagree
+class _Translations$rolePlayPage$freeTalkDisagree$ru implements Translations$rolePlayPage$freeTalkDisagree$en {
+	_Translations$rolePlayPage$freeTalkDisagree$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Politely Disagreeing About Hobbies';
+	@override String get screenplay => 'Disagree politely about a hobby preference, explain your view, and keep the conversation friendly.';
+	@override late final _Translations$rolePlayPage$freeTalkDisagree$chat$ru chat = _Translations$rolePlayPage$freeTalkDisagree$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.freeTalkMovies
+class _Translations$rolePlayPage$freeTalkMovies$ru implements Translations$rolePlayPage$freeTalkMovies$en {
+	_Translations$rolePlayPage$freeTalkMovies$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking About Movies';
+	@override String get screenplay => 'Recommend a movie, ask about genres, and react to each other\'s favorites.';
+	@override late final _Translations$rolePlayPage$freeTalkMovies$chat$ru chat = _Translations$rolePlayPage$freeTalkMovies$chat$ru._(_root);
+}
+
+// Path: rolePlayPage.freeTalkWeekend
+class _Translations$rolePlayPage$freeTalkWeekend$ru implements Translations$rolePlayPage$freeTalkWeekend$en {
+	_Translations$rolePlayPage$freeTalkWeekend$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Talking About Weekend Plans';
+	@override String get screenplay => 'Share weekend plans, ask about theirs, and suggest a simple activity you could do together.';
+	@override late final _Translations$rolePlayPage$freeTalkWeekend$chat$ru chat = _Translations$rolePlayPage$freeTalkWeekend$chat$ru._(_root);
 }
 
 // Path: notificationsPage.translation
@@ -1732,6 +2291,51 @@ class _Translations$rolePlayPage$coffee$chat$ru implements Translations$rolePlay
 	@override String get botReply => 'Отличный выбор. Что-то еще к вашему заказу?';
 }
 
+// Path: rolePlayPage.coffeeQueue.chat
+class _Translations$rolePlayPage$coffeeQueue$chat$ru implements Translations$rolePlayPage$coffeeQueue$chat$en {
+	_Translations$rolePlayPage$coffeeQueue$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice waiting in a coffee line — small talk, holding your place, and moving up. I\'ll explain a little first, then we\'ll act it out. Ready?';
+	@override String get incoming1 => 'This line is moving slowly today, huh?';
+	@override String get outgoing1 => 'Yeah — mornings are always busy here.';
+	@override String get incoming2Highlight => 'True';
+	@override String get incoming2Rest => '! Are you getting the usual, or trying something new?';
+	@override String get botReply => 'Nice. Looks like you\'re next — good luck with your order!';
+}
+
+// Path: rolePlayPage.coffeeRecommendation.chat
+class _Translations$rolePlayPage$coffeeRecommendation$chat$ru implements Translations$rolePlayPage$coffeeRecommendation$chat$en {
+	_Translations$rolePlayPage$coffeeRecommendation$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking a barista for recommendations — flavors, sizes, milk options. I\'ll explain a little first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'Hey! Need a suggestion, or do you already know what you want?';
+	@override String get outgoing1 => 'I\'d love a recommendation — something not too bitter.';
+	@override String get incoming2Highlight => 'Perfect';
+	@override String get incoming2Rest => '! Our honey oat latte is popular, or the caramel cold brew if you want iced.';
+	@override String get botReply => 'Great pick. What size should I make that?';
+}
+
+// Path: rolePlayPage.coffeeWrongOrder.chat
+class _Translations$rolePlayPage$coffeeWrongOrder$chat$ru implements Translations$rolePlayPage$coffeeWrongOrder$chat$en {
+	_Translations$rolePlayPage$coffeeWrongOrder$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice fixing a wrong coffee order — staying polite, explaining the mistake, and asking for a remake. I\'ll teach a few phrases first, then we\'ll act it out. Ready?';
+	@override String get incoming1 => 'Here\'s your order — medium iced latte. Enjoy!';
+	@override String get outgoing1 => 'Sorry, I think this might be wrong. I asked for a hot oat milk latte.';
+	@override String get incoming2Highlight => 'Oh no';
+	@override String get incoming2Rest => ' — my mistake! I\'ll remake that for you right away.';
+	@override String get botReply => 'Thanks for your patience. Hot oat milk latte coming up.';
+}
+
 // Path: rolePlayPage.directions.chat
 class _Translations$rolePlayPage$directions$chat$ru implements Translations$rolePlayPage$directions$chat$en {
 	_Translations$rolePlayPage$directions$chat$ru._(this._root);
@@ -1745,6 +2349,51 @@ class _Translations$rolePlayPage$directions$chat$ru implements Translations$role
 	@override String get incoming2Highlight => 'Конечно';
 	@override String get incoming2Rest => '! Идите два квартала в ту сторону, затем поверните налево. Вы увидите вход.';
 	@override String get botReply => 'Пожалуйста! Хотите совет по ресторану рядом со станцией?';
+}
+
+// Path: rolePlayPage.directionsWrongWay.chat
+class _Translations$rolePlayPage$directionsWrongWay$chat$ru implements Translations$rolePlayPage$directionsWrongWay$chat$en {
+	_Translations$rolePlayPage$directionsWrongWay$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice fixing wrong directions politely. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'Did you find the park?';
+	@override String get outgoing1 => 'I think I went the wrong way. Could you explain it again with landmarks?';
+	@override String get incoming2Highlight => 'Of course';
+	@override String get incoming2Rest => ' — walk past the red bookstore, then left at the fountain.';
+	@override String get botReply => 'If you see the bakery, you\'ve gone too far.';
+}
+
+// Path: rolePlayPage.directionsTransit.chat
+class _Translations$rolePlayPage$directionsTransit$chat$ru implements Translations$rolePlayPage$directionsTransit$chat$en {
+	_Translations$rolePlayPage$directionsTransit$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking about bus and subway routes. I\'ll explain first, then we\'ll act it out. Sound good?';
+	@override String get incoming1 => 'Need transit help?';
+	@override String get outgoing1 => 'Yes — which subway line goes to the museum?';
+	@override String get incoming2Highlight => 'Take the blue line';
+	@override String get incoming2Rest => ' three stops, then transfer to the green line.';
+	@override String get botReply => 'The whole trip is about twenty minutes.';
+}
+
+// Path: rolePlayPage.directionsLost.chat
+class _Translations$rolePlayPage$directionsLost$chat$ru implements Translations$rolePlayPage$directionsLost$chat$en {
+	_Translations$rolePlayPage$directionsLost$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking for help when you\'re lost. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'You look a little lost — need a hand?';
+	@override String get outgoing1 => 'Yes, please. I\'m trying to find City Hall.';
+	@override String get incoming2Highlight => 'Easy';
+	@override String get incoming2Rest => ' — go straight two blocks, then turn right.';
+	@override String get botReply => 'Want me to point it out on the map too?';
 }
 
 // Path: rolePlayPage.interview.chat
@@ -1762,6 +2411,51 @@ class _Translations$rolePlayPage$interview$chat$ru implements Translations$roleP
 	@override String get botReply => 'Это впечатляет. Какие у вас есть вопросы о роли?';
 }
 
+// Path: rolePlayPage.interviewSalary.chat
+class _Translations$rolePlayPage$interviewSalary$chat$ru implements Translations$rolePlayPage$interviewSalary$chat$en {
+	_Translations$rolePlayPage$interviewSalary$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice discussing salary expectations professionally. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'What are your salary expectations for this role?';
+	@override String get outgoing1 => 'I\'m looking for a range around market average for this level. Could you share your band?';
+	@override String get incoming2Highlight => 'Sure';
+	@override String get incoming2Rest => '. Benefits also include remote days and learning budget.';
+	@override String get botReply => 'Are benefits important in your decision?';
+}
+
+// Path: rolePlayPage.interviewExperience.chat
+class _Translations$rolePlayPage$interviewExperience$chat$ru implements Translations$rolePlayPage$interviewExperience$chat$en {
+	_Translations$rolePlayPage$interviewExperience$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice describing work experience clearly. I\'ll explain first, then we\'ll act it out. Sound good?';
+	@override String get incoming1 => 'Tell me about your most recent role.';
+	@override String get outgoing1 => 'I coordinated a small team and improved our delivery time.';
+	@override String get incoming2Highlight => 'Interesting';
+	@override String get incoming2Rest => '. By how much did you improve it?';
+	@override String get botReply => 'What was the hardest part of that job?';
+}
+
+// Path: rolePlayPage.interviewStrengths.chat
+class _Translations$rolePlayPage$interviewStrengths$chat$ru implements Translations$rolePlayPage$interviewStrengths$chat$en {
+	_Translations$rolePlayPage$interviewStrengths$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice talking about your strengths in an interview. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'What would you say are your biggest strengths?';
+	@override String get outgoing1 => 'I\'m organized and I communicate clearly with teammates.';
+	@override String get incoming2Highlight => 'Good';
+	@override String get incoming2Rest => '. Can you give a quick example?';
+	@override String get botReply => 'How do those strengths help in this role?';
+}
+
 // Path: rolePlayPage.missedTrain.chat
 class _Translations$rolePlayPage$missedTrain$chat$ru implements Translations$rolePlayPage$missedTrain$chat$en {
 	_Translations$rolePlayPage$missedTrain$chat$ru._(this._root);
@@ -1775,6 +2469,51 @@ class _Translations$rolePlayPage$missedTrain$chat$ru implements Translations$rol
 	@override String get incoming2Highlight => 'No problem';
 	@override String get incoming2Rest => '. Let me check the next available train for you.';
 	@override String get botReply => 'Would you prefer the fastest option or the cheapest one?';
+}
+
+// Path: rolePlayPage.missedTrainRefund.chat
+class _Translations$rolePlayPage$missedTrainRefund$chat$ru implements Translations$rolePlayPage$missedTrainRefund$chat$en {
+	_Translations$rolePlayPage$missedTrainRefund$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking about rebooking or refunds after a missed train. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'How can I help?';
+	@override String get outgoing1 => 'My first train was delayed and I missed the connection. Can I rebook for free?';
+	@override String get incoming2Highlight => 'Yes';
+	@override String get incoming2Rest => ' — I\'ll put you on the next available train.';
+	@override String get botReply => 'Would you like an email confirmation too?';
+}
+
+// Path: rolePlayPage.missedTrainTicket.chat
+class _Translations$rolePlayPage$missedTrainTicket$chat$ru implements Translations$rolePlayPage$missedTrainTicket$chat$en {
+	_Translations$rolePlayPage$missedTrainTicket$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice fixing ticket issues after missing a train. I\'ll explain first, then we\'ll act it out. Sound good?';
+	@override String get incoming1 => 'Ticket problems?';
+	@override String get outgoing1 => 'I missed my train. Is this ticket still valid for the next one?';
+	@override String get incoming2Highlight => 'Yes';
+	@override String get incoming2Rest => ' for the next two hours on the same route.';
+	@override String get botReply => 'Just show it at the gate — you\'re fine.';
+}
+
+// Path: rolePlayPage.missedTrainNext.chat
+class _Translations$rolePlayPage$missedTrainNext$chat$ru implements Translations$rolePlayPage$missedTrainNext$chat$en {
+	_Translations$rolePlayPage$missedTrainNext$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice finding the next train after missing yours. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'Can I help you?';
+	@override String get outgoing1 => 'I just missed the 10:15 to Boston. When\'s the next one?';
+	@override String get incoming2Highlight => 'Next is 10:45';
+	@override String get incoming2Rest => ' from platform 3.';
+	@override String get botReply => 'Do you need help with the ticket gate?';
 }
 
 // Path: rolePlayPage.flightAttendant.chat
@@ -1792,6 +2531,51 @@ class _Translations$rolePlayPage$flightAttendant$chat$ru implements Translations
 	@override String get botReply => 'Would you like something to drink — water, juice, coffee, or tea?';
 }
 
+// Path: rolePlayPage.flightDelay.chat
+class _Translations$rolePlayPage$flightDelay$chat$ru implements Translations$rolePlayPage$flightDelay$chat$en {
+	_Translations$rolePlayPage$flightDelay$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking about delays and connections on a flight. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'We\'ll be delayed about forty minutes.';
+	@override String get outgoing1 => 'I have a tight connection. Will I still make it?';
+	@override String get incoming2Highlight => 'We\'ll try';
+	@override String get incoming2Rest => '. I\'ll radio ahead if needed.';
+	@override String get botReply => 'Do you need gate information for the next flight?';
+}
+
+// Path: rolePlayPage.flightSpecialMeal.chat
+class _Translations$rolePlayPage$flightSpecialMeal$chat$ru implements Translations$rolePlayPage$flightSpecialMeal$chat$en {
+	_Translations$rolePlayPage$flightSpecialMeal$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking for a special meal on a flight. I\'ll explain first, then we\'ll act it out. Ready?';
+	@override String get incoming1 => 'We\'re serving dinner soon.';
+	@override String get outgoing1 => 'Do you have a vegetarian option?';
+	@override String get incoming2Highlight => 'Yes';
+	@override String get incoming2Rest => ' — pasta or salad box.';
+	@override String get botReply => 'I\'ll bring it with the next cart.';
+}
+
+// Path: rolePlayPage.flightSeat.chat
+class _Translations$rolePlayPage$flightSeat$chat$ru implements Translations$rolePlayPage$flightSeat$chat$en {
+	_Translations$rolePlayPage$flightSeat$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking a flight attendant to change seats. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'Need anything before takeoff?';
+	@override String get outgoing1 => 'Could I move to an aisle seat if one is free?';
+	@override String get incoming2Highlight => 'Let me check';
+	@override String get incoming2Rest => '… yes, 14C is open.';
+	@override String get botReply => 'I\'ll move your bag tag too.';
+}
+
 // Path: rolePlayPage.trainTicket.chat
 class _Translations$rolePlayPage$trainTicket$chat$ru implements Translations$rolePlayPage$trainTicket$chat$en {
 	_Translations$rolePlayPage$trainTicket$chat$ru._(this._root);
@@ -1805,6 +2589,51 @@ class _Translations$rolePlayPage$trainTicket$chat$ru implements Translations$rol
 	@override String get incoming2Highlight => 'Great';
 	@override String get incoming2Rest => '. When would you like to travel?';
 	@override String get botReply => 'Would you like a one-way or return ticket?';
+}
+
+// Path: rolePlayPage.trainTicketUpgrade.chat
+class _Translations$rolePlayPage$trainTicketUpgrade$chat$ru implements Translations$rolePlayPage$trainTicketUpgrade$chat$en {
+	_Translations$rolePlayPage$trainTicketUpgrade$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice upgrading a train seat or class. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'Need help with your ticket?';
+	@override String get outgoing1 => 'Can I upgrade to first class on this train?';
+	@override String get incoming2Highlight => 'Yes';
+	@override String get incoming2Rest => ' — seats are open for an extra forty dollars.';
+	@override String get botReply => 'Quiet car is cheaper if you prefer that.';
+}
+
+// Path: rolePlayPage.trainTicketPlatform.chat
+class _Translations$rolePlayPage$trainTicketPlatform$chat$ru implements Translations$rolePlayPage$trainTicketPlatform$chat$en {
+	_Translations$rolePlayPage$trainTicketPlatform$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice finding the right train platform. I\'ll explain first, then we\'ll act it out. Sound good?';
+	@override String get incoming1 => 'Looking for your platform?';
+	@override String get outgoing1 => 'Yes — the train to Chicago. Which platform is it?';
+	@override String get incoming2Highlight => 'Platform 7';
+	@override String get incoming2Rest => '. Elevators are on the left.';
+	@override String get botReply => 'Boarding starts in ten minutes.';
+}
+
+// Path: rolePlayPage.trainTicketChange.chat
+class _Translations$rolePlayPage$trainTicketChange$chat$ru implements Translations$rolePlayPage$trainTicketChange$chat$en {
+	_Translations$rolePlayPage$trainTicketChange$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice changing a train ticket time. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'Ticket desk — how can I help?';
+	@override String get outgoing1 => 'Can I change my 3 pm ticket to the 5 pm train?';
+	@override String get incoming2Highlight => 'Yes';
+	@override String get incoming2Rest => ', with a small change fee.';
+	@override String get botReply => 'I\'ll print the updated ticket now.';
 }
 
 // Path: rolePlayPage.restaurantReservation.chat
@@ -1822,6 +2651,51 @@ class _Translations$rolePlayPage$restaurantReservation$chat$ru implements Transl
 	@override String get botReply => 'How many people will be joining you?';
 }
 
+// Path: rolePlayPage.restaurantComplaint.chat
+class _Translations$rolePlayPage$restaurantComplaint$chat$ru implements Translations$rolePlayPage$restaurantComplaint$chat$en {
+	_Translations$rolePlayPage$restaurantComplaint$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice complaining politely at a restaurant. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'Is everything alright with your meal?';
+	@override String get outgoing1 => 'The pasta is cold. Could you remake it, please?';
+	@override String get incoming2Highlight => 'I\'m sorry';
+	@override String get incoming2Rest => ' — we\'ll remake it right away.';
+	@override String get botReply => 'Would you like a drink while you wait?';
+}
+
+// Path: rolePlayPage.restaurantAllergy.chat
+class _Translations$rolePlayPage$restaurantAllergy$chat$ru implements Translations$rolePlayPage$restaurantAllergy$chat$en {
+	_Translations$rolePlayPage$restaurantAllergy$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice talking about food allergies at a restaurant. I\'ll explain first, then we\'ll act it out. Sound good?';
+	@override String get incoming1 => 'Any allergies we should know about?';
+	@override String get outgoing1 => 'Yes — I\'m allergic to peanuts. Which dishes are safe?';
+	@override String get incoming2Highlight => 'Most pasta dishes';
+	@override String get incoming2Rest => ' are fine. I\'ll flag it for the kitchen.';
+	@override String get botReply => 'Would you like the chef\'s recommendation?';
+}
+
+// Path: rolePlayPage.restaurantChange.chat
+class _Translations$rolePlayPage$restaurantChange$chat$ru implements Translations$rolePlayPage$restaurantChange$chat$en {
+	_Translations$rolePlayPage$restaurantChange$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice changing a restaurant reservation. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'Reservation desk, how can I help?';
+	@override String get outgoing1 => 'I have a booking for 7. Can we move it to 8 for four people?';
+	@override String get incoming2Highlight => 'Sure';
+	@override String get incoming2Rest => ', 8 pm for four is available.';
+	@override String get botReply => 'I\'ll text you the confirmation.';
+}
+
 // Path: rolePlayPage.doctorAppointment.chat
 class _Translations$rolePlayPage$doctorAppointment$chat$ru implements Translations$rolePlayPage$doctorAppointment$chat$en {
 	_Translations$rolePlayPage$doctorAppointment$chat$ru._(this._root);
@@ -1835,6 +2709,51 @@ class _Translations$rolePlayPage$doctorAppointment$chat$ru implements Translatio
 	@override String get incoming2Highlight => 'Sure';
 	@override String get incoming2Rest => '. Have you visited our clinic before?';
 	@override String get botReply => 'What would you like to see the doctor about?';
+}
+
+// Path: rolePlayPage.doctorFollowUp.chat
+class _Translations$rolePlayPage$doctorFollowUp$chat$ru implements Translations$rolePlayPage$doctorFollowUp$chat$en {
+	_Translations$rolePlayPage$doctorFollowUp$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice talking about test results with a doctor. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'Your blood test results are back.';
+	@override String get outgoing1 => 'What do they mean? Do I need more tests?';
+	@override String get incoming2Highlight => 'Mostly normal';
+	@override String get incoming2Rest => '. One value is a bit high, so let\'s recheck in a month.';
+	@override String get botReply => 'Any questions before we finish?';
+}
+
+// Path: rolePlayPage.doctorPrescription.chat
+class _Translations$rolePlayPage$doctorPrescription$chat$ru implements Translations$rolePlayPage$doctorPrescription$chat$en {
+	_Translations$rolePlayPage$doctorPrescription$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking about medicine and prescriptions. I\'ll explain first, then we\'ll act it out. Ready?';
+	@override String get incoming1 => 'I\'m giving you this medicine twice a day.';
+	@override String get outgoing1 => 'Should I take it with food? Any side effects?';
+	@override String get incoming2Highlight => 'Yes';
+	@override String get incoming2Rest => ', with food. Mild drowsiness is possible.';
+	@override String get botReply => 'If it doesn\'t help in three days, call us.';
+}
+
+// Path: rolePlayPage.doctorSymptoms.chat
+class _Translations$rolePlayPage$doctorSymptoms$chat$ru implements Translations$rolePlayPage$doctorSymptoms$chat$en {
+	_Translations$rolePlayPage$doctorSymptoms$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice describing symptoms at a doctor\'s appointment. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'What brings you in today?';
+	@override String get outgoing1 => 'I\'ve had a sore throat for three days.';
+	@override String get incoming2Highlight => 'I see';
+	@override String get incoming2Rest => '. Any fever or cough?';
+	@override String get botReply => 'On a scale of one to ten, how bad is the pain?';
 }
 
 // Path: rolePlayPage.shoppingClothes.chat
@@ -1852,6 +2771,51 @@ class _Translations$rolePlayPage$shoppingClothes$chat$ru implements Translations
 	@override String get botReply => 'Would you prefer something casual or more formal?';
 }
 
+// Path: rolePlayPage.shoppingDiscount.chat
+class _Translations$rolePlayPage$shoppingDiscount$chat$ru implements Translations$rolePlayPage$shoppingDiscount$chat$en {
+	_Translations$rolePlayPage$shoppingDiscount$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking about discounts and sales. I\'ll teach a few phrases first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'That jacket looks great on you!';
+	@override String get outgoing1 => 'Thanks! Is it on sale, or do you have any discounts today?';
+	@override String get incoming2Highlight => 'Actually';
+	@override String get incoming2Rest => ', there\'s 20% off if you buy two items.';
+	@override String get botReply => 'Student discount is also available with ID.';
+}
+
+// Path: rolePlayPage.shoppingReturn.chat
+class _Translations$rolePlayPage$shoppingReturn$chat$ru implements Translations$rolePlayPage$shoppingReturn$chat$en {
+	_Translations$rolePlayPage$shoppingReturn$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice returning an item — being polite, explaining why, and asking for a refund. I\'ll explain first, then we\'ll act it out. Sound good?';
+	@override String get incoming1 => 'Hi! How can I help you today?';
+	@override String get outgoing1 => 'I\'d like to return this shirt. It doesn\'t fit well.';
+	@override String get incoming2Highlight => 'No problem';
+	@override String get incoming2Rest => '. Do you have the receipt with you?';
+	@override String get botReply => 'Would you prefer a refund or an exchange?';
+}
+
+// Path: rolePlayPage.shoppingFittingRoom.chat
+class _Translations$rolePlayPage$shoppingFittingRoom$chat$ru implements Translations$rolePlayPage$shoppingFittingRoom$chat$en {
+	_Translations$rolePlayPage$shoppingFittingRoom$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice in a fitting room — sizes, colors, and deciding to buy. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'How\'s that size working for you?';
+	@override String get outgoing1 => 'It\'s a bit tight. Do you have a larger size?';
+	@override String get incoming2Highlight => 'Sure';
+	@override String get incoming2Rest => '! I\'ll grab the next size for you.';
+	@override String get botReply => 'Want to try another color while I check?';
+}
+
 // Path: rolePlayPage.takingTaxi.chat
 class _Translations$rolePlayPage$takingTaxi$chat$ru implements Translations$rolePlayPage$takingTaxi$chat$en {
 	_Translations$rolePlayPage$takingTaxi$chat$ru._(this._root);
@@ -1865,6 +2829,51 @@ class _Translations$rolePlayPage$takingTaxi$chat$ru implements Translations$role
 	@override String get incoming2Highlight => 'Got it';
 	@override String get incoming2Rest => '. Do you have the exact address?';
 	@override String get botReply => 'Would you prefer the fastest route?';
+}
+
+// Path: rolePlayPage.taxiComplaint.chat
+class _Translations$rolePlayPage$taxiComplaint$chat$ru implements Translations$rolePlayPage$taxiComplaint$chat$en {
+	_Translations$rolePlayPage$taxiComplaint$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice handling a problem in a taxi politely. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'We\'re almost there.';
+	@override String get outgoing1 => 'Sorry, but this isn\'t the address I gave. Can we fix that?';
+	@override String get incoming2Highlight => 'Oh';
+	@override String get incoming2Rest => ' — my mistake. I\'ll turn around right away.';
+	@override String get botReply => 'Thanks for telling me. No extra charge.';
+}
+
+// Path: rolePlayPage.taxiTraffic.chat
+class _Translations$rolePlayPage$taxiTraffic$chat$ru implements Translations$rolePlayPage$taxiTraffic$chat$en {
+	_Translations$rolePlayPage$taxiTraffic$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice talking about traffic and alternate routes in a taxi. I\'ll explain first, then we\'ll act it out. Ready?';
+	@override String get incoming1 => 'Traffic is heavy on the highway.';
+	@override String get outgoing1 => 'Is there a faster route through the city?';
+	@override String get incoming2Highlight => 'Yes';
+	@override String get incoming2Rest => ', but there are more lights. It might still be quicker.';
+	@override String get botReply => 'Want me to take the city route?';
+}
+
+// Path: rolePlayPage.taxiFare.chat
+class _Translations$rolePlayPage$taxiFare$chat$ru implements Translations$rolePlayPage$taxiFare$chat$en {
+	_Translations$rolePlayPage$taxiFare$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking about taxi fares. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'Where to?';
+	@override String get outgoing1 => 'To the airport, please. About how much will it cost?';
+	@override String get incoming2Highlight => 'Around thirty';
+	@override String get incoming2Rest => ', depending on traffic.';
+	@override String get botReply => 'Card and cash are both fine.';
 }
 
 // Path: rolePlayPage.rentingApartment.chat
@@ -1882,6 +2891,51 @@ class _Translations$rolePlayPage$rentingApartment$chat$ru implements Translation
 	@override String get botReply => 'Do you need a furnished or unfurnished apartment?';
 }
 
+// Path: rolePlayPage.rentingApartmentNegotiate.chat
+class _Translations$rolePlayPage$rentingApartmentNegotiate$chat$ru implements Translations$rolePlayPage$rentingApartmentNegotiate$chat$en {
+	_Translations$rolePlayPage$rentingApartmentNegotiate$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice negotiating rent and lease terms. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'The rent is thirteen hundred plus utilities.';
+	@override String get outgoing1 => 'Could you do twelve fifty if I sign a longer lease?';
+	@override String get incoming2Highlight => 'Possibly';
+	@override String get incoming2Rest => ' for a 18-month lease. Deposit is still one month.';
+	@override String get botReply => 'Are pets allowed with an extra fee?';
+}
+
+// Path: rolePlayPage.rentingApartmentAgent.chat
+class _Translations$rolePlayPage$rentingApartmentAgent$chat$ru implements Translations$rolePlayPage$rentingApartmentAgent$chat$en {
+	_Translations$rolePlayPage$rentingApartmentAgent$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice talking with a real estate agent about rentals. I\'ll explain first, then we\'ll act it out. Ready?';
+	@override String get incoming1 => 'What kind of apartment are you looking for?';
+	@override String get outgoing1 => 'A one-bedroom near the subway, under twelve hundred a month.';
+	@override String get incoming2Highlight => 'Perfect';
+	@override String get incoming2Rest => '. I have three options in that range.';
+	@override String get botReply => 'Do you prefer furnished or unfurnished?';
+}
+
+// Path: rolePlayPage.rentingApartmentTour.chat
+class _Translations$rolePlayPage$rentingApartmentTour$chat$ru implements Translations$rolePlayPage$rentingApartmentTour$chat$en {
+	_Translations$rolePlayPage$rentingApartmentTour$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice talking about an apartment during a viewing. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'Here\'s the living room — what do you think?';
+	@override String get outgoing1 => 'It\'s nice. Does it get much sunlight in the afternoon?';
+	@override String get incoming2Highlight => 'Yes';
+	@override String get incoming2Rest => ', especially from these windows.';
+	@override String get botReply => 'Want to see the kitchen and balcony next?';
+}
+
 // Path: rolePlayPage.birthdayParty.chat
 class _Translations$rolePlayPage$birthdayParty$chat$ru implements Translations$rolePlayPage$birthdayParty$chat$en {
 	_Translations$rolePlayPage$birthdayParty$chat$ru._(this._root);
@@ -1895,6 +2949,51 @@ class _Translations$rolePlayPage$birthdayParty$chat$ru implements Translations$r
 	@override String get incoming2Highlight => 'Nice';
 	@override String get incoming2Rest => '! When should we have the party?';
 	@override String get botReply => 'Would you rather have the party at home or at a restaurant?';
+}
+
+// Path: rolePlayPage.birthdaySurprise.chat
+class _Translations$rolePlayPage$birthdaySurprise$chat$ru implements Translations$rolePlayPage$birthdaySurprise$chat$en {
+	_Translations$rolePlayPage$birthdaySurprise$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice planning a surprise party without spoiling it. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'Is everything ready for the surprise?';
+	@override String get outgoing1 => 'Almost — can you distract her until 7?';
+	@override String get incoming2Highlight => 'Got it';
+	@override String get incoming2Rest => '. What if she finishes work early?';
+	@override String get botReply => 'Text me and I\'ll stall with coffee.';
+}
+
+// Path: rolePlayPage.birthdayGifts.chat
+class _Translations$rolePlayPage$birthdayGifts$chat$ru implements Translations$rolePlayPage$birthdayGifts$chat$en {
+	_Translations$rolePlayPage$birthdayGifts$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice talking about birthday gifts. I\'ll explain first, then we\'ll act it out. Sound good?';
+	@override String get incoming1 => 'What should we get for Emma?';
+	@override String get outgoing1 => 'Maybe a book or headphones. What\'s our budget?';
+	@override String get incoming2Highlight => 'Around thirty';
+	@override String get incoming2Rest => ' each if we go together.';
+	@override String get botReply => 'Want to shop online or in store?';
+}
+
+// Path: rolePlayPage.birthdayInvite.chat
+class _Translations$rolePlayPage$birthdayInvite$chat$ru implements Translations$rolePlayPage$birthdayInvite$chat$en {
+	_Translations$rolePlayPage$birthdayInvite$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice inviting guests to a birthday party. I\'ll explain first, then we\'ll role-play. Ready?';
+	@override String get incoming1 => 'What\'s up?';
+	@override String get outgoing1 => 'I\'m hosting a birthday party on Saturday. Can you come?';
+	@override String get incoming2Highlight => 'Yes';
+	@override String get incoming2Rest => '! What time does it start?';
+	@override String get botReply => 'Should I bring anything?';
 }
 
 // Path: rolePlayPage.flirtingMeet.chat
@@ -1912,6 +3011,51 @@ class _Translations$rolePlayPage$flirtingMeet$chat$ru implements Translations$ro
 	@override String get botReply => 'Nice to meet you. Do you come here often?';
 }
 
+// Path: rolePlayPage.flirtingAwkward.chat
+class _Translations$rolePlayPage$flirtingAwkward$chat$ru implements Translations$rolePlayPage$flirtingAwkward$chat$en {
+	_Translations$rolePlayPage$flirtingAwkward$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice handling an awkward moment in a flirty chat — light apology and recovery. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'Wait… I think you mixed up my name.';
+	@override String get outgoing1 => 'Oh no — sorry! That was embarrassing. Can we start over?';
+	@override String get incoming2Highlight => 'Haha, sure';
+	@override String get incoming2Rest => '. I\'m Maya.';
+	@override String get botReply => 'No hard feelings. What were we talking about?';
+}
+
+// Path: rolePlayPage.flirtingAskOut.chat
+class _Translations$rolePlayPage$flirtingAskOut$chat$ru implements Translations$rolePlayPage$flirtingAskOut$chat$en {
+	_Translations$rolePlayPage$flirtingAskOut$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice asking someone out politely. I\'ll explain first, then we\'ll act it out. Ready?';
+	@override String get incoming1 => 'I\'ve really enjoyed talking with you.';
+	@override String get outgoing1 => 'Me too. Would you like to grab coffee sometime this week?';
+	@override String get incoming2Highlight => 'I\'d love that';
+	@override String get incoming2Rest => '. What day works for you?';
+	@override String get botReply => 'Saturday afternoon is free for me.';
+}
+
+// Path: rolePlayPage.flirtingCompliment.chat
+class _Translations$rolePlayPage$flirtingCompliment$chat$ru implements Translations$rolePlayPage$flirtingCompliment$chat$en {
+	_Translations$rolePlayPage$flirtingCompliment$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice giving a friendly compliment — short, kind, and natural. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'Oh, excuse me — I almost bumped into you.';
+	@override String get outgoing1 => 'No worries! By the way, I like your jacket.';
+	@override String get incoming2Highlight => 'Thanks';
+	@override String get incoming2Rest => '! That\'s sweet of you to say.';
+	@override String get botReply => 'Are you waiting for someone, or just hanging out?';
+}
+
 // Path: rolePlayPage.freeTalkHobby.chat
 class _Translations$rolePlayPage$freeTalkHobby$chat$ru implements Translations$rolePlayPage$freeTalkHobby$chat$en {
 	_Translations$rolePlayPage$freeTalkHobby$chat$ru._(this._root);
@@ -1925,6 +3069,51 @@ class _Translations$rolePlayPage$freeTalkHobby$chat$ru implements Translations$r
 	@override String get incoming2Highlight => 'Nice';
 	@override String get incoming2Rest => '! I\'ve been meaning to try hiking more. Any favorite trails?';
 	@override String get botReply => 'That sounds perfect. Want to go together sometime?';
+}
+
+// Path: rolePlayPage.freeTalkDisagree.chat
+class _Translations$rolePlayPage$freeTalkDisagree$chat$ru implements Translations$rolePlayPage$freeTalkDisagree$chat$en {
+	_Translations$rolePlayPage$freeTalkDisagree$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice disagreeing politely about hobbies. I\'ll explain first, then we\'ll role-play. Sound good?';
+	@override String get incoming1 => 'I think hiking is boring.';
+	@override String get outgoing1 => 'I get that — for me it\'s relaxing. What do you prefer instead?';
+	@override String get incoming2Highlight => 'Fair';
+	@override String get incoming2Rest => '. I like indoor climbing more.';
+	@override String get botReply => 'Maybe we can try each other\'s hobby once.';
+}
+
+// Path: rolePlayPage.freeTalkMovies.chat
+class _Translations$rolePlayPage$freeTalkMovies$chat$ru implements Translations$rolePlayPage$freeTalkMovies$chat$en {
+	_Translations$rolePlayPage$freeTalkMovies$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice talking about movies — genres, favorites, recommendations. I\'ll explain first, then we\'ll chat. Ready?';
+	@override String get incoming1 => 'Seen any good movies lately?';
+	@override String get outgoing1 => 'Yes — a comedy last week. Do you like comedies?';
+	@override String get incoming2Highlight => 'Love them';
+	@override String get incoming2Rest => '! Any titles you\'d recommend?';
+	@override String get botReply => 'I\'ll send you my top three tonight.';
+}
+
+// Path: rolePlayPage.freeTalkWeekend.chat
+class _Translations$rolePlayPage$freeTalkWeekend$chat$ru implements Translations$rolePlayPage$freeTalkWeekend$chat$en {
+	_Translations$rolePlayPage$freeTalkWeekend$chat$ru._(this._root);
+
+	final TranslationsRu _root; // ignore: unused_field
+
+	// Translations
+	@override String get briefing => 'Hi! Today we\'ll practice chatting about weekend plans. I\'ll explain first, then we\'ll talk. Sound good?';
+	@override String get incoming1 => 'Any plans for the weekend?';
+	@override String get outgoing1 => 'I might go to the park. What about you?';
+	@override String get incoming2Highlight => 'Nice';
+	@override String get incoming2Rest => '! I was thinking of a museum.';
+	@override String get botReply => 'Want to meet for a short walk on Sunday?';
 }
 
 // Path: profilePage.faqItems.supportedLanguages
@@ -2142,14 +3331,14 @@ extension on TranslationsRu {
 			'setup.progressInsightTitle' => 'Увидьте реальный прогресс всего за 2 недели!',
 			'setup.progressInsightBody' => 'Пользователи Lingola обычно замечают заметный рост уверенности в речи уже с самого начала.',
 			'setup.progressInsightConfidence' => 'Уверенность в речи',
-			'setup.progressInsightToday' => 'Today',
+			'setup.progressInsightToday' => 'Сегодня',
 			'setup.progressInsightWeek2' => '2-я неделя',
 			'setup.progressInsightWithLingola' => 'С Lingola',
 			'setup.progressInsightWithoutApp' => 'Без приложения',
 			'setup.levelHint' => 'Lingola создан, чтобы помогать ученикам любого уровня',
 			'setup.dailyPracticeTitle' => 'Сколько ты хочешь практиковать в день?',
 			'setup.dailyPracticeHint' => 'Иди в своём темпе — каждый день на шаг ближе.',
-			'setup.dailyPracticeMonthlyHours' => ({required Object hours}) => '${hours} / month',
+			'setup.dailyPracticeMonthlyHours' => ({required Object hours}) => '${hours} ч / месяц',
 			'setup.dailyPracticeOnlyMinutes' => ({required Object minutes}) => 'Всего ${minutes} мин в день',
 			'setup.dailyPracticeMinutesOption' => ({required Object minutes}) => '${minutes} мин',
 			'setup.dailyPracticeToday' => 'Сегодня',
@@ -2162,6 +3351,8 @@ extension on TranslationsRu {
 			'setup.practiceTimeSave' => 'Сохранить',
 			'setup.setPracticeTimeTitle' => 'Выбери время',
 			'setup.setPracticeTimeHint' => 'В каком промежутке времени ты хочешь практиковать?',
+			'setup.periodAm' => 'ДП',
+			'setup.periodPm' => 'ПП',
 			'setup.promiseTitle' => 'Я обещаю практиковать речь каждый день',
 			'setup.promiseBody' => 'И как можно быстрее достичь языковых целей с ИИ-тьюторами',
 			'setup.promiseHoldHint' => 'Удерживай логотип Lingola, чтобы подтвердить',
@@ -2175,22 +3366,22 @@ extension on TranslationsRu {
 			'accountCreating.stepPlan' => 'Ваш план завершается',
 			'accountCreating.optimization' => 'Оптимизация',
 			'accountCreating.progress' => ({required Object value}) => '${value}%',
-			'accountCreating.titleLine1' => 'Building your',
-			'accountCreating.titleLine2' => 'Account',
-			'accountCreating.testimonialQuote' => 'Week one I could barely say hello. Week three I was having full conversations with my AI tutor. I\'m not stopping now.',
-			'accountCreating.testimonialAuthor' => 'Maria, 29 — 3 months in',
-			'accountCreating.comparisonPitch' => 'Learn 600+ extra phrases about 30× faster with Lingola than studying entirely on your own.',
+			'accountCreating.titleLine1' => 'Твой аккаунт',
+			'accountCreating.titleLine2' => 'создаётся',
+			'accountCreating.testimonialQuote' => 'В первую неделю я едва могла сказать «привет». На третьей уже вела полноценные разговоры с ИИ-тьютором. Я не останавливаюсь.',
+			'accountCreating.testimonialAuthor' => 'Мария, 29 — уже 3 месяца',
+			'accountCreating.comparisonPitch' => 'Учи больше 600 дополнительных фраз с Lingola примерно в 30× быстрее, чем в одиночку.',
 			'accountCreating.comparisonAloneCount' => '400',
 			'accountCreating.comparisonLingolaCount' => '1000',
-			'accountCreating.comparisonUnit' => 'PHRASES',
-			'accountCreating.comparisonAloneLabel' => 'On your own',
+			'accountCreating.comparisonUnit' => 'ФРАЗЫ',
+			'accountCreating.comparisonAloneLabel' => 'Самостоятельно',
 			'accountCreating.comparisonLingolaLabel' => 'Lingola',
-			'accountCreating.fluencyPitch' => 'From today to fluency — your next level is only 30 days away',
-			'accountCreating.chartToday' => 'Today',
-			'accountCreating.chartMid' => '15 Sep',
-			'accountCreating.chartEnd' => '30 Sep',
-			'planReady.titleLine1' => 'Your plan is',
-			'planReady.titleLine2' => 'Ready!',
+			'accountCreating.fluencyPitch' => 'От сегодня до беглости — следующий уровень всего через 30 дней',
+			'accountCreating.chartToday' => 'Сегодня',
+			'accountCreating.chartMid' => '15 сен',
+			'accountCreating.chartEnd' => '30 сен',
+			'planReady.titleLine1' => 'Твой план',
+			'planReady.titleLine2' => 'готов!',
 			'planReady.statBanner' => '95% of users see results within the first 7 days',
 			'planReady.planTitle' => ({required Object name}) => '${name}\'S PLAN',
 			'planReady.defaultName' => 'YOUR',
@@ -2199,7 +3390,7 @@ extension on TranslationsRu {
 			'planReady.fieldFocus' => 'FOCUS AREA',
 			'planReady.fieldDuration' => 'DURATION',
 			'planReady.fieldInterests' => 'ИНТЕРЕСЫ',
-			'planReady.startPlan' => 'Start my plan →',
+			'planReady.startPlan' => 'Начать мой план →',
 			'planReady.courseEnglish' => 'English',
 			'planReady.courseGerman' => 'German',
 			'planReady.courseFrench' => 'French',
@@ -2555,10 +3746,10 @@ extension on TranslationsRu {
 			'lessonPage.levels.a2.lessons.32' => 'Музыкальные предпочтения',
 			'lessonPage.levels.a2.lessons.33' => 'Спорт',
 			'lessonPage.levels.a2.lessons.34' => 'Правила гонки',
-			'lessonPage.levels.a2.lessons.35' => 'Оставить сообщение',
-			'lessonPage.levels.a2.lessons.36' => 'Запросы',
 			_ => null,
 		} ?? switch (path) {
+			'lessonPage.levels.a2.lessons.35' => 'Оставить сообщение',
+			'lessonPage.levels.a2.lessons.36' => 'Запросы',
 			'lessonPage.levels.a2.lessons.37' => 'Приглашения',
 			'lessonPage.levels.a2.lessons.38' => 'Опыт путешествий',
 			'lessonPage.levels.a2.lessons.39' => 'Прошедшее время 1',
@@ -2724,6 +3915,30 @@ extension on TranslationsRu {
 			'rolePlayPage.coffee.chat.incoming2Highlight' => 'Конечно',
 			'rolePlayPage.coffee.chat.incoming2Rest' => '! Хотите горячий или холодный, и какие-то добавки?',
 			'rolePlayPage.coffee.chat.botReply' => 'Отличный выбор. Что-то еще к вашему заказу?',
+			'rolePlayPage.coffeeQueue.title' => 'Waiting in the Coffee Line',
+			'rolePlayPage.coffeeQueue.screenplay' => 'Stand in line at a busy café, chat politely with the person ahead of you, hold your spot, and get ready to order when it\'s your turn.',
+			'rolePlayPage.coffeeQueue.chat.briefing' => 'Hi! Today we\'ll practice waiting in a coffee line — small talk, holding your place, and moving up. I\'ll explain a little first, then we\'ll act it out. Ready?',
+			'rolePlayPage.coffeeQueue.chat.incoming1' => 'This line is moving slowly today, huh?',
+			'rolePlayPage.coffeeQueue.chat.outgoing1' => 'Yeah — mornings are always busy here.',
+			'rolePlayPage.coffeeQueue.chat.incoming2Highlight' => 'True',
+			'rolePlayPage.coffeeQueue.chat.incoming2Rest' => '! Are you getting the usual, or trying something new?',
+			'rolePlayPage.coffeeQueue.chat.botReply' => 'Nice. Looks like you\'re next — good luck with your order!',
+			'rolePlayPage.coffeeRecommendation.title' => 'Asking for a Drink Recommendation',
+			'rolePlayPage.coffeeRecommendation.screenplay' => 'Ask the barista what they recommend, compare a few drinks, choose size and milk options, then place your order confidently.',
+			'rolePlayPage.coffeeRecommendation.chat.briefing' => 'Hi! Today we\'ll practice asking a barista for recommendations — flavors, sizes, milk options. I\'ll explain a little first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.coffeeRecommendation.chat.incoming1' => 'Hey! Need a suggestion, or do you already know what you want?',
+			'rolePlayPage.coffeeRecommendation.chat.outgoing1' => 'I\'d love a recommendation — something not too bitter.',
+			'rolePlayPage.coffeeRecommendation.chat.incoming2Highlight' => 'Perfect',
+			'rolePlayPage.coffeeRecommendation.chat.incoming2Rest' => '! Our honey oat latte is popular, or the caramel cold brew if you want iced.',
+			'rolePlayPage.coffeeRecommendation.chat.botReply' => 'Great pick. What size should I make that?',
+			'rolePlayPage.coffeeWrongOrder.title' => 'Fixing a Wrong Coffee Order',
+			'rolePlayPage.coffeeWrongOrder.screenplay' => 'Politely explain that your drink is wrong, describe what you ordered, ask for a remake or swap, and thank the barista.',
+			'rolePlayPage.coffeeWrongOrder.chat.briefing' => 'Hi! Today we\'ll practice fixing a wrong coffee order — staying polite, explaining the mistake, and asking for a remake. I\'ll teach a few phrases first, then we\'ll act it out. Ready?',
+			'rolePlayPage.coffeeWrongOrder.chat.incoming1' => 'Here\'s your order — medium iced latte. Enjoy!',
+			'rolePlayPage.coffeeWrongOrder.chat.outgoing1' => 'Sorry, I think this might be wrong. I asked for a hot oat milk latte.',
+			'rolePlayPage.coffeeWrongOrder.chat.incoming2Highlight' => 'Oh no',
+			'rolePlayPage.coffeeWrongOrder.chat.incoming2Rest' => ' — my mistake! I\'ll remake that for you right away.',
+			'rolePlayPage.coffeeWrongOrder.chat.botReply' => 'Thanks for your patience. Hot oat milk latte coming up.',
 			'rolePlayPage.directions.title' => 'Спросить Направление на Улице',
 			'rolePlayPage.directions.screenplay' => 'Спросите направление к месту, узнайте, как добраться до метро или автобуса, получите информацию о билетах и послушайте рекомендации по ресторанам.',
 			'rolePlayPage.directions.chat.briefing' => 'Привет! Сегодня мы будем практиковаться в том, как спрашивать направление на улице. Сначала я немного объясню, а потом мы разыграем. Звучит хорошо?',
@@ -2732,6 +3947,30 @@ extension on TranslationsRu {
 			'rolePlayPage.directions.chat.incoming2Highlight' => 'Конечно',
 			'rolePlayPage.directions.chat.incoming2Rest' => '! Идите два квартала в ту сторону, затем поверните налево. Вы увидите вход.',
 			'rolePlayPage.directions.chat.botReply' => 'Пожалуйста! Хотите совет по ресторану рядом со станцией?',
+			'rolePlayPage.directionsWrongWay.title' => 'Correcting Wrong Directions',
+			'rolePlayPage.directionsWrongWay.screenplay' => 'Realize the directions were wrong, politely check again, and get clearer landmark-based instructions.',
+			'rolePlayPage.directionsWrongWay.chat.briefing' => 'Hi! Today we\'ll practice fixing wrong directions politely. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.directionsWrongWay.chat.incoming1' => 'Did you find the park?',
+			'rolePlayPage.directionsWrongWay.chat.outgoing1' => 'I think I went the wrong way. Could you explain it again with landmarks?',
+			'rolePlayPage.directionsWrongWay.chat.incoming2Highlight' => 'Of course',
+			'rolePlayPage.directionsWrongWay.chat.incoming2Rest' => ' — walk past the red bookstore, then left at the fountain.',
+			'rolePlayPage.directionsWrongWay.chat.botReply' => 'If you see the bakery, you\'ve gone too far.',
+			'rolePlayPage.directionsTransit.title' => 'Asking About Bus or Subway Routes',
+			'rolePlayPage.directionsTransit.screenplay' => 'Ask which line to take, how many stops, and where to transfer to reach your destination.',
+			'rolePlayPage.directionsTransit.chat.briefing' => 'Hi! Today we\'ll practice asking about bus and subway routes. I\'ll explain first, then we\'ll act it out. Sound good?',
+			'rolePlayPage.directionsTransit.chat.incoming1' => 'Need transit help?',
+			'rolePlayPage.directionsTransit.chat.outgoing1' => 'Yes — which subway line goes to the museum?',
+			'rolePlayPage.directionsTransit.chat.incoming2Highlight' => 'Take the blue line',
+			'rolePlayPage.directionsTransit.chat.incoming2Rest' => ' three stops, then transfer to the green line.',
+			'rolePlayPage.directionsTransit.chat.botReply' => 'The whole trip is about twenty minutes.',
+			'rolePlayPage.directionsLost.title' => 'Asking for Help When You\'re Lost',
+			'rolePlayPage.directionsLost.screenplay' => 'Admit you\'re lost, describe where you need to go, and confirm the directions before you leave.',
+			'rolePlayPage.directionsLost.chat.briefing' => 'Hi! Today we\'ll practice asking for help when you\'re lost. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.directionsLost.chat.incoming1' => 'You look a little lost — need a hand?',
+			'rolePlayPage.directionsLost.chat.outgoing1' => 'Yes, please. I\'m trying to find City Hall.',
+			'rolePlayPage.directionsLost.chat.incoming2Highlight' => 'Easy',
+			'rolePlayPage.directionsLost.chat.incoming2Rest' => ' — go straight two blocks, then turn right.',
+			'rolePlayPage.directionsLost.chat.botReply' => 'Want me to point it out on the map too?',
 			'rolePlayPage.interview.title' => 'Собеседование',
 			'rolePlayPage.interview.screenplay' => 'Представьтесь, ответьте на общие вопросы собеседования, расскажите о своем опыте и спросите о роли и следующих шагах.',
 			'rolePlayPage.interview.chat.briefing' => 'Привет! Сегодня мы будем практиковаться в собеседовании. Сначала я немного объясню, а потом мы разыграем — я буду вас интервьюировать, а потом мы поменяемся. Звучит хорошо?',
@@ -2740,6 +3979,30 @@ extension on TranslationsRu {
 			'rolePlayPage.interview.chat.incoming2Highlight' => 'Замечательно',
 			'rolePlayPage.interview.chat.incoming2Rest' => '. Расскажите о недавнем проекте, которым вы гордитесь.',
 			'rolePlayPage.interview.chat.botReply' => 'Это впечатляет. Какие у вас есть вопросы о роли?',
+			'rolePlayPage.interviewSalary.title' => 'Discussing Salary Expectations',
+			'rolePlayPage.interviewSalary.screenplay' => 'Talk about salary range politely, ask about benefits, and keep the tone professional.',
+			'rolePlayPage.interviewSalary.chat.briefing' => 'Hi! Today we\'ll practice discussing salary expectations professionally. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.interviewSalary.chat.incoming1' => 'What are your salary expectations for this role?',
+			'rolePlayPage.interviewSalary.chat.outgoing1' => 'I\'m looking for a range around market average for this level. Could you share your band?',
+			'rolePlayPage.interviewSalary.chat.incoming2Highlight' => 'Sure',
+			'rolePlayPage.interviewSalary.chat.incoming2Rest' => '. Benefits also include remote days and learning budget.',
+			'rolePlayPage.interviewSalary.chat.botReply' => 'Are benefits important in your decision?',
+			'rolePlayPage.interviewExperience.title' => 'Describing Work Experience',
+			'rolePlayPage.interviewExperience.screenplay' => 'Walk through a recent role, your responsibilities, and one achievement with numbers if possible.',
+			'rolePlayPage.interviewExperience.chat.briefing' => 'Hi! Today we\'ll practice describing work experience clearly. I\'ll explain first, then we\'ll act it out. Sound good?',
+			'rolePlayPage.interviewExperience.chat.incoming1' => 'Tell me about your most recent role.',
+			'rolePlayPage.interviewExperience.chat.outgoing1' => 'I coordinated a small team and improved our delivery time.',
+			'rolePlayPage.interviewExperience.chat.incoming2Highlight' => 'Interesting',
+			'rolePlayPage.interviewExperience.chat.incoming2Rest' => '. By how much did you improve it?',
+			'rolePlayPage.interviewExperience.chat.botReply' => 'What was the hardest part of that job?',
+			'rolePlayPage.interviewStrengths.title' => 'Talking About Your Strengths',
+			'rolePlayPage.interviewStrengths.screenplay' => 'Describe two strengths with short examples and connect them to the job.',
+			'rolePlayPage.interviewStrengths.chat.briefing' => 'Hi! Today we\'ll practice talking about your strengths in an interview. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.interviewStrengths.chat.incoming1' => 'What would you say are your biggest strengths?',
+			'rolePlayPage.interviewStrengths.chat.outgoing1' => 'I\'m organized and I communicate clearly with teammates.',
+			'rolePlayPage.interviewStrengths.chat.incoming2Highlight' => 'Good',
+			'rolePlayPage.interviewStrengths.chat.incoming2Rest' => '. Can you give a quick example?',
+			'rolePlayPage.interviewStrengths.chat.botReply' => 'How do those strengths help in this role?',
 			'rolePlayPage.customScenarios' => 'Your scenarios',
 			'rolePlayPage.createOwnScenario' => 'Создай свой сценарий!',
 			'rolePlayPage.createOwnScenarioTitle' => 'Create your scenario',
@@ -2766,6 +4029,30 @@ extension on TranslationsRu {
 			'rolePlayPage.missedTrain.chat.incoming2Highlight' => 'No problem',
 			'rolePlayPage.missedTrain.chat.incoming2Rest' => '. Let me check the next available train for you.',
 			'rolePlayPage.missedTrain.chat.botReply' => 'Would you prefer the fastest option or the cheapest one?',
+			'rolePlayPage.missedTrainRefund.title' => 'Asking About Rebooking or a Refund',
+			'rolePlayPage.missedTrainRefund.screenplay' => 'Ask about rebooking, refunds, or compensation after missing a connection due to a delay.',
+			'rolePlayPage.missedTrainRefund.chat.briefing' => 'Hi! Today we\'ll practice asking about rebooking or refunds after a missed train. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.missedTrainRefund.chat.incoming1' => 'How can I help?',
+			'rolePlayPage.missedTrainRefund.chat.outgoing1' => 'My first train was delayed and I missed the connection. Can I rebook for free?',
+			'rolePlayPage.missedTrainRefund.chat.incoming2Highlight' => 'Yes',
+			'rolePlayPage.missedTrainRefund.chat.incoming2Rest' => ' — I\'ll put you on the next available train.',
+			'rolePlayPage.missedTrainRefund.chat.botReply' => 'Would you like an email confirmation too?',
+			'rolePlayPage.missedTrainTicket.title' => 'Fixing a Ticket After Missing a Train',
+			'rolePlayPage.missedTrainTicket.screenplay' => 'Ask whether your ticket is still valid, if you can board the next train, and what to do at the gate.',
+			'rolePlayPage.missedTrainTicket.chat.briefing' => 'Hi! Today we\'ll practice fixing ticket issues after missing a train. I\'ll explain first, then we\'ll act it out. Sound good?',
+			'rolePlayPage.missedTrainTicket.chat.incoming1' => 'Ticket problems?',
+			'rolePlayPage.missedTrainTicket.chat.outgoing1' => 'I missed my train. Is this ticket still valid for the next one?',
+			'rolePlayPage.missedTrainTicket.chat.incoming2Highlight' => 'Yes',
+			'rolePlayPage.missedTrainTicket.chat.incoming2Rest' => ' for the next two hours on the same route.',
+			'rolePlayPage.missedTrainTicket.chat.botReply' => 'Just show it at the gate — you\'re fine.',
+			'rolePlayPage.missedTrainNext.title' => 'Finding the Next Train',
+			'rolePlayPage.missedTrainNext.screenplay' => 'Explain you missed your train and ask when the next one leaves and which platform to use.',
+			'rolePlayPage.missedTrainNext.chat.briefing' => 'Hi! Today we\'ll practice finding the next train after missing yours. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.missedTrainNext.chat.incoming1' => 'Can I help you?',
+			'rolePlayPage.missedTrainNext.chat.outgoing1' => 'I just missed the 10:15 to Boston. When\'s the next one?',
+			'rolePlayPage.missedTrainNext.chat.incoming2Highlight' => 'Next is 10:45',
+			'rolePlayPage.missedTrainNext.chat.incoming2Rest' => ' from platform 3.',
+			'rolePlayPage.missedTrainNext.chat.botReply' => 'Do you need help with the ticket gate?',
 			'rolePlayPage.flightAttendant.title' => 'Talking to a Flight Attendant',
 			'rolePlayPage.flightAttendant.screenplay' => 'You\'re a passenger on a flight. Find your seat, get help with luggage, choose food and drinks, and ask for anything you need during the flight.',
 			'rolePlayPage.flightAttendant.chat.briefing' => 'Hi! Today we\'ll practice talking to a flight attendant on a plane — seats, luggage, meals. I\'ll explain first, then we\'ll act it out. Sound good?',
@@ -2774,6 +4061,30 @@ extension on TranslationsRu {
 			'rolePlayPage.flightAttendant.chat.incoming2Highlight' => 'Thank you',
 			'rolePlayPage.flightAttendant.chat.incoming2Rest' => '. Would you like some help finding your seat?',
 			'rolePlayPage.flightAttendant.chat.botReply' => 'Would you like something to drink — water, juice, coffee, or tea?',
+			'rolePlayPage.flightDelay.title' => 'Asking About a Delay or Connection',
+			'rolePlayPage.flightDelay.screenplay' => 'Ask why the flight is delayed, whether you\'ll make a connection, and what help is available.',
+			'rolePlayPage.flightDelay.chat.briefing' => 'Hi! Today we\'ll practice asking about delays and connections on a flight. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.flightDelay.chat.incoming1' => 'We\'ll be delayed about forty minutes.',
+			'rolePlayPage.flightDelay.chat.outgoing1' => 'I have a tight connection. Will I still make it?',
+			'rolePlayPage.flightDelay.chat.incoming2Highlight' => 'We\'ll try',
+			'rolePlayPage.flightDelay.chat.incoming2Rest' => '. I\'ll radio ahead if needed.',
+			'rolePlayPage.flightDelay.chat.botReply' => 'Do you need gate information for the next flight?',
+			'rolePlayPage.flightSpecialMeal.title' => 'Asking for a Special Meal',
+			'rolePlayPage.flightSpecialMeal.screenplay' => 'Ask about meal options, request vegetarian or other special meals, and confirm timing.',
+			'rolePlayPage.flightSpecialMeal.chat.briefing' => 'Hi! Today we\'ll practice asking for a special meal on a flight. I\'ll explain first, then we\'ll act it out. Ready?',
+			'rolePlayPage.flightSpecialMeal.chat.incoming1' => 'We\'re serving dinner soon.',
+			'rolePlayPage.flightSpecialMeal.chat.outgoing1' => 'Do you have a vegetarian option?',
+			'rolePlayPage.flightSpecialMeal.chat.incoming2Highlight' => 'Yes',
+			'rolePlayPage.flightSpecialMeal.chat.incoming2Rest' => ' — pasta or salad box.',
+			'rolePlayPage.flightSpecialMeal.chat.botReply' => 'I\'ll bring it with the next cart.',
+			'rolePlayPage.flightSeat.title' => 'Asking to Change Seats',
+			'rolePlayPage.flightSeat.screenplay' => 'Politely ask if you can switch seats for comfort, family, or a window/aisle preference.',
+			'rolePlayPage.flightSeat.chat.briefing' => 'Hi! Today we\'ll practice asking a flight attendant to change seats. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.flightSeat.chat.incoming1' => 'Need anything before takeoff?',
+			'rolePlayPage.flightSeat.chat.outgoing1' => 'Could I move to an aisle seat if one is free?',
+			'rolePlayPage.flightSeat.chat.incoming2Highlight' => 'Let me check',
+			'rolePlayPage.flightSeat.chat.incoming2Rest' => '… yes, 14C is open.',
+			'rolePlayPage.flightSeat.chat.botReply' => 'I\'ll move your bag tag too.',
 			'rolePlayPage.trainTicket.title' => 'Buying a Train Ticket',
 			'rolePlayPage.trainTicket.screenplay' => 'At a train station, tell the clerk where you\'re going, pick a departure time, choose ticket type and seat, and pay for your ticket.',
 			'rolePlayPage.trainTicket.chat.briefing' => 'Hi! Today we\'ll practice buying a train ticket at the counter. I\'ll teach useful phrases first, then we\'ll role-play. Ready?',
@@ -2782,6 +4093,30 @@ extension on TranslationsRu {
 			'rolePlayPage.trainTicket.chat.incoming2Highlight' => 'Great',
 			'rolePlayPage.trainTicket.chat.incoming2Rest' => '. When would you like to travel?',
 			'rolePlayPage.trainTicket.chat.botReply' => 'Would you like a one-way or return ticket?',
+			'rolePlayPage.trainTicketUpgrade.title' => 'Upgrading Your Seat or Class',
+			'rolePlayPage.trainTicketUpgrade.screenplay' => 'Ask about upgrading to quiet car or first class, compare prices, and complete the change.',
+			'rolePlayPage.trainTicketUpgrade.chat.briefing' => 'Hi! Today we\'ll practice upgrading a train seat or class. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.trainTicketUpgrade.chat.incoming1' => 'Need help with your ticket?',
+			'rolePlayPage.trainTicketUpgrade.chat.outgoing1' => 'Can I upgrade to first class on this train?',
+			'rolePlayPage.trainTicketUpgrade.chat.incoming2Highlight' => 'Yes',
+			'rolePlayPage.trainTicketUpgrade.chat.incoming2Rest' => ' — seats are open for an extra forty dollars.',
+			'rolePlayPage.trainTicketUpgrade.chat.botReply' => 'Quiet car is cheaper if you prefer that.',
+			'rolePlayPage.trainTicketPlatform.title' => 'Finding the Right Platform',
+			'rolePlayPage.trainTicketPlatform.screenplay' => 'Ask which platform your train leaves from and how to get there with luggage.',
+			'rolePlayPage.trainTicketPlatform.chat.briefing' => 'Hi! Today we\'ll practice finding the right train platform. I\'ll explain first, then we\'ll act it out. Sound good?',
+			'rolePlayPage.trainTicketPlatform.chat.incoming1' => 'Looking for your platform?',
+			'rolePlayPage.trainTicketPlatform.chat.outgoing1' => 'Yes — the train to Chicago. Which platform is it?',
+			'rolePlayPage.trainTicketPlatform.chat.incoming2Highlight' => 'Platform 7',
+			'rolePlayPage.trainTicketPlatform.chat.incoming2Rest' => '. Elevators are on the left.',
+			'rolePlayPage.trainTicketPlatform.chat.botReply' => 'Boarding starts in ten minutes.',
+			'rolePlayPage.trainTicketChange.title' => 'Changing Your Train Ticket Time',
+			'rolePlayPage.trainTicketChange.screenplay' => 'Ask to change departure time, check fees, and confirm the new ticket.',
+			'rolePlayPage.trainTicketChange.chat.briefing' => 'Hi! Today we\'ll practice changing a train ticket time. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.trainTicketChange.chat.incoming1' => 'Ticket desk — how can I help?',
+			'rolePlayPage.trainTicketChange.chat.outgoing1' => 'Can I change my 3 pm ticket to the 5 pm train?',
+			'rolePlayPage.trainTicketChange.chat.incoming2Highlight' => 'Yes',
+			'rolePlayPage.trainTicketChange.chat.incoming2Rest' => ', with a small change fee.',
+			'rolePlayPage.trainTicketChange.chat.botReply' => 'I\'ll print the updated ticket now.',
 			'rolePlayPage.restaurantReservation.title' => 'Making a Restaurant Reservation',
 			'rolePlayPage.restaurantReservation.screenplay' => 'Call or visit a restaurant to book a table — choose the date, time, number of guests, seating preference, and confirm your reservation.',
 			'rolePlayPage.restaurantReservation.chat.briefing' => 'Hi! Today we\'ll practice making a restaurant reservation. I\'ll explain a few phrases first, then we\'ll act it out. Sound good?',
@@ -2790,6 +4125,30 @@ extension on TranslationsRu {
 			'rolePlayPage.restaurantReservation.chat.incoming2Highlight' => 'Of course',
 			'rolePlayPage.restaurantReservation.chat.incoming2Rest' => '. What day would you like to come?',
 			'rolePlayPage.restaurantReservation.chat.botReply' => 'How many people will be joining you?',
+			'rolePlayPage.restaurantComplaint.title' => 'Complaining Politely at a Restaurant',
+			'rolePlayPage.restaurantComplaint.screenplay' => 'Explain a problem with food or service calmly and ask for a fair fix.',
+			'rolePlayPage.restaurantComplaint.chat.briefing' => 'Hi! Today we\'ll practice complaining politely at a restaurant. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.restaurantComplaint.chat.incoming1' => 'Is everything alright with your meal?',
+			'rolePlayPage.restaurantComplaint.chat.outgoing1' => 'The pasta is cold. Could you remake it, please?',
+			'rolePlayPage.restaurantComplaint.chat.incoming2Highlight' => 'I\'m sorry',
+			'rolePlayPage.restaurantComplaint.chat.incoming2Rest' => ' — we\'ll remake it right away.',
+			'rolePlayPage.restaurantComplaint.chat.botReply' => 'Would you like a drink while you wait?',
+			'rolePlayPage.restaurantAllergy.title' => 'Talking About Food Allergies',
+			'rolePlayPage.restaurantAllergy.screenplay' => 'Explain allergies or diet needs, ask what\'s safe on the menu, and confirm with the staff.',
+			'rolePlayPage.restaurantAllergy.chat.briefing' => 'Hi! Today we\'ll practice talking about food allergies at a restaurant. I\'ll explain first, then we\'ll act it out. Sound good?',
+			'rolePlayPage.restaurantAllergy.chat.incoming1' => 'Any allergies we should know about?',
+			'rolePlayPage.restaurantAllergy.chat.outgoing1' => 'Yes — I\'m allergic to peanuts. Which dishes are safe?',
+			'rolePlayPage.restaurantAllergy.chat.incoming2Highlight' => 'Most pasta dishes',
+			'rolePlayPage.restaurantAllergy.chat.incoming2Rest' => ' are fine. I\'ll flag it for the kitchen.',
+			'rolePlayPage.restaurantAllergy.chat.botReply' => 'Would you like the chef\'s recommendation?',
+			'rolePlayPage.restaurantChange.title' => 'Changing a Restaurant Reservation',
+			'rolePlayPage.restaurantChange.screenplay' => 'Call to change the time or party size and confirm the new details.',
+			'rolePlayPage.restaurantChange.chat.briefing' => 'Hi! Today we\'ll practice changing a restaurant reservation. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.restaurantChange.chat.incoming1' => 'Reservation desk, how can I help?',
+			'rolePlayPage.restaurantChange.chat.outgoing1' => 'I have a booking for 7. Can we move it to 8 for four people?',
+			'rolePlayPage.restaurantChange.chat.incoming2Highlight' => 'Sure',
+			'rolePlayPage.restaurantChange.chat.incoming2Rest' => ', 8 pm for four is available.',
+			'rolePlayPage.restaurantChange.chat.botReply' => 'I\'ll text you the confirmation.',
 			'rolePlayPage.doctorAppointment.title' => 'Making a Doctor\'s Appointment',
 			'rolePlayPage.doctorAppointment.screenplay' => 'Call a clinic to book a doctor\'s appointment — explain why you need to visit, choose a day and time, and confirm your details.',
 			'rolePlayPage.doctorAppointment.chat.briefing' => 'Hi! Today we\'ll practice making a doctor\'s appointment by phone. I\'ll teach key phrases first, then we\'ll role-play. Ready?',
@@ -2798,6 +4157,30 @@ extension on TranslationsRu {
 			'rolePlayPage.doctorAppointment.chat.incoming2Highlight' => 'Sure',
 			'rolePlayPage.doctorAppointment.chat.incoming2Rest' => '. Have you visited our clinic before?',
 			'rolePlayPage.doctorAppointment.chat.botReply' => 'What would you like to see the doctor about?',
+			'rolePlayPage.doctorFollowUp.title' => 'Talking About Test Results',
+			'rolePlayPage.doctorFollowUp.screenplay' => 'Ask what results mean, next steps, and whether you need another appointment.',
+			'rolePlayPage.doctorFollowUp.chat.briefing' => 'Hi! Today we\'ll practice talking about test results with a doctor. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.doctorFollowUp.chat.incoming1' => 'Your blood test results are back.',
+			'rolePlayPage.doctorFollowUp.chat.outgoing1' => 'What do they mean? Do I need more tests?',
+			'rolePlayPage.doctorFollowUp.chat.incoming2Highlight' => 'Mostly normal',
+			'rolePlayPage.doctorFollowUp.chat.incoming2Rest' => '. One value is a bit high, so let\'s recheck in a month.',
+			'rolePlayPage.doctorFollowUp.chat.botReply' => 'Any questions before we finish?',
+			'rolePlayPage.doctorPrescription.title' => 'Asking About Medicine',
+			'rolePlayPage.doctorPrescription.screenplay' => 'Ask how to take medicine, about side effects, and when to come back if it doesn\'t help.',
+			'rolePlayPage.doctorPrescription.chat.briefing' => 'Hi! Today we\'ll practice asking about medicine and prescriptions. I\'ll explain first, then we\'ll act it out. Ready?',
+			'rolePlayPage.doctorPrescription.chat.incoming1' => 'I\'m giving you this medicine twice a day.',
+			'rolePlayPage.doctorPrescription.chat.outgoing1' => 'Should I take it with food? Any side effects?',
+			'rolePlayPage.doctorPrescription.chat.incoming2Highlight' => 'Yes',
+			'rolePlayPage.doctorPrescription.chat.incoming2Rest' => ', with food. Mild drowsiness is possible.',
+			'rolePlayPage.doctorPrescription.chat.botReply' => 'If it doesn\'t help in three days, call us.',
+			'rolePlayPage.doctorSymptoms.title' => 'Describing Your Symptoms',
+			'rolePlayPage.doctorSymptoms.screenplay' => 'Explain what hurts, when it started, and how strong the pain is.',
+			'rolePlayPage.doctorSymptoms.chat.briefing' => 'Hi! Today we\'ll practice describing symptoms at a doctor\'s appointment. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.doctorSymptoms.chat.incoming1' => 'What brings you in today?',
+			'rolePlayPage.doctorSymptoms.chat.outgoing1' => 'I\'ve had a sore throat for three days.',
+			'rolePlayPage.doctorSymptoms.chat.incoming2Highlight' => 'I see',
+			'rolePlayPage.doctorSymptoms.chat.incoming2Rest' => '. Any fever or cough?',
+			'rolePlayPage.doctorSymptoms.chat.botReply' => 'On a scale of one to ten, how bad is the pain?',
 			'rolePlayPage.shoppingClothes.title' => 'Shopping for Clothes',
 			'rolePlayPage.shoppingClothes.screenplay' => 'In a clothing store, tell the assistant what you\'re looking for, try items on, compare sizes and colors, and decide whether to buy.',
 			'rolePlayPage.shoppingClothes.chat.briefing' => 'Hi! Today we\'ll practice shopping for clothes in a store. I\'ll explain useful phrases first, then we\'ll role-play. Sound good?',
@@ -2806,6 +4189,30 @@ extension on TranslationsRu {
 			'rolePlayPage.shoppingClothes.chat.incoming2Highlight' => 'Sure',
 			'rolePlayPage.shoppingClothes.chat.incoming2Rest' => '. What size do you usually wear?',
 			'rolePlayPage.shoppingClothes.chat.botReply' => 'Would you prefer something casual or more formal?',
+			'rolePlayPage.shoppingDiscount.title' => 'Asking About a Discount',
+			'rolePlayPage.shoppingDiscount.screenplay' => 'Ask about sales, student discounts, or price matches, then decide whether the deal is worth it.',
+			'rolePlayPage.shoppingDiscount.chat.briefing' => 'Hi! Today we\'ll practice asking about discounts and sales. I\'ll teach a few phrases first, then we\'ll role-play. Ready?',
+			'rolePlayPage.shoppingDiscount.chat.incoming1' => 'That jacket looks great on you!',
+			'rolePlayPage.shoppingDiscount.chat.outgoing1' => 'Thanks! Is it on sale, or do you have any discounts today?',
+			'rolePlayPage.shoppingDiscount.chat.incoming2Highlight' => 'Actually',
+			'rolePlayPage.shoppingDiscount.chat.incoming2Rest' => ', there\'s 20% off if you buy two items.',
+			'rolePlayPage.shoppingDiscount.chat.botReply' => 'Student discount is also available with ID.',
+			'rolePlayPage.shoppingReturn.title' => 'Returning an Item to the Store',
+			'rolePlayPage.shoppingReturn.screenplay' => 'Return a purchase politely — explain the reason, show the receipt, and ask for a refund or exchange.',
+			'rolePlayPage.shoppingReturn.chat.briefing' => 'Hi! Today we\'ll practice returning an item — being polite, explaining why, and asking for a refund. I\'ll explain first, then we\'ll act it out. Sound good?',
+			'rolePlayPage.shoppingReturn.chat.incoming1' => 'Hi! How can I help you today?',
+			'rolePlayPage.shoppingReturn.chat.outgoing1' => 'I\'d like to return this shirt. It doesn\'t fit well.',
+			'rolePlayPage.shoppingReturn.chat.incoming2Highlight' => 'No problem',
+			'rolePlayPage.shoppingReturn.chat.incoming2Rest' => '. Do you have the receipt with you?',
+			'rolePlayPage.shoppingReturn.chat.botReply' => 'Would you prefer a refund or an exchange?',
+			'rolePlayPage.shoppingFittingRoom.title' => 'Trying Clothes in the Fitting Room',
+			'rolePlayPage.shoppingFittingRoom.screenplay' => 'Ask for a different size, check the mirror, and decide whether to buy the outfit.',
+			'rolePlayPage.shoppingFittingRoom.chat.briefing' => 'Hi! Today we\'ll practice in a fitting room — sizes, colors, and deciding to buy. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.shoppingFittingRoom.chat.incoming1' => 'How\'s that size working for you?',
+			'rolePlayPage.shoppingFittingRoom.chat.outgoing1' => 'It\'s a bit tight. Do you have a larger size?',
+			'rolePlayPage.shoppingFittingRoom.chat.incoming2Highlight' => 'Sure',
+			'rolePlayPage.shoppingFittingRoom.chat.incoming2Rest' => '! I\'ll grab the next size for you.',
+			'rolePlayPage.shoppingFittingRoom.chat.botReply' => 'Want to try another color while I check?',
 			'rolePlayPage.takingTaxi.title' => 'Taking a Taxi',
 			'rolePlayPage.takingTaxi.screenplay' => 'Get in a taxi in a new city, tell the driver where you\'re going, talk about the route, and pay at the end of the ride.',
 			'rolePlayPage.takingTaxi.chat.briefing' => 'Hi! Today we\'ll practice taking a taxi — giving your destination, chatting with the driver, and paying. I\'ll teach first, then we\'ll act it out. Ready?',
@@ -2814,6 +4221,30 @@ extension on TranslationsRu {
 			'rolePlayPage.takingTaxi.chat.incoming2Highlight' => 'Got it',
 			'rolePlayPage.takingTaxi.chat.incoming2Rest' => '. Do you have the exact address?',
 			'rolePlayPage.takingTaxi.chat.botReply' => 'Would you prefer the fastest route?',
+			'rolePlayPage.taxiComplaint.title' => 'Handling a Taxi Problem',
+			'rolePlayPage.taxiComplaint.screenplay' => 'Politely raise an issue — wrong route, AC, or fare — and ask for a fair solution.',
+			'rolePlayPage.taxiComplaint.chat.briefing' => 'Hi! Today we\'ll practice handling a problem in a taxi politely. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.taxiComplaint.chat.incoming1' => 'We\'re almost there.',
+			'rolePlayPage.taxiComplaint.chat.outgoing1' => 'Sorry, but this isn\'t the address I gave. Can we fix that?',
+			'rolePlayPage.taxiComplaint.chat.incoming2Highlight' => 'Oh',
+			'rolePlayPage.taxiComplaint.chat.incoming2Rest' => ' — my mistake. I\'ll turn around right away.',
+			'rolePlayPage.taxiComplaint.chat.botReply' => 'Thanks for telling me. No extra charge.',
+			'rolePlayPage.taxiTraffic.title' => 'Talking About Traffic and Routes',
+			'rolePlayPage.taxiTraffic.screenplay' => 'Discuss traffic, ask for a faster route, and decide whether to wait or take another way.',
+			'rolePlayPage.taxiTraffic.chat.briefing' => 'Hi! Today we\'ll practice talking about traffic and alternate routes in a taxi. I\'ll explain first, then we\'ll act it out. Ready?',
+			'rolePlayPage.taxiTraffic.chat.incoming1' => 'Traffic is heavy on the highway.',
+			'rolePlayPage.taxiTraffic.chat.outgoing1' => 'Is there a faster route through the city?',
+			'rolePlayPage.taxiTraffic.chat.incoming2Highlight' => 'Yes',
+			'rolePlayPage.taxiTraffic.chat.incoming2Rest' => ', but there are more lights. It might still be quicker.',
+			'rolePlayPage.taxiTraffic.chat.botReply' => 'Want me to take the city route?',
+			'rolePlayPage.taxiFare.title' => 'Asking About the Taxi Fare',
+			'rolePlayPage.taxiFare.screenplay' => 'Ask for an estimate before the ride, confirm payment options, and check the final amount at the end.',
+			'rolePlayPage.taxiFare.chat.briefing' => 'Hi! Today we\'ll practice asking about taxi fares. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.taxiFare.chat.incoming1' => 'Where to?',
+			'rolePlayPage.taxiFare.chat.outgoing1' => 'To the airport, please. About how much will it cost?',
+			'rolePlayPage.taxiFare.chat.incoming2Highlight' => 'Around thirty',
+			'rolePlayPage.taxiFare.chat.incoming2Rest' => ', depending on traffic.',
+			'rolePlayPage.taxiFare.chat.botReply' => 'Card and cash are both fine.',
 			'rolePlayPage.rentingApartment.title' => 'Renting an Apartment',
 			'rolePlayPage.rentingApartment.screenplay' => 'Talk to a landlord about a rental apartment — ask about rent, bills, deposit, pets, parking, and arrange a viewing.',
 			'rolePlayPage.rentingApartment.chat.briefing' => 'Hi! Today we\'ll practice talking to a landlord about renting an apartment. I\'ll explain key phrases first, then we\'ll role-play. Sound good?',
@@ -2822,6 +4253,32 @@ extension on TranslationsRu {
 			'rolePlayPage.rentingApartment.chat.incoming2Highlight' => 'Great',
 			'rolePlayPage.rentingApartment.chat.incoming2Rest' => '. When are you looking to move in?',
 			'rolePlayPage.rentingApartment.chat.botReply' => 'Do you need a furnished or unfurnished apartment?',
+			'rolePlayPage.rentingApartmentNegotiate.title' => 'Negotiating Rent and Lease Terms',
+			'rolePlayPage.rentingApartmentNegotiate.screenplay' => 'Negotiate rent, deposit, move-in date, and pet policy politely while staying clear about your limits.',
+			'rolePlayPage.rentingApartmentNegotiate.chat.briefing' => 'Hi! Today we\'ll practice negotiating rent and lease terms. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.rentingApartmentNegotiate.chat.incoming1' => 'The rent is thirteen hundred plus utilities.',
+			'rolePlayPage.rentingApartmentNegotiate.chat.outgoing1' => 'Could you do twelve fifty if I sign a longer lease?',
+			'rolePlayPage.rentingApartmentNegotiate.chat.incoming2Highlight' => 'Possibly',
+			'rolePlayPage.rentingApartmentNegotiate.chat.incoming2Rest' => ' for a 18-month lease. Deposit is still one month.',
+			_ => null,
+		} ?? switch (path) {
+			'rolePlayPage.rentingApartmentNegotiate.chat.botReply' => 'Are pets allowed with an extra fee?',
+			'rolePlayPage.rentingApartmentAgent.title' => 'Talking with a Real Estate Agent',
+			'rolePlayPage.rentingApartmentAgent.screenplay' => 'Talk to an agent about budget, location, lease length, and which listings match your needs.',
+			'rolePlayPage.rentingApartmentAgent.chat.briefing' => 'Hi! Today we\'ll practice talking with a real estate agent about rentals. I\'ll explain first, then we\'ll act it out. Ready?',
+			'rolePlayPage.rentingApartmentAgent.chat.incoming1' => 'What kind of apartment are you looking for?',
+			'rolePlayPage.rentingApartmentAgent.chat.outgoing1' => 'A one-bedroom near the subway, under twelve hundred a month.',
+			'rolePlayPage.rentingApartmentAgent.chat.incoming2Highlight' => 'Perfect',
+			'rolePlayPage.rentingApartmentAgent.chat.incoming2Rest' => '. I have three options in that range.',
+			'rolePlayPage.rentingApartmentAgent.chat.botReply' => 'Do you prefer furnished or unfurnished?',
+			'rolePlayPage.rentingApartmentTour.title' => 'Talking About the Apartment on a Tour',
+			'rolePlayPage.rentingApartmentTour.screenplay' => 'Ask about rooms, sunlight, noise, appliances, and whether furniture is included during a viewing.',
+			'rolePlayPage.rentingApartmentTour.chat.briefing' => 'Hi! Today we\'ll practice talking about an apartment during a viewing. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.rentingApartmentTour.chat.incoming1' => 'Here\'s the living room — what do you think?',
+			'rolePlayPage.rentingApartmentTour.chat.outgoing1' => 'It\'s nice. Does it get much sunlight in the afternoon?',
+			'rolePlayPage.rentingApartmentTour.chat.incoming2Highlight' => 'Yes',
+			'rolePlayPage.rentingApartmentTour.chat.incoming2Rest' => ', especially from these windows.',
+			'rolePlayPage.rentingApartmentTour.chat.botReply' => 'Want to see the kitchen and balcony next?',
 			'rolePlayPage.birthdayParty.title' => 'Planning a Birthday Party',
 			'rolePlayPage.birthdayParty.screenplay' => 'Plan a birthday party with a friend — pick the venue, date, guest list, food, cake, music, and activities together.',
 			'rolePlayPage.birthdayParty.chat.briefing' => 'Hi! Today we\'ll practice planning a birthday party with a friend. I\'ll teach useful phrases first, then we\'ll role-play. Ready?',
@@ -2830,6 +4287,30 @@ extension on TranslationsRu {
 			'rolePlayPage.birthdayParty.chat.incoming2Highlight' => 'Nice',
 			'rolePlayPage.birthdayParty.chat.incoming2Rest' => '! When should we have the party?',
 			'rolePlayPage.birthdayParty.chat.botReply' => 'Would you rather have the party at home or at a restaurant?',
+			'rolePlayPage.birthdaySurprise.title' => 'Planning a Surprise Party',
+			'rolePlayPage.birthdaySurprise.screenplay' => 'Keep the surprise secret, assign tasks, and handle last-minute changes without spoiling it.',
+			'rolePlayPage.birthdaySurprise.chat.briefing' => 'Hi! Today we\'ll practice planning a surprise party without spoiling it. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.birthdaySurprise.chat.incoming1' => 'Is everything ready for the surprise?',
+			'rolePlayPage.birthdaySurprise.chat.outgoing1' => 'Almost — can you distract her until 7?',
+			'rolePlayPage.birthdaySurprise.chat.incoming2Highlight' => 'Got it',
+			'rolePlayPage.birthdaySurprise.chat.incoming2Rest' => '. What if she finishes work early?',
+			'rolePlayPage.birthdaySurprise.chat.botReply' => 'Text me and I\'ll stall with coffee.',
+			'rolePlayPage.birthdayGifts.title' => 'Talking About Birthday Gifts',
+			'rolePlayPage.birthdayGifts.screenplay' => 'Discuss gift ideas, budget, and whether to buy something together.',
+			'rolePlayPage.birthdayGifts.chat.briefing' => 'Hi! Today we\'ll practice talking about birthday gifts. I\'ll explain first, then we\'ll act it out. Sound good?',
+			'rolePlayPage.birthdayGifts.chat.incoming1' => 'What should we get for Emma?',
+			'rolePlayPage.birthdayGifts.chat.outgoing1' => 'Maybe a book or headphones. What\'s our budget?',
+			'rolePlayPage.birthdayGifts.chat.incoming2Highlight' => 'Around thirty',
+			'rolePlayPage.birthdayGifts.chat.incoming2Rest' => ' each if we go together.',
+			'rolePlayPage.birthdayGifts.chat.botReply' => 'Want to shop online or in store?',
+			'rolePlayPage.birthdayInvite.title' => 'Inviting Guests to a Party',
+			'rolePlayPage.birthdayInvite.screenplay' => 'Invite friends, share the date and place, and ask who can come.',
+			'rolePlayPage.birthdayInvite.chat.briefing' => 'Hi! Today we\'ll practice inviting guests to a birthday party. I\'ll explain first, then we\'ll role-play. Ready?',
+			'rolePlayPage.birthdayInvite.chat.incoming1' => 'What\'s up?',
+			'rolePlayPage.birthdayInvite.chat.outgoing1' => 'I\'m hosting a birthday party on Saturday. Can you come?',
+			'rolePlayPage.birthdayInvite.chat.incoming2Highlight' => 'Yes',
+			'rolePlayPage.birthdayInvite.chat.incoming2Rest' => '! What time does it start?',
+			'rolePlayPage.birthdayInvite.chat.botReply' => 'Should I bring anything?',
 			'rolePlayPage.deleteFailed' => 'Не удалось удалить сценарий. Попробуйте ещё раз.',
 			'rolePlayPage.easy' => 'Лёгкий',
 			'rolePlayPage.medium' => 'Средний',
@@ -2854,6 +4335,30 @@ extension on TranslationsRu {
 			'rolePlayPage.flirtingMeet.chat.incoming2Highlight' => 'Thanks',
 			'rolePlayPage.flirtingMeet.chat.incoming2Rest' => '! I\'m Alex, by the way. What brings you here?',
 			'rolePlayPage.flirtingMeet.chat.botReply' => 'Nice to meet you. Do you come here often?',
+			'rolePlayPage.flirtingAwkward.title' => 'Handling an Awkward Moment',
+			'rolePlayPage.flirtingAwkward.screenplay' => 'Recover from a misunderstanding or awkward pause, apologize lightly, and steer the chat back to a comfortable topic.',
+			'rolePlayPage.flirtingAwkward.chat.briefing' => 'Hi! Today we\'ll practice handling an awkward moment in a flirty chat — light apology and recovery. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.flirtingAwkward.chat.incoming1' => 'Wait… I think you mixed up my name.',
+			'rolePlayPage.flirtingAwkward.chat.outgoing1' => 'Oh no — sorry! That was embarrassing. Can we start over?',
+			'rolePlayPage.flirtingAwkward.chat.incoming2Highlight' => 'Haha, sure',
+			'rolePlayPage.flirtingAwkward.chat.incoming2Rest' => '. I\'m Maya.',
+			'rolePlayPage.flirtingAwkward.chat.botReply' => 'No hard feelings. What were we talking about?',
+			'rolePlayPage.flirtingAskOut.title' => 'Asking Someone Out',
+			'rolePlayPage.flirtingAskOut.screenplay' => 'After a short chat, suggest meeting again — coffee, a walk, or a movie — and handle a yes or a soft no gracefully.',
+			'rolePlayPage.flirtingAskOut.chat.briefing' => 'Hi! Today we\'ll practice asking someone out politely. I\'ll explain first, then we\'ll act it out. Ready?',
+			'rolePlayPage.flirtingAskOut.chat.incoming1' => 'I\'ve really enjoyed talking with you.',
+			'rolePlayPage.flirtingAskOut.chat.outgoing1' => 'Me too. Would you like to grab coffee sometime this week?',
+			'rolePlayPage.flirtingAskOut.chat.incoming2Highlight' => 'I\'d love that',
+			'rolePlayPage.flirtingAskOut.chat.incoming2Rest' => '. What day works for you?',
+			'rolePlayPage.flirtingAskOut.chat.botReply' => 'Saturday afternoon is free for me.',
+			'rolePlayPage.flirtingCompliment.title' => 'Giving a Friendly Compliment',
+			'rolePlayPage.flirtingCompliment.screenplay' => 'Start with a light compliment, keep it respectful, and see if the other person wants to keep talking.',
+			'rolePlayPage.flirtingCompliment.chat.briefing' => 'Hi! Today we\'ll practice giving a friendly compliment — short, kind, and natural. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.flirtingCompliment.chat.incoming1' => 'Oh, excuse me — I almost bumped into you.',
+			'rolePlayPage.flirtingCompliment.chat.outgoing1' => 'No worries! By the way, I like your jacket.',
+			'rolePlayPage.flirtingCompliment.chat.incoming2Highlight' => 'Thanks',
+			'rolePlayPage.flirtingCompliment.chat.incoming2Rest' => '! That\'s sweet of you to say.',
+			'rolePlayPage.flirtingCompliment.chat.botReply' => 'Are you waiting for someone, or just hanging out?',
 			'rolePlayPage.freeTalkHobby.title' => 'Talking About Hobbies',
 			'rolePlayPage.freeTalkHobby.screenplay' => 'Chat freely about free-time activities, ask follow-up questions, share preferences, and suggest trying something new together.',
 			'rolePlayPage.freeTalkHobby.chat.briefing' => 'Hi! Today we\'ll practice free discussion about hobbies — asking, answering, and reacting naturally. I\'ll explain first, then we\'ll talk. Ready?',
@@ -2862,6 +4367,30 @@ extension on TranslationsRu {
 			'rolePlayPage.freeTalkHobby.chat.incoming2Highlight' => 'Nice',
 			'rolePlayPage.freeTalkHobby.chat.incoming2Rest' => '! I\'ve been meaning to try hiking more. Any favorite trails?',
 			'rolePlayPage.freeTalkHobby.chat.botReply' => 'That sounds perfect. Want to go together sometime?',
+			'rolePlayPage.freeTalkDisagree.title' => 'Politely Disagreeing About Hobbies',
+			'rolePlayPage.freeTalkDisagree.screenplay' => 'Disagree politely about a hobby preference, explain your view, and keep the conversation friendly.',
+			'rolePlayPage.freeTalkDisagree.chat.briefing' => 'Hi! Today we\'ll practice disagreeing politely about hobbies. I\'ll explain first, then we\'ll role-play. Sound good?',
+			'rolePlayPage.freeTalkDisagree.chat.incoming1' => 'I think hiking is boring.',
+			'rolePlayPage.freeTalkDisagree.chat.outgoing1' => 'I get that — for me it\'s relaxing. What do you prefer instead?',
+			'rolePlayPage.freeTalkDisagree.chat.incoming2Highlight' => 'Fair',
+			'rolePlayPage.freeTalkDisagree.chat.incoming2Rest' => '. I like indoor climbing more.',
+			'rolePlayPage.freeTalkDisagree.chat.botReply' => 'Maybe we can try each other\'s hobby once.',
+			'rolePlayPage.freeTalkMovies.title' => 'Talking About Movies',
+			'rolePlayPage.freeTalkMovies.screenplay' => 'Recommend a movie, ask about genres, and react to each other\'s favorites.',
+			'rolePlayPage.freeTalkMovies.chat.briefing' => 'Hi! Today we\'ll practice talking about movies — genres, favorites, recommendations. I\'ll explain first, then we\'ll chat. Ready?',
+			'rolePlayPage.freeTalkMovies.chat.incoming1' => 'Seen any good movies lately?',
+			'rolePlayPage.freeTalkMovies.chat.outgoing1' => 'Yes — a comedy last week. Do you like comedies?',
+			'rolePlayPage.freeTalkMovies.chat.incoming2Highlight' => 'Love them',
+			'rolePlayPage.freeTalkMovies.chat.incoming2Rest' => '! Any titles you\'d recommend?',
+			'rolePlayPage.freeTalkMovies.chat.botReply' => 'I\'ll send you my top three tonight.',
+			'rolePlayPage.freeTalkWeekend.title' => 'Talking About Weekend Plans',
+			'rolePlayPage.freeTalkWeekend.screenplay' => 'Share weekend plans, ask about theirs, and suggest a simple activity you could do together.',
+			'rolePlayPage.freeTalkWeekend.chat.briefing' => 'Hi! Today we\'ll practice chatting about weekend plans. I\'ll explain first, then we\'ll talk. Sound good?',
+			'rolePlayPage.freeTalkWeekend.chat.incoming1' => 'Any plans for the weekend?',
+			'rolePlayPage.freeTalkWeekend.chat.outgoing1' => 'I might go to the park. What about you?',
+			'rolePlayPage.freeTalkWeekend.chat.incoming2Highlight' => 'Nice',
+			'rolePlayPage.freeTalkWeekend.chat.incoming2Rest' => '! I was thinking of a museum.',
+			'rolePlayPage.freeTalkWeekend.chat.botReply' => 'Want to meet for a short walk on Sunday?',
 			'notificationsPage.title' => 'Уведомления',
 			'notificationsPage.deleteConfirmTitle' => 'Вы уверены?',
 			'notificationsPage.deleteConfirmBody' => 'Это уведомление будет удалено.',
@@ -2889,9 +4418,11 @@ extension on TranslationsRu {
 			'profilePage.general' => 'Общие',
 			'profilePage.profileSettings' => 'Настройки профиля',
 			'profilePage.fullName' => 'Полное имя',
+			'profilePage.changeName' => 'Изменить имя',
 			'profilePage.email' => 'Электронная почта',
 			'profilePage.deleteAccount' => 'Удалить аккаунт',
 			'profilePage.save' => 'СОХРАНИТЬ',
+			'profilePage.saveTitle' => 'Сохранить',
 			'profilePage.deleteTitle' => 'Мы не хотим, чтобы ты уходил, но мы понимаем.',
 			'profilePage.deleteBody' => 'Скажи нам, почему ты хочешь уйти, чтобы мы могли улучшить опыт использования Lingola?',
 			'profilePage.deleteReasons.aiCharacters' => 'Я не нашел персонажей с искусственным интеллектом реалистичными.',
@@ -2905,22 +4436,23 @@ extension on TranslationsRu {
 			'profilePage.next' => 'ДАЛЕЕ',
 			'profilePage.specialOfferTitle' => 'Специальное предложение',
 			'profilePage.specialOfferBody' => 'Посмотри на предложение, которое мы подготовили для тебя перед уходом.',
-			'profilePage.monthlyPlanTitle' => 'Перейти на месячный план',
-			'profilePage.monthlyPlanPrice' => '\$79/месяц, отмена в любое время',
-			'profilePage.monthlyPlanDesc' => 'Без долгосрочных обязательств. Оставайся на связи с нашим сообществом на месячной основе.',
+			'profilePage.monthlyPlanTitle' => 'Останься и получи скидку 50% на 1 год',
+			'profilePage.monthlyPlanPrice' => 'Наше лучшее предложение. Всего \$24,99/год',
+			'profilePage.monthlyPlanDesc' => 'Наше лучшее предложение — скидка 50% на годовой план.',
 			'profilePage.whatYoullKeep' => 'Что ты сохранишь:',
 			'profilePage.keepCharacters' => 'Доступ ко всем персонажам',
 			'profilePage.keepVideo' => 'Неограниченные видеозвонки',
 			'profilePage.keepCourses' => 'Доступ ко всем курсам',
-			'profilePage.switchMonthlyCta' => 'Перейти на месячный план',
+			'profilePage.switchMonthlyCta' => 'Принять скидку 50% и остаться',
 			'profilePage.confirmTitle' => 'Ты уверен?',
 			'profilePage.confirmBody' => 'Мы действительно не хотим, чтобы ты уходил. Вот что ты потеряешь:',
 			'profilePage.loseCharacters' => 'Неограниченный доступ к персонажам',
 			'profilePage.loseVideo' => 'Неограниченный доступ к видеозвонкам',
 			'profilePage.loseCourses' => 'Доступ ко всем курсам',
-			'profilePage.discountTitle' => 'Останься и получи 60% скидку на 1 месяц',
-			'profilePage.discountSubtitle' => 'Наше лучшее предложение. Всего \$27.60/месяц',
-			'profilePage.acceptDiscountCta' => 'Принять 60% скидку и остаться',
+			'profilePage.discountTitle' => 'Останься и получи скидку 50% на 1 год',
+			'profilePage.discountSubtitle' => 'Наше лучшее предложение. Всего \$24,99/год',
+			'profilePage.acceptDiscountCta' => 'Принять скидку 50% и остаться',
+			'profilePage.deleteCta' => 'DELETE',
 			'profilePage.farewellTitle' => 'Нам грустно видеть тебя уходящим',
 			'profilePage.farewellBody' => ({required Object date}) => 'Твое членство отменено. Ты будешь иметь доступ до конца текущего расчетного периода ${date}.',
 			'profilePage.changeMindTitle' => '✨ Передумал?',
@@ -2961,6 +4493,7 @@ extension on TranslationsRu {
 			'profilePage.shareInviteBody' => 'Пригласи своих друзей и наслаждайтесь переводом вместе',
 			'profilePage.rateUs' => 'Оцените нас',
 			'profilePage.faq' => 'Часто задаваемые вопросы Lingola',
+			'profilePage.contactUs' => 'Связаться с нами',
 			'profilePage.faqItems.supportedLanguages.question' => 'Какие языки поддерживает приложение?',
 			'profilePage.faqItems.supportedLanguages.answer' => 'Интерфейс Lingola доступен на английском, немецком, итальянском, французском, турецком, японском, испанском, русском, хинди, португальском и упрощённом китайском языках.',
 			'profilePage.faqItems.howAiWorks.question' => 'Как работает ИИ?',
@@ -3000,8 +4533,8 @@ extension on TranslationsRu {
 			'profilePage.logout' => 'Выйти',
 			'profilePage.logoutTitle' => 'Вы уверены, что хотите выйти?',
 			'profilePage.logoutBody' => 'Увидимся снова скоро! Нам будут не хватать твоих дыхательных упражнений.',
-			'profilePage.logoutConfirm' => 'LOGOUT',
-			'profilePage.logoutCancel' => 'CANCEL',
+			'profilePage.logoutConfirm' => 'ВЫЙТИ',
+			'profilePage.logoutCancel' => 'ОТМЕНА',
 			'profilePage.days.mon' => 'ПН',
 			'profilePage.days.tue' => 'ВТ',
 			'profilePage.days.wed' => 'СР',
@@ -3071,8 +4604,6 @@ extension on TranslationsRu {
 			'profilePage.restorePurchases' => 'Восстановить покупки',
 			'profilePage.aboutFlywork' => 'О Flywork',
 			'profilePage.faqHelp' => 'Частые вопросы и помощь',
-			_ => null,
-		} ?? switch (path) {
 			'profilePage.deleteAccountAndData' => 'Удалить аккаунт и данные',
 			'profilePage.interestShopping' => 'Шопинг',
 			'profilePage.interestFood' => 'Еда',
@@ -3099,6 +4630,13 @@ extension on TranslationsRu {
 			'profilePage.certificatesEmptySubtitle' => 'Не забудьте проверить снова, когда завершите уровень.',
 			'profilePage.restorePurchasesSuccess' => 'Покупки восстановлены.',
 			'profilePage.restorePurchasesEmpty' => 'Активные покупки для этого аккаунта не найдены.',
+			'profilePage.certificateListA1' => 'A1 - Сертификат стартового уровня',
+			'profilePage.certificateListA2' => 'A2 - Базовый сертификат',
+			'profilePage.certificateListB1' => 'B1 - Сертификат среднего уровня',
+			'profilePage.certificateListB2' => 'B2 - Сертификат выше среднего',
+			'profilePage.certificateListC1' => 'C1 - Продвинутый сертификат',
+			'profilePage.certificateListC2' => 'C2 - Экспертный сертификат',
+			'profilePage.certificateListGeneric' => ({required Object level}) => 'Сертификат ${level}',
 			'pushNotifications.title' => 'Lingola',
 			'pushNotifications.h2.0' => 'Похоже, вы сделали короткий перерыв.',
 			'pushNotifications.h2.1' => 'Есть минутка для одного слова?',

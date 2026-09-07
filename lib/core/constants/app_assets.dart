@@ -2,6 +2,9 @@
 abstract final class AppAssets {
   // —— Genel ——
   static const backArrow = 'assets/images/generalArrowIcon.svg';
+  /// Onboarding step geri oku — Figma 24×24.
+  static const onboardingBack = 'assets/images/onboarding/onboarding_back.png';
+  static const onboardingBackSize = 24.0;
   static const heart = 'assets/images/heart.svg';
   /// Figma silme ikonu — 36×36.
   static const deleteIcon = 'assets/images/deleteIcon.png';
@@ -19,6 +22,13 @@ abstract final class AppAssets {
   static const chatVideo = 'assets/images/chat_video.svg';
   static const chatActionMessage = 'assets/images/chat_action_message.svg';
   static const chatActionMic = 'assets/images/chat_action_mic.svg';
+  /// Hold-to-record bar — Figma klavye / kilit / çöp / ampul.
+  static const chatKeyboard = 'assets/iconsForTalking/kalvye.png';
+  static const chatLock = 'assets/images/chat/lock.png';
+  static const chatTrash = 'assets/images/chat/trash.png';
+  static const chatBulb = 'assets/iconsForTalking/light.png';
+  /// Ortadaki mikrofon glifi (beyaz).
+  static const chatTalkMic = 'assets/iconsForTalking/microphone.png';
   static const success = 'assets/images/quizSection/successful.png';
   static const failed = 'assets/images/quizSection/failed.png';
   static const homePractice = 'assets/images/quizSection/practice.png';
@@ -121,6 +131,7 @@ abstract final class AppAssets {
       'assets/images/profilIcons/bottomArrow.svg';
   static const profileSupport = 'assets/images/profilIcons/support.svg';
   static const profileFeedback = 'assets/images/profilIcons/feedback.svg';
+  static const profileContactMail = 'assets/images/profilIcons/contactMail.png';
   static const profileProgression =
       'assets/images/profilIcons/progression.svg';
   static const profileSaveButton =
@@ -146,6 +157,18 @@ abstract final class AppAssets {
   static const profileDiscount = 'assets/images/profilIcons/discount.svg';
   static const profileChain = 'assets/images/profilIcons/chain.svg';
   static const profileLock = 'assets/images/profilIcons/lock.svg';
+  static const profileDeleteOfferStars =
+      'assets/images/profilIcons/deleteOffer/stars.png';
+  static const profileDeleteOfferTutors =
+      'assets/images/profilIcons/deleteOffer/freeTutors.png';
+  static const profileDeleteOfferVideo =
+      'assets/images/profilIcons/deleteOffer/video.png';
+  static const profileDeleteOfferLessons =
+      'assets/images/profilIcons/deleteOffer/allLessons.png';
+  static const profileDeleteOfferTicket =
+      'assets/images/profilIcons/deleteOffer/getOffer.png';
+  static const profileDeleteAreYouSure =
+      'assets/images/profilIcons/deleteOffer/areYouSure.png';
   static const profileTargetLang =
       'assets/images/profilIcons/newProfileIcons/targetLang.png';
   static const profileLangLevel =
@@ -304,7 +327,7 @@ abstract final class AppAssets {
   static const tutorDiego = 'assets/images/profilIcons/tutor/diego.png';
   static const tutorAmara = 'assets/images/profilIcons/tutor/amara.png';
   static const tutorErik = 'assets/images/profilIcons/tutor/erik.png';
-  static const tutorKatie = 'assets/riv/Female/kaite.png';
+  static const tutorKatie = 'assets/images/profilIcons/tutor/katie.png';
   static const tutorMorgan = 'assets/images/profilIcons/tutor/morgan.png';
 
   // —— Calling ——
@@ -333,13 +356,15 @@ abstract final class AppAssets {
   static const tutorKenjiRiv = 'assets/riv/Male/avatar4.riv';
   static const tutorFreyaRiv = 'assets/riv/Female/avatar5.riv';
   static const tutorCamilaRiv = 'assets/riv/Female/avatar6.riv';
-  static const tutorMarcoRiv = 'assets/riv/Male/avatar2.riv';
-  static const tutorJulianRiv = 'assets/riv/Male/avatar1.riv';
+  // Male avatarN.riv dosya adları yüzlerle kaymıştı — doğru eşleme:
+  // avatar1=Erik, avatar2=Julian, avatar3=Marco
+  static const tutorMarcoRiv = 'assets/riv/Male/avatar3.riv';
+  static const tutorJulianRiv = 'assets/riv/Male/avatar2.riv';
   static const tutorInesRiv = 'assets/riv/Female/avatar2.riv';
   static const tutorFelixRiv = 'assets/riv/Male/avatar7.riv';
   static const tutorDiegoRiv = 'assets/riv/Male/avatar6.riv';
   static const tutorAmaraRiv = 'assets/riv/Female/avatar1.riv';
-  static const tutorErikRiv = 'assets/riv/Male/avatar3.riv';
+  static const tutorErikRiv = 'assets/riv/Male/avatar1.riv';
   static const tutorKatieRiv = 'assets/riv/Female/kaite.riv';
   static const tutorMorganRiv = 'assets/riv/morgan.riv';
 }

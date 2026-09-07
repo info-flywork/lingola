@@ -69,4 +69,9 @@ abstract final class AppLocaleSync {
     if (appLocale == null || appLocale.trim().isEmpty) return;
     await applyCode(appLocale);
   }
+
+  /// Oturum yokken / çıkış sonrası: telefon diline dön.
+  static Future<AppLocale> applyDeviceLocale() async {
+    return applyCode(deviceLocaleCode());
+  }
 }

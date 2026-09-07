@@ -156,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   pathSections: _remoteData?.pathSections,
                   onPathNodeTap: _onPathNodeTap,
                 ),
-                const SizedBox(height: 36),
+                const SizedBox(height: 16),
                 _LiveLessonSection(
                   title: text.home.liveLesson,
                   subtitle: text.home.liveLessonSubtitle,
@@ -388,10 +388,13 @@ class _LearningPathSectionState extends State<_LearningPathSection> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final viewportH = LessonPathView.viewportHeightForWidth(
-            constraints.maxWidth,
-            visibleNodes: 5,
-          );
+          // A1 başlığı + 4 node (Favori Oda); Günlük Rutin clip altında kalsın.
+          const levelTitleBlock = 32.0 + 12.0;
+          final viewportH = levelTitleBlock +
+              LessonPathView.viewportHeightForWidth(
+                constraints.maxWidth,
+                visibleNodes: 4,
+              );
           return SizedBox(
             height: viewportH,
             child: Stack(
@@ -747,9 +750,9 @@ class _HomeHeaderState extends State<_HomeHeader> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -795,13 +798,12 @@ class _ContinueConversationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = AppText.current;
-    final lessonLabel = data?.lessonLabel ?? text.home.lessonProgress;
     final remaining = data?.remainingMinutes ?? data?.totalMinutes ?? 15;
     final total = data?.totalMinutes ?? 15;
     final progressFactor = data?.progressFactor ?? 0.0;
     final timeCurrent = text.home.minutesLeft(value: remaining);
     final timeTotal = '/ ${total}min';
-    // Figma: 398×138, pad dikey 10, gap 10; üst satır space-between
+    // Figma: pad sıkı; üst “Sohbete Devam / ders adı” satırı yok — kart daha kısa.
     return Material(
       color: AppColors.primaryTint05,
       borderRadius: BorderRadius.circular(10),
@@ -810,43 +812,15 @@ class _ContinueConversationCard extends StatelessWidget {
         onTap: onContinue ?? () {},
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(10, 16, 10, 16),
+          padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
           child: Column(
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Text(
-                      text.home.continueConversation,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style:
-                          AppTextStyles.sectionSubtitle.copyWith(fontSize: 14),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    lessonLabel,
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      height: 16 / 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
               Row(
                 children: [
                   const HomeAsset(
                     'assets/images/home/clock_icon.svg',
-                    width: 24,
-                    height: 24,
+                    width: 22,
+                    height: 22,
                   ),
                   const SizedBox(width: 4),
                   Expanded(
@@ -857,16 +831,16 @@ class _ContinueConversationCard extends StatelessWidget {
                             text: timeCurrent,
                             style: const TextStyle(
                               color: AppColors.ink,
-                              fontSize: 24,
-                              height: 28 / 24,
+                              fontSize: 22,
+                              height: 26 / 22,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           TextSpan(
                             text: ' $timeTotal',
                             style: AppTextStyles.sectionSubtitle.copyWith(
-                              fontSize: 14,
-                              height: 18 / 14,
+                              fontSize: 13,
+                              height: 16 / 13,
                             ),
                           ),
                         ],
@@ -877,9 +851,9 @@ class _ContinueConversationCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    height: 32,
+                    height: 30,
                     constraints:
-                        const BoxConstraints(minWidth: 96, maxWidth: 120),
+                        const BoxConstraints(minWidth: 88, maxWidth: 110),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
@@ -892,8 +866,8 @@ class _ContinueConversationCard extends StatelessWidget {
                         text.home.kContinue,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
-                          height: 18 / 14,
+                          fontSize: 13,
+                          height: 16 / 13,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -901,7 +875,7 @@ class _ContinueConversationCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               ClipRRect(
                 borderRadius: BorderRadius.circular(999),
                 child: SizedBox(

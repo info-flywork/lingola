@@ -533,6 +533,23 @@ class CallingConversationController extends ChangeNotifier {
     await _stopAndTranscribe();
   }
 
+  /// Hold-to-record: sola kaydır / iptal — göndermeden kaydı sil.
+  Future<void> cancelListening() async {
+    if (_micStarting) {
+      _micStarting = false;
+      _listening = false;
+      unawaited(_mic.cancel());
+      _notify();
+      _scheduleIdleNudge();
+      return;
+    }
+    if (!_listening) return;
+    _listening = false;
+    await _mic.cancel();
+    _notify();
+    _scheduleIdleNudge();
+  }
+
   /// Dokun → kayıt; tekrar dokun → gönder.
   Future<void> toggleMic() async {
     if (_listening) {
@@ -779,21 +796,40 @@ class CallingConversationController extends ChangeNotifier {
 
   String get _effectiveSystemPrompt {
     final onboarding = SessionStore.currentUser?.onboarding;
+    final explanationLanguage = onboarding?.explanationLanguage;
+    final nativeLanguageCode = onboarding?.nativeLanguageCode;
     final base = systemPrompt ??
         TutorPersonality.freeTalkSystemPrompt(
           tutorSlug: tutorSlug,
           learnerFirstName: _learnerFirstName,
-          explanationLanguage: onboarding?.explanationLanguage,
-          nativeLanguageCode: onboarding?.nativeLanguageCode,
+          explanationLanguage: explanationLanguage,
+          nativeLanguageCode: nativeLanguageCode,
         );
     if (!lessonMode) return base;
+
+    final preferNative = explanationLanguage != 'english';
+    if (preferNative) {
+      final nativeBlock = TutorPersonality.explanationLanguageBlock(
+        explanationLanguage: explanationLanguage,
+        nativeLanguageCode: nativeLanguageCode,
+      );
+      return '''
+$base
+
+OVERRIDE — Profile preference "learn in native language" takes priority over any "English only" lesson rule above:
+$nativeBlock
+- Practice phrases and examples must still be in English.
+- One question at a time. Wait for their answer before a new topic or nudge.
+- Do not stack multiple greetings or "still there" messages.''';
+    }
+
     return '''
 $base
 
 CRITICAL — English LESSON (voice call):
-- Reply in simple English only. You are teaching English, not conversing in Turkish.
-- All examples must be in English (e.g. "My name is Ahmet", never "Benim adım Ahmet").
-- If the learner writes in Turkish, answer briefly in English ("Yes, I hear you!") then give ONE English phrase to try.
+- Reply in simple English only. You are teaching English, not conversing in the learner's native language.
+- All examples must be in English (e.g. "My name is Ahmet", never a native-language version of the phrase).
+- If the learner writes in their native language, answer briefly in English then give ONE English phrase to try.
 - One question at a time. Wait for their answer before a new topic or nudge.
 - Do not stack multiple greetings or "still there" messages.''';
   }

@@ -25,6 +25,35 @@ abstract final class RolePlayCatalog {
     return scenarioId.replaceFirst(RegExp(r'-(easy|medium|hard)$', caseSensitive: false), '');
   }
 
+  /// Her taban senaryodan bir temsilci (progress > beginner > ilk).
+  static List<RolePlayScenarioItem> uniqueByBase(
+    List<RolePlayScenarioItem> items,
+  ) {
+    if (items.isEmpty) return const [];
+    final order = <String>[];
+    final best = <String, RolePlayScenarioItem>{};
+    for (final item in items) {
+      final base = baseId(item.id);
+      if (!order.contains(base)) order.add(base);
+      final existing = best[base];
+      if (existing == null) {
+        best[base] = item;
+        continue;
+      }
+      final itemProgress = item.progress != null && item.progress! > 0.001;
+      final existingProgress =
+          existing.progress != null && existing.progress! > 0.001;
+      if (itemProgress && !existingProgress) {
+        best[base] = item;
+      } else if (!existingProgress &&
+          item.levelKey == 'beginner' &&
+          existing.levelKey != 'beginner') {
+        best[base] = item;
+      }
+    }
+    return [for (final id in order) best[id]!];
+  }
+
   static String categoryLabel(dynamic page, String key) {
     return switch (key) {
       'shopping' => page.shopping as String,
@@ -86,6 +115,95 @@ const rolePlayBaseCatalog = <RolePlayStaticMeta>[
   RolePlayStaticMeta(id: 'trainTicket', minutes: 6, categoryKey: 'travel'),
 ];
 
+/// Taban senaryo → zorluk başına farklı i18n titleKey.
+/// beginner her zaman base id; easy/medium/hard ayrı senaryo metinleri.
+const rolePlayVariantTitleKeys = <String, Map<String, String>>{
+  'coffee': {
+    'beginner': 'coffee',
+    'easy': 'coffeeQueue',
+    'medium': 'coffeeRecommendation',
+    'hard': 'coffeeWrongOrder',
+  },
+  'shoppingClothes': {
+    'beginner': 'shoppingClothes',
+    'easy': 'shoppingFittingRoom',
+    'medium': 'shoppingReturn',
+    'hard': 'shoppingDiscount',
+  },
+  'flirtingMeet': {
+    'beginner': 'flirtingMeet',
+    'easy': 'flirtingCompliment',
+    'medium': 'flirtingAskOut',
+    'hard': 'flirtingAwkward',
+  },
+  'directions': {
+    'beginner': 'directions',
+    'easy': 'directionsLost',
+    'medium': 'directionsTransit',
+    'hard': 'directionsWrongWay',
+  },
+  'takingTaxi': {
+    'beginner': 'takingTaxi',
+    'easy': 'taxiFare',
+    'medium': 'taxiTraffic',
+    'hard': 'taxiComplaint',
+  },
+  'missedTrain': {
+    'beginner': 'missedTrain',
+    'easy': 'missedTrainNext',
+    'medium': 'missedTrainTicket',
+    'hard': 'missedTrainRefund',
+  },
+  'freeTalkHobby': {
+    'beginner': 'freeTalkHobby',
+    'easy': 'freeTalkWeekend',
+    'medium': 'freeTalkMovies',
+    'hard': 'freeTalkDisagree',
+  },
+  'interview': {
+    'beginner': 'interview',
+    'easy': 'interviewStrengths',
+    'medium': 'interviewExperience',
+    'hard': 'interviewSalary',
+  },
+  'doctorAppointment': {
+    'beginner': 'doctorAppointment',
+    'easy': 'doctorSymptoms',
+    'medium': 'doctorPrescription',
+    'hard': 'doctorFollowUp',
+  },
+  'birthdayParty': {
+    'beginner': 'birthdayParty',
+    'easy': 'birthdayInvite',
+    'medium': 'birthdayGifts',
+    'hard': 'birthdaySurprise',
+  },
+  'rentingApartment': {
+    'beginner': 'rentingApartment',
+    'easy': 'rentingApartmentTour',
+    'medium': 'rentingApartmentAgent',
+    'hard': 'rentingApartmentNegotiate',
+  },
+  'restaurantReservation': {
+    'beginner': 'restaurantReservation',
+    'easy': 'restaurantChange',
+    'medium': 'restaurantAllergy',
+    'hard': 'restaurantComplaint',
+  },
+  'flightAttendant': {
+    'beginner': 'flightAttendant',
+    'easy': 'flightSeat',
+    'medium': 'flightSpecialMeal',
+    'hard': 'flightDelay',
+  },
+  'trainTicket': {
+    'beginner': 'trainTicket',
+    'easy': 'trainTicketChange',
+    'medium': 'trainTicketPlatform',
+    'hard': 'trainTicketUpgrade',
+  },
+};
+
 List<({String id, String titleKey, int minutes, String categoryKey, String levelKey})>
     expandRolePlayCatalog() {
   const diffs = [
@@ -99,12 +217,32 @@ List<({String id, String titleKey, int minutes, String categoryKey, String level
       for (final d in diffs)
         (
           id: '${base.id}${d.suffix}',
-          titleKey: base.titleKey ?? base.id,
+          titleKey: _variantTitleKey(base, d.key),
           minutes: base.minutes + d.delta,
           categoryKey: base.categoryKey,
           levelKey: d.key,
         ),
   ];
+}
+
+String _variantTitleKey(RolePlayStaticMeta base, String levelKey) {
+  final map = rolePlayVariantTitleKeys[base.id];
+  if (map != null) {
+    return map[levelKey] ?? base.titleKey ?? base.id;
+  }
+  return base.titleKey ?? base.id;
+}
+
+/// scenarioId (coffee-easy) → i18n titleKey (coffeeQueue).
+String rolePlayTitleKeyForScenarioId(String scenarioId) {
+  final base = RolePlayCatalog.baseId(scenarioId);
+  final level = switch (scenarioId) {
+    final s when s.endsWith('-hard') => 'hard',
+    final s when s.endsWith('-medium') => 'medium',
+    final s when s.endsWith('-easy') => 'easy',
+    _ => 'beginner',
+  };
+  return rolePlayVariantTitleKeys[base]?[level] ?? base;
 }
 
 /// Ortak senaryo modeli (liste + kategori ekranı).

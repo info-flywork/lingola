@@ -218,6 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'hi' => t.targetLanguage.hindi,
       'pt' => t.targetLanguage.portuguese,
       'zh' => t.targetLanguage.simplifiedChinese,
+      'ko' => t.targetLanguage.korean,
       _ => t.language.english,
     };
   }
@@ -235,6 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'hi' => '🇮🇳',
       'pt' => '🇵🇹',
       'zh' => '🇨🇳',
+      'ko' => '🇰🇷',
       _ => '🇬🇧',
     };
   }
@@ -274,7 +276,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _interestsValueLabel(List<String> ids) {
     if (ids.isEmpty) return '—';
-    return ids.map(_interestLabel).where((e) => e.isNotEmpty).join(', ');
+    final labels =
+        ids.map(_interestLabel).where((e) => e.isNotEmpty).toList(growable: false);
+    if (labels.isEmpty) return '—';
+    if (labels.length <= 2) return labels.join(', ');
+    return '${labels.take(2).join(', ')} ...';
   }
 
   String _paceLabel(String? pace) => DailyPace.label(AppText.current, pace);
@@ -833,7 +839,7 @@ class _LearnNativeToggleRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: AppColors.border10),
@@ -847,19 +853,15 @@ class _LearnNativeToggleRow extends StatelessWidget {
               style: _ProfileScreenState._rowTextStyle,
             ),
           ),
-          SizedBox(
-            width: 39,
-            height: 24,
-            child: FittedBox(
-              fit: BoxFit.contain,
-              alignment: Alignment.centerRight,
-              child: Switch.adaptive(
-                value: value,
-                activeThumbColor: Colors.white,
-                activeTrackColor: AppColors.primary,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                onChanged: busy ? null : onChanged,
-              ),
+          Transform.scale(
+            scale: 1.0,
+            alignment: Alignment.centerRight,
+            child: Switch.adaptive(
+              value: value,
+              activeThumbColor: Colors.white,
+              activeTrackColor: AppColors.primary,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              onChanged: busy ? null : onChanged,
             ),
           ),
         ],
@@ -950,7 +952,7 @@ class _SettingsTile extends StatelessWidget {
                 color: labelColor ?? const Color(0xFF000000),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 16),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -970,7 +972,7 @@ class _SettingsTile extends StatelessWidget {
                         style: valueStyle,
                       ),
                     ),
-                  if (valueLabel != null) const SizedBox(width: 6),
+                  if (valueLabel != null) const SizedBox(width: 8),
                   if (trailing != null)
                     trailing!
                   else

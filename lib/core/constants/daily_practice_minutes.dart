@@ -19,16 +19,16 @@ class DailyPracticeMinutes {
   static double monthlyHours(int minutes) =>
       normalize(minutes) * 30 / 60.0;
 
-  /// Örn. 5 → "2.5h", 10 → "5h", 15 → "7.5h".
+  /// Örn. 5 → "2.5", 10 → "5", 15 → "7.5" (birim i18n'de).
   static String formatMonthlyHours(int minutes) {
     final hours = monthlyHours(minutes);
     if (hours == hours.roundToDouble()) {
-      return '${hours.toInt()}h';
+      return '${hours.toInt()}';
     }
     final fixed = hours.toStringAsFixed(1);
     if (fixed.endsWith('.0')) {
-      return '${hours.toInt()}h';
+      return '${hours.toInt()}';
     }
-    return '${fixed}h';
+    return fixed;
   }
 }

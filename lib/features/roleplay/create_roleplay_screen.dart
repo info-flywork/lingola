@@ -114,7 +114,7 @@ class _CreateRolePlayScreenState extends State<CreateRolePlayScreen>
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.rolePlayPage;
-    final bottom = MediaQuery.paddingOf(context).bottom;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -124,6 +124,7 @@ class _CreateRolePlayScreenState extends State<CreateRolePlayScreen>
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               Padding(
@@ -235,7 +236,7 @@ class _CreateRolePlayScreenState extends State<CreateRolePlayScreen>
               ),
               if (!_generating)
                 Padding(
-                  padding: EdgeInsets.fromLTRB(16, 0, 16, 12 + bottom),
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, bottomInset + 2),
                   child: PrimaryButton(
                     label: text.createOwnScenarioContinue,
                     onPressed: _submit,

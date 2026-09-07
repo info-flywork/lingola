@@ -25,6 +25,8 @@ class LanguageFlag extends StatelessWidget {
       'po': 'po',
       'zh': 'china',
       'cn': 'china',
+      'ko': 'korean',
+      'kr': 'korean',
     };
     final file = fileByCode[code.toLowerCase()] ?? code.toLowerCase();
     return 'assets/images/flags/$file.svg';

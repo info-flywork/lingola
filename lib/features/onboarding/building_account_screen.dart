@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:rive/rive.dart' as rive;
 
 import '../../core/auth/session_store.dart';
@@ -250,11 +251,24 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen>
     super.dispose();
   }
 
+  /// Grafik X ekseni: bugünden +N gün, aktif dile göre kısa tarih (ör. 22 Eyl).
+  static String _chartDateLabel({required int daysFromNow}) {
+    final date = DateTime.now().add(Duration(days: daysFromNow));
+    final locale = LocaleSettings.currentLocale.languageCode;
+    try {
+      return DateFormat('d MMM', locale).format(date);
+    } catch (_) {
+      return DateFormat('d MMM', 'en').format(date);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.accountCreating;
     final readyText = AppText.current.planReady;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final chartMidLabel = _chartDateLabel(daysFromNow: 15);
+    final chartEndLabel = _chartDateLabel(daysFromNow: 30);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -338,8 +352,8 @@ class _AccountCreatingScreenState extends State<AccountCreatingScreen>
                             ),
                             _FluencyGrowthSection(
                               todayLabel: text.chartToday,
-                              midLabel: text.chartMid,
-                              endLabel: text.chartEnd,
+                              midLabel: chartMidLabel,
+                              endLabel: chartEndLabel,
                               fillDuration: _chartFillDuration,
                               animate: _chartActive,
                             ),

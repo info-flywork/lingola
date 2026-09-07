@@ -29,6 +29,59 @@ abstract final class AppColors {
 }
 
 abstract final class AppTextStyles {
+  /// Erken setup soruları (hedef, ilgi alanları) — Figma: Poppins 700, 24 / 30.
+  static const onboardingSetupTitleLg = TextStyle(
+    color: AppColors.ink,
+    fontFamily: 'Poppins',
+    fontSize: 24,
+    height: 30 / 24,
+    fontWeight: FontWeight.w700,
+  );
+
+  /// Geç setup soruları (seviye, tempo, pratik…) — Figma: Poppins 700, 20 / 30.
+  static const onboardingSetupTitle = TextStyle(
+    color: AppColors.ink,
+    fontFamily: 'Poppins',
+    fontSize: 20,
+    height: 30 / 20,
+    fontWeight: FontWeight.w700,
+  );
+
+  /// Progress insight başlığı — Figma: Poppins 600, 20 / 24.
+  static const onboardingInsightTitle = TextStyle(
+    color: AppColors.ink,
+    fontFamily: 'Poppins',
+    fontSize: 20,
+    height: 24 / 20,
+    fontWeight: FontWeight.w600,
+  );
+
+  /// Onboarding setup alt metin — Figma: Poppins 500, 16 / 20, %65.
+  static TextStyle get onboardingSetupHint => TextStyle(
+        color: AppColors.ink.withValues(alpha: 0.65),
+        fontFamily: 'Poppins',
+        fontSize: 16,
+        height: 20 / 16,
+        fontWeight: FontWeight.w500,
+      );
+
+  /// Progress insight gövde — Figma: Poppins 500, 15 / 20, %65.
+  static TextStyle get onboardingInsightBody => TextStyle(
+        color: AppColors.ink.withValues(alpha: 0.65),
+        fontFamily: 'Poppins',
+        fontSize: 15,
+        height: 20 / 15,
+        fontWeight: FontWeight.w500,
+      );
+
+  /// Figma başlık / hint kutusu genişlikleri (satır kırılımı için).
+  static const setupTitleMaxWidthLg = 356.0;
+  static const setupHintMaxWidthLg = 366.0;
+  static const setupTitleMaxWidth = 378.0;
+  static const setupHintMaxWidth = 386.0;
+  static const insightTitleMaxWidth = 278.0;
+  static const insightBodyMaxWidth = 398.0;
+
   static const onboardingTitle = TextStyle(
     color: AppColors.ink,
     fontFamily: 'Poppins',

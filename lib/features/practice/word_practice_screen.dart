@@ -251,7 +251,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   Widget build(BuildContext context) {
     final text = AppText.current.wordPracticePage;
     final card = _current;
-    final cardsLen = _session?.cards.length ?? 0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -370,18 +369,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
                         label: text.next,
                         onPressed: _goNext,
                       ),
-                      if (cardsLen > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            '${_index + 1} / $cardsLen',
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ),

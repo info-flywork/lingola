@@ -99,6 +99,7 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/images/chat/
     - assets/images/home/
     - assets/images/nav/
     - assets/images/tutors/
@@ -130,10 +131,12 @@ flutter:
     - assets/images/profilIcons/
     - assets/images/profilIcons/newProfileIcons/
     - assets/images/profilIcons/interests/
+    - assets/images/profilIcons/deleteOffer/
     - assets/images/interests/
     - assets/images/profilIcons/tutor/
     - assets/images/certificate/
     - assets/images/callinScreen/
+    - assets/iconsForTalking/
     - assets/legal/
     - assets/legal/tr/
     - assets/legal/en/

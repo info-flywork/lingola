@@ -43,13 +43,13 @@ class LessonPathView extends StatelessWidget {
   static const y0 = 40.0;
   static const trackStroke = 22.0;
 
-  /// İlk ~5 node (Daily Routine) için yaklaşık viewport yüksekliği.
-  static double viewportHeightForWidth(double width, {int visibleNodes = 5}) {
+  /// Home’da ilk görünür dilim: ~Favori Oda’ya kadar (Günlük Rutin clip dışı).
+  static double viewportHeightForWidth(double width, {int visibleNodes = 4}) {
     final n = visibleNodes.clamp(1, 32);
     final layout = layoutMetrics(n);
     final lastTop = layout.nodeCenters[n - 1] - nodeSize / 2;
-    // Daily Routine civarı: son görünür node + biraz pay.
-    final designH = lastTop + nodeSize + 24;
+    // Son görünür node + kısa pay (canlı dersler yukarı gelsin).
+    final designH = lastTop + nodeSize + 12;
     return designH * (width / designWidth);
   }
 

@@ -28,16 +28,48 @@ class RolePlayCategoryScreen extends StatefulWidget {
 }
 
 class _RolePlayCategoryScreenState extends State<RolePlayCategoryScreen> {
-  String _difficultyFilter = 'all';
+  /// Aynı senaryonun zorluk varyantları listesi mi (tek baseId)?
+  bool get _isVariantList {
+    if (widget.scenarios.length <= 1) return true;
+    final first = RolePlayCatalog.baseId(widget.scenarios.first.id);
+    return widget.scenarios.every((s) => RolePlayCatalog.baseId(s.id) == first);
+  }
+
+  /// Kategori: her tabandan bir kart. Varyant listesi: hepsi.
+  List<RolePlayScenarioItem> get _displayedScenarios {
+    if (_isVariantList) return widget.scenarios;
+    return RolePlayCatalog.uniqueByBase(widget.scenarios);
+  }
+
+  Future<void> _onScenarioTap(
+    BuildContext context,
+    RolePlayScenarioItem scenario,
+  ) async {
+    if (!_isVariantList) {
+      final baseId = RolePlayCatalog.baseId(scenario.id);
+      final variants = widget.scenarios
+          .where((s) => RolePlayCatalog.baseId(s.id) == baseId)
+          .toList(growable: false);
+      if (variants.length > 1) {
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => RolePlayCategoryScreen(
+              categoryKey: widget.categoryKey,
+              categoryTitle: scenario.title,
+              scenarios: variants,
+              onOpenDetail: widget.onOpenDetail,
+            ),
+          ),
+        );
+        return;
+      }
+    }
+    await widget.onOpenDetail(context, scenario);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final page = AppText.current.rolePlayPage;
-    final filtered = _difficultyFilter == 'all'
-        ? widget.scenarios
-        : widget.scenarios
-            .where((s) => s.levelKey == _difficultyFilter)
-            .toList(growable: false);
+    final displayed = _displayedScenarios;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
@@ -80,42 +112,20 @@ class _RolePlayCategoryScreenState extends State<RolePlayCategoryScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 40,
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 1 + RolePlayCatalog.difficultyKeys.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return RolePlayFilterChip(
-                        label: page.filterAll,
-                        selected: _difficultyFilter == 'all',
-                        onTap: () => setState(() => _difficultyFilter = 'all'),
-                      );
-                    }
-                    final key = RolePlayCatalog.difficultyKeys[index - 1];
-                    return RolePlayFilterChip(
-                      label: RolePlayCatalog.levelLabel(page, key),
-                      selected: _difficultyFilter == key,
-                      onTap: () => setState(() => _difficultyFilter = key),
-                    );
-                  },
-                ),
-              ),
               const SizedBox(height: 16),
               Expanded(
                 child: ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                  itemCount: filtered.length,
+                  itemCount: displayed.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
-                    final scenario = filtered[index];
+                    final scenario = displayed[index];
                     return RolePlayScenarioCard(
                       scenario: scenario,
-                      onTap: () => widget.onOpenDetail(context, scenario),
+                      // Zorluk detay sheet'te var; kategori listesinde gizle,
+                      // varyant listesinde göster.
+                      hideDifficulty: !_isVariantList,
+                      onTap: () => _onScenarioTap(context, scenario),
                     );
                   },
                 ),

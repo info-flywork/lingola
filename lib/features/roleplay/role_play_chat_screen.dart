@@ -6,12 +6,10 @@ import '../../core/auth/api_client.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
-import '../../i18n/strings.g.dart';
 import '../../widgets/lingola_chat_session.dart';
 import '../tutor/services/tutor_api_service.dart';
 import '../tutor/services/tutor_chat_api_service.dart';
 import 'role_play_api_service.dart';
-import 'role_play_catalog.dart';
 
 class RolePlayChatScreen extends StatefulWidget {
   const RolePlayChatScreen({
@@ -218,92 +216,4 @@ class _RolePlayChatScreenState extends State<RolePlayChatScreen> {
       onSessionExpired: _handleClose,
     );
   }
-}
-
-({String titleEn, String openingEn, String badge}) rolePlayEnglishContent({
-  required String scenarioId,
-  String? title,
-  String? openingMessage,
-}) {
-  final page = AppLocale.en.buildSync().rolePlayPage;
-  final baseId = RolePlayCatalog.baseId(scenarioId);
-  return switch (baseId) {
-    'coffee' => (
-        titleEn: page.coffee.title,
-        openingEn: page.coffee.chat.briefing,
-        badge: page.coffee.title,
-      ),
-    'directions' => (
-        titleEn: page.directions.title,
-        openingEn: page.directions.chat.briefing,
-        badge: page.directions.title,
-      ),
-    'interview' => (
-        titleEn: page.interview.title,
-        openingEn: page.interview.chat.briefing,
-        badge: page.interview.title,
-      ),
-    'missedTrain' => (
-        titleEn: page.missedTrain.title,
-        openingEn: page.missedTrain.chat.briefing,
-        badge: page.missedTrain.title,
-      ),
-    'flightAttendant' => (
-        titleEn: page.flightAttendant.title,
-        openingEn: page.flightAttendant.chat.briefing,
-        badge: page.flightAttendant.title,
-      ),
-    'trainTicket' => (
-        titleEn: page.trainTicket.title,
-        openingEn: page.trainTicket.chat.briefing,
-        badge: page.trainTicket.title,
-      ),
-    'restaurantReservation' => (
-        titleEn: page.restaurantReservation.title,
-        openingEn: page.restaurantReservation.chat.briefing,
-        badge: page.restaurantReservation.title,
-      ),
-    'doctorAppointment' => (
-        titleEn: page.doctorAppointment.title,
-        openingEn: page.doctorAppointment.chat.briefing,
-        badge: page.doctorAppointment.title,
-      ),
-    'shoppingClothes' => (
-        titleEn: page.shoppingClothes.title,
-        openingEn: page.shoppingClothes.chat.briefing,
-        badge: page.shoppingClothes.title,
-      ),
-    'takingTaxi' => (
-        titleEn: page.takingTaxi.title,
-        openingEn: page.takingTaxi.chat.briefing,
-        badge: page.takingTaxi.title,
-      ),
-    'rentingApartment' => (
-        titleEn: page.rentingApartment.title,
-        openingEn: page.rentingApartment.chat.briefing,
-        badge: page.rentingApartment.title,
-      ),
-    'birthdayParty' => (
-        titleEn: page.birthdayParty.title,
-        openingEn: page.birthdayParty.chat.briefing,
-        badge: page.birthdayParty.title,
-      ),
-    'flirtingMeet' => (
-        titleEn: page.flirtingMeet.title,
-        openingEn: page.flirtingMeet.chat.briefing,
-        badge: page.flirtingMeet.title,
-      ),
-    'freeTalkHobby' => (
-        titleEn: page.freeTalkHobby.title,
-        openingEn: page.freeTalkHobby.chat.briefing,
-        badge: page.freeTalkHobby.title,
-      ),
-    _ => (
-        titleEn: title?.trim().isNotEmpty == true ? title!.trim() : 'Role Play',
-        openingEn: openingMessage?.trim().isNotEmpty == true
-            ? openingMessage!.trim()
-            : 'Hi! Ready to practice this scene together?',
-        badge: title?.trim().isNotEmpty == true ? title!.trim() : 'Role Play',
-      ),
-  };
 }

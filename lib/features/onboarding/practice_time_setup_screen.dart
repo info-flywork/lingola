@@ -10,6 +10,7 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
 import 'onboarding_draft.dart';
+import 'onboarding_step_header.dart';
 import 'promise_commitment_screen.dart';
 import 'set_practice_time_sheet.dart';
 
@@ -25,93 +26,134 @@ class PracticeTimeSetupScreen extends StatefulWidget {
 }
 
 class _PracticeTimeSetupScreenState extends State<PracticeTimeSetupScreen> {
-  late int _selected;
-  late TimeOfDay _windowStart;
-  late TimeOfDay _windowEnd;
+  int? _selected;
+  TimeOfDay? _windowStart;
+  TimeOfDay? _windowEnd;
   var _saving = false;
-  var _windowConfirmed = false;
+
+  /// Preset (Sabah/Öğleden sonra/Akşam) için bir kez üretilen somut saat.
+  /// Aynı slot tekrar seçilirse yeniden random üretilmez.
+  TimeOfDay? _lockedPresetTime;
+  int? _lockedPresetIndex;
 
   @override
   void initState() {
     super.initState();
-    _selected = PracticeTimeOfDay.indexOf(widget.draft.practiceTimeOfDay);
-    final defaults =
-        PracticeTimeOfDay.defaultRange(widget.draft.practiceTimeOfDay);
-    _windowStart = TimeOfDay(
-      hour: widget.draft.reminderHour,
-      minute: widget.draft.reminderMinute,
-    );
-    _windowEnd = TimeOfDay(
-      hour: widget.draft.practiceWindowEndHour,
-      minute: widget.draft.practiceWindowEndMinute,
-    );
-    // Draft henüz ayarlanmadıysa dilim varsayılanını kullan.
-    if (widget.draft.reminderHour ==
-            PracticeTimeOfDay.reminderHourFor(widget.draft.practiceTimeOfDay) &&
-        widget.draft.reminderMinute == 0 &&
-        widget.draft.practiceWindowEndHour == defaults.$2.hour) {
-      _windowStart = defaults.$1;
-      _windowEnd = defaults.$2;
+    final slot = widget.draft.practiceTimeOfDay;
+    if (slot != null && slot.trim().isNotEmpty) {
+      _selected = PracticeTimeOfDay.indexOf(slot);
+      if (widget.draft.practiceWindowSet) {
+        _windowStart = TimeOfDay(
+          hour: widget.draft.reminderHour,
+          minute: widget.draft.reminderMinute,
+        );
+        _windowEnd = TimeOfDay(
+          hour: widget.draft.practiceWindowEndHour,
+          minute: widget.draft.practiceWindowEndMinute,
+        );
+        if (!PracticeTimeOfDay.isFlexible(slot)) {
+          _lockedPresetIndex = _selected;
+          _lockedPresetTime = _windowStart;
+        }
+      }
     }
   }
 
-  Future<void> _openTimeSheet(int index) async {
+  Future<void> _onSelect(int index) async {
+    if (_saving) return;
     final slot = PracticeTimeOfDay.values[index];
-    final defaults = PracticeTimeOfDay.defaultRange(slot);
-    final sameSlot = index == _selected && _windowConfirmed;
-    setState(() => _selected = index);
+
+    if (PracticeTimeOfDay.isFlexible(slot)) {
+      setState(() => _selected = index);
+      await _openFlexibleSheet();
+      return;
+    }
+
+    // Sabah / Öğleden sonra / Akşam — sheet yok; bir kez random saat.
+    final concrete = (_lockedPresetIndex == index && _lockedPresetTime != null)
+        ? _lockedPresetTime!
+        : PracticeTimeOfDay.randomConcreteTime(slot);
+
+    setState(() {
+      _selected = index;
+      _lockedPresetIndex = index;
+      _lockedPresetTime = concrete;
+      _windowStart = concrete;
+      _windowEnd = concrete;
+    });
+  }
+
+  Future<void> _openFlexibleSheet() async {
+    final defaults = PracticeTimeOfDay.defaultRange('flexible');
+    final hasFlexibleWindow = _selected == PracticeTimeOfDay.indexOf('flexible') &&
+        _windowStart != null &&
+        _windowEnd != null &&
+        widget.draft.practiceWindowSet &&
+        PracticeTimeOfDay.isFlexible(widget.draft.practiceTimeOfDay);
 
     final result = await showSetPracticeTimeSheet(
       context,
-      practiceTimeOfDay: slot,
-      initialStart: sameSlot ? _windowStart : defaults.$1,
-      initialEnd: sameSlot ? _windowEnd : defaults.$2,
+      practiceTimeOfDay: 'flexible',
+      initialStart: hasFlexibleWindow ? _windowStart : defaults.$1,
+      initialEnd: hasFlexibleWindow ? _windowEnd : defaults.$2,
     );
-    if (!mounted || result == null) return;
+    if (!mounted) return;
+    if (result == null) {
+      // Sheet iptal: seçimi geri al (pencere yoksa).
+      if (_windowStart == null) {
+        setState(() => _selected = null);
+      }
+      return;
+    }
 
     setState(() {
       _windowStart = result.start;
       _windowEnd = result.end;
-      _windowConfirmed = true;
+      _lockedPresetIndex = null;
+      _lockedPresetTime = null;
     });
-    widget.draft.setPracticeTimeOfDayIndex(index);
-    widget.draft.setPracticeWindow(
-      startHour: result.start.hour,
-      startMinute: result.start.minute,
-      endHour: result.end.hour,
-      endMinute: result.end.minute,
+  }
+
+  Future<void> _onSave() async {
+    if (_saving || _selected == null || _windowStart == null || _windowEnd == null) {
+      return;
+    }
+    await _persistAndContinue(
+      start: _windowStart!,
+      end: _windowEnd!,
+      slotIndex: _selected!,
     );
   }
 
-  Future<void> _save() async {
+  Future<void> _persistAndContinue({
+    required TimeOfDay start,
+    required TimeOfDay end,
+    required int slotIndex,
+  }) async {
     if (_saving) return;
     setState(() => _saving = true);
 
-    // Sheet açılmadan Kaydet'e basılırsa seçili dilimin varsayılanını kullan.
-    if (!_windowConfirmed) {
-      final defaults =
-          PracticeTimeOfDay.defaultRange(PracticeTimeOfDay.values[_selected]);
-      _windowStart = defaults.$1;
-      _windowEnd = defaults.$2;
-    }
-
-    widget.draft.setPracticeTimeOfDayIndex(_selected);
+    widget.draft.setPracticeTimeOfDayIndex(slotIndex);
     widget.draft.setPracticeWindow(
-      startHour: _windowStart.hour,
-      startMinute: _windowStart.minute,
-      endHour: _windowEnd.hour,
-      endMinute: _windowEnd.minute,
+      startHour: start.hour,
+      startMinute: start.minute,
+      endHour: end.hour,
+      endMinute: end.minute,
     );
 
     unawaited(
-      AuthService.syncOnboardingDraft(widget.draft).then((_) {}).catchError((_) {}),
+      AuthService.syncOnboardingDraft(widget.draft)
+          .then((_) {})
+          .catchError((_) {}),
     );
+
     if (!mounted) return;
-    Navigator.of(context).push(
+    await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => PromiseCommitmentScreen(draft: widget.draft),
       ),
     );
+    if (mounted) setState(() => _saving = false);
   }
 
   @override
@@ -138,56 +180,38 @@ class _PracticeTimeSetupScreenState extends State<PracticeTimeSetupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Text(
-                  text.language.step(current: 8, total: 8),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AppColors.secondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: const LinearProgressIndicator(
-                    minHeight: 13,
-                    value: 1,
-                    color: AppColors.primary,
-                    backgroundColor: AppColors.border,
-                  ),
-                ),
+              const OnboardingStepHeader(
+                step: 8,
+                totalSteps: 8,
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(10, 28, 10, 16),
                   child: Column(
                     children: [
-                      Text(
-                        setup.practiceTimeTitle,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          color: AppColors.ink,
-                          fontSize: 20,
-                          height: 30 / 20,
-                          fontWeight: FontWeight.w700,
+                      SizedBox(
+                        width: double.infinity,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            setup.practiceTimeTitle,
+                            textAlign: TextAlign.center,
+                            softWrap: false,
+                            style: AppTextStyles.onboardingSetupTitle,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        setup.practiceTimeHint,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          color: AppColors.ink.withValues(alpha: 0.65),
-                          fontSize: 16,
-                          height: 20 / 16,
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            setup.practiceTimeHint,
+                            textAlign: TextAlign.center,
+                            softWrap: false,
+                            style: AppTextStyles.onboardingSetupHint,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 28),
@@ -197,7 +221,7 @@ class _PracticeTimeSetupScreenState extends State<PracticeTimeSetupScreen> {
                           label: labels[i],
                           iconAsset: PracticeTimeOfDay.iconAssets[i],
                           selected: i == _selected,
-                          onTap: () => unawaited(_openTimeSheet(i)),
+                          onTap: _saving ? null : () => unawaited(_onSelect(i)),
                         ),
                       ],
                     ],
@@ -207,18 +231,28 @@ class _PracticeTimeSetupScreenState extends State<PracticeTimeSetupScreen> {
               DecoratedBox(
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  border: Border(top: BorderSide(color: AppColors.border)),
+                  border: Border(
+                    top: BorderSide(color: Color(0xFFECECEC), width: 2),
+                  ),
                 ),
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(
+                    10,
                     16,
-                    16,
-                    16,
-                    bottomInset > 0 ? bottomInset + 6 : 16,
+                    10,
+                    bottomInset > 0 ? bottomInset + 10 : 30,
                   ),
                   child: PrimaryButton(
                     label: setup.practiceTimeSave,
-                    onPressed: () => unawaited(_save()),
+                    onPressed: () {
+                      if (_selected == null ||
+                          _windowStart == null ||
+                          _windowEnd == null ||
+                          _saving) {
+                        return;
+                      }
+                      unawaited(_onSave());
+                    },
                   ),
                 ),
               ),
@@ -241,7 +275,7 @@ class _PracticeTimeTile extends StatelessWidget {
   final String label;
   final String iconAsset;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

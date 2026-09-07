@@ -28,6 +28,7 @@ List<_NativeLang> _nativeLanguages() {
     _NativeLang(code: 'hi', label: t.targetLanguage.hindi),
     _NativeLang(code: 'it', label: t.targetLanguage.italian),
     _NativeLang(code: 'de', label: t.targetLanguage.german),
+    _NativeLang(code: 'ko', label: t.targetLanguage.korean),
   ];
 }
 

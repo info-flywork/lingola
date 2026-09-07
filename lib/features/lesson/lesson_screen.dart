@@ -539,6 +539,7 @@ class _LessonScreenState extends State<LessonScreen> {
           addElapsedSeconds: sessionSeconds - priorElapsed.inSeconds,
         );
       } else {
+        // Pause + save silently. "Continue" is offered when they reopen the lesson.
         await LessonApiService.saveProgress(
           slug: slug,
           tutorId: choice.tutor.id,
@@ -548,14 +549,6 @@ class _LessonScreenState extends State<LessonScreen> {
               .clamp(0, 15 * 60),
         );
         await _loadPath();
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppText.current.home.continueConversation,
-            ),
-          ),
-        );
       }
     } on ApiException catch (err) {
       if (!mounted) return;

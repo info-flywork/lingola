@@ -603,10 +603,9 @@ class _InterestList extends StatelessWidget {
                     selected ? BorderRadius.circular(10) : BorderRadius.zero,
                 child: Container(
                   width: double.infinity,
-                  height: 52,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 10,
+                    vertical: 14,
                   ),
                   decoration: selected
                       ? BoxDecoration(

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/i18n/app_locale_sync.dart';
 import '../../core/theme/app_theme.dart';
 import '../../i18n/strings.g.dart';
+import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
 
 class FaqScreen extends StatefulWidget {
@@ -16,9 +18,11 @@ class FaqScreen extends StatefulWidget {
 }
 
 class _FaqScreenState extends State<FaqScreen> {
+  static const _infoEmail = 'info@fly-work.com';
+
   int? _expandedIndex = 0;
 
-  List<({String q, String a})> _faqItems(page) {
+  List<({String q, String a})> _faqItems(Translations$profilePage$en page) {
     final items = page.faqItems;
     return [
       (q: items.supportedLanguages.question, a: items.supportedLanguages.answer),
@@ -34,80 +38,148 @@ class _FaqScreenState extends State<FaqScreen> {
     ];
   }
 
+  Future<void> _openInfoMail() async {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: _infoEmail,
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AppLocale>(
       valueListenable: AppLocaleSync.localeChanges,
-      builder: (context, _, __) {
+      builder: (context, _, _) {
         final text = AppText.current.profilePage;
         final items = _faqItems(text);
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.white,
-      ),
-      child: Scaffold(
-        backgroundColor: AppColors.surface,
-        body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const HomeAsset(
-                        AppAssets.backArrow,
-                        width: 24,
-                        height: 24,
-                      ),
-                      tooltip: AppText.current.common.back,
-                    ),
-                    Expanded(
-                      child: Text(
-                        text.faq,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 16,
-                          height: 24 / 16,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.ink,
+          value: SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.white,
+          ),
+          child: Scaffold(
+            backgroundColor: AppColors.surface,
+            body: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          icon: const HomeAsset(
+                            AppAssets.backArrow,
+                            width: 24,
+                            height: 24,
+                          ),
+                          tooltip: AppText.current.common.back,
                         ),
-                      ),
+                        Expanded(
+                          child: Text(
+                            text.faq,
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              height: 24 / 16,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final item = items[index];
-                    final expanded = _expandedIndex == index;
-                    return _FaqCard(
-                      question: item.q,
-                      answer: item.a,
-                      expanded: expanded,
-                      onTap: () {
-                        setState(() {
-                          _expandedIndex = expanded ? null : index;
-                        });
+                  ),
+                  Expanded(
+                    child: ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                      itemCount: items.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        final expanded = _expandedIndex == index;
+                        return _FaqCard(
+                          question: item.q,
+                          answer: item.a,
+                          expanded: expanded,
+                          onTap: () {
+                            setState(() {
+                              _expandedIndex = expanded ? null : index;
+                            });
+                          },
+                        );
                       },
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    child: _ContactUsButton(
+                      label: text.contactUs,
+                      onPressed: _openInfoMail,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Figma: 398×48, gap 10, mail 24×24, brand blue + drop shadow.
+class _ContactUsButton extends StatelessWidget {
+  const _ContactUsButton({
+    required this.label,
+    required this.onPressed,
+  });
+
+  static const _height = 48.0;
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.darkShadow,
+        borderRadius: BorderRadius.circular(PrimaryButton.radius),
+      ),
+      padding: const EdgeInsets.only(bottom: PrimaryButton.shadowOffset),
+      child: SizedBox(
+        width: double.infinity,
+        height: _height,
+        child: FilledButton(
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(PrimaryButton.radius),
+            ),
+            textStyle: AppTextStyles.primaryButton,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(label),
+              const SizedBox(width: 10),
+              const HomeAsset(
+                AppAssets.profileContactMail,
+                width: 24,
+                height: 24,
               ),
             ],
           ),
         ),
       ),
-    );
-      },
     );
   }
 }

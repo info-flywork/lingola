@@ -24,60 +24,60 @@ class _AiTutorsIntroScreenState extends State<AiTutorsIntroScreen>
     with TickerProviderStateMixin {
   /// Figma (≈393 genişlik) — göreli konum + px boyutlar.
   static const _avatars = <_TutorBubble>[
-    // Merkez: Lingola robot (~168)
+    // Merkez: Lingola robot — hafif aşağı (cadı ile çakışmayı azalt)
     _TutorBubble(
       asset: AppAssets.tutorRobot,
       dx: 0.50,
-      dy: 0.40,
-      size: 168,
+      dy: 0.52,
+      size: 158,
       phase: 0.2,
     ),
-    // Üst: Felix (krem kazak) — 165×165
+    // Üst: Felix — altyazıdan net boşluk
     _TutorBubble(
       asset: AppAssets.tutorFelix,
       dx: 0.50,
-      dy: 0.10,
-      size: 165,
+      dy: 0.20,
+      size: 148,
       phase: 1.1,
     ),
-    // Sol: Freya (gözlüklü)
+    // Sol: Freya
     _TutorBubble(
       asset: AppAssets.tutorFreya,
-      dx: 0.14,
-      dy: 0.30,
-      size: 140,
+      dx: 0.12,
+      dy: 0.36,
+      size: 128,
       phase: 2.0,
     ),
-    // Sağ üst: Elena
+    // Sağ üst: Katie (eski Elena yeri)
     _TutorBubble(
-      asset: AppAssets.tutorElena,
-      dx: 0.82,
-      dy: 0.24,
-      size: 118,
+      asset: AppAssets.tutorKatie,
+      dx: 0.86,
+      dy: 0.30,
+      size: 112,
       phase: 0.7,
     ),
-    // Sol alt: Morgan (takım) — 175×175
+    // Sol alt: Morgan
     _TutorBubble(
       asset: AppAssets.tutorMorgan,
-      dx: 0.18,
-      dy: 0.70,
-      size: 175,
+      dx: 0.16,
+      dy: 0.76,
+      size: 152,
       phase: 1.6,
     ),
-    // Orta alt: Vaelen (cadı) — 89×89 en küçük
+    // Orta alt: Vaelen (cadı) — hafif yukarı
     _TutorBubble(
       asset: AppAssets.tutorVaelen,
       dx: 0.48,
       dy: 0.78,
-      size: 89,
+      size: 84,
       phase: 2.4,
     ),
-    // Sağ alt: Amara — ~214, yarısı ekrandan taşar
+    // Sağ alt: Amara — kısmen taşabilir
     _TutorBubble(
       asset: AppAssets.tutorAmara,
-      dx: 0.96,
-      dy: 0.66,
-      size: 214,
+      dx: 0.94,
+      dy: 0.70,
+      size: 188,
       phase: 0.4,
     ),
   ];
@@ -134,37 +134,44 @@ class _AiTutorsIntroScreenState extends State<AiTutorsIntroScreen>
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 36, 24, 0),
+                      padding: const EdgeInsets.fromLTRB(8, 28, 8, 0),
                       child: Column(
                         children: [
-                          // Figma: 378×60 — 2 satır; "seçebilirsin" 3. satıra düşmesin.
-                          Text(
-                            text.aiTutorsIntroTitle,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 20,
-                              height: 30 / 20,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.ink,
+                          SizedBox(
+                            width: double.infinity,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: SizedBox(
+                                width: AppTextStyles.setupTitleMaxWidth,
+                                child: Text(
+                                  text.aiTutorsIntroTitle,
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.onboardingSetupTitle,
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          Text(
-                            text.aiTutorsIntroBody,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 16,
-                              height: 20 / 16,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.ink.withValues(alpha: 0.65),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: SizedBox(
+                                width: AppTextStyles.setupHintMaxWidth,
+                                child: Text(
+                                  text.aiTutorsIntroBody,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: AppTextStyles.onboardingSetupHint,
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     // Yatay padding yok — sağdaki büyük avatar yarı ekran dışında kalabilsin.
                     Expanded(
                       child: AnimatedBuilder(
@@ -229,14 +236,14 @@ class _AiTutorsIntroScreenState extends State<AiTutorsIntroScreen>
     final float = math.sin(
           (_floatController.value * 2 * math.pi) + bubble.phase,
         ) *
-        6;
+        4;
     final floatX = math.cos(
           (_floatController.value * 2 * math.pi) + bubble.phase * 0.7,
         ) *
-        4;
+        2.5;
 
-    // Figma 393 referans; ekrana göre hafif ölçek.
-    final scale = (area.width / 393).clamp(0.88, 1.12);
+    // Figma 393 referans; fazla büyütme kümede üst üste binmeyi artırır.
+    final scale = (area.width / 393).clamp(0.88, 1.02);
     final size = bubble.size * scale;
 
     final left = area.width * bubble.dx - size / 2 + floatX * enterT;

@@ -89,12 +89,16 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   void didUpdateWidget(covariant TutorRiveAvatar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.assetPath != widget.assetPath ||
-        oldWidget.fallbackRivePath != widget.fallbackRivePath) {
+        oldWidget.fallbackRivePath != widget.fallbackRivePath ||
+        oldWidget.fallbackImage != widget.fallbackImage) {
       _recoveryAttempted = false;
       _riveReady = false;
       _riveEverLoaded = false;
       _riveFailed = false;
       _fileLoader = null;
+      _activeUrl = null;
+      // Eski Rive karesini anında düş — aksi halde önceki hoca görünür kalır.
+      if (mounted) setState(() {});
       unawaited(_bootstrap());
       return;
     }
@@ -531,11 +535,6 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
   }
 
   Widget _buildRiveAvatar(rive.RiveLoaded loaded) {
-    if (!_riveReady) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _onLoaded(loaded);
-      });
-    }
     final riveWidget = rive.RiveWidget(
       controller: loaded.controller,
       fit: _effectiveFit,
@@ -551,49 +550,47 @@ class _TutorRiveAvatarState extends State<TutorRiveAvatar> {
 
   @override
   Widget build(BuildContext context) {
-    final hidePlaceholder = _riveEverLoaded;
     final loader = _fileLoader;
+    final bg = widget.loadingBackgroundColor ?? const Color(0xFF2D46FF);
 
+    // Placeholder ve Rive asla aynı anda üst üste binmesin.
+    // Eski yapı: RiveLoaded anında Rive boyanırdı ama blur foto hâlâ
+    // opacity=1 kalırdı → "aynı video üst üste" (ilk soğuk yüklemede belirgin).
     return Stack(
       fit: StackFit.expand,
       children: [
-        Positioned.fill(
-          child: ColoredBox(
-            color: widget.loadingBackgroundColor ?? const Color(0xFF2D46FF),
-          ),
-        ),
-        if (!_riveFailed && loader != null)
-          RepaintBoundary(
-            child: KeyedSubtree(
-              key: ValueKey('rive-$_loaderKey-$_activeUrl'),
-              child: rive.RiveWidgetBuilder(
-                fileLoader: loader,
-                controller: _createController,
-                onLoaded: _onLoaded,
-                onFailed: _onFailed,
-                builder: (context, state) {
-                  return switch (state) {
-                    rive.RiveLoading() => const SizedBox.shrink(),
-                    rive.RiveFailed() => const SizedBox.shrink(),
-                    rive.RiveLoaded loaded => _buildRiveAvatar(loaded),
-                  };
-                },
-              ),
-            ),
-          ),
-        IgnorePointer(
-          ignoring: hidePlaceholder,
-          child: AnimatedOpacity(
-            opacity: hidePlaceholder ? 0.0 : 1.0,
-            duration: const Duration(milliseconds: 140),
-            curve: Curves.easeOut,
+        Positioned.fill(child: ColoredBox(color: bg)),
+        if (_riveFailed || loader == null)
+          Positioned.fill(
             child: _riveFailed
                 ? (widget.anchorBottom
                     ? _buildFallbackPhoto()
                     : _buildFallbackPhotoContained())
                 : _buildPlaceholder(),
+          )
+        else
+          Positioned.fill(
+            child: RepaintBoundary(
+              child: KeyedSubtree(
+                key: ValueKey('rive-$_loaderKey-$_activeUrl'),
+                child: rive.RiveWidgetBuilder(
+                  fileLoader: loader,
+                  controller: _createController,
+                  onLoaded: _onLoaded,
+                  onFailed: _onFailed,
+                  builder: (context, state) {
+                    return switch (state) {
+                      rive.RiveLoading() => _buildPlaceholder(),
+                      rive.RiveFailed() => widget.anchorBottom
+                          ? _buildFallbackPhoto()
+                          : _buildFallbackPhotoContained(),
+                      rive.RiveLoaded loaded => _buildRiveAvatar(loaded),
+                    };
+                  },
+                ),
+              ),
+            ),
           ),
-        ),
       ],
     );
   }

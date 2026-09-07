@@ -497,10 +497,6 @@ class _SpeakingTestScreenState extends State<SpeakingTestScreen>
                   padding: const EdgeInsets.fromLTRB(19, 0, 19, 10),
                   children: [
                     _SpeakingCard(
-                      questionLabel: text.questionOf(
-                        current: _index + 1,
-                        total: _prompts.length,
-                      ),
                       progressIndex: _index,
                       total: _prompts.length,
                       title: text.speakingProficiency,
@@ -580,7 +576,6 @@ class _SpeakingPrompt {
 
 class _SpeakingCard extends StatelessWidget {
   const _SpeakingCard({
-    required this.questionLabel,
     required this.progressIndex,
     required this.total,
     required this.title,
@@ -604,7 +599,6 @@ class _SpeakingCard extends StatelessWidget {
     this.speakingPrompt = false,
   });
 
-  final String questionLabel;
   final int progressIndex;
   final int total;
   final String title;
@@ -642,25 +636,6 @@ class _SpeakingCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: .10),
-              borderRadius: BorderRadius.circular(9999),
-            ),
-            child: Text(
-              questionLabel,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                height: 16 / 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.24,
-                color: AppColors.primary,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
           _SegmentProgress(index: progressIndex, total: total),
           const SizedBox(height: 16),
           Text(

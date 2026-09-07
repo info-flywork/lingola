@@ -11,6 +11,7 @@ import '../../core/theme/app_theme.dart';
 import '../../widgets/app_widgets.dart';
 import 'language_flag.dart';
 import 'onboarding_draft.dart';
+import 'onboarding_step_header.dart';
 import 'setup_question_screens.dart';
 import 'target_language_options.dart';
 
@@ -76,6 +77,10 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
       _SheetLanguage('jp', text.language.japanese),
       _SheetLanguage('es', text.language.spanish),
       _SheetLanguage('ru', text.language.russian),
+      _SheetLanguage('hi', text.targetLanguage.hindi),
+      _SheetLanguage('zh', text.profilePage.chineseShort),
+      _SheetLanguage('pt', text.targetLanguage.portuguese),
+      _SheetLanguage('ko', text.targetLanguage.korean),
     ];
   }
 
@@ -135,29 +140,10 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Text(
-                  text.language.step(current: 1, total: 5),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AppColors.secondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: const LinearProgressIndicator(
-                    minHeight: 13,
-                    value: .2,
-                    color: AppColors.primary,
-                    backgroundColor: AppColors.border,
-                  ),
-                ),
+              const OnboardingStepHeader(
+                step: 1,
+                totalSteps: 8,
+                showBack: false,
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -165,14 +151,14 @@ class _LanguageSetupScreenState extends State<LanguageSetupScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        text.language.title,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: AppColors.ink,
-                          fontSize: 24,
-                          height: 30 / 24,
-                          fontWeight: FontWeight.w700,
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: AppTextStyles.setupTitleMaxWidthLg,
+                        ),
+                        child: Text(
+                          text.language.title,
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.onboardingSetupTitleLg,
                         ),
                       ),
                       const SizedBox(height: 28),

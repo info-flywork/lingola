@@ -8,6 +8,7 @@ import '../../widgets/app_widgets.dart';
 import '../../widgets/home_asset.dart';
 import 'role_play_catalog.dart';
 import 'role_play_chat_screen.dart';
+import 'role_play_content.dart';
 
 Future<void> openRolePlayScenarioDetail({
   required BuildContext context,
@@ -97,10 +98,12 @@ class RolePlayScenarioCard extends StatelessWidget {
     super.key,
     required this.scenario,
     required this.onTap,
+    this.hideDifficulty = false,
   });
 
   final RolePlayScenarioItem scenario;
   final VoidCallback onTap;
+  final bool hideDifficulty;
 
   @override
   Widget build(BuildContext context) {
@@ -188,14 +191,16 @@ class RolePlayScenarioCard extends StatelessWidget {
                               background: const Color(0xFFF0F0F0),
                               foreground: const Color(0xFF6F6F6F),
                             ),
-                            const SizedBox(width: 6),
-                            RolePlayMetaChip(
-                              label: scenario.level,
-                              background: Colors.white,
-                              foreground: AppColors.primary,
-                              outlined: true,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            if (!hideDifficulty) ...[
+                              const SizedBox(width: 6),
+                              RolePlayMetaChip(
+                                label: scenario.level,
+                                background: Colors.white,
+                                foreground: AppColors.primary,
+                                outlined: true,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ],
                           ],
                         ),
                     ],

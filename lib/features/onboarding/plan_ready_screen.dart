@@ -14,6 +14,7 @@ import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/tutor/widgets/tutor_rive_avatar.dart';
 import '../../i18n/strings.g.dart';
+import '../../widgets/app_widgets.dart';
 import '../profile/interests_sheet.dart';
 import '../shell/main_shell.dart';
 import 'onboarding_draft.dart';
@@ -341,29 +342,9 @@ class _PlanReadyScreenState extends State<PlanReadyScreen>
                         10,
                         bottomInset > 0 ? bottomInset + 6 : 24,
                       ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.darkShadow,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: FilledButton(
-                            onPressed: _startPlan,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              textStyle: AppTextStyles.primaryButton,
-                            ),
-                            child: Text(readyText.startPlan),
-                          ),
-                        ),
+                      child: PrimaryButton(
+                        label: readyText.startPlan,
+                        onPressed: _startPlan,
                       ),
                     ),
                   ),

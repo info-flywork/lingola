@@ -5,14 +5,17 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/auth/api_client.dart';
+import '../../core/auth/session_store.dart';
 import '../../core/config/app_env.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_text.dart';
 import '../../core/premium/premium_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../widgets/chat_session_action_bar.dart';
 import '../../widgets/home_asset.dart';
 import '../../widgets/chat_word_chip.dart';
 import '../lesson/lesson_session_result.dart';
+import 'services/hold_to_speak_service.dart';
 import 'services/openai_chat_service.dart';
 import 'services/tutor_chat_api_service.dart';
 import 'services/tutor_tts_service.dart';
@@ -60,10 +63,12 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
+  final _textFocus = FocusNode();
   final _scrollController = ScrollController();
   final _messages = <TutorChatMessageDto>[];
   /// Boş alana tıklanınca kelime seçimini temizler.
   final _wordSelectionEpoch = ValueNotifier<int>(0);
+  late final HoldToSpeakService _mic;
 
   String? _sessionId;
   var _loading = true;
@@ -74,9 +79,22 @@ class _ChatScreenState extends State<ChatScreen> {
   var _checkpointOpen = false;
   late final Stopwatch _watch;
 
+  var _textComposeOn = false;
+  var _recording = false;
+  var _transcribing = false;
+  Timer? _recordingTicker;
+  Duration _recordingElapsed = Duration.zero;
+  var _hintLoading = false;
+  var _hintsOn = false;
+
   @override
   void initState() {
     super.initState();
+    _mic = HoldToSpeakService(
+      multilingual: true,
+      nativeLanguageCode:
+          SessionStore.currentUser?.onboarding?.nativeLanguageCode,
+    );
     _watch = Stopwatch()..start();
     _segmentStartedAt = DateTime.now();
     if (widget.lessonSegmentMode || widget.finishOnPop) {
@@ -89,6 +107,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   int get _sessionElapsedSeconds =>
       (widget.initialElapsed + _watch.elapsed).inSeconds;
+
+  bool get _composerBusy =>
+      _loading || _sessionId == null || _sending || _transcribing;
 
   void _popSession({required bool finish}) {
     if (widget.lessonSegmentMode) {
@@ -107,7 +128,10 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _segmentTimer?.cancel();
+    _recordingTicker?.cancel();
+    unawaited(_mic.dispose());
     _controller.dispose();
+    _textFocus.dispose();
     _scrollController.dispose();
     _wordSelectionEpoch.dispose();
     super.dispose();
@@ -222,13 +246,18 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _send() async {
-    final text = _controller.text.trim();
+    await _sendText(_controller.text.trim());
+  }
+
+  Future<void> _sendText(String text) async {
     final sessionId = _sessionId;
     if (text.isEmpty || sessionId == null || _sending) return;
 
     setState(() {
       _sending = true;
       _error = null;
+      _textComposeOn = false;
+      _hintsOn = false;
       _messages.add(
         TutorChatMessageDto(
           id: 'local-user-${DateTime.now().microsecondsSinceEpoch}',
@@ -239,6 +268,7 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     });
     _controller.clear();
+    _textFocus.unfocus();
     _scrollToBottom();
 
     try {
@@ -264,6 +294,250 @@ class _ChatScreenState extends State<ChatScreen> {
         _error = e is ApiException ? e.message : e.toString();
       });
     }
+  }
+
+  void _startRecordingTimer() {
+    _recordingTicker?.cancel();
+    _recordingElapsed = Duration.zero;
+    _recordingTicker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted || !_recording) return;
+      setState(() => _recordingElapsed += const Duration(seconds: 1));
+    });
+  }
+
+  void _stopRecordingTimer() {
+    _recordingTicker?.cancel();
+    _recordingTicker = null;
+    _recordingElapsed = Duration.zero;
+  }
+
+  Future<void> _onMicHoldStart() async {
+    if (_composerBusy || _recording) return;
+    setState(() {
+      _recording = true;
+      _error = null;
+    });
+    _startRecordingTimer();
+    try {
+      await _mic.start();
+      if (!mounted) return;
+    } catch (e) {
+      if (!mounted) return;
+      _stopRecordingTimer();
+      setState(() {
+        _recording = false;
+        _error = e.toString();
+      });
+    }
+  }
+
+  Future<void> _onMicHoldSend() async {
+    if (!_recording) return;
+    await _stopMicAndSend();
+  }
+
+  Future<void> _stopMicAndSend() async {
+    if (!_recording) return;
+    _stopRecordingTimer();
+    setState(() {
+      _recording = false;
+      _transcribing = true;
+    });
+    try {
+      final text = (await _mic.stopAndGetText()).trim();
+      if (!mounted) return;
+      setState(() => _transcribing = false);
+      if (text.isEmpty) {
+        setState(() => _error = 'Ses anlaşılamadı — tekrar dene');
+        return;
+      }
+      await _sendText(text);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _transcribing = false;
+        _error = e.toString();
+      });
+    }
+  }
+
+  void _toggleTextCompose() {
+    setState(() {
+      _textComposeOn = !_textComposeOn;
+      if (!_textComposeOn) _textFocus.unfocus();
+    });
+    if (_textComposeOn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _textFocus.requestFocus();
+      });
+    }
+  }
+
+  Future<void> _requestHint() async {
+    if (_hintLoading || _composerBusy) return;
+    if (_hintsOn) {
+      setState(() => _hintsOn = false);
+      return;
+    }
+    String? lastBot;
+    for (var i = _messages.length - 1; i >= 0; i--) {
+      if (!_messages[i].isUser) {
+        lastBot = _messages[i].content;
+        break;
+      }
+    }
+    if (lastBot == null || lastBot.trim().isEmpty) return;
+    setState(() {
+      _hintsOn = true;
+      _hintLoading = true;
+      _textComposeOn = true;
+    });
+    try {
+      final hint = await OpenAiChatService().suggestStudentReply(
+        tutorLastMessage: lastBot,
+        lessonContext: widget.sessionTitle ?? 'English practice',
+      );
+      if (!mounted) return;
+      final cleaned = hint.trim();
+      setState(() {
+        _hintLoading = false;
+        if (cleaned.isEmpty) {
+          _hintsOn = false;
+        } else {
+          _controller.text = cleaned;
+        }
+      });
+      _textFocus.requestFocus();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _hintLoading = false;
+        _hintsOn = false;
+        _error = e.toString();
+      });
+    }
+  }
+
+  Widget _buildComposer() {
+    final hint = AppText.current.tutorPage.typeMessage;
+    if (_textComposeOn && !_recording) {
+      return Container(
+        color: Colors.white,
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+        child: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _controller,
+          builder: (context, value, _) {
+            final hasText = value.text.trim().isNotEmpty;
+            return Row(
+              children: [
+                Material(
+                  color: ChatSessionActionBar.sideButtonBg,
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: _composerBusy ? null : _toggleTextCompose,
+                    child: const SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: Icon(
+                        Icons.mic_rounded,
+                        color: AppColors.primary,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Container(
+                    height: 48,
+                    padding: const EdgeInsets.only(left: 16, right: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: Colors.black.withValues(alpha: .05),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _controller,
+                            focusNode: _textFocus,
+                            enabled: !_composerBusy,
+                            autofocus: true,
+                            textInputAction: TextInputAction.send,
+                            onSubmitted: (_) {
+                              if (hasText) unawaited(_send());
+                            },
+                            decoration: InputDecoration(
+                              hintText: hint,
+                              border: InputBorder.none,
+                              isDense: true,
+                              hintStyle: const TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 14,
+                                color: AppColors.secondary,
+                              ),
+                            ),
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                        ),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: !_composerBusy && hasText
+                                ? () => unawaited(_send())
+                                : null,
+                            child: const HomeAsset(
+                              AppAssets.send,
+                              width: 32,
+                              height: 32,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+    }
+
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+      child: ChatSessionActionBar(
+        holdToRecord: false,
+        enableMic: !_composerBusy,
+        busy: _composerBusy && !_recording,
+        micBusy: _transcribing,
+        listening: _recording,
+        hintActive: _hintsOn,
+        hintLoading: _hintLoading,
+        onMessage: _toggleTextCompose,
+        onHint: () => unawaited(_requestHint()),
+        onMicTap: () => unawaited(_toggleMicTap()),
+      ),
+    );
+  }
+
+  Future<void> _toggleMicTap() async {
+    if (_composerBusy || _transcribing) return;
+    if (_recording) {
+      await _onMicHoldSend();
+      return;
+    }
+    await _onMicHoldStart();
   }
 
   void _scrollToBottom() {
@@ -300,8 +574,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final text = AppText.current.tutorPage;
-
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
@@ -436,140 +708,9 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           SafeArea(
             top: false,
-            child: _ChatComposer(
-              controller: _controller,
-              hint: text.typeMessage,
-              enabled: !_loading && _sessionId != null && !_sending,
-              onSend: _send,
-            ),
+            child: _buildComposer(),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ChatComposer extends StatelessWidget {
-  const _ChatComposer({
-    required this.controller,
-    required this.hint,
-    required this.enabled,
-    required this.onSend,
-  });
-
-  final TextEditingController controller;
-  final String hint;
-  final bool enabled;
-  final VoidCallback onSend;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-      child: ValueListenableBuilder<TextEditingValue>(
-        valueListenable: controller,
-        builder: (context, value, _) {
-          final hasText = value.text.trim().isNotEmpty;
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Material(
-                color: Colors.white,
-                elevation: 0,
-                shadowColor: Colors.transparent,
-                shape: const CircleBorder(),
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.black.withValues(alpha: .05),
-                    ),
-                  ),
-                  child: SizedBox(
-                    width: 46,
-                    height: 46,
-                    child: Center(
-                      child: Icon(
-                        Icons.add_rounded,
-                        size: 24,
-                        color: AppColors.primary.withValues(
-                          alpha: enabled ? 1 : .4,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Container(
-                  height: 48,
-                  padding: const EdgeInsets.only(left: 16, right: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: Colors.black.withValues(alpha: .05),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: controller,
-                          enabled: enabled,
-                          textInputAction: TextInputAction.send,
-                          onSubmitted: (_) {
-                            if (hasText) onSend();
-                          },
-                          decoration: InputDecoration(
-                            hintText: hint,
-                            border: InputBorder.none,
-                            isDense: true,
-                            hintStyle: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 14,
-                              height: 18 / 14,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            height: 18 / 14,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: HomeAsset(
-                          AppAssets.chatMic,
-                          width: 22,
-                          height: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          customBorder: const CircleBorder(),
-                          onTap: enabled && hasText ? onSend : null,
-                          child: const HomeAsset(
-                            AppAssets.send,
-                            width: 32,
-                            height: 32,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
       ),
     );
   }

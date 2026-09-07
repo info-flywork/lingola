@@ -10,6 +10,11 @@ class PrimaryButton extends StatelessWidget {
     super.key,
   });
 
+  /// Figma CTA: 398×54, radius 10, fill #2D46FF, shadow #0015B4 Y:4.
+  static const height = 54.0;
+  static const radius = 10.0;
+  static const shadowOffset = 4.0;
+
   final String label;
   final VoidCallback onPressed;
 
@@ -18,19 +23,20 @@ class PrimaryButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.darkShadow,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(radius),
       ),
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: shadowOffset),
       child: SizedBox(
         width: double.infinity,
-        height: 48,
+        height: height,
         child: FilledButton(
           onPressed: onPressed,
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
+            padding: const EdgeInsets.all(12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(radius),
             ),
             textStyle: AppTextStyles.primaryButton,
           ),
@@ -56,23 +62,24 @@ class SecondaryButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.secondaryButtonShadow,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(PrimaryButton.radius),
       ),
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: PrimaryButton.shadowOffset),
       child: SizedBox(
         width: double.infinity,
-        height: 48,
+        height: PrimaryButton.height,
         child: OutlinedButton(
           onPressed: onPressed,
           style: OutlinedButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: AppColors.secondaryButtonText,
+            padding: const EdgeInsets.all(12),
             side: const BorderSide(
               color: AppColors.secondaryButtonShadow,
               width: 1,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(PrimaryButton.radius),
             ),
             textStyle: AppTextStyles.primaryButton.copyWith(
               color: AppColors.secondaryButtonText,

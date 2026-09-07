@@ -1,4 +1,5 @@
 import '../../core/constants/app_assets.dart';
+import '../../core/constants/app_text.dart';
 
 /// CEFR seviyesine göre sertifika rozeti ve etiketleri.
 abstract final class CertificateLevelAssets {
@@ -24,6 +25,7 @@ abstract final class CertificateLevelAssets {
     }
   }
 
+  /// Belge üzerinde her zaman İngilizce (CertificateCopy ile aynı dil).
   static String levelLabel(String level) {
     switch (level.toUpperCase()) {
       case 'A1':
@@ -43,23 +45,24 @@ abstract final class CertificateLevelAssets {
     }
   }
 
-  /// Liste satırı — Figma: "A1 - Starter Certificate".
+  /// Liste satırı — uygulama diline göre.
   static String listTitle(String level) {
+    final text = AppText.current.profilePage;
     switch (level.toUpperCase()) {
       case 'A1':
-        return 'A1 - Starter Certificate';
+        return text.certificateListA1;
       case 'A2':
-        return 'A2 - Basic Certificate';
+        return text.certificateListA2;
       case 'B1':
-        return 'B1 - Intermediate Certificate';
+        return text.certificateListB1;
       case 'B2':
-        return 'B2 - Upper Intermediate Certificate';
+        return text.certificateListB2;
       case 'C1':
-        return 'C1 - Advanced Certificate';
+        return text.certificateListC1;
       case 'C2':
-        return 'C2 - Expert Certificate';
+        return text.certificateListC2;
       default:
-        return '${level.toUpperCase()} Certificate';
+        return text.certificateListGeneric(level: level.toUpperCase());
     }
   }
 

@@ -96,26 +96,26 @@
     "russian": "Rusça"
   },
   "setup": {
-    "goalTitle": "Neden yeni bir dil öğrenmek istiyorsunuz?",
-    "goalHint": "Hedefine tam uyan kişisel bir çalışma planı hazırlayacağız",
+    "goalTitle": "Neden yeni bir dil öğrenmek\nistiyorsunuz?",
+    "goalHint": "Hedefine tam uyan kişisel bir çalışma planı\nhazırlayacağız",
     "goalCareer": "Kariyer Gelişimi",
     "goalTravel": "Seyahat",
     "goalLiving": "Yurt Dışında Yaşamak",
     "goalStudying": "Eğitim",
     "goalOther": "Kişisel gelişim",
     "interestsTitle": "Lütfen ilgi alanlarınızı seçiniz",
-    "interestsHint": "İlgini çeken konularla sana özel bir öğrenme deneyimi oluşturacağız.",
+    "interestsHint": "İlgini çeken konularla sana özel bir öğrenme\ndeneyimi oluşturacağız.",
     "seeMoreEllipsis": "Daha fazla...",
     "levelTitle": "Mevcut seviyeni nasıl tanımlarsın?",
     "levelA1": "Bu dili sıfırdan öğreniyorum",
     "levelA2": "Temel sohbetlere katılabilirim",
-    "levelB1": "Aşina olduğum konularda kısa sohbetleri idare edebilirim",
-    "levelB2": "Günlük konular hakkında detaylı konuşabilirim",
-    "levelC1": "Ana dili konuşanlarla akıcı bir şekilde konuşabilirim",
-    "levelC2": "Her konuda kendimi net bir şekilde ifade edebiliyorum",
-    "paceTitle": "Kayda değer bir ilerleme görmeyi ne kadar yakında istiyorsun?",
-    "explanationTitle": "Kendi dilinde sorduğun sorulara nasıl açıklama yapalım?",
-    "explanationHint": "Bunu istediğin zaman profil ayarlarından değiştirebilirsin.",
+    "levelB1": "Aşina olduğum konularda kısa sohbetleri idare\nedebilirim",
+    "levelB2": "Günlük konular hakkında detaylı\nkonuşabilirim",
+    "levelC1": "Ana dili konuşanlarla akıcı bir şekilde\nkonuşabilirim",
+    "levelC2": "Her konuda kendimi net bir şekilde ifade\nedebiliyorum",
+    "paceTitle": "Kayda değer bir ilerleme görmeyi ne\nkadar yakında istiyorsun?",
+    "explanationTitle": "Kendi dilinde sorduğun sorulara nasıl\naçıklama yapalım?",
+    "explanationHint": "Bunu istediğin zaman profil ayarlarından\ndeğiştirebilirsin.",
     "explanationNative": "Anadilimde açıkla",
     "explanationEnglish": "İngilizce açıkla",
     "paceHint": "Planın temposunu ayarlamamıza yardımcı olur",
@@ -124,22 +124,22 @@
     "paceMonth6": "6 ay",
     "paceYear1": "1 yıl",
     "paceRelaxed": "Acele etmiyorum",
-    "progressInsightTitle": "Sadece 2 haftada gerçek ilerleme gör!",
-    "progressInsightBody": "Lingola kullanıcıları genelde daha en baştan konuşma özgüvenlerinde büyük bir artış fark ediyor.",
+    "progressInsightTitle": "Sadece 2 haftada gerçek\nilerleme gör!",
+    "progressInsightBody": "Lingola kullanıcıları genelde daha en baştan\nkonuşma özgüvenlerinde büyük bir artış fark ediyor.",
     "progressInsightConfidence": "Konuşma özgüveni",
-    "progressInsightToday": "Today",
+    "progressInsightToday": "Bugün",
     "progressInsightWeek2": "2. hafta",
     "progressInsightWithLingola": "Lingola ile",
     "progressInsightWithoutApp": "Uygulama olmadan",
-    "levelHint": "Lingola, her seviyeden dil öğrencisine yardımcı olmak için tasarlandı",
-    "dailyPracticeTitle": "Günde ne kadar pratik yapmak istiyorsun?",
-    "dailyPracticeHint": "Kendi hızında ilerle, her gün bir adım daha yaklaş.",
-    "dailyPracticeMonthlyHours": "$hours / month",
+    "levelHint": "Lingola, her seviyeden dil öğrencisine yardımcı\nolmak için tasarlandı",
+    "dailyPracticeTitle": "Günde ne kadar pratik yapmak\nistiyorsun?",
+    "dailyPracticeHint": "Kendi hızında ilerle, her gün bir adım daha\nyaklaş.",
+    "dailyPracticeMonthlyHours": "$hours saat / ay",
     "dailyPracticeOnlyMinutes": "Günde sadece $minutes dk",
     "dailyPracticeMinutesOption": "$minutes dk",
     "dailyPracticeToday": "Bugün",
-    "practiceTimeTitle": "Günün hangi saati pratik yapmak istersin?",
-    "practiceTimeHint": "Hatırlatmalar serini korumana yardımcı olur, her gün hedefine bir adım daha yaklaşmanı sağlar.",
+    "practiceTimeTitle": "Günün hangi saati pratik yapmak\nistersin?",
+    "practiceTimeHint": "Hatırlatmalar serini korumana yardımcı olur ve\nher gün hedefine bir adım daha yaklaşmanı\nsağlar.",
     "practiceTimeMorning": "Sabah",
     "practiceTimeAfternoon": "Öğleden sonra",
     "practiceTimeEvening": "Akşam",
@@ -147,19 +147,21 @@
     "practiceTimeSave": "Kaydet",
     "setPracticeTimeTitle": "Zamanını ayarla",
     "setPracticeTimeHint": "Hangi zaman aralığında pratik yapmak istersin?",
+    "periodAm": "ÖÖ",
+    "periodPm": "ÖS",
     "promiseTitle": "Ben, her gün konuşma pratiği yapacağıma söz veriyorum",
     "promiseBody": "Ve yapay zeka eğitmenleri ile dil öğrenme hedeflerime mümkün olan en hızlı şekilde ulaş",
-    "promiseHoldHint": "Onaylamak için Lingola logosuna dokunup basılı tut",
+    "promiseHoldHint": "Onaylamak için Lingola\nlogosuna dokunup basılı tut",
     "aiTutorsIntroTitle": "Lingola’da 20+ yapay zeka\neğitmeninden dilediğini seçebilirsin",
     "aiTutorsIntroBody": "Hepsinin derin kişilikleri ve farklı aksanları var",
     "aiTutorsIntroCta": "Biraz Seni Tanıyalım"
   },
   "accountCreating": {
     "title": "Kişisel Hesabın Oluşturuluyor",
-    "titleLine1": "Building your",
-    "titleLine2": "Account",
-    "testimonialQuote": "Week one I could barely say hello. Week three I was having full conversations with my AI tutor. I'm not stopping now.",
-    "testimonialAuthor": "Maria, 29 — 3 months in",
+    "titleLine1": "Hesabın",
+    "titleLine2": "Oluşturuluyor",
+    "testimonialQuote": "İlk hafta zar zor merhaba diyebiliyordum. Üçüncü hafta AI eğitmenimle akıcı sohbetler yapıyordum. Artık durmuyorum.",
+    "testimonialAuthor": "Maria, 29 — 3 aydır",
     "stepContent": "İçerik oluşturuluyor",
     "stepDialogues": "Diyaloglar hazırlanıyor",
     "stepLessons": "Dersler optimize ediliyor",
@@ -173,22 +175,22 @@
     "comparisonAloneLabel": "Tek başına",
     "comparisonLingolaLabel": "Lingola",
     "fluencyPitch": "Bugünden akıcılığa, bir sonraki seviyeniz sadece 30 gün uzakta",
-    "chartToday": "Today",
-    "chartMid": "15 Sep",
-    "chartEnd": "30 Sep"
+    "chartToday": "Bugün",
+    "chartMid": "15 Eyl",
+    "chartEnd": "30 Eyl"
   },
   "planReady": {
-    "titleLine1": "Your plan is",
-    "titleLine2": "Ready!",
+    "titleLine1": "Planın",
+    "titleLine2": "Hazır!",
     "statBanner": "Kullanıcıların %95'i ilk 7 gün içinde sonuç alıyor",
-    "planTitle": "$name'İN PLANI",
+    "planTitle": "$name PLANI",
     "defaultName": "SENİN",
     "fieldCourse": "KURS",
     "fieldLevel": "SEVİYENİZ",
     "fieldFocus": "ODAK ALANI",
     "fieldDuration": "SÜRE",
     "fieldInterests": "İLGİ ALANLARI",
-    "startPlan": "Start my plan →",
+    "startPlan": "Planıma başla →",
     "courseEnglish": "İngilizce",
     "courseGerman": "Almanca",
     "courseFrench": "Fransızca",
@@ -811,6 +813,42 @@
         "botReply": "Tanıştığımıza memnun oldum. Sık gelir misin buraya?"
       }
     },
+    "flirtingAwkward": {
+      "title": "Garip Bir Anı Kurtarmak",
+      "screenplay": "Yanlış anlaşılma veya sessizlikten sonra hafifçe özür dile ve sohbeti rahat bir konuya çevir.",
+      "chat": {
+        "briefing": "Merhaba! Bugün flört sohbetinde garip bir anı kurtarmayı pratik edeceğiz — hafif özür ve toparlanma. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Bir dakika… Sanırım adımı karıştırdın.",
+        "outgoing1": "Ah, özür dilerim! Çok utandım. Baştan başlayabilir miyiz?",
+        "incoming2Highlight": "Haha, tabii",
+        "incoming2Rest": ". Ben Maya.",
+        "botReply": "Sorun değil. Neyden bahsediyorduk?"
+      }
+    },
+    "flirtingAskOut": {
+      "title": "Birini Dışarı Davet Etmek",
+      "screenplay": "Kısa sohbetten sonra tekrar buluşmayı öner — kahve, yürüyüş veya film — evet veya nazik hayırı güzel karşıla.",
+      "chat": {
+        "briefing": "Merhaba! Bugün kibarca birini dışarı davet etmeyi pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Hazır mısın?",
+        "incoming1": "Seninle konuşmak gerçekten keyifliydi.",
+        "outgoing1": "Benim için de. Bu hafta bir kahve içmek ister misin?",
+        "incoming2Highlight": "Çok isterim",
+        "incoming2Rest": ". Senin için hangi gün uygun?",
+        "botReply": "Cumartesi öğleden sonra müsaitim."
+      }
+    },
+    "flirtingCompliment": {
+      "title": "Kibar Bir İltifat Etmek",
+      "screenplay": "Hafif bir iltifatla başla, saygılı ol ve karşı tarafın sohbete devam etmek isteyip istemediğini gör.",
+      "chat": {
+        "briefing": "Merhaba! Bugün kibar iltifat etmeyi pratik edeceğiz — kısa, nazik, doğal. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Pardon — az kalsın çarpışıyorduk.",
+        "outgoing1": "Sorun değil! Bu arada, ceketin çok güzelmiş.",
+        "incoming2Highlight": "Teşekkürler",
+        "incoming2Rest": "! Ne güzel söyledin.",
+        "botReply": "Birini mi bekliyorsun, yoksa öyle mi takılıyorsun?"
+      }
+    },
     "freeTalkHobby": {
       "title": "Hobiler Hakkında Sohbet",
       "screenplay": "Boş zaman aktiviteleri hakkında serbestçe konuş, takip soruları sor, tercihlerini paylaş ve birlikte yeni bir şey denemeyi öner.",
@@ -821,6 +859,42 @@
         "incoming2Highlight": "Güzel",
         "incoming2Rest": "! Ben de daha fazla yürüyüş yapmak istiyordum. Favori bir parkurun var mı?",
         "botReply": "Kulağa harika geliyor. Bir ara birlikte gidelim mi?"
+      }
+    },
+    "freeTalkDisagree": {
+      "title": "Hobilerde Kibarca Aynı Fikirde Olmamak",
+      "screenplay": "Bir hobi tercihine kibarca katılma, görüşünü açıkla ve sohbeti dostça sürdür.",
+      "chat": {
+        "briefing": "Merhaba! Bugün hobilerde kibarca aynı fikirde olmamayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Bence yürüyüş sıkıcı.",
+        "outgoing1": "Anlıyorum — bana göre rahatlatıcı. Sen neyi tercih ediyorsun?",
+        "incoming2Highlight": "Haklısın",
+        "incoming2Rest": ". Ben kapalı alan tırmanışını daha çok severim.",
+        "botReply": "Belki bir kez birbirimizin hobisini deneriz."
+      }
+    },
+    "freeTalkMovies": {
+      "title": "Filmler Hakkında Konuşmak",
+      "screenplay": "Film öner, türleri sor ve birbirinizin favorilerine tepki ver.",
+      "chat": {
+        "briefing": "Merhaba! Bugün film sohbeti pratik edeceğiz — türler, favoriler, öneriler. Önce açıklayacağım, sonra konuşacağız. Hazır mısın?",
+        "incoming1": "Son zamanlarda iyi film izledin mi?",
+        "outgoing1": "Evet — geçen hafta bir komedi. Sen komedi sever misin?",
+        "incoming2Highlight": "Bayılırım",
+        "incoming2Rest": "! Önereceğin bir şey var mı?",
+        "botReply": "Bu gece en iyi üçümü atarım."
+      }
+    },
+    "freeTalkWeekend": {
+      "title": "Hafta Sonu Planlarından Bahsetmek",
+      "screenplay": "Hafta sonu planlarını anlat, onunkini sor ve birlikte yapılabilecek basit bir şey öner.",
+      "chat": {
+        "briefing": "Merhaba! Bugün hafta sonu planı sohbeti pratik edeceğiz. Önce açıklayacağım, sonra konuşacağız. Olur mu?",
+        "incoming1": "Hafta sonu planın var mı?",
+        "outgoing1": "Belki parka giderim. Sen?",
+        "incoming2Highlight": "Güzel",
+        "incoming2Rest": "! Ben müzeyi düşünüyordum.",
+        "botReply": "Pazar kısa bir yürüyüş için buluşalım mı?"
       }
     },
     "coffee": {
@@ -835,6 +909,42 @@
         "botReply": "Harika seçim. Siparişinle birlikte başka bir şey ister misin?"
       }
     },
+    "coffeeQueue": {
+      "title": "Kahve Sırasında Beklemek",
+      "screenplay": "Kalabalık bir kafede sırada bekle, önündeki kişiyle kibarca sohbet et, yerini koru ve sıra sana gelince siparişe hazır ol.",
+      "chat": {
+        "briefing": "Merhaba! Bugün kahve sırasında beklemeyi pratik edeceğiz — kısa sohbet, yerini tutmak, sıranın ilerlemesi. Önce biraz açıklayacağım, sonra canlandıracağız. Hazır mısın?",
+        "incoming1": "Bugün sıra biraz yavaş ilerliyor, değil mi?",
+        "outgoing1": "Evet — sabahları burası hep kalabalık oluyor.",
+        "incoming2Highlight": "Doğru",
+        "incoming2Rest": "! Her zamanki siparişini mi alıyorsun, yoksa yeni bir şey mi deneyeceksin?",
+        "botReply": "Güzel. Görünüşe göre sıra sende — iyi siparişler!"
+      }
+    },
+    "coffeeRecommendation": {
+      "title": "Baristadan İçecek Önerisi İstemek",
+      "screenplay": "Baristaya ne önerdiğini sor, birkaç içeceği karşılaştır, boyut ve süt seçeneklerini seç, sonra güvenle sipariş ver.",
+      "chat": {
+        "briefing": "Merhaba! Bugün baristadan öneri istemeyi pratik edeceğiz — tatlar, boyutlar, süt seçenekleri. Önce biraz açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Merhaba! Öneri mi istersin, yoksa ne istediğini biliyor musun?",
+        "outgoing1": "Bir öneri isterim — çok acı olmayan bir şey olsun.",
+        "incoming2Highlight": "Harika",
+        "incoming2Rest": "! Ballı yulaf latte çok seviliyor; buzlu istersen karamelli cold brew da güzel.",
+        "botReply": "Güzel seçim. Hangi boy olsun?"
+      }
+    },
+    "coffeeWrongOrder": {
+      "title": "Yanlış Kahve Siparişini Düzeltmek",
+      "screenplay": "İçeceğinin yanlış geldiğini kibarca söyle, ne sipariş ettiğini anlat, yeniden yapılmasını veya değiştirilmesini iste ve teşekkür et.",
+      "chat": {
+        "briefing": "Merhaba! Bugün yanlış gelen kahve siparişini düzeltmeyi pratik edeceğiz — kibar kalmak, hatayı anlatmak, yeniden yapılmasını istemek. Önce birkaç ifade, sonra canlandırma. Hazır mısın?",
+        "incoming1": "Buyurun siparişiniz — orta boy buzlu latte. Afiyet olsun!",
+        "outgoing1": "Kusura bakmayın, sanırım yanlış olmuş. Ben sıcak yulaf sütlü latte istemiştim.",
+        "incoming2Highlight": "Ah",
+        "incoming2Rest": " — benim hatam! Hemen yeniden yapıyorum.",
+        "botReply": "Sabırınız için teşekkürler. Sıcak yulaf sütlü latte geliyor."
+      }
+    },
     "directions": {
       "title": "Sokakta Yön Sorma",
       "screenplay": "Bir yere nasıl gidileceğini sor, metro veya otobüs hakkında bilgi al, biletler hakkında bilgi edin ve restoran önerilerini dinle.",
@@ -845,6 +955,42 @@
         "incoming2Highlight": "Tabii ki",
         "incoming2Rest": "! O yöne iki blok yürü, sonra sola dön. Girişi göreceksin.",
         "botReply": "Rica ederim! İstasyon yakınında bir restoran önerisi ister misin?"
+      }
+    },
+    "directionsWrongWay": {
+      "title": "Yanlış Tarifi Düzeltmek",
+      "screenplay": "Yol tarifinin yanlış olduğunu fark et, kibarca tekrar sor ve yer işaretleriyle daha net tarif al.",
+      "chat": {
+        "briefing": "Merhaba! Bugün yanlış tarifi kibarca düzeltmeyi pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Parkı buldun mu?",
+        "outgoing1": "Sanırım yanlış gittim. Yer işaretleriyle tekrar tarif eder misin?",
+        "incoming2Highlight": "Tabii",
+        "incoming2Rest": " — kırmızı kitabeviyi geç, çeşmede sola dön.",
+        "botReply": "Fırını görürsen fazla gitmişsin demektir."
+      }
+    },
+    "directionsTransit": {
+      "title": "Otobüs veya Metro Rotası Sormak",
+      "screenplay": "Hangi hatta bineceğini, kaç durak gideceğini ve nerede aktarma yapacağını sor.",
+      "chat": {
+        "briefing": "Merhaba! Bugün otobüs/metro rotası sormayı pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Olur mu?",
+        "incoming1": "Ulaşım konusunda yardım ister misin?",
+        "outgoing1": "Evet — müzeye hangi metro hattı gidiyor?",
+        "incoming2Highlight": "Mavi hattı al",
+        "incoming2Rest": ", üç durak git, sonra yeşil hatta aktarma yap.",
+        "botReply": "Toplam yol yaklaşık yirmi dakika sürer."
+      }
+    },
+    "directionsLost": {
+      "title": "Kaybolduğunda Yardım İstemek",
+      "screenplay": "Kaybolduğunu söyle, nereye gitmen gerektiğini anlat ve ayrılmadan önce yolu teyit et.",
+      "chat": {
+        "briefing": "Merhaba! Bugün kaybolduğunda yardım istemeyi pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Biraz kaybolmuş gibisin — yardım ister misin?",
+        "outgoing1": "Evet, lütfen. Belediye binasını arıyorum.",
+        "incoming2Highlight": "Kolay",
+        "incoming2Rest": " — iki blok düz git, sonra sağa dön.",
+        "botReply": "Haritada da göstereyim mi?"
       }
     },
     "interview": {
@@ -859,6 +1005,42 @@
         "botReply": "Bu etkileyici. Rol hakkında ne gibi soruların var?"
       }
     },
+    "interviewSalary": {
+      "title": "Maaş Beklentisini Konuşmak",
+      "screenplay": "Maaş aralığını kibarca konuş, yan hakları sor ve profesyonel kal.",
+      "chat": {
+        "briefing": "Merhaba! Bugün maaş beklentisini profesyonelce konuşmayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Bu rol için maaş beklentin nedir?",
+        "outgoing1": "Bu seviye için piyasa ortalamasına yakın bir aralık düşünüyorum. Sizin bandınızı paylaşabilir misiniz?",
+        "incoming2Highlight": "Tabii",
+        "incoming2Rest": ". Yan haklarda uzaktan günler ve eğitim bütçesi de var.",
+        "botReply": "Kararında yan haklar önemli mi?"
+      }
+    },
+    "interviewExperience": {
+      "title": "İş Deneyimini Anlatmak",
+      "screenplay": "Son rolünü, sorumluluklarını ve mümkünse rakamlı bir başarını anlat.",
+      "chat": {
+        "briefing": "Merhaba! Bugün iş deneyimini net anlatmayı pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Olur mu?",
+        "incoming1": "En son rolünden bahseder misin?",
+        "outgoing1": "Küçük bir ekibi koordine ettim ve teslim süremizi kısalttım.",
+        "incoming2Highlight": "İlginç",
+        "incoming2Rest": ". Ne kadar kısalttınız?",
+        "botReply": "O işin en zor yanı neydi?"
+      }
+    },
+    "interviewStrengths": {
+      "title": "Güçlü Yanlarını Anlatmak",
+      "screenplay": "İki güçlü yanını kısa örneklerle anlat ve işe bağla.",
+      "chat": {
+        "briefing": "Merhaba! Bugün mülakatta güçlü yanlarını anlatmayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "En güçlü yanların neler?",
+        "outgoing1": "Düzenliyim ve ekiple net iletişim kurarım.",
+        "incoming2Highlight": "Güzel",
+        "incoming2Rest": ". Kısa bir örnek verebilir misin?",
+        "botReply": "Bu güçlü yanlar bu rolde nasıl işe yarar?"
+      }
+    },
     "missedTrain": {
       "title": "Trenini Kaçırdın",
       "screenplay": "Trenini kaçırdın ve istasyon görevlisinden yardım iste — nereye gideceğini söyle, bir sonraki treni bul ve perona yön tarifi al.",
@@ -869,6 +1051,42 @@
         "incoming2Highlight": "Sorun değil",
         "incoming2Rest": ". Bir sonraki uygun treni kontrol edeyim.",
         "botReply": "En hızlı seçeneği mi yoksa en ucuz olanı mı tercih edersiniz?"
+      }
+    },
+    "missedTrainRefund": {
+      "title": "Yeniden Bilet veya İade Sormak",
+      "screenplay": "Gecikme yüzünden aktarmayı kaçırınca yeniden bilet, iade veya telafi seçeneklerini sor.",
+      "chat": {
+        "briefing": "Merhaba! Bugün tren kaçınca yeniden bilet veya iade sormayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Nasıl yardımcı olabilirim?",
+        "outgoing1": "İlk trenim gecikti, aktarmayı kaçırdım. Ücretsiz yeniden bilet alabilir miyim?",
+        "incoming2Highlight": "Evet",
+        "incoming2Rest": " — sizi bir sonraki trene yazıyorum.",
+        "botReply": "E-posta onayı da ister misiniz?"
+      }
+    },
+    "missedTrainTicket": {
+      "title": "Tren Kaçınca Bileti Düzeltmek",
+      "screenplay": "Biletinin hâlâ geçerli olup olmadığını, sonraki trene binebilip binemeyeceğini ve kapıda ne yapacağını sor.",
+      "chat": {
+        "briefing": "Merhaba! Bugün tren kaçınca bilet sorununu çözmeyi pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Olur mu?",
+        "incoming1": "Bilet sorunu mu var?",
+        "outgoing1": "Trenimi kaçırdım. Bu bilet sonraki tren için hâlâ geçerli mi?",
+        "incoming2Highlight": "Evet",
+        "incoming2Rest": ", aynı güzergâhta iki saat geçerli.",
+        "botReply": "Kapıda göster — sorun olmaz."
+      }
+    },
+    "missedTrainNext": {
+      "title": "Sonraki Treni Bulmak",
+      "screenplay": "Treni kaçırdığını söyle, bir sonrakinin ne zaman kalkacağını ve hangi peronu kullanacağını sor.",
+      "chat": {
+        "briefing": "Merhaba! Bugün treni kaçırdıktan sonra sonrakini bulmayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Yardımcı olabilir miyim?",
+        "outgoing1": "Boston'a 10:15 trenini kaçırdım. Bir sonraki ne zaman?",
+        "incoming2Highlight": "Sonraki 10:45",
+        "incoming2Rest": ", 3. perondan.",
+        "botReply": "Bilet geçişinde yardım ister misin?"
       }
     },
     "flightAttendant": {
@@ -883,6 +1101,42 @@
         "botReply": "Bir şeyler içmek ister misiniz — su, meyve suyu, kahve veya çay?"
       }
     },
+    "flightDelay": {
+      "title": "Gecikme veya Aktarma Sormak",
+      "screenplay": "Uçuş neden geciktiğini, aktarmaya yetişip yetişmeyeceğini ve ne yardım olduğunu sor.",
+      "chat": {
+        "briefing": "Merhaba! Bugün uçuşta gecikme ve aktarma sormayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Yaklaşık kırk dakika gecikeceğiz.",
+        "outgoing1": "Aktarmam çok sıkışık. Yetişir miyim?",
+        "incoming2Highlight": "Deneyeceğiz",
+        "incoming2Rest": ". Gerekirse önceden haber veririz.",
+        "botReply": "Sonraki uçuşun kapı bilgisini ister misiniz?"
+      }
+    },
+    "flightSpecialMeal": {
+      "title": "Özel Yemek İstemek",
+      "screenplay": "Yemek seçeneklerini sor, vejetaryen veya özel yemek iste ve zamanını teyit et.",
+      "chat": {
+        "briefing": "Merhaba! Bugün uçakta özel yemek istemeyi pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Hazır mısın?",
+        "incoming1": "Yakında akşam yemeği servisi var.",
+        "outgoing1": "Vejetaryen seçenek var mı?",
+        "incoming2Highlight": "Evet",
+        "incoming2Rest": " — makarna veya salata kutusu.",
+        "botReply": "Bir sonraki arabayla getireceğim."
+      }
+    },
+    "flightSeat": {
+      "title": "Koltuk Değişikliği İstemek",
+      "screenplay": "Rahatlık, aile veya cam/koridor tercihi için kibarca koltuk değişimi iste.",
+      "chat": {
+        "briefing": "Merhaba! Bugün kabin görevlisinden koltuk değişikliği istemeyi pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Kalkıştan önce bir şey ister misiniz?",
+        "outgoing1": "Boşsa koridor tarafına geçebilir miyim?",
+        "incoming2Highlight": "Bakayım",
+        "incoming2Rest": "… evet, 14C boş.",
+        "botReply": "Bagaj etiketini de taşıyorum."
+      }
+    },
     "trainTicket": {
       "title": "Tren Bileti Alma",
       "screenplay": "Tren istasyonunda gişeye git, nereye gideceğini söyle, kalkış saatini seç, bilet türünü ve koltuğunu belirle, bileti öde.",
@@ -893,6 +1147,42 @@
         "incoming2Highlight": "Harika",
         "incoming2Rest": ". Ne zaman seyahat etmek istersiniz?",
         "botReply": "Tek yön mü yoksa gidiş-dönüş mü istersiniz?"
+      }
+    },
+    "trainTicketUpgrade": {
+      "title": "Koltuk veya Sınıf Yükseltmek",
+      "screenplay": "Sessiz vagon veya birinci sınıfa yükseltmeyi sor, fiyatları karşılaştır ve değişikliği tamamla.",
+      "chat": {
+        "briefing": "Merhaba! Bugün tren koltuğu veya sınıf yükseltmeyi pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Biletiniz için yardım ister misiniz?",
+        "outgoing1": "Bu trende birinci sınıfa yükseltebilir miyim?",
+        "incoming2Highlight": "Evet",
+        "incoming2Rest": " — kırk dolar farkla yer var.",
+        "botReply": "Sessiz vagon daha uygun, isterseniz."
+      }
+    },
+    "trainTicketPlatform": {
+      "title": "Doğru Peronu Bulmak",
+      "screenplay": "Treninin hangi perondan kalktığını ve bagajla nasıl gideceğini sor.",
+      "chat": {
+        "briefing": "Merhaba! Bugün doğru tren peronunu bulmayı pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Olur mu?",
+        "incoming1": "Peronunu mu arıyorsun?",
+        "outgoing1": "Evet — Chicago treni. Hangi peron?",
+        "incoming2Highlight": "Peron 7",
+        "incoming2Rest": ". Asansörler solda.",
+        "botReply": "Biniş on dakika içinde başlıyor."
+      }
+    },
+    "trainTicketChange": {
+      "title": "Tren Bileti Saatini Değiştirmek",
+      "screenplay": "Kalkış saatini değiştirmek iste, ücreti sor ve yeni bileti teyit et.",
+      "chat": {
+        "briefing": "Merhaba! Bugün tren bileti saatini değiştirmeyi pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Bilet gişesi — buyurun?",
+        "outgoing1": "Saat 3 biletini 5 trenine çevirebilir miyim?",
+        "incoming2Highlight": "Evet",
+        "incoming2Rest": ", küçük bir değişiklik ücreti var.",
+        "botReply": "Güncel bileti şimdi basıyorum."
       }
     },
     "restaurantReservation": {
@@ -907,6 +1197,42 @@
         "botReply": "Kaç kişi olacaksınız?"
       }
     },
+    "restaurantComplaint": {
+      "title": "Restoranda Kibarca Şikâyet Etmek",
+      "screenplay": "Yemek veya servis sorununu sakin anlat ve adil bir çözüm iste.",
+      "chat": {
+        "briefing": "Merhaba! Bugün restoranda kibarca şikâyet etmeyi pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Yemeğiniz yolunda mı?",
+        "outgoing1": "Makarna soğuk. Yeniden yapabilir misiniz, lütfen?",
+        "incoming2Highlight": "Özür dilerim",
+        "incoming2Rest": " — hemen yeniden yapıyoruz.",
+        "botReply": "Beklerken bir içecek ister misiniz?"
+      }
+    },
+    "restaurantAllergy": {
+      "title": "Yiyecek Alerjisini Belirtmek",
+      "screenplay": "Alerji veya diyet ihtiyacını anlat, menüde güvenli olanı sor ve personele teyit ettir.",
+      "chat": {
+        "briefing": "Merhaba! Bugün restoranda yiyecek alerjisini anlatmayı pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Olur mu?",
+        "incoming1": "Bilmemiz gereken bir alerjiniz var mı?",
+        "outgoing1": "Evet — fıstığa alerjim var. Hangi yemekler güvenli?",
+        "incoming2Highlight": "Çoğu makarna",
+        "incoming2Rest": " sorun olmaz. Mutfağa not düşeceğim.",
+        "botReply": "Şefin önerisini ister misiniz?"
+      }
+    },
+    "restaurantChange": {
+      "title": "Restoran Rezervasyonunu Değiştirmek",
+      "screenplay": "Saati veya kişi sayısını değiştirmek için ara ve yeni bilgileri teyit et.",
+      "chat": {
+        "briefing": "Merhaba! Bugün restoran rezervasyonunu değiştirmeyi pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Rezervasyon, buyurun?",
+        "outgoing1": "Saat 7 için rezervasyonum var. 8'e, dört kişilik alabilir miyiz?",
+        "incoming2Highlight": "Tabii",
+        "incoming2Rest": ", saat 8 dört kişilik müsait.",
+        "botReply": "Onayı mesajla göndereceğim."
+      }
+    },
     "doctorAppointment": {
       "title": "Doktor Randevusu Alma",
       "screenplay": "Bir kliniği arayarak doktor randevusu al — ziyaret nedenini açıkla, uygun gün ve saati seç, bilgilerini onayla.",
@@ -917,6 +1243,42 @@
         "incoming2Highlight": "Tabii",
         "incoming2Rest": ". Daha önce kliniğimize gelmiş miydiniz?",
         "botReply": "Doktora ne için gelmek istiyorsunuz?"
+      }
+    },
+    "doctorFollowUp": {
+      "title": "Test Sonuçlarını Konuşmak",
+      "screenplay": "Sonuçların ne anlama geldiğini, sonraki adımları ve yeni randevu gerekip gerekmediğini sor.",
+      "chat": {
+        "briefing": "Merhaba! Bugün doktorda test sonuçlarını konuşmayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Kan tahlili sonuçlarınız geldi.",
+        "outgoing1": "Ne anlama geliyor? Daha fazla test gerekir mi?",
+        "incoming2Highlight": "Çoğu normal",
+        "incoming2Rest": ". Bir değer biraz yüksek, bir ay sonra tekrar bakalım.",
+        "botReply": "Bitirmeden sorunuz var mı?"
+      }
+    },
+    "doctorPrescription": {
+      "title": "İlaç Hakkında Sormak",
+      "screenplay": "İlacı nasıl kullanacağını, yan etkileri ve işe yaramazsa ne zaman döneceğini sor.",
+      "chat": {
+        "briefing": "Merhaba! Bugün ilaç ve reçete sormayı pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Hazır mısın?",
+        "incoming1": "Bu ilacı günde iki kez kullanacaksınız.",
+        "outgoing1": "Yemekle mi alayım? Yan etkisi var mı?",
+        "incoming2Highlight": "Evet",
+        "incoming2Rest": ", yemekle. Hafif uyku hali olabilir.",
+        "botReply": "Üç günde geçmezse bizi arayın."
+      }
+    },
+    "doctorSymptoms": {
+      "title": "Şikayetlerini Anlatmak",
+      "screenplay": "Nerenin ağrıdığını, ne zaman başladığını ve ağrının şiddetini anlat.",
+      "chat": {
+        "briefing": "Merhaba! Bugün doktorda şikayet anlatmayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Bugün sizi ne getirdi?",
+        "outgoing1": "Üç gündür boğazım ağrıyor.",
+        "incoming2Highlight": "Anladım",
+        "incoming2Rest": ". Ateş veya öksürük var mı?",
+        "botReply": "Bir ile on arasında ağrı kaç?"
       }
     },
     "shoppingClothes": {
@@ -931,6 +1293,42 @@
         "botReply": "Gündelik mi yoksa daha resmi bir şey mi tercih edersiniz?"
       }
     },
+    "shoppingDiscount": {
+      "title": "İndirim Hakkında Sormak",
+      "screenplay": "İndirim, öğrenci indirimi veya fiyat eşleştirme sor; fırsatın değip değmediğine karar ver.",
+      "chat": {
+        "briefing": "Merhaba! Bugün indirim sormayı pratik edeceğiz. Önce birkaç ifade, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "O ceket üzerinizde harika duruyor!",
+        "outgoing1": "Teşekkürler! İndirimde mi, yoksa bugün özel bir kampanya var mı?",
+        "incoming2Highlight": "Aslında",
+        "incoming2Rest": ", iki ürün alırsanız yüzde 20 indirim var.",
+        "botReply": "Öğrenci kimliğiyle de indirim yapabiliyoruz."
+      }
+    },
+    "shoppingReturn": {
+      "title": "Mağazaya Ürün İade Etmek",
+      "screenplay": "Kibar bir şekilde iade yap — sebebi açıkla, fişi göster, iade veya değişim iste.",
+      "chat": {
+        "briefing": "Merhaba! Bugün ürün iadesi pratik edeceğiz — kibar olmak, sebebi anlatmak, iade istemek. Önce açıklayacağım, sonra canlandıracağız. Olur mu?",
+        "incoming1": "Merhaba! Size nasıl yardımcı olabilirim?",
+        "outgoing1": "Bu gömleği iade etmek istiyorum. Üzerime olmadı.",
+        "incoming2Highlight": "Sorun değil",
+        "incoming2Rest": ". Fişiniz yanınızda mı?",
+        "botReply": "İade mi yoksa değişim mi istersiniz?"
+      }
+    },
+    "shoppingFittingRoom": {
+      "title": "Soyunma Kabininde Kıyafet Denemek",
+      "screenplay": "Farklı beden iste, aynada kontrol et ve kıyafeti alıp almayacağına karar ver.",
+      "chat": {
+        "briefing": "Merhaba! Bugün soyunma kabininde pratik yapacağız — beden, renk, satın alma kararı. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "O beden nasıl oldu?",
+        "outgoing1": "Biraz dar. Bir büyük bedeni var mı?",
+        "incoming2Highlight": "Tabii",
+        "incoming2Rest": "! Hemen bir büyük bedeni getireyim.",
+        "botReply": "Bakarken başka bir renk de denemek ister misin?"
+      }
+    },
     "takingTaxi": {
       "title": "Taksiye Binme",
       "screenplay": "Yeni bir şehirde taksiye bin, gideceğin yeri söyle, rota hakkında konuş, yolculuk sonunda ödeme yap.",
@@ -941,6 +1339,42 @@
         "incoming2Highlight": "Anladım",
         "incoming2Rest": ". Tam adresiniz var mı?",
         "botReply": "En hızlı rotayı mı tercih edersiniz?"
+      }
+    },
+    "taxiComplaint": {
+      "title": "Taksidedeki Bir Sorunu Çözmek",
+      "screenplay": "Yanlış rota, klima veya ücret gibi bir sorunu kibarca dile getir ve adil bir çözüm iste.",
+      "chat": {
+        "briefing": "Merhaba! Bugün takside bir sorunu kibarca çözmeyi pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Neredeyse geldik.",
+        "outgoing1": "Kusura bakmayın ama bu verdiğim adres değil. Düzeltebilir miyiz?",
+        "incoming2Highlight": "Ah",
+        "incoming2Rest": " — benim hatam. Hemen geri dönüyorum.",
+        "botReply": "Söylediğin için teşekkürler. Ek ücret yok."
+      }
+    },
+    "taxiTraffic": {
+      "title": "Trafik ve Güzergâh Konuşmak",
+      "screenplay": "Trafiği konuş, daha hızlı bir yol sor ve beklemek ya da başka güzergâh seçmek arasında karar ver.",
+      "chat": {
+        "briefing": "Merhaba! Bugün takside trafik ve alternatif güzergâh konuşmayı pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Hazır mısın?",
+        "incoming1": "Otoyolda trafik yoğun.",
+        "outgoing1": "Şehir içinden daha hızlı bir yol var mı?",
+        "incoming2Highlight": "Var",
+        "incoming2Rest": ", ama daha çok ışık var. Yine de daha çabuk olabilir.",
+        "botReply": "Şehir içi yoldan gideyim mi?"
+      }
+    },
+    "taxiFare": {
+      "title": "Taksi Ücretini Sormak",
+      "screenplay": "Yolculuk öncesi tahmini sor, ödeme seçeneklerini teyit et ve sonunda tutarı kontrol et.",
+      "chat": {
+        "briefing": "Merhaba! Bugün taksi ücreti sormayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Nereye?",
+        "outgoing1": "Havaalanına, lütfen. Yaklaşık ne kadar tutar?",
+        "incoming2Highlight": "Yaklaşık otuz",
+        "incoming2Rest": ", trafiğe göre değişir.",
+        "botReply": "Kart da nakit de olur."
       }
     },
     "rentingApartment": {
@@ -955,6 +1389,42 @@
         "botReply": "Eşyalı mı yoksa eşyasız bir daire mi arıyorsunuz?"
       }
     },
+    "rentingApartmentNegotiate": {
+      "title": "Kira ve Sözleşme Pazarlığı",
+      "screenplay": "Kirayı, depozitoyu, taşınma tarihini ve evcil hayvan kuralını kibarca pazarlık et; sınırlarını net tut.",
+      "chat": {
+        "briefing": "Merhaba! Bugün kira ve sözleşme şartlarını pazarlık etmeyi pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Kira bin üç yüz artı faturalar.",
+        "outgoing1": "Daha uzun sözleşme imzalarsam bin iki yüz elli olur mu?",
+        "incoming2Highlight": "Belki",
+        "incoming2Rest": ", 18 aylık sözleşmede. Depozito yine bir aylık.",
+        "botReply": "Ek ücretle evcil hayvan olur mu?"
+      }
+    },
+    "rentingApartmentAgent": {
+      "title": "Emlakçı ile Konuşmak",
+      "screenplay": "Emlakçıyla bütçe, konum, sözleşme süresi ve ihtiyacına uyan ilanları konuş.",
+      "chat": {
+        "briefing": "Merhaba! Bugün emlakçıyla kiralık daire konuşmayı pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Hazır mısın?",
+        "incoming1": "Nasıl bir daire arıyorsunuz?",
+        "outgoing1": "Metroya yakın, aylık bin iki yüzün altında bir oda bir salon.",
+        "incoming2Highlight": "Harika",
+        "incoming2Rest": ". O aralıkta üç seçeneğim var.",
+        "botReply": "Eşyalı mı yoksa eşyasız mı tercih edersiniz?"
+      }
+    },
+    "rentingApartmentTour": {
+      "title": "Daire Hakkında Konuşmak",
+      "screenplay": "Görüntüleme sırasında oda, ışık, gürültü, eşya ve mobilyanın dahil olup olmadığını sor.",
+      "chat": {
+        "briefing": "Merhaba! Bugün daire gezisinde daire hakkında konuşmayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Olur mu?",
+        "incoming1": "Burası salon — ne dersiniz?",
+        "outgoing1": "Güzel. Öğleden sonra güneş alıyor mu?",
+        "incoming2Highlight": "Evet",
+        "incoming2Rest": ", özellikle bu pencerelerden.",
+        "botReply": "Sırada mutfak ve balkonu görelim mi?"
+      }
+    },
     "birthdayParty": {
       "title": "Doğum Günü Partisi Planlama",
       "screenplay": "Bir arkadaşınla doğum günü partisi planla — mekan, tarih, davetli listesi, yemek, pasta, müzik ve aktiviteleri birlikte belirle.",
@@ -965,6 +1435,42 @@
         "incoming2Highlight": "Güzel",
         "incoming2Rest": "! Partiyi ne zaman yapalım?",
         "botReply": "Evde mi yoksa restoranda mı yapmayı tercih edersin?"
+      }
+    },
+    "birthdaySurprise": {
+      "title": "Sürpriz Parti Planlamak",
+      "screenplay": "Sürprizi gizli tut, görevleri dağıt ve bozmadan son dakika değişikliklerini yönet.",
+      "chat": {
+        "briefing": "Merhaba! Bugün sürprizi bozmadan parti planlamayı pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Sürpriz için her şey hazır mı?",
+        "outgoing1": "Neredeyse — onu 7'ye kadar oyalayabilir misin?",
+        "incoming2Highlight": "Tamam",
+        "incoming2Rest": ". İşten erken çıkarsa ne olacak?",
+        "botReply": "Yaz bana, ben kahveyle oyalarım."
+      }
+    },
+    "birthdayGifts": {
+      "title": "Doğum Günü Hediyesi Konuşmak",
+      "screenplay": "Hediye fikirlerini, bütçeyi ve birlikte alıp almayacağınızı konuş.",
+      "chat": {
+        "briefing": "Merhaba! Bugün doğum günü hediyesi konuşmayı pratik edeceğiz. Önce açıklayacağım, sonra canlandıracağız. Olur mu?",
+        "incoming1": "Emma'ya ne alalım?",
+        "outgoing1": "Belki kitap veya kulaklık. Bütçemiz ne kadar?",
+        "incoming2Highlight": "Yaklaşık otuz",
+        "incoming2Rest": " kişi başı, birlikte alırsak.",
+        "botReply": "Online mı yoksa mağazadan mı bakalım?"
+      }
+    },
+    "birthdayInvite": {
+      "title": "Partiye Misafir Davet Etmek",
+      "screenplay": "Arkadaşlarını davet et, tarih ve yeri söyle, kimlerin gelebileceğini sor.",
+      "chat": {
+        "briefing": "Merhaba! Bugün doğum günü partisine davet etmeyi pratik edeceğiz. Önce açıklayacağım, sonra rol yapacağız. Hazır mısın?",
+        "incoming1": "Ne var ne yok?",
+        "outgoing1": "Cumartesi doğum günü partisi veriyorum. Gelebilir misin?",
+        "incoming2Highlight": "Evet",
+        "incoming2Rest": "! Saat kaçta başlıyor?",
+        "botReply": "Bir şey getirmemi ister misin?"
       }
     }
   },
@@ -1073,9 +1579,11 @@
     "settings": "Ayarlar",
     "profileSettings": "Profil Ayarları",
     "fullName": "Tam İsim",
+    "changeName": "Adı Değiştir",
     "email": "E-posta",
     "deleteAccount": "Hesabı Sil",
     "save": "KAYDET",
+    "saveTitle": "Kaydet",
     "profileSaved": "Profil kaydedildi",
     "profilePhotoUpdated": "Profil fotoğrafı güncellendi",
     "nameCannotBeEmpty": "İsim boş olamaz",
@@ -1098,22 +1606,23 @@
     "next": "SONRAKİ",
     "specialOfferTitle": "Özel teklif",
     "specialOfferBody": "Gitmeden önce senin için hazırlamış olduğumuz teklife göz at.",
-    "monthlyPlanTitle": "1 Aylık Plana Geç",
-    "monthlyPlanPrice": "\\$79/ay, istediğin zaman iptal et",
-    "monthlyPlanDesc": "Uzun vadeli taahhüt yok. Topluluğumuzla ay ay bağlantıda kal.",
-    "whatYoullKeep": "Sahip olacağın şeyler:",
-    "keepCharacters": "Tüm karakterlere erişim",
-    "keepVideo": "Sınırsız görüntülü arama",
-    "keepCourses": "Tüm kurslara erişim",
-    "switchMonthlyCta": "Aylık Plana Geç",
-    "confirmTitle": "Emin misin?",
-    "confirmBody": "Gerçekten gitmeni istemiyoruz. İşte kaybedeceklerin:",
+    "monthlyPlanTitle": "Kal ve 1 yıl için %50 indirim al",
+    "monthlyPlanPrice": "Şimdiye kadarki en iyi teklifimiz. Sadece \\$24,99/yıl",
+    "monthlyPlanDesc": "Şimdiye kadarki en iyi teklifimiz — yıllık planda %50 indirim.",
+    "whatYoullKeep": "What you'll keep:",
+    "keepCharacters": "Sınırsız AI eğitmen erişimi",
+    "keepVideo": "Sınırsız görüntülü konuşma pratiği",
+    "keepCourses": "Tüm ders ve hikayelere erişim",
+    "switchMonthlyCta": "Accept 50% Off & Stay",
+    "confirmTitle": "Are you sure?",
+    "confirmBody": "Gerçekten gitmeni istemiyoruz. İşte kaybedeceğin şeyler:",
     "loseCharacters": "Sınırsız karakter erişimi",
     "loseVideo": "Sınırsız görüntülü arama erişimi",
     "loseCourses": "Tüm kurslara erişim",
-    "discountTitle": "Kal ve 1 ay için %60 indirim al",
-    "discountSubtitle": "Şimdiye kadarki en iyi teklifimiz. Sadece \\$27.60/ay",
-    "acceptDiscountCta": "%60 İndirim Al & Kal",
+    "discountTitle": "Stay and get 50% off for 1 year",
+    "discountSubtitle": "Our best offer ever. Just \\$24,99/year",
+    "acceptDiscountCta": "Accept 50% Off & Stay",
+    "deleteCta": "DELETE",
     "farewellTitle": "Gitmene üzüldük",
     "farewellBody": "Üyeliğin iptal edildi. $date tarihine kadar erişimin olacak.",
     "changeMindTitle": "✨ Fikrini değiştir?",
@@ -1160,12 +1669,13 @@
     "shareWithFriendTitle": "Arkadaşla Paylaş",
     "shareInviteBody": "Arkadaşlarını davet et ve birlikte çeviri yapmanın tadını çıkar.",
     "rateUs": "Bizi Beğendin mi? Puan Ver",
-    "settingsCertificates": "Certificates",
+    "settingsCertificates": "Sertifikalar",
     "restorePurchases": "Satın Alımları Geri Yükle",
     "aboutFlywork": "Flywork Hakkında",
     "faqHelp": "SSS ve Yardım",
     "deleteAccountAndData": "Hesabı ve Verileri Sil",
     "faq": "Lingola SSS",
+    "contactUs": "Bize Ulaşın",
     "faqItems": {
       "supportedLanguages": {
         "question": "Uygulama hangi dilleri destekliyor?",
@@ -1227,8 +1737,8 @@
     "logout": "Çıkış Yap",
     "logoutTitle": "Çıkış yapmak istediğine emin misiniz?",
     "logoutBody": "Görüşmek üzere! Nefes egzersizlerini özleyeceğiz.",
-    "logoutConfirm": "LOGOUT",
-    "logoutCancel": "CANCEL",
+    "logoutConfirm": "ÇIKIŞ YAP",
+    "logoutCancel": "İPTAL",
     "days": {
       "mon": "PZT",
       "tue": "SAL",
@@ -1298,6 +1808,13 @@
     "myCertificates": "Sertifikalarım",
     "certificatesEmptyTitle": "Henüz sertifika yok",
     "certificatesEmptySubtitle": "Bir seviye tamamladığında tekrar kontrol etmeyi unutma.",
+    "certificateListA1": "A1 - Başlangıç Sertifikası",
+    "certificateListA2": "A2 - Temel Sertifika",
+    "certificateListB1": "B1 - Orta Seviye Sertifika",
+    "certificateListB2": "B2 - Orta Üstü Sertifika",
+    "certificateListC1": "C1 - İleri Seviye Sertifika",
+    "certificateListC2": "C2 - Uzman Sertifika",
+    "certificateListGeneric": "$level Sertifikası",
     "restorePurchasesSuccess": "Satın alımların geri yüklendi.",
     "restorePurchasesEmpty": "Bu hesap için aktif satın alma bulunamadı."
   }

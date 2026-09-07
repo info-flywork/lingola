@@ -6,27 +6,26 @@ import '../../core/constants/practice_time_of_day.dart';
 
 /// Onboarding cevapları — ekranlar arası taşınır, auth sırasında API'ye gider.
 /// Dil kodları açık string (12+ dil); UI enum'a kilitlenmez.
+/// Seviye / tempo / dakika / pratik dilimi kullanıcı seçene kadar null/boş kalır.
 class OnboardingDraft {
   OnboardingDraft({
     this.nativeLanguageCode = 'tr',
     this.targetLanguageCode = 'en',
     this.goal,
     List<String>? interests,
-    this.level = CefrLevels.defaultLevel,
-    this.pace = DailyPace.defaultPace,
-    this.dailyMinutes = DailyPracticeMinutes.defaultMinutes,
-    this.practiceTimeOfDay = PracticeTimeOfDay.defaultValue,
+    this.level,
+    this.pace,
+    this.dailyMinutes,
+    this.practiceTimeOfDay,
     int? reminderHour,
     this.reminderMinute = 0,
     int? practiceWindowEndHour,
     this.practiceWindowEndMinute = 0,
-    this.explanationLanguage = 'native',
+    this.explanationLanguage,
     String? appLocale,
   })  : interests = List<String>.from(interests ?? const <String>[]),
-        reminderHour =
-            reminderHour ?? PracticeTimeOfDay.reminderHourFor(practiceTimeOfDay),
-        practiceWindowEndHour = practiceWindowEndHour ??
-            PracticeTimeOfDay.defaultRange(practiceTimeOfDay).$2.hour,
+        reminderHour = reminderHour ?? 12,
+        practiceWindowEndHour = practiceWindowEndHour ?? 18,
         appLocale = appLocale ?? AppLocaleSync.deviceLocaleCode();
 
   String nativeLanguageCode;
@@ -35,13 +34,13 @@ class OnboardingDraft {
   List<String> interests;
   String? level;
   String? pace;
-  int dailyMinutes;
-  String practiceTimeOfDay;
+  int? dailyMinutes;
+  String? practiceTimeOfDay;
   int reminderHour;
   int reminderMinute;
   int practiceWindowEndHour;
   int practiceWindowEndMinute;
-  String explanationLanguage;
+  String? explanationLanguage;
 
   /// Uygulama UI dili — ilk kurulumda telefon dili (destek yoksa en).
   String appLocale;
@@ -110,7 +109,7 @@ class OnboardingDraft {
   Map<String, dynamic> toApiJson() => {
         'nativeLanguageCode': nativeLanguageCode,
         'targetLanguageCode': targetLanguageCode,
-        'explanationLanguage': explanationLanguage,
+        'explanationLanguage': explanationLanguage ?? 'native',
         'goal': goal,
         'interests': interests,
         'level': CefrLevels.forApi(level),

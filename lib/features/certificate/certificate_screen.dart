@@ -128,11 +128,10 @@ class _CertificateScreenState extends State<CertificateScreen> {
                             itemBuilder: (context, index) {
                               final cert = _summary.certificates[index];
                               return _CertificateListTile(
-                                title: cert.title?.trim().isNotEmpty == true
-                                    ? cert.title!
-                                    : CertificateLevelAssets.listTitle(
-                                        cert.cefrLevel,
-                                      ),
+                                // API title İngilizce sabit; UI diline göre lokalize et.
+                                title: CertificateLevelAssets.listTitle(
+                                  cert.cefrLevel,
+                                ),
                                 onTap: () => _openDetail(cert),
                               );
                             },

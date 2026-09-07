@@ -95,37 +95,27 @@ class _ProfileEditSheet extends StatefulWidget {
 }
 
 class _ProfileEditSheetState extends State<_ProfileEditSheet> {
-  static const _deleteRed = Color(0xFFEF3F3F);
-  static const _fieldRadius = 10.0;
-
   late final TextEditingController _nameController;
-  late final TextEditingController _emailController;
   var _saving = false;
   var _loading = true;
-  var _uploadingAvatar = false;
-  String? _avatarUrl;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
-    _emailController = TextEditingController();
+    _nameController.addListener(() {
+      if (mounted) setState(() {});
+    });
     _hydrateFrom(SessionStore.currentUser);
     _loadUser();
   }
 
   void _hydrateFrom(AppUser? user) {
     final name = user?.displayName?.trim() ?? '';
-    final email = user?.email?.trim() ?? '';
     _nameController.value = TextEditingValue(
       text: name,
       selection: TextSelection.collapsed(offset: name.length),
     );
-    _emailController.value = TextEditingValue(
-      text: email,
-      selection: TextSelection.collapsed(offset: email.length),
-    );
-    _avatarUrl = user?.avatarUrl;
   }
 
   Future<void> _loadUser() async {
@@ -146,7 +136,6 @@ class _ProfileEditSheetState extends State<_ProfileEditSheet> {
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
     super.dispose();
   }
 
@@ -182,302 +171,123 @@ class _ProfileEditSheetState extends State<_ProfileEditSheet> {
     }
   }
 
-  Future<void> _pickAndUploadAvatar() async {
-    if (_uploadingAvatar || _loading) return;
-    setState(() => _uploadingAvatar = true);
-    try {
-      final ok = await pickAndUploadProfileAvatar(context);
-      if (!mounted || !ok) return;
-      setState(() => _hydrateFrom(SessionStore.currentUser));
-    } finally {
-      if (mounted) setState(() => _uploadingAvatar = false);
-    }
-  }
-
-  Widget _buildAvatar() {
-    final url = _avatarUrl?.trim();
-    final image = (url != null && url.isNotEmpty)
-        ? ClipOval(
-            child: Image.network(
-              url,
-              width: 86,
-              height: 86,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const HomeAsset(
-                AppAssets.profileAvatar,
-                width: 86,
-                height: 86,
-              ),
-            ),
-          )
-        : const HomeAsset(
-            AppAssets.profileAvatar,
-            width: 86,
-            height: 86,
-          );
-
-    return SizedBox(
-      width: 92,
-      height: 92,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Center(
-            child: _uploadingAvatar
-                ? const SizedBox(
-                    width: 86,
-                    height: 86,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : image,
-          ),
-          Positioned(
-            right: 0,
-            bottom: 0,
-            child: Material(
-              color: Colors.white,
-              shape: const CircleBorder(),
-              elevation: 1,
-              shadowColor: Colors.black26,
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: _uploadingAvatar ? null : _pickAndUploadAvatar,
-                child: const SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: Center(
-                    child: HomeAsset(
-                      AppAssets.profileCamera,
-                      width: 16,
-                      height: 16,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showDeleteAccountSheet(BuildContext context) async {
-    await showProfileDeleteAccountSheet(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     final text = AppText.current.profilePage;
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final hasText = _nameController.text.isNotEmpty;
 
-    return SafeArea(
-      top: false,
-      child: Container(
-        width: double.infinity,
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.sizeOf(context).height * 0.92,
-        ),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          10,
+          16,
+          16 + MediaQuery.paddingOf(context).bottom,
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10),
-            Container(
-              width: 33,
-              height: 5,
-              decoration: BoxDecoration(
-                color: AppColors.secondary,
-                borderRadius: BorderRadius.circular(50),
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 33,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.secondary,
+                  borderRadius: BorderRadius.circular(50),
+                ),
               ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              text.profileSettings,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 18,
-                height: 24 / 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.ink,
+              const SizedBox(height: 18),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const HomeAsset(
+                    AppAssets.profileEditPen,
+                    width: 22,
+                    height: 22,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    text.changeName,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 18,
+                      height: 24 / 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: Column(
+              const SizedBox(height: 20),
+              Container(
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFD7DCFF)),
+                ),
+                child: Row(
                   children: [
-                    Center(child: _buildAvatar()),
-                    const SizedBox(height: 24),
-                    _LabeledField(
-                      label: text.fullName,
-                      child: _InputBox(
-                        child: TextField(
-                          controller: _nameController,
-                          enabled: !_loading && !_saving,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            height: 18 / 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.ink,
-                          ),
-                          cursorColor: AppColors.primary,
-                          textInputAction: TextInputAction.done,
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.zero,
-                          ),
+                    Expanded(
+                      child: TextField(
+                        controller: _nameController,
+                        enabled: !_loading && !_saving,
+                        autofocus: true,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          height: 24 / 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.ink,
+                        ),
+                        cursorColor: AppColors.primary,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _onSave(),
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    _LabeledField(
-                      label: text.email,
-                      child: _InputBox(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _emailController,
-                                enabled: false,
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  height: 18 / 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.secondary,
-                                ),
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.zero,
-                                  hintText: _loading ? '…' : '—',
-                                  hintStyle: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    color: AppColors.secondary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const HomeAsset(
-                              AppAssets.profileLock,
-                              width: 16,
-                              height: 18,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => _showDeleteAccountSheet(context),
-                        borderRadius: BorderRadius.circular(_fieldRadius),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
+                    if (hasText)
+                      GestureDetector(
+                        onTap: (_loading || _saving)
+                            ? null
+                            : () {
+                                _nameController.clear();
+                              },
+                        child: Container(
+                          width: 22,
+                          height: 22,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFB0B4C3),
+                            shape: BoxShape.circle,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const HomeAsset(
-                                AppAssets.profileDeleteAccount,
-                                width: 22,
-                                height: 22,
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                text.deleteAccount,
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  height: 21 / 14,
-                                  fontWeight: FontWeight.w400,
-                                  letterSpacing: -0.28,
-                                  color: _deleteRed,
-                                ),
-                              ),
-                            ],
+                          child: const Icon(
+                            Icons.close,
+                            size: 14,
+                            color: Colors.white,
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + bottomInset),
-              child: PrimaryButton(
-                label: _saving ? '…' : text.save,
+              const SizedBox(height: 20),
+              PrimaryButton(
+                label: _saving ? '…' : text.saveTitle,
                 onPressed: _onSave,
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LabeledField extends StatelessWidget {
-  const _LabeledField({
-    required this.label,
-    required this.child,
-  });
-
-  final String label;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            height: 18 / 14,
-            fontWeight: FontWeight.w500,
-            color: AppColors.secondary,
+            ],
           ),
         ),
-        const SizedBox(height: 10),
-        child,
-      ],
-    );
-  }
-}
-
-class _InputBox extends StatelessWidget {
-  const _InputBox({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      alignment: Alignment.centerLeft,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: AppColors.border10),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: child,
     );
   }
 }
@@ -666,18 +476,26 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
             ),
             const SizedBox(height: 10),
           ],
-          Flexible(
-            child: SingleChildScrollView(
-              child: switch (_step) {
-                _DeleteStep.gate => _buildGate(text),
-                _DeleteStep.survey => _buildSurvey(text),
-                _DeleteStep.offer => _buildOffer(text),
-                _DeleteStep.farewell => _buildFarewell(text),
-              },
+          if (isGate)
+            _buildGate(text)
+          else
+            Flexible(
+              child: SingleChildScrollView(
+                child: switch (_step) {
+                  _DeleteStep.gate => const SizedBox.shrink(),
+                  _DeleteStep.survey => _buildSurvey(text),
+                  _DeleteStep.offer => _buildOffer(text),
+                  _DeleteStep.farewell => _buildFarewell(text),
+                },
+              ),
             ),
-          ),
           Padding(
-            padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottomInset),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              12,
+              16,
+              (_step == _DeleteStep.offer ? 24 : 16) + bottomInset,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -699,13 +517,8 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
                   ),
                 ] else if (_step == _DeleteStep.offer) ...[
                   PrimaryButton(
-                    label: text.switchMonthlyCta,
-                    onPressed: () => _acceptOffer('monthly_plan'),
-                  ),
-                  const SizedBox(height: 10),
-                  PrimaryButton(
                     label: text.acceptDiscountCta,
-                    onPressed: () => _acceptOffer('discount_60'),
+                    onPressed: () => _acceptOffer('discount_50_yearly'),
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -718,15 +531,9 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Opacity(
-                          opacity: canNext ? 1 : 0.55,
-                          child: IgnorePointer(
-                            ignoring: !canNext,
-                            child: SecondaryButton(
-                              label: text.next,
-                              onPressed: _onNext,
-                            ),
-                          ),
+                        child: SecondaryButton(
+                          label: text.deleteCta,
+                          onPressed: _onNext,
                         ),
                       ),
                     ],
@@ -770,11 +577,16 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
 
   Widget _buildGate(Translations$profilePage$en text) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 28, 16, 4),
       child: Column(
         children: [
-          const Text('🤔', style: TextStyle(fontSize: 64)),
-          const SizedBox(height: 16),
+          const HomeAsset(
+            AppAssets.profileDeleteAreYouSure,
+            width: 72,
+            height: 72,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 12),
           Text(
             text.confirmTitle,
             textAlign: TextAlign.center,
@@ -786,7 +598,7 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
               color: AppColors.ink,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
             text.confirmDeleteWarning,
             textAlign: TextAlign.center,
@@ -895,121 +707,133 @@ class _DeleteAccountSheetState extends State<_DeleteAccountSheet> {
   }
 
   Widget _buildOffer(Translations$profilePage$en text) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SheetHeader(
-          title: text.specialOfferTitle,
-          body: text.specialOfferBody,
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: _border),
-                  borderRadius: BorderRadius.circular(10),
+    // Figma: Are you sure? → keep list (icons) → 50% offer → Accept / Cancel / Delete
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0x0D000000), // #000000 @ 5%
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  text.confirmTitle,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    height: 18 / 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.ink,
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            const HomeAsset(
-                              AppAssets.profilePremiumIconDeleteAccount,
-                              width: 48,
-                              height: 48,
-                            ),
-                            Positioned(
-                              right: -4,
-                              bottom: -4,
-                              child: const HomeAsset(
-                                AppAssets.profileCornesTik,
-                                width: 21,
-                                height: 21,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                text.monthlyPlanTitle,
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  height: 18 / 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.ink,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                text.monthlyPlanPrice,
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12,
-                                  height: 16 / 12,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.secondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      text.monthlyPlanDesc,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 12,
-                        height: 16 / 12,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 8),
+                Text(
+                  text.confirmBody,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 13,
+                    height: 20 / 13,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: -0.13,
+                    color: AppColors.ink.withValues(alpha: 0.60),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: _border),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const _WhatYoullKeepTitle(),
-                    const SizedBox(height: 10),
-                    _KeepCheckRow(label: text.keepCharacters),
-                    const SizedBox(height: 8),
-                    _KeepCheckRow(label: text.keepVideo),
-                    const SizedBox(height: 8),
-                    _KeepCheckRow(label: text.keepCourses),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: _border),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _WhatYoullKeepTitle(),
+                const SizedBox(height: 10),
+                _KeepIconRow(
+                  iconAsset: AppAssets.profileDeleteOfferTutors,
+                  label: text.keepCharacters,
+                ),
+                const SizedBox(height: 8),
+                _KeepIconRow(
+                  iconAsset: AppAssets.profileDeleteOfferVideo,
+                  label: text.keepVideo,
+                ),
+                const SizedBox(height: 8),
+                _KeepIconRow(
+                  iconAsset: AppAssets.profileDeleteOfferLessons,
+                  label: text.keepCourses,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: _border),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: const HomeAsset(
+                    AppAssets.profileDeleteOfferTicket,
+                    width: 38,
+                    height: 36,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        text.discountTitle,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14,
+                          height: 18 / 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        text.discountSubtitle,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12,
+                          height: 16 / 12,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1184,19 +1008,45 @@ class _WhatYoullKeepTitle extends StatelessWidget {
   }
 }
 
-class _KeepCheckRow extends StatelessWidget {
-  const _KeepCheckRow({required this.label});
+class _KeepIconRow extends StatelessWidget {
+  const _KeepIconRow({
+    required this.iconAsset,
+    required this.label,
+  });
 
+  final String iconAsset;
   final String label;
+
+  static const _tileBlue = Color(0x1A2D46FF); // #2D46FF @ 10%
+  static const double _tileW = 38;
+  static const double _tileH = 36;
+  static const double _iconSize = 24; // Figma: 24×24
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const HomeAsset(
-          AppAssets.profileDeleteAccountTik,
-          width: 17,
-          height: 17,
+        SizedBox(
+          width: _tileW,
+          height: _tileH,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: _tileBlue,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: SizedBox(
+                width: _iconSize,
+                height: _iconSize,
+                child: HomeAsset(
+                  iconAsset,
+                  width: _iconSize,
+                  height: _iconSize,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -1204,8 +1054,8 @@ class _KeepCheckRow extends StatelessWidget {
             label,
             style: const TextStyle(
               fontFamily: 'Poppins',
-              fontSize: 12,
-              height: 16 / 12,
+              fontSize: 13,
+              height: 22 / 13,
               fontWeight: FontWeight.w500,
               color: AppColors.ink,
             ),

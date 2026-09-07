@@ -23,6 +23,8 @@ class _PromiseCommitmentScreenState extends State<PromiseCommitmentScreen>
     with SingleTickerProviderStateMixin {
   static const _holdDuration = Duration(milliseconds: 1400);
   static const _buttonSize = 168.0;
+  /// Figma / marka — basılı tutunca genişleyen dolgu.
+  static const _fillBlue = Color(0xFF3475FC);
 
   late final AnimationController _fillController;
   final _buttonKey = GlobalKey();
@@ -110,27 +112,31 @@ class _PromiseCommitmentScreenState extends State<PromiseCommitmentScreen>
         ) *
         1.05;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.white,
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: AnimatedBuilder(
-          animation: _fillController,
-          builder: (context, _) {
-            final t = Curves.easeInCubic.transform(_fillController.value);
-            final hintOpacity = (1.0 - t * 1.35).clamp(0.0, 1.0);
-            final fillRadius = _buttonSize / 2 + (maxRadius - _buttonSize / 2) * t;
-            final center = _buttonCenter ??
-                Offset(size.width / 2, size.height * 0.58);
+    return AnimatedBuilder(
+      animation: _fillController,
+      builder: (context, _) {
+        final t = Curves.easeInCubic.transform(_fillController.value);
+        final hintOpacity = (1.0 - t * 1.35).clamp(0.0, 1.0);
+        final fillRadius =
+            _buttonSize / 2 + (maxRadius - _buttonSize / 2) * t;
+        final center =
+            _buttonCenter ?? Offset(size.width / 2, size.height * 0.58);
 
-            return Stack(
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value:
+              (t > 0.35 ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+                  .copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: t > 0.35 ? _fillBlue : Colors.white,
+            systemNavigationBarIconBrightness:
+                t > 0.35 ? Brightness.light : Brightness.dark,
+          ),
+          child: Scaffold(
+            backgroundColor: t > 0.92 ? _fillBlue : Colors.white,
+            body: Stack(
               key: _stackKey,
               fit: StackFit.expand,
               children: [
-                // Expanding fill — koala'nın altında kalsın.
                 if (t > 0)
                   Positioned.fill(
                     child: IgnorePointer(
@@ -138,7 +144,7 @@ class _PromiseCommitmentScreenState extends State<PromiseCommitmentScreen>
                         painter: _ExpandingCirclePainter(
                           center: center,
                           radius: fillRadius,
-                          color: AppColors.primary,
+                          color: _fillBlue,
                         ),
                       ),
                     ),
@@ -188,15 +194,17 @@ class _PromiseCommitmentScreenState extends State<PromiseCommitmentScreen>
                             key: _buttonKey,
                             width: _buttonSize,
                             height: _buttonSize,
-                            child: DecoratedBox(
-                              decoration: const BoxDecoration(
-                                color: AppColors.primary,
+                            child: const DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: _fillBlue,
                                 shape: BoxShape.circle,
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(18),
-                                child: Image.asset(
-                                  'assets/images/onboarding/approvedCoala.png',
+                                padding: EdgeInsets.all(18),
+                                child: Image(
+                                  image: AssetImage(
+                                    'assets/images/onboarding/approvedCoala.png',
+                                  ),
                                   fit: BoxFit.contain,
                                 ),
                               ),
@@ -226,10 +234,10 @@ class _PromiseCommitmentScreenState extends State<PromiseCommitmentScreen>
                   ),
                 ),
               ],
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

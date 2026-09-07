@@ -513,77 +513,86 @@ class _CallingScreenState extends State<CallingScreen> {
   }
 
   Widget _buildSessionActionBar({required bool darkChrome}) {
-    if (darkChrome) {
-      return _buildMicRow(darkChrome: true);
-    }
-    final listening = _conversation.listening;
-    final transcribing = _conversation.transcribing;
-    final speaking = _conversation.speaking;
-    return ChatSessionActionBar(
-      listening: listening,
-      busy: speaking || transcribing,
-      micBusy: transcribing,
-      messageActive: _textComposeOn,
-      hintActive: _hintsOn,
-      hintLoading: _hintLoading,
-      onMessage: _toggleTextCompose,
-      onHint: () => unawaited(_toggleHint()),
-      onMicTap: () => unawaited(_conversation.toggleMic()),
-    );
+    // Hold-to-record sadece onboarding/roleplay'de.
+    // Tutor calling (compact + expanded) eski tap mic.
+    return _buildMicRow(darkChrome: darkChrome);
   }
 
   Widget _buildTextComposeField() {
-    return Container(
-      height: 48,
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.only(left: 16, right: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.black.withValues(alpha: .05)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _textController,
-              focusNode: _textFocus,
-              autofocus: true,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => unawaited(_submitTypedMessage()),
-              decoration: InputDecoration(
-                hintText: AppText.current.tutorPage.typeMessage,
-                border: InputBorder.none,
-                isDense: true,
-                hintStyle: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  height: 18 / 14,
-                  color: AppColors.secondary,
+    return Row(
+      children: [
+        Material(
+          color: ChatSessionActionBar.sideButtonBg,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: _toggleTextCompose,
+            child: const SizedBox(
+              width: 44,
+              height: 44,
+              child: Icon(
+                Icons.mic_rounded,
+                color: AppColors.primary,
+                size: 22,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Container(
+            height: 48,
+            padding: const EdgeInsets.only(left: 16, right: 6),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: Colors.black.withValues(alpha: .05)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _textController,
+                    focusNode: _textFocus,
+                    autofocus: true,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => unawaited(_submitTypedMessage()),
+                    decoration: InputDecoration(
+                      hintText: AppText.current.tutorPage.typeMessage,
+                      border: InputBorder.none,
+                      isDense: true,
+                      hintStyle: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        height: 18 / 14,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      height: 18 / 14,
+                      color: AppColors.ink,
+                    ),
+                  ),
                 ),
-              ),
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                height: 18 / 14,
-                color: AppColors.ink,
-              ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => unawaited(_submitTypedMessage()),
+                    child: const HomeAsset(
+                      AppAssets.send,
+                      width: 32,
+                      height: 32,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: () => unawaited(_submitTypedMessage()),
-              child: const HomeAsset(
-                AppAssets.send,
-                width: 32,
-                height: 32,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -893,7 +902,7 @@ class _CallingScreenState extends State<CallingScreen> {
                     ),
                     const SizedBox(height: 8),
                   ],
-                  if (listening) ...[
+                  if (!_textComposeOn && listening) ...[
                     Text(
                       AppText.current.tutorPage.calling.tapToSpeakHint,
                       textAlign: TextAlign.center,
@@ -906,12 +915,17 @@ class _CallingScreenState extends State<CallingScreen> {
                     ),
                     const SizedBox(height: 8),
                   ],
-                  if (_buildHintCard(onDark: false) case final hint?) ...[
-                    hint,
-                    const SizedBox(height: 10),
+                  if (!_textComposeOn) ...[
+                    if (_buildHintCard(onDark: false) case final hint?) ...[
+                      hint,
+                      const SizedBox(height: 10),
+                    ],
                   ],
-                  if (_textComposeOn) _buildTextComposeField(),
-                  _buildSessionActionBar(darkChrome: false),
+                  // Klavye açıkken mic bar + text üst üste binmesin → overflow.
+                  if (_textComposeOn)
+                    _buildTextComposeField()
+                  else
+                    _buildSessionActionBar(darkChrome: false),
                 ],
               ),
             ),
@@ -926,7 +940,6 @@ class _CallingScreenState extends State<CallingScreen> {
     final bottom = MediaQuery.paddingOf(context).bottom;
     final size = MediaQuery.sizeOf(context);
     final listening = _conversation.listening;
-    const figmaW = 393.0;
     const figmaH = 852.0;
     const avatarTop = 80.0;
     const avatarHeight = 600.0;
